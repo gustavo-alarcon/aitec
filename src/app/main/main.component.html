@@ -1,0 +1,18 @@
+<mat-toolbar class="main_toolbar">
+  <div>
+      <!-- <button mat-icon-button (click)="toggleSideMenu()">
+          <mat-icon class="dark-icon">menu</mat-icon>
+      </button> 
+      <mat-icon class="dark-icon">menu</mat-icon>-->
+      <a class="w3-margin-left main__logo" routerLink="/main">
+          <img src="../../assets/images/Disto_Logo.png" class="main__logoimage" alt="logo">
+      </a>
+  </div>
+  <span style="flex: 1 1 auto;"></span>
+  <button mat-flat-button color="primary">
+    <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+  </button>
+</mat-toolbar>
+<div class="main__space">
+  <router-outlet></router-outlet>
+</div>
