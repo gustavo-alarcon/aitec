@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -25,15 +26,26 @@ export class SignUpComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private auth: AuthService
+    private auth: AuthService,
+    private activatedRoute: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
-    this.providerForm = this.fb.control(null, Validators.required)
+    let providerType = this.activatedRoute.snapshot.queryParams["providerType"];
+    let email = this.activatedRoute.snapshot.queryParams["email"];
+    this.initForm(providerType, email)
+  }
+  
+
+  initForm(providerType: string, email: string){
+    //Por definir providerForm
+    this.providerForm = this.fb.control(
+      providerType ? providerType : this.providerType[0], 
+      Validators.required)
     this.emailForm = this.fb.group({
       //Falta chequear rellenado con email FALTAAAAAAA
       email: this.fb.control(
-        {value: null}, [Validators.required, Validators.email]
+        email ? email : "", [Validators.required, Validators.email], this.emailRepeatedValidator()
       ),
       pass: this.fb.control(
         {value: null}, [Validators.required, Validators.email]
@@ -56,13 +68,13 @@ export class SignUpComponent implements OnInit {
         {value: null}, [Validators.required]
       ),
       business: this.fb.control(
-        {value: null}, Validators.required
+        {value: null, disable: true}, Validators.required
       ),
       ruc: this.fb.control(
-        {value: null}, Validators.required
+        {value: null, disable: true}, Validators.required
       ),
       address: this.fb.control(
-        {value: null}, Validators.required
+        {value: null, disable: true}, Validators.required
       ),
     })
     this.feedForm = this.fb.control(
@@ -76,22 +88,78 @@ export class SignUpComponent implements OnInit {
   emailRepeatedValidator() {
     return (control: AbstractControl): Observable<ValidationErrors|null> => {
       const email = control.value;
+      const parent = control.parent;
+      const providerTypeForm = this.providerForm.value;
+
+      if(!parent) return null
+
       return of(email).pipe(
         debounceTime(500),
-        switchMap(res => from(this.auth.emailMethod(res))),
-        map(res => {
-          control.parent.get('pass').enable()
+        switchMap(res => (this.auth.emailMethod(res))),
+        switchMap(res => {
+          parent.get('pass').disable()
+          parent.get('repeatedPass').disable()
+
+          //El metodo de email es google
           switch(res[0]) {
             case 'google.com':
-              control.parent.get('pass').disable()
-              return {googleLogin: true}
+              //El formulario no está seleccionado con google
+              if(providerTypeForm != 'google'){
+                return of({wrongProvider: 'google'})
+              }
+              //El formulario esta seleccionado con google
+              return this.auth.getUserByEmail(email).pipe(
+                map(user => {
+                  //Usuario registrado en DB
+                  if(user){
+                    return {repeatedUser: true}
+                  } else {
+                  //Usuario no registrado en db
+                    return null
+                  }
+                })
+              )
+            //El método de email es facebook
             case 'facebook.com':
-              control.parent.get('pass').disable()
-              return {facebookLogin: true}
+              //El formulario no está seleccionado con facebook
+              if(providerTypeForm != 'facebook'){
+                return of({wrongProvider: 'facebook'})
+              }
+              //El formulario esta seleccionado con facebook
+              return this.auth.getUserByEmail(email).pipe(
+                map(user => {
+                  //Usuario registrado en DB
+                  if(user){
+                    return {repeatedUser: true}
+                  } else {
+                  //Usuario no registrado en db
+                    return null
+                  }
+                })
+              )
+            //El método de email es email
             case 'email':
-              control.parent.get('pass').disable()
-              return {emailLogin: true}
+              //El formulario no está seleccionado con email
+              if(providerTypeForm != 'email'){
+                return of({wrongProvider: 'email'})
+              }
+              //El formulario esta seleccionado con email
+              return this.auth.getUserByEmail(email).pipe(
+                map(user => {
+                  //Usuario registrado en DB
+                  if(user){
+                    return {repeatedUser: true}
+                  } else {
+                    parent.get('pass').enable()
+                    parent.get('repeatedPass').enable()                    //Usuario no registrado en db
+                    return null
+                  }
+                })
+              )
             default: 
+              //usuario no registrado. Continuar
+              parent.get('pass').enable()
+              parent.get('repeatedPass').enable() 
               return null
           }
         }
@@ -108,7 +176,7 @@ export class SignUpComponent implements OnInit {
         pass = parent.get('pass').value;
         repeatedPass = parent.get('repeatedPass').value
         if(pass && repeatedPass){
-          return {noRepeatedPass: true}
+          return pass == repeatedPass ? null:{noRepeatedPass: true}
         }
       }
       return null
