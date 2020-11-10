@@ -1,6 +1,8 @@
 
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
+@import "./assets/css/animate.css";
+@import "./assets/css/w3.css";
 @import '~@angular/material/theming';
 // Plus imports for other components in your app.
 
@@ -521,4 +523,33 @@ img.ng-lazyloaded {
 .mat-drawer-inner-container::-webkit-scrollbar-track:hover,
 .mat-drawer-inner-container::-webkit-scrollbar-track:active {
   background: #d4d4d4;
+}
+
+/*colums*/
+.ms-row {
+  margin-right: -8px;
+  margin-left: -8px;
+  padding: 0 !important;
+}
+
+
+@media (min-width: 480px) {
+  .col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .col-lg-4 {
+    flex: 0 0 33.33333333%;
+    max-width: 33.33333333%;
+  }
+}
+
+@media (min-width: 1366px) {
+  .col-xxl-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
 }
