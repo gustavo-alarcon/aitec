@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { debounceTime, map, switchMap } from 'rxjs/operators';
+import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
@@ -12,10 +13,19 @@ import { AuthService } from 'src/app/core/services/auth.service';
 })
 export class SignUpComponent implements OnInit {
 
-  providerType:["email", "gmail", "facebok"]= ["email", "gmail", "facebok"];
-  personalInfoType:["natural", "juridica"]
+  providerType:["email", "google", "facebook"]= ["email", "google", "facebook"];
+  personalInfoType:["natural", "juridica"] = ["natural", "juridica"]
+
+  providerTypeParam: string = null;
+  emailParam: string = null;
 
   registerLogin$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false) //true when email already exist, so you need to login
+  providerType$: Observable<boolean>;
+  personalInfoType$: Observable<boolean>;
+
+  hidePass: boolean = true;
+  hideRepeatedPass: boolean = true;
+
 
   
   providerForm: FormControl;
@@ -28,16 +38,18 @@ export class SignUpComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private activatedRoute: ActivatedRoute,
+    private snackbar: MatSnackBar,
   ) { }
 
   ngOnInit(): void {
-    let providerType = this.activatedRoute.snapshot.queryParams["providerType"];
-    let email = this.activatedRoute.snapshot.queryParams["email"];
-    this.initForm(providerType, email)
+    this.providerTypeParam = this.activatedRoute.snapshot.queryParams["providerType"];
+    this.emailParam = this.activatedRoute.snapshot.queryParams["email"];
+    console.log(this.providerTypeParam,this.emailParam);
+    this.initForms(this.providerTypeParam, this.emailParam);
+    this.initObservables()
   }
   
-
-  initForm(providerType: string, email: string){
+  initForms(providerType: string, email: string){
     //Por definir providerForm
     this.providerForm = this.fb.control(
       providerType ? providerType : this.providerType[0], 
@@ -48,50 +60,112 @@ export class SignUpComponent implements OnInit {
         email ? email : "", [Validators.required, Validators.email], this.emailRepeatedValidator()
       ),
       pass: this.fb.control(
-        {value: null}, [Validators.required, Validators.email]
+        {value: null, disabled: (providerType == this.providerType[1] ||
+          providerType == this.providerType[2])
+        }, [Validators.required, this.samePassValidator()]
       ),
       repeatedPass: this.fb.control(
-        {value: null}, [Validators.required, Validators.email]
+        {value: null, disabled: (providerType == this.providerType[1] ||
+          providerType == this.providerType[2])
+        }, [Validators.required, this.samePassValidator()]
       ),
     })
     this.personalInfoForm = this.fb.group({
       type: this.fb.control(
-        {value: this.personalInfoType[0]}, [Validators.required]
+        this.personalInfoType[0], [Validators.required]
       ),
       name: this.fb.control(
-        {value: null}, Validators.required
+        null, Validators.required
+      ),
+      lastName: this.fb.control(
+        null, Validators.required
       ),
       dni: this.fb.control(
-        {value: null}, [Validators.required, Validators.maxLength(8)]
+        null, [Validators.required, Validators.maxLength(8), Validators.minLength(8)]
       ),
       phone: this.fb.control(
-        {value: null}, [Validators.required]
+        null, [Validators.required]
       ),
       business: this.fb.control(
-        {value: null, disable: true}, Validators.required
+        {value: null, disabled: true}, Validators.required
       ),
       ruc: this.fb.control(
-        {value: null, disable: true}, Validators.required
+        {value: null, disabled: true}, Validators.required
       ),
       address: this.fb.control(
-        {value: null, disable: true}, Validators.required
+        {value: null, disabled: true}, Validators.required
       ),
     })
     this.feedForm = this.fb.control(
-      {value: false}
+      false
     )
     this.conditionForm = this.fb.control(
-      {value: false}, Validators.requiredTrue
+      false, Validators.requiredTrue
     )
   }
 
+  initObservables(){
+    this.providerType$ = this.providerForm.valueChanges.pipe(
+      map((res: "email"| "google"| "facebook") => {
+        this.emailForm.get("email").reset("");
+        if(res == "google" || res =="facebook"){
+          this.emailForm.get("pass").disable()
+          this.emailForm.get("repeatedPass").disable()
+          return false
+        } else {
+          this.emailForm.get("pass").enable()
+          this.emailForm.get("repeatedPass").enable()
+          return true
+        }
+      }),
+      startWith(this.providerForm.value == "email")
+    );
+
+    this.personalInfoType$ = this.personalInfoForm.get("type").valueChanges.pipe(
+      map((res: "natural"| "juridica") => {
+        if(res == "natural"){
+          this.personalInfoForm.get("business").disable()
+          this.personalInfoForm.get("ruc").disable()
+          this.personalInfoForm.get("address").disable()
+          return false
+        } else {
+          this.personalInfoForm.get("business").enable()
+          this.personalInfoForm.get("ruc").enable()
+          this.personalInfoForm.get("address").enable()
+          return true
+        }
+      })
+    )
+  }
+
+  registerUser(){
+    console.log("registrando")
+  }
+
+  signInProvider(type: "facebook"|"google") {
+    this.auth.signIn(type).then(res => {
+      if(res){
+        this.snackbar.open('¡Bienvenido!', 'Cerrar');
+      } else {
+        this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
+        console.log('res from signingoogle not found');
+      }
+    })
+    .catch(error => {
+      this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
+      console.log(error);
+    });;
+  }
+
   emailRepeatedValidator() {
-    return (control: AbstractControl): Observable<ValidationErrors|null> => {
+    return (control: AbstractControl): 
+      Observable<{wrongProvider: string}|
+                  {repeatedUser: boolean }|null> => {
       const email = control.value;
       const parent = control.parent;
       const providerTypeForm = this.providerForm.value;
 
-      if(!parent) return null
+      if(!parent) return of(null)
 
       return of(email).pipe(
         debounceTime(500),
@@ -150,9 +224,10 @@ export class SignUpComponent implements OnInit {
                   if(user){
                     return {repeatedUser: true}
                   } else {
-                    parent.get('pass').enable()
-                    parent.get('repeatedPass').enable()                    //Usuario no registrado en db
-                    return null
+                    //parent.get('pass').enable()
+                    //parent.get('repeatedPass').enable()                    
+                    //Usuario no registrado en db
+                    return {repeatedUser: true}
                   }
                 })
               )

@@ -12,8 +12,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-
-
+import {MatRadioModule} from '@angular/material/radio';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 
 @NgModule({
@@ -32,7 +32,9 @@ import { MatInputModule } from '@angular/material/input';
     MatFormFieldModule,
     ReactiveFormsModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    MatRadioModule,
+    MatCheckboxModule
   ]
 })
 export class LoginModule { }

@@ -47,7 +47,7 @@ export class SignInComponent implements OnInit {
       })
       .catch(err => {
         this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        //console.log(err.message);
+        console.log(err.message);
       })
   }
 
@@ -58,7 +58,7 @@ export class SignInComponent implements OnInit {
       })
       .catch(error => {
         this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        //console.log(error);
+        console.log(error);
       });
   }
 
@@ -68,12 +68,12 @@ export class SignInComponent implements OnInit {
         this.snackbar.open('¡Bienvenido!', 'Cerrar');
       } else {
         this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        //console.log('res from signingoogle not found');
+        console.log('res from signingoogle not found');
       }
     })
     .catch(error => {
       this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-      //console.log(error);
+      console.log(error);
     });;
   }
 
@@ -92,35 +92,37 @@ export class SignInComponent implements OnInit {
 
   passwordForgot(){
     this.snackbar.open(
-      'Por favor, ingrese su correo y vuelva a presionar "Olvidé mi contraseña".',
+      'Por favor, ingrese un correo válido y vuelva a presionar "Olvidé mi contraseña".',
       'Aceptar');
   }
 
   emailRepeatedValidator() {
-    return (control: AbstractControl): Observable<ValidationErrors|null> => {
-      const email = control.value;
-      return of(email).pipe(
-        debounceTime(500),
-        switchMap(res => from(this.auth.emailMethod(res))),
-        map(res => {
-          control.parent.get('pass').enable()
-          this.registerLogin$.next(false)
-          switch(res[0]) {
-            case 'google.com':
-              control.parent.get('pass').disable()
-              return {googleLogin: true}
-            case 'facebook.com':
-              control.parent.get('pass').disable()
-              this.registerLogin$.next(true)
-              return {facebookLogin: true}
-            case 'password':
-              this.registerLogin$.next(true)
-              return null
-            default: 
-              return null
+    return (control: AbstractControl): Observable<
+      {providerLogin: "google"|"facebook"|"noRegistered"}|null
+      > => {
+        const email = control.value;
+        return of(email).pipe(
+          debounceTime(500),
+          switchMap(res => from(this.auth.emailMethod(res))),
+          map(res => {
+            console.log(res)
+            control.parent.get('pass').enable()
+            this.registerLogin$.next(false)
+            switch(res[0]) {
+              case 'google.com':
+                control.parent.get('pass').disable()
+                return {providerLogin: "google"}
+              case 'facebook.com':
+                control.parent.get('pass').disable()
+                return {providerLogin: "facebook"}
+              case 'email':
+                this.registerLogin$.next(true)
+                return null
+              default: 
+                return {providerLogin: "noRegistered"}
+            }
           }
-        }
-      ))
+        ))
     }
   }
 

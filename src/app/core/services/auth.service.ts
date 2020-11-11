@@ -41,12 +41,14 @@ export class AuthService {
       this.afAuth.user.pipe(
         switchMap(user => {
           if (user) {
+            console.log(user)
             return this.afs.collection('users').doc<User>(user.uid).valueChanges().pipe(
               tap(userDB => {
+                console.log(userDB);
                 if(!userDB){
                   this.snackbar.open("Este usuario no existe. Por favor, regístrese", "Aceptar")
                   this.afAuth.signOut().then(()=> (
-                    this.router.navigateByUrl(`/main/login/signup?mode=${user.providerId}&email=${user.email}`)
+                    this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerId}&email=${user.email}`)
                   ))
                 }
               })
