@@ -64,12 +64,7 @@ export class SignInComponent implements OnInit {
 
   signInProvider(type: "facebook"|"google") {
     this.auth.signIn(type).then(res => {
-      if(res){
-        this.snackbar.open('¡Bienvenido!', 'Cerrar');
-      } else {
-        this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        console.log('res from signingoogle not found');
-      }
+      this.snackbar.open('¡Bienvenido!', 'Cerrar');
     })
     .catch(error => {
       this.snackbar.open('Parece que hubo un error ...', 'Cerrar');

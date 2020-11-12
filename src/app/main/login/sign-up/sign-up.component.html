@@ -1,9 +1,10 @@
 <div style="display:flex; flex-direction: column; align-items: center">
   <div style="width:100%; max-width: 500px;">
-    <div style="padding: 40px">
-      <p>Hola, requerimos los siguientes datos</p>
+    <div class="mainContainer">
+      <p style="font-weight: bold;" (click)="deb()">Hola, requerimos los siguientes datos</p>
 
-      <mat-radio-group [formControl]="providerForm">
+      <mat-radio-group [formControl]="providerForm" class="w3-margin-bottom" 
+        style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">
         <mat-radio-button 
           *ngFor="let option of providerType" 
           [value]="option">{{option | titlecase}}</mat-radio-button>
@@ -11,7 +12,9 @@
 
       <form [formGroup]="emailForm">
           <mat-form-field 
-            *ngIf="(providerForm.value == providerType[0]) || (providerTypeParam && emailParam)"
+            *ngIf="(providerForm.value == providerType[0]) || 
+              ((providerForm.value == providerTypeParam) && (emailForm.get('email').value == emailParam))
+              else signIn"
             class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
               <mat-label>Usuario</mat-label>
               <input matInput type="text" formControlName="email" placeholder="Correo electrónico" autocomplete="off">
@@ -63,8 +66,7 @@
             </mat-form-field>
           </ng-container>
           
-          <ng-container *ngIf="!(providerTypeParam && emailParam) && 
-            (providerForm.value == providerType[1] || providerForm.value == providerType[2])">
+          <ng-template #signIn>
             <button 
                 style="max-width:260px"
                 [color]="providerForm.value == 'google' ? 'warn' : 'primary'"
@@ -73,16 +75,16 @@
                 (click)="signInProvider(providerForm.value)">
                 Ingresar con <strong>{{providerForm.value | titlecase}}</strong>
             </button>
-          </ng-container>
+          </ng-template>
 
       </form>
 
-      <p><mat-icon>account_box</mat-icon>Información Personal</p>
+      <p style="font-weight: bold;"><mat-icon>account_box</mat-icon>Información Personal</p>
 
       <form [formGroup]="personalInfoForm">
 
-        <mat-radio-group formControlName="type">
-          <mat-radio-button 
+        <mat-radio-group formControlName="type" class="w3-margin-bottom" 
+        style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">          <mat-radio-button 
             *ngFor="let option of personalInfoType" 
             [value]="option">P. {{option | titlecase}}</mat-radio-button>
           </mat-radio-group>
@@ -144,14 +146,14 @@
 
       </form>
 
-      <p><mat-icon>email</mat-icon>Mantenme Actualizado</p>
+      <p style="font-weight: bold;"><mat-icon>email</mat-icon>Mantenme Actualizado</p>
 
+        <mat-checkbox [formControl]="feedForm">
+          <span style="white-space: normal;">Quiero recibir noticias, promociones y novedades de nuevos productos.</span>
+        </mat-checkbox>
 
-      <mat-checkbox [formControl]="feedForm">
-        Quiero recibir noticias, promociones y novedades de nuevos productos.
-      </mat-checkbox>
       <mat-checkbox [formControl]="conditionForm">
-        Acepto términos y condiciones
+        <p>Acepto términos y condiciones</p>
       </mat-checkbox>
       
       <div style="display:flex;flex-direction: column; align-items:center">

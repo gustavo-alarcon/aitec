@@ -78,6 +78,7 @@ export class DatabaseService {
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
+  userRef: `users` = `users`;
   generalConfigDoc = this.afs.collection(this.configRef).doc<GeneralConfig>("generalConfig");
 
   getOpening(): Observable<Array<{ opening: string; closing: string }>> {
@@ -1256,5 +1257,6 @@ export class DatabaseService {
       )
       .valueChanges();
   }
+
   
 }

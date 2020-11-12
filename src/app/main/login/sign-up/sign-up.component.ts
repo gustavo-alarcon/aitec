@@ -42,11 +42,18 @@ export class SignUpComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.providerTypeParam = this.activatedRoute.snapshot.queryParams["providerType"];
+    this.providerTypeParam = 
+      this.activatedRoute.snapshot.queryParams["providerType"] == "google.com" ? "google" :
+      this.activatedRoute.snapshot.queryParams["providerType"] == "facebook.com" ? "facebook":null;
     this.emailParam = this.activatedRoute.snapshot.queryParams["email"];
     console.log(this.providerTypeParam,this.emailParam);
     this.initForms(this.providerTypeParam, this.emailParam);
     this.initObservables()
+  }
+  deb(){
+    console.log(this.providerForm)
+    console.log(this.emailForm)
+    console.log(this.personalInfoForm)
   }
   
   initForms(providerType: string, email: string){
@@ -139,18 +146,27 @@ export class SignUpComponent implements OnInit {
   }
 
   registerUser(){
-    console.log("registrando")
+    this.emailForm.markAsPending();
+    let user = {
+      email: this.emailForm.get("email").value,
+      ...this.personalInfoForm.value,
+      feed: this.feedForm.value,
+    };
+
+    this.auth.registerUser(user, this.emailForm.get("pass").enabled ? 
+      this.emailForm.get("pass").value:null).subscribe(
+        res => {
+          this.snackbar.open("Registro exitoso!", "Aceptar");
+        },
+        err => {
+          this.snackbar.open("Ocurrió un error. Vuelva a intentarlo.", "Aceptar");
+          console.log(err);
+        }
+      );
   }
 
   signInProvider(type: "facebook"|"google") {
-    this.auth.signIn(type).then(res => {
-      if(res){
-        this.snackbar.open('¡Bienvenido!', 'Cerrar');
-      } else {
-        this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        console.log('res from signingoogle not found');
-      }
-    })
+    this.auth.signIn(type).then()
     .catch(error => {
       this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
       console.log(error);
@@ -174,6 +190,7 @@ export class SignUpComponent implements OnInit {
           parent.get('pass').disable()
           parent.get('repeatedPass').disable()
 
+          console.log(res[0])
           //El metodo de email es google
           switch(res[0]) {
             case 'google.com':
@@ -186,11 +203,12 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    return {repeatedUser: true}
-                  } else {
+                    if(Object.keys(user).length != 2){
+                      return {repeatedUser: true}
+                    }
+                  } 
                   //Usuario no registrado en db
-                    return null
-                  }
+                  return null
                 })
               )
             //El método de email es facebook
@@ -204,11 +222,12 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    return {repeatedUser: true}
-                  } else {
+                    if(Object.keys(user).length != 2){
+                      return {repeatedUser: true}
+                    }
+                  } 
                   //Usuario no registrado en db
-                    return null
-                  }
+                  return null
                 })
               )
             //El método de email es email
@@ -222,20 +241,20 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    return {repeatedUser: true}
-                  } else {
-                    //parent.get('pass').enable()
-                    //parent.get('repeatedPass').enable()                    
-                    //Usuario no registrado en db
-                    return {repeatedUser: true}
-                  }
+                    if(Object.keys(user).length != 2){
+                      return {repeatedUser: true}
+                    }
+                  } 
+                  //Usuario no registrado en db
+                  return null
                 })
               )
             default: 
+              console.log("no registrado")
               //usuario no registrado. Continuar
               parent.get('pass').enable()
               parent.get('repeatedPass').enable() 
-              return null
+              return of(null)
           }
         }
       ))
