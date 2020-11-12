@@ -13,6 +13,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ProductDivModule } from '../product-div/product-div.module';
+import { SlickCarouselModule } from 'ngx-slick-carousel';
 
 @NgModule({
   declarations: [LandingComponent],
@@ -29,6 +30,7 @@ import { ProductDivModule } from '../product-div/product-div.module';
     MatCardModule,
     ProductDivModule,
     MatTabsModule,
+    SlickCarouselModule
   ],
 })
 export class LandingModule {}

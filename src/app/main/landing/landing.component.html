@@ -1,4 +1,22 @@
-<img src="../../../assets/images/banner.png" class="w3-block" alt="" />
+<ngx-slick-carousel
+  class="carousel"
+  #slickModal="slick-carousel"
+  [config]="slideConfig"
+>
+  <div ngxSlickItem class="slide">
+    <img src="../../../assets/images/banner.png" class="w3-block" alt="" />
+  </div>
+  <div ngxSlickItem class="slide">
+    <img
+      src="https://aitecperu.com.pe/media/cabeceras/xJYXNgSGF.jpg.pagespeed.ic.weSVVwdW9s.webp"
+      class="w3-block"
+      alt=""
+    />
+  </div>
+  <div ngxSlickItem class="slide">
+    <img src="https://aitecperu.com.pe/media/cabeceras/xxAFoO37X.png.pagespeed.ic.jk5UDZ3mLz.webp" class="w3-block" alt="">
+  </div>
+</ngx-slick-carousel>
 <div class="w3-padding">
   <h2 class="title-section">Ofertas</h2>
 </div>
@@ -10,20 +28,17 @@
     </div>
     <div class="w3-col s12 m10 l10">
       <div class="section">
-        <div class="w3-row-padding ms-row">
-          <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
-            <app-product-div [offer]="true"></app-product-div>
+        <ngx-slick-carousel
+          class="carousel"
+          #slickModal="slick-carousel"
+          [config]="slideConfig2"
+        >
+          <div ngxSlickItem *ngFor="let slide of prods" class="slide">
+            <div class="w3-padding">
+              <app-product-div [offer]="true"></app-product-div>
+            </div>
           </div>
-          <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
-            <app-product-div [offer]="true"></app-product-div>
-          </div>
-          <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
-            <app-product-div [offer]="true"></app-product-div>
-          </div>
-          <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
-            <app-product-div [offer]="true"></app-product-div>
-          </div>
-        </div>
+        </ngx-slick-carousel>
       </div>
       <div class="section">
         <div class="ms-flex">
@@ -66,13 +81,15 @@
           color="primary"
         >
           <mat-tab label="Los más buscados">
-            <div class="w3-padding w3-margin-top">
-              <div class="w3-row-padding ms-row">
+            <div class="w3-margin-top">
+              <div class="w3-row">
                 <div
                   *ngFor="let prod of prods"
                   class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
                 >
-                  <app-product-div [offer]="false"></app-product-div>
+                  <div class="w3-padding">
+                    <app-product-div [offer]="false"></app-product-div>
+                  </div>
                 </div>
               </div>
               <div class="w3-center w3-margin-top">
@@ -83,13 +100,15 @@
             </div>
           </mat-tab>
           <mat-tab label="Últimos productos">
-            <div class="w3-padding w3-margin-top">
-              <div class="w3-row-padding ms-row">
+            <div class="w3-margin-top">
+              <div class="w3-row">
                 <div
                   *ngFor="let prod of prods"
                   class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
                 >
+                <div class="w3-padding">
                   <app-product-div [offer]="false"></app-product-div>
+                </div>
                 </div>
               </div>
               <div class="w3-center w3-margin-top">
@@ -101,12 +120,14 @@
           </mat-tab>
           <mat-tab label="Ofertas">
             <div class="w3-padding w3-margin-top">
-              <div class="w3-row-padding ms-row">
+              <div class="w3-row">
                 <div
                   *ngFor="let prod of prods"
                   class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
                 >
-                  <app-product-div [offer]="true"></app-product-div>
+                <div class="w3-padding">
+                  <app-product-div [offer]="false"></app-product-div>
+                </div>
                 </div>
               </div>
               <div class="w3-center w3-margin-top">

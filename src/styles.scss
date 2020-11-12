@@ -118,7 +118,7 @@ a {
 }
 
 :root {
-  --primary-color:#1c31ea;
+  --primary-color: #1c31ea;
   --accent-color: #ff8f00;
   --warn-color: #f44336;
   --forth-color: #f44336;
@@ -462,7 +462,7 @@ img.ng-lazyloaded {
   font-weight: 700;
 }
 
-.section__tab .mat-tab-label{
+.section__tab .mat-tab-label {
   font-size: 1.3em;
 }
 
@@ -566,6 +566,24 @@ img.ng-lazyloaded {
 }
 
 /*colums*/
+.ms-container {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+@media (min-width: 768px) {
+  .ms-container {
+    width: 750px;
+  }
+}
+@media (min-width: 992px) {
+  .ms-container {
+    width: 970px;
+  }
+}
+
+
 .ms-row {
   margin-right: -8px;
   margin-left: -8px;
@@ -614,9 +632,9 @@ img.ng-lazyloaded {
 }
 
 .title-section::before {
-  right: calc(100% + 10px);
+  right: calc(100% + 20px);
 }
 
 .title-section::after {
-  left: calc(100% + 10px);
+  left: calc(100% + 20px);
 }
