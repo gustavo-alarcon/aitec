@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { debounceTime, map, switchMap } from 'rxjs/operators';
+import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -13,6 +15,8 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class SignInComponent implements OnInit {
   version: string
+  userRedirect$: Observable<User>;
+
   
   registerLogin$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false) //true when email already exist, so you need to login
   dataFormGroup: FormGroup;
@@ -28,9 +32,18 @@ export class SignInComponent implements OnInit {
     private dbs: DatabaseService,
     private snackbar: MatSnackBar,
     private fb: FormBuilder,
+    public router: Router
   ) { }
 
   ngOnInit() {
+    this.userRedirect$ = this.auth.user$.pipe(
+      debounceTime(500),
+      tap(user => {
+      if(user){
+        this.snackbar.open("Bienvenido", "Aceptar")
+        this.router.navigateByUrl('/main')
+      }
+    }))
     this.version = this.dbs.version;
 
     this.dataFormGroup = this.fb.group({
@@ -49,17 +62,6 @@ export class SignInComponent implements OnInit {
         this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
         console.log(err.message);
       })
-  }
-
-  registerUser(): void {
-    this.auth.signUp(this.dataFormGroup.value)
-      .then(res => {
-        this.snackbar.open('¡Bienvenido!', 'Cerrar');
-      })
-      .catch(error => {
-        this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-        console.log(error);
-      });
   }
 
   signInProvider(type: "facebook"|"google") {

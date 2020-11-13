@@ -45,15 +45,23 @@ export class AuthService {
       switchMap(user => {
         if (user) {
           console.log(user)
-          return this.afs.collection('users').doc<User>(user.uid).valueChanges().pipe(
-            tap(userDB => {
+          return this.afs.collection<User>('users').doc(user.uid).get({source: "server"}).pipe(
+            map(res =>{
+              if(res.exists){
+                return <User>res.data()
+              } else {
+                return null
+              }
+            }),
+            switchMap(userDB => {
               console.log(userDB);
               if(!userDB){
                 if(user.email){
                   this.snackbar.open("Registrando...", "Aceptar")
-                  this.afs.collection('users').doc(user.uid).set({uid: user.uid, email: user.email}).then(()=> (
-                    this.afAuth.signOut()
-                  )).then(()=> (
+                  this.afs.collection('users').doc(user.uid).set({uid: user.uid, email: user.email}).then(()=> {
+                    console.log("written")
+                    return this.afAuth.signOut()
+                  }).then(()=> (
                     this.router.navigateByUrl(`/main/login`).then(()=> (
                       this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
                     ))
@@ -65,13 +73,18 @@ export class AuthService {
                   this.snackbar.open("Este usuario no posee correo válido. Inicie sesión con cuenta válida.", "Aceptar")
                   this.afAuth.signOut()
                 }
-                
+                return of(null)
               } else {
                 if(Object.keys(userDB).length == 2){
                   this.snackbar.open("Por favor, complete su regístro", "Aceptar")
-                  this.router.navigateByUrl(`/main/login`).then(()=> (
-                    this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
+                  this.afAuth.signOut().then(()=>(
+                    this.router.navigateByUrl(`/main/login`).then(()=> (
+                      this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
+                    ))
                   ))
+                  return of(null)
+                } else {
+                  return this.afs.collection<User>('users').doc(user.uid).valueChanges()
                 }
               }
             })
@@ -93,8 +106,8 @@ export class AuthService {
     return this.afAuth.signInWithEmailAndPassword(email, pass);
   }
 
-  public signUp(data: { email: string, pass: string }): Promise<firebase.default.auth.UserCredential> {
-    return this.afAuth.createUserWithEmailAndPassword(data.email, data.pass);
+  public signUpEmail(email: string, pass: string ): Promise<firebase.default.auth.UserCredential> {
+    return this.afAuth.createUserWithEmailAndPassword(email, pass);
   }
 
   public resetPassword(email: string) {
@@ -170,7 +183,7 @@ export class AuthService {
 
       if(pass){
         this.user$ = null;
-        return from(this.afAuth.signInWithEmailAndPassword(user.email, pass)).pipe(
+        return from(this.signUpEmail(user.email, pass)).pipe(
           switchMap(cred => {
             let uid = cred.user.uid
             userRef = this.afs.firestore.collection(this.usersRef).doc(cred.user.uid);

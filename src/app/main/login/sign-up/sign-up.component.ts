@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
@@ -12,6 +13,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
   styleUrls: ['./sign-up.component.scss']
 })
 export class SignUpComponent implements OnInit {
+  userRedirect$: Observable<User>;
 
   providerType:["email", "google", "facebook"]= ["email", "google", "facebook"];
   personalInfoType:["natural", "juridica"] = ["natural", "juridica"]
@@ -39,9 +41,19 @@ export class SignUpComponent implements OnInit {
     private auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
+    public router: Router
   ) { }
 
   ngOnInit(): void {
+    this.userRedirect$ = this.auth.user$.pipe(
+      debounceTime(500),
+      tap(user => {
+      if(user){
+        this.snackbar.open("Bienvenido", "Aceptar")
+        this.router.navigateByUrl('/main')
+      }
+    }))
+
     this.providerTypeParam = 
       this.activatedRoute.snapshot.queryParams["providerType"] == "google.com" ? "google" :
       this.activatedRoute.snapshot.queryParams["providerType"] == "facebook.com" ? "facebook":null;
@@ -156,7 +168,8 @@ export class SignUpComponent implements OnInit {
     this.auth.registerUser(user, this.emailForm.get("pass").enabled ? 
       this.emailForm.get("pass").value:null).subscribe(
         res => {
-          this.snackbar.open("Registro exitoso!", "Aceptar");
+          this.snackbar.open("Registro exitoso! Por favor, inicie sesión.", "Aceptar");
+          this.router.navigateByUrl("/main/login/signIn")
         },
         err => {
           this.snackbar.open("Ocurrió un error. Vuelva a intentarlo.", "Aceptar");
@@ -166,7 +179,7 @@ export class SignUpComponent implements OnInit {
   }
 
   signInProvider(type: "facebook"|"google") {
-    this.auth.signIn(type).then()
+    this.auth.signIn(type)
     .catch(error => {
       this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
       console.log(error);

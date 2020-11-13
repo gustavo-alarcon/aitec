@@ -1,5 +1,15 @@
+<ng-container *ngIf="userRedirect$ | async"></ng-container>
 <div style="display:flex; flex-direction: column; align-items: center">
   <div style="width:100%; max-width: 500px;">
+    <div class="menuContainer">
+      <div class="deactivated"
+        (click)="router.navigateByUrl('/main/login/signIn')">
+        MI CUENTA
+      </div>
+      <div class="activated">
+        REGISTRARSE
+      </div>
+    </div>
     <div class="mainContainer">
       <p style="font-weight: bold;" (click)="deb()">Hola, requerimos los siguientes datos</p>
 
