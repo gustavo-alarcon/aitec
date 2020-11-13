@@ -78,6 +78,7 @@ export class DatabaseService {
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
+  userRef: `users` = `users`;
   generalConfigDoc = this.afs.collection(this.configRef).doc<GeneralConfig>("generalConfig");
 
   getOpening(): Observable<Array<{ opening: string; closing: string }>> {
@@ -111,25 +112,6 @@ export class DatabaseService {
   }
 
   //users
-
-  getUserDisplayName(userId: string): Observable<string> {
-    return this.afs
-      .collection(`/users`)
-      .doc(userId)
-      .valueChanges()
-      .pipe(
-        take<User>(1),
-        map((user) => {
-          if (user.name && user.lastName1) {
-            return user.name.split(" ")[0] + " " + user.lastName1.split(" ")[0];
-          }
-          if (user.displayName) {
-            return user.displayName.split(" ").slice(0, 2).join(" ");
-          }
-          return "Sin nombre";
-        })
-      );
-  }
 
   getUsers(): Observable<User[]> {
     return this.afs
@@ -1040,9 +1022,6 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  emailMethod(email: string): Observable<string[]> {
-    return from(this.afAuth.fetchSignInMethodsForEmail(email));
-  }
 
   //NUEVO
 
@@ -1278,4 +1257,6 @@ export class DatabaseService {
       )
       .valueChanges();
   }
+
+  
 }

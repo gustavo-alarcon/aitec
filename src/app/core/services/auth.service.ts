@@ -1,10 +1,10 @@
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 
 import { User } from "../models/user.model";
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreDocument, DocumentReference } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -19,6 +19,8 @@ export const facebookProvider = new firebase.default.auth.FacebookAuthProvider()
   providedIn: 'root'
 })
 export class AuthService {
+  usersRef = `users`
+
   public user$: Observable<User>;
 
   public authLoader: boolean = false;
@@ -29,44 +31,90 @@ export class AuthService {
     private router: Router,
     public snackbar: MatSnackBar,
     private platform: Platform,
-    private dbs: DatabaseService
+    private dbs: DatabaseService,
   ) {
 
     this.afAuth.setPersistence('local');
 
     // observe user authentication
-    this.user$ =
-      this.afAuth.authState.pipe(
-        switchMap(user => {
-          if (user) {
-            this.updateUserData(user);
-            return this.afs.collection('users').doc<User>(user.uid)
-              .valueChanges()
-              // .pipe(
-              //   // map((res) => res.data())
-              //   map((res) => res)
-              // );
-          } else {
-            return of(null);
-          }
-        }),
-        shareReplay(1)
-      )
+    this.user$ = this.getUserObservable()
   }
 
-  public signInEmail(email: string, pass: string): Promise<any> {
+  private getUserObservable(): Observable<User>{
+    return this.afAuth.user.pipe(
+      switchMap(user => {
+        if (user) {
+          console.log(user)
+          return this.afs.collection<User>('users').doc(user.uid).get({source: "server"}).pipe(
+            map(res =>{
+              if(res.exists){
+                return <User>res.data()
+              } else {
+                return null
+              }
+            }),
+            switchMap(userDB => {
+              console.log(userDB);
+              if(!userDB){
+                if(user.email){
+                  this.snackbar.open("Registrando...", "Aceptar")
+                  this.afs.collection('users').doc(user.uid).set({uid: user.uid, email: user.email}).then(()=> {
+                    console.log("written")
+                    return this.afAuth.signOut()
+                  }).then(()=> (
+                    this.router.navigateByUrl(`/main/login`).then(()=> (
+                      this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
+                    ))
+                  )).catch(err => {
+                    this.snackbar.open("¡Ocurrió un error!", "Aceptar")
+                    console.log(err)
+                  });
+                } else {
+                  this.snackbar.open("Este usuario no posee correo válido. Inicie sesión con cuenta válida.", "Aceptar")
+                  this.afAuth.signOut()
+                }
+                return of(null)
+              } else {
+                if(Object.keys(userDB).length == 2){
+                  this.snackbar.open("Por favor, complete su regístro", "Aceptar")
+                  this.afAuth.signOut().then(()=>(
+                    this.router.navigateByUrl(`/main/login`).then(()=> (
+                      this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
+                    ))
+                  ))
+                  return of(null)
+                } else {
+                  return this.afs.collection<User>('users').doc(user.uid).valueChanges()
+                }
+              }
+            })
+          )
+        } else {
+          return of(null);
+        }
+      }),
+      shareReplay()
+    )
+
+  }
+
+  public confirmPasswordReset(code: string, password: string): Promise<void> {
+    return this.afAuth.confirmPasswordReset(code, password)
+  }
+
+  public signInEmail(email: string, pass: string): Promise<firebase.default.auth.UserCredential> {
     return this.afAuth.signInWithEmailAndPassword(email, pass);
   }
 
-  public signUp(data: any): Promise<any> {
-    return this.afAuth.createUserWithEmailAndPassword(data.email, data.pass);
+  public signUpEmail(email: string, pass: string ): Promise<firebase.default.auth.UserCredential> {
+    return this.afAuth.createUserWithEmailAndPassword(email, pass);
   }
 
   public resetPassword(email: string) {
     return this.afAuth.sendPasswordResetEmail(email)
   }
 
-  public signIn(type: 'facebook'|'google'): Promise<void | firebase.default.auth.UserCredential> {
+  public signIn(type: 'google'|'facebook'): Promise<void | firebase.default.auth.UserCredential> {
     let provider = null;
 
     switch (type) {
@@ -80,36 +128,22 @@ export class AuthService {
 
     if (this.platform.ANDROID || this.platform.IOS) {
       return this.afAuth.signInWithRedirect(provider)
-        .catch(error => {
-          this.handleError(error)
+        .then((cred) => {
+          console.log("signIn with mobile")
         });
     } else {
       return this.afAuth.signInWithPopup(provider)
-        .catch(error => {
-          this.handleError(error)
+        .then((cred)=> {
+          console.log("signIn with desk")
         })
     }
   }
 
-  private updateUserData(user: firebase.default.User): Promise<void> {
-    const userRef: AngularFirestoreDocument<User> = this.afs.doc(`users/${user.uid}`);
-
-    let key = Object.keys(this.platform).filter(key => this.platform[key] == true && key != 'isBrowser');
-
-    const data = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      lastLogin: new Date(),
-      lastBrowser: [key.length ? key.join(", ") : "empty", navigator.userAgent]
-    }
-    return userRef.set(data, { merge: true });
-  }
-
   public logout(): void {
+    this.dbs.order = []
+    this.dbs.orderObs.next([])
     this.afAuth.signOut().finally(() => {
-      this.router.navigateByUrl('/login');
+      this.router.navigateByUrl('/main');
     });
   }
 
@@ -125,4 +159,47 @@ export class AuthService {
     );
 
   }
+
+  //User from DB
+  getUserByEmail(email: string): Observable<User> {
+    return this.afs.collection<User>(this.usersRef, ref => ref.where("email", "==", email)).get()
+      .pipe(
+        map(snap => {
+          if (snap.empty) {
+            return null
+          } else {
+            return <User>snap.docs[0].data()
+          }
+        })
+      )
+  }
+
+  emailMethod(email: string): Observable<string[]> {
+    return from(this.afAuth.fetchSignInMethodsForEmail(email))
+  }
+
+  registerUser(user: User, pass?: string){
+    let userRef: DocumentReference = null;
+
+      if(pass){
+        this.user$ = null;
+        return from(this.signUpEmail(user.email, pass)).pipe(
+          switchMap(cred => {
+            let uid = cred.user.uid
+            userRef = this.afs.firestore.collection(this.usersRef).doc(cred.user.uid);
+            return from(userRef.set({...user, uid}, {merge: true}).then(()=>{
+              this.user$ = this.getUserObservable()
+            }))
+          })
+        )
+      } else {
+        return this.getUserByEmail(user.email).pipe(
+          switchMap(userDB => {
+            userRef = this.afs.firestore.collection(this.usersRef).doc(userDB.uid)
+            return from(userRef.set({...user}, {merge: true}))
+          })
+        )
+      }
+  }
+
 }
