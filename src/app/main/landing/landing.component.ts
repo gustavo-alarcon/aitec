@@ -35,6 +35,24 @@ export class LandingComponent implements OnInit {
     }
   ]};
 
+  slideConfig3 = {"slidesToShow": 3, "slidesToScroll": 1,
+  "autoplay": true,
+  "autoplaySpeed":7000,
+  responsive: [
+    {
+      breakpoint: 1010,
+      settings: {
+        slidesToShow: 2
+      }
+    },
+    {
+      breakpoint: 780,
+      settings: {
+        slidesToShow: 1
+      }
+    }
+  ]};
+
   constructor() { }
 
   ngOnInit(): void {

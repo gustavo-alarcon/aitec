@@ -2,6 +2,12 @@
   background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
   color: white;
   padding: 0 16px;
+  &__row{
+    max-width: 1500px;
+    padding: 8px 16px 0px;
+    margin: auto;
+    position: relative;
+  }
   &__logo {
     margin-right: 10px;
   }
@@ -42,8 +48,8 @@
 
 .footer {
   background-color: #f1f1f1;
-  
-  &__section{
+
+  &__section {
     padding: 3% 5%;
   }
   &__logo {
@@ -66,16 +72,16 @@
       background: black;
     }
   }
-  &__buton-social{
+  &__buton-social {
     background: black;
     margin: 0 0.5em;
   }
-  &__meraki{
+  &__meraki {
     width: 95px;
   }
 }
 
-.footer__buton-social img{
+.footer__buton-social img {
   width: 18px;
 }
 
@@ -98,7 +104,6 @@
     background-color: black;
     color: white;
   }
-
 }
 .footer-list ul {
   list-style: none;
@@ -117,4 +122,80 @@
   .main__space {
     padding-top: 56px;
   }
+}
+
+.categories {
+  position: absolute;
+  left: 0;
+  z-index: 1000;
+  background-color: white;
+  width: 100%;
+  &__nav {
+    padding-right: 0;
+    padding-left: 0;
+    padding-bottom: 0;
+    width: 270px;
+    border-right: 1px;
+    border: 1px solid #cecece;
+    border-top: 0;
+    border-radius: 5px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    z-index: 1000;
+    background-color: white;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+  }
+  &__list {
+    margin-bottom: 0;
+    padding-inline-start: 0;
+  }
+  &__item {
+    height: 48px;
+    margin-bottom: 0;
+    padding: 0 20px;
+    font-family: Roboto;
+    color: #555555;
+    line-height: 48px;
+    cursor: pointer;
+    transition: all 0.5s ease-in-out;
+    &:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    &--name {
+      border-bottom: 1px solid #c4c4c4;
+      div {
+        width: 200px;
+      }
+    }
+  }
+  &__section{
+    width: calc(100% - 270px);
+    overflow: hidden;
+    padding: 36px;
+    display: none;
+  }
+  &__title{
+    font-family: Raleway;
+    color: #2B2B2B;
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: 600;
+    font-size: 1.5em;
+    padding-bottom: 16px;
+  }
+}
+.categories__item:hover .categories__section{
+  display: block;
+}
+.nav-categs-overlay {
+  position: absolute;
+  left: 0;
+  opacity: .3;
+  background-color: #333;
+  width: 100%;
+  height: 100%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-bottom: 32px;
+  z-index: 900;
 }
