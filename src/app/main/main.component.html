@@ -1,18 +1,222 @@
-<mat-toolbar class="main_toolbar">
-  <div>
-      <!-- <button mat-icon-button (click)="toggleSideMenu()">
-          <mat-icon class="dark-icon">menu</mat-icon>
-      </button> 
-      <mat-icon class="dark-icon">menu</mat-icon>-->
-      <a class="w3-margin-left main__logo" routerLink="/main">
-          <img src="../../assets/images/Disto_Logo.png" class="main__logoimage" alt="logo">
+<div class="main-toolbar">
+  <div class="main-toolbar__row">
+    <div class="ms-flex ms-flex--center">
+      <a
+        class="main-toolbar__logo w3-margin-left w3-margin-right"
+        routerLink="/main"
+      >
+        <img
+          src="../../assets/images/logo-white.png"
+          class="main-toolbar__logoimage"
+          alt="logo"
+        />
       </a>
+      <div class="search-form background-color w3-margin-left">
+        <input
+          matInput
+          type="text"
+          placeholder="Buscar productos, marcas y más..."
+          autocomplete="off"
+          class="search-form__input"
+          style="border: none"
+        />
+  
+        <button mat-button class="search-form__button">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+      <span class="ms-fill"></span>
+      <div class="ms-flex">
+        <button mat-icon-button class="social__button">
+          <img src="../../assets/images/whatsapp.png" alt="" />
+        </button>
+        <button mat-icon-button class="social__button">
+          <img src="../../assets/images/facebook.png" alt="" />
+        </button>
+  
+        <button mat-icon-button class="social__button">
+          <img src="../../assets/images/logotipo-de-instagram.png" alt="" />
+        </button>
+      </div>
+    </div>
+  
+    <div class="ms-flex ms-flex--center">
+      <div>
+        <button mat-button (click)="toggleMenu()">
+          <mat-icon>menu</mat-icon>
+          CATEGORÍAS</button
+        >| <button mat-button routerLink="/main">INICIO</button>|
+        <button mat-button routerLink="/main/contactanos">CONTACTÁNOS</button>
+      </div>
+      <span class="ms-fill"></span>
+      <button mat-button>
+        <mat-icon matBadge="15" matBadgeColor="warn">shopping_cart</mat-icon>
+      </button>
+      <button mat-button>
+        <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+      </button>
+      <button mat-button>
+        <mat-icon matBadge="5" matBadgeColor="warn">notifications_none</mat-icon>
+      </button>
+    </div>
+    <div class="categories fadeIn animated" #megaMenu [style.display]="openedMenu?'block':'none'">
+      <div style="display: flex;">
+        <nav class="categories__nav">
+          <ul class="categories__list">
+            <li class="categories__item">
+              <div class="categories__item--name">Promociones</div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name">Destacados</div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Computo</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Imagen/Impresion</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Tablets y smartphone</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Redes y seguridad</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Software</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Accesorios y perifericos</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Gadgets</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>PC´s y laptops</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Gamer</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Adaptadores y cables</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+            <li class="categories__item">
+              <div class="categories__item--name ms-flex ms-flex--center">
+                <div>Inalambrico</div>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <div class="categories__section">
+          <h2 class="categories__title">Computo [Categoria]</h2>
+        </div>
+      </div>
+    </div>
   </div>
-  <span style="flex: 1 1 auto;"></span>
-  <button mat-flat-button color="primary">
-    <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
-  </button>
-</mat-toolbar>
-<div class="main__space">
+</div>
+
+
+<div style="min-height: 85vh">
+  <div class="nav-categs-overlay" (click)="toggleMenu()" [style.display]="openedMenu?'block':'none'"></div>
   <router-outlet></router-outlet>
 </div>
+<footer class="footer">
+  <div class="footer__section">
+    <div class="w3-row-padding ms-row">
+      <div class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-center">
+        <img
+          src="../../assets/images/logo-black.png"
+          class="footer__logo w3-margin-top"
+          alt=""
+        />
+      </div>
+      <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
+        <h4 class="footer__title">Búsqueda rápida</h4>
+        <div class="footer-list">
+          <ul>
+            <li><a>Promociones</a></li>
+            <li><a>PC's</a></li>
+            <li><a>Laptops</a></li>
+            <li><a>Accesorios</a></li>
+            <li><a>Gammers</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
+        <h4 class="footer__title">información</h4>
+        <div class="footer-list">
+          <ul>
+            <li><a>Libro de reclamaciones</a></li>
+            <li><a>Preguntas Frecuentes</a></li>
+            <li><a>Seguimiento de tu orden</a></li>
+            <li><a>Contáctanos</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
+        <h4 class="footer__title">suscripción</h4>
+        <div>
+          Te notificaremos de promociones, descuentos y beneficios para
+          clientees como tú.
+        </div>
+        <div class="email-form background-color w3-margin-top w3-margin-bottom">
+          <input
+            matInput
+            type="text"
+            placeholder="Déjanos tu email"
+            autocomplete="off"
+            class="email-form__input"
+            style="border: none"
+          />
+
+          <button mat-button class="email-form__button">Suscríbete</button>
+        </div>
+        <div class="w3-margin-top">
+          <button mat-icon-button class="footer__buton-social">
+            <img src="../../assets/images/facebook.png" alt="" />
+          </button>
+          <button mat-icon-button class="footer__buton-social">
+            <img src="../../assets/images/twitter.png" alt="" />
+          </button>
+          <button mat-icon-button class="footer__buton-social">
+            <img src="../../assets/images/logotipo-de-instagram.png" alt="" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="w3-center w3-padding">
+    © 2020 AITEC Perú Todos los derechos reservados | Diseñado por
+    <img src="../../assets/images/negativo.png" class="footer__meraki" alt="" />
+  </div>
+</footer>

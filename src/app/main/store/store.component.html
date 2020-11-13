@@ -1,0 +1,148 @@
+<div class="ms-flex">
+  <nav class="categories__nav">
+    <ul class="categories__list">
+      <li class="categories__item">
+        <div class="categories__item--name">Promociones</div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name">Destacados</div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Computo</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Imagen/Impresion</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Tablets y smartphone</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Redes y seguridad</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Software</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Accesorios y perifericos</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Gadgets</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>PC´s y laptops</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Gamer</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Adaptadores y cables</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+      <li class="categories__item">
+        <div class="categories__item--name ms-flex ms-flex--center">
+          <div>Inalambrico</div>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  <div class="store__section">
+    <div class="ms-flex" style="justify-content: space-between">
+      <div>Inicio > Productos</div>
+
+      <mat-form-field appearance="outline" class="store__search">
+        <mat-label>Busca en los resultados</mat-label>
+        <input
+          matInput
+          placeholder="Busca en los resultados"
+          autocomplete="off"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+    <div class="w3-margin-top">
+      <div class="w3-row">
+        <div
+          *ngFor="let prod of prods | paginate: config"
+          class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
+        >
+          <div class="w3-padding">
+            <app-product-div [offer]="false"></app-product-div>
+          </div>
+        </div>
+      </div>
+      <pagination-template
+        #p="paginationApi"
+        [id]="config.id"
+        (pageChange)="config.currentPage = $event"
+        maxSize="6"
+        autoHide="true"
+        class="paginator"
+      >
+        <div class="ms-flex ms-flex--center">
+          <button
+            mat-button
+            class="paginator__button"
+            (click)="p.previous()"
+            [disabled]="p.isFirstPage()"
+          >
+            <mat-icon>keyboard_arrow_left</mat-icon>
+          </button>
+
+          <div
+            *ngFor="let page of p.pages"
+            [class.paginator__current]="p.getCurrent() === page.value"
+          >
+            <a
+              (click)="p.setCurrent(page.value)"
+              *ngIf="p.getCurrent() !== page.value"
+              class="paginator__number"
+            >
+              <span>{{ page.label }}</span>
+            </a>
+            <div *ngIf="p.getCurrent() === page.value">
+              <span>{{ page.label }}</span>
+            </div>
+          </div>
+          <button
+            mat-button
+            class="paginator__button"
+            (click)="p.next()"
+            [disabled]="p.isLastPage()"
+          >
+            <mat-icon>keyboard_arrow_right</mat-icon>
+          </button>
+        </div>
+      </pagination-template>
+    </div>
+  </div>
+</div>
