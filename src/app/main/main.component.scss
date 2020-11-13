@@ -114,6 +114,11 @@
   text-decoration: none;
 }
 
+.main__space{
+  padding-top: 64px;
+  padding-bottom: 32px;
+}
+
 @media (max-width: 601px) {
   .main__logoimage {
     max-height: 36px;

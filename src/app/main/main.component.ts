@@ -1,3 +1,7 @@
+import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../core/models/user.model';
+import { AuthService } from '../core/services/auth.service';
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 
 @Component({
@@ -6,15 +10,19 @@ import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/co
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
-  @ViewChild("megaMenu") menu: ElementRef;
-  openedMenu:boolean = false
+  user$: Observable<User>
   constructor(
-    private renderer: Renderer2
+    private auth: AuthService
   ) { }
+  openedMenu:boolean = false
 
   ngOnInit(): void {
+    this.user$ = this.auth.user$
   }
 
+  logOut(){
+    this.auth.logout()
+  }
   toggleMenu(){
     this.openedMenu = !this.openedMenu;
     console.log(this.openedMenu);
