@@ -14,13 +14,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatDialogModule } from '@angular/material/dialog';
+import { TermsComponent } from '../terms/terms.component';
 
 
 @NgModule({
   declarations: [
     LoginComponent,
     SignInComponent,
-    SignUpComponent
+    SignUpComponent,
+    TermsComponent
   ],
   imports: [
     CommonModule,
@@ -34,7 +37,12 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     FormsModule,
     MatInputModule,
     MatRadioModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatDialogModule,
+    MatDividerModule
+  ], 
+  entryComponents: [
+    TermsComponent
   ]
 })
 export class LoginModule { }

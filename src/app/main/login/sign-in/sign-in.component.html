@@ -1,4 +1,4 @@
-<ng-container *ngIf="userRedirect$ | async"></ng-container>
+<ng-container *ngIf="getUser$ | async"></ng-container>
 <div style="display:flex; flex-direction: column; align-items: center">
   <div style="width:100%; max-width: 500px;">   
     <div class="menuContainer">
@@ -73,7 +73,7 @@
                 Ingresar con <strong>Facebook</strong>
             </button>
 
-            <button color="primary"
+            <button color="warn"
                 style="max-width:260px"
                 mat-raised-button class="w3-block w3-margin-bottom"   
                 (click)="signInProvider('google')">

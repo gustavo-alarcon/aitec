@@ -15,7 +15,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class SignInComponent implements OnInit {
   version: string
-  userRedirect$: Observable<User>;
+  getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
 
   
   registerLogin$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false) //true when email already exist, so you need to login
@@ -36,14 +36,24 @@ export class SignInComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.userRedirect$ = this.auth.user$.pipe(
-      debounceTime(500),
-      tap(user => {
-      if(user){
-        this.snackbar.open("Bienvenido", "Aceptar")
-        this.router.navigateByUrl('/main')
+    this.getUser$ = this.auth.getUser$.pipe(
+      tap(userData => {
+      if(userData){
+        switch(userData.type){
+          case "registered":
+            this.snackbar.open("Bienvenido...", "Aceptar")
+            this.router.navigateByUrl('/main')
+            break;
+          case "unregistered":
+            this.snackbar.open("Registrando...", "Aceptar")
+            this.router.navigateByUrl('/main/login/signUp')
+            break;
+          case "unexistent":
+            break;
+        }
       }
     }))
+
     this.version = this.dbs.version;
 
     this.dataFormGroup = this.fb.group({
@@ -57,6 +67,8 @@ export class SignInComponent implements OnInit {
     this.auth.signInEmail(this.dataFormGroup.get('email').value, this.dataFormGroup.get('pass').value)
       .then(res => {
         this.snackbar.open('¡Bienvenido!', 'Cerrar');
+        //this.router.navigateByUrl('/main');
+
       })
       .catch(err => {
         this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
@@ -66,7 +78,9 @@ export class SignInComponent implements OnInit {
 
   signInProvider(type: "facebook"|"google") {
     this.auth.signIn(type).then(res => {
-      this.snackbar.open('¡Bienvenido!', 'Cerrar');
+      //this.snackbar.open('¡Bienvenido!', 'Cerrar');
+      //this.router.navigateByUrl('/main');
+
     })
     .catch(error => {
       this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
@@ -112,7 +126,7 @@ export class SignInComponent implements OnInit {
               case 'facebook.com':
                 control.parent.get('pass').disable()
                 return {providerLogin: "facebook"}
-              case 'email':
+              case 'password':
                 this.registerLogin$.next(true)
                 return null
               default: 
