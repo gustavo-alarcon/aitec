@@ -419,7 +419,7 @@ img.ng-lazyloaded {
 }
 
 .ticket__total {
-  background: var(--primary-color);
+  background: #FF8A00;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 5px;
   font-size: 1.5em;
@@ -588,6 +588,12 @@ img.ng-lazyloaded {
     width: 970px;
   }
 }
+@media (min-width: 1200px){
+  .ms-container {
+    width: 1200px;
+}
+}
+
 
 .ms-content{
   max-width:1400px;

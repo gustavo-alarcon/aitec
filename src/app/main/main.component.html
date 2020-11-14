@@ -38,7 +38,8 @@
       </div>
       <span class="ms-fill"></span>
       <button mat-button routerLink="/main/carrito">
-        <mat-icon matBadge="15" matBadgeColor="warn">shopping_cart</mat-icon>
+        <mat-icon [matBadge]="dbs.order.length"
+        [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">shopping_cart</mat-icon>
       </button>
 
       <button *ngIf="!(user$ | async); else logout" mat-button routerLink="/main/login/signIn" class="menu-button">

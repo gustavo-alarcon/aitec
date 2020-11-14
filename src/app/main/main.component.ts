@@ -2,6 +2,7 @@ import { Observable } from 'rxjs';
 import { User } from '../core/models/user.model';
 import { AuthService } from '../core/services/auth.service';
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { DatabaseService } from '../core/services/database.service';
 
 @Component({
   selector: 'app-main',
@@ -11,7 +12,8 @@ import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/co
 export class MainComponent implements OnInit {
   user$: Observable<User>
   constructor(
-    private auth: AuthService
+    private auth: AuthService,
+    public dbs: DatabaseService
   ) { }
   openedMenu:boolean = false
   firstOpening: boolean = false;
@@ -25,7 +27,7 @@ export class MainComponent implements OnInit {
   }
   toggleMenu(){
     this.openedMenu = !this.openedMenu;
-    this.firstOpening = true;
+    this.firstOpening = !this.firstOpening;
     
     //this.renderer.setStyle(this.menu.nativeElement, "display",'block');
   }
