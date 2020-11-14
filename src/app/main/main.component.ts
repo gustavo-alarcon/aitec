@@ -14,6 +14,7 @@ export class MainComponent implements OnInit {
     private auth: AuthService
   ) { }
   openedMenu:boolean = false
+  firstOpening: boolean = false;
 
   ngOnInit(): void {
     this.user$ = this.auth.user$
@@ -24,7 +25,7 @@ export class MainComponent implements OnInit {
   }
   toggleMenu(){
     this.openedMenu = !this.openedMenu;
-    console.log(this.openedMenu);
+    this.firstOpening = true;
     
     //this.renderer.setStyle(this.menu.nativeElement, "display",'block');
   }

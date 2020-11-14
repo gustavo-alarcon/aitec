@@ -1,25 +1,12 @@
 <div class="main-toolbar">
   <div class="main-toolbar__row">
-    <div class="ms-flex ms-flex--center">
-      <a
-        class="main-toolbar__logo w3-margin-left w3-margin-right"
-        routerLink="/main"
-      >
-        <img
-          src="../../assets/images/logo-white.png"
-          class="main-toolbar__logoimage"
-          alt="logo"
-        />
+    <div class="ms-flex ms-flex--center w3-padding">
+      <a class="main-toolbar__logo w3-margin-right" routerLink="/main">
+        <img src="../../assets/images/logo-white.png" class="main-toolbar__logoimage" alt="logo" />
       </a>
-      <div class="search-form background-color w3-margin-left">
-        <input
-          matInput
-          type="text"
-          placeholder="Buscar productos, marcas y más..."
-          autocomplete="off"
-          class="search-form__input"
-          style="border: none"
-        />
+      <div class="search-form background-color w3-margin-left mat-elevation-z2">
+        <input matInput type="text" placeholder="Buscar productos, marcas y más..." autocomplete="off"
+          class="search-form__input" style="border: none" />
 
         <button mat-button class="search-form__button">
           <mat-icon>search</mat-icon>
@@ -40,24 +27,21 @@
       </div>
     </div>
 
-    <div class="ms-flex ms-flex--center">
+    <div class="ms-flex ms-flex--center w3-padding">
       <div>
-        <button mat-button (click)="toggleMenu()">
+        <button mat-button (click)="toggleMenu()" class="menu-button">
           <mat-icon>menu</mat-icon>
-          CATEGORÍAS</button
-        >| <button mat-button routerLink="/main">INICIO</button>|
-        <button mat-button routerLink="/main/contactanos">CONTACTÁNOS</button>
+          CATEGORÍAS
+        </button>|
+        <button mat-button routerLink="/main" class="menu-button">INICIO</button>|
+        <button mat-button routerLink="/main/contactanos" class="menu-button">CONTACTÁNOS</button>
       </div>
       <span class="ms-fill"></span>
       <button mat-button routerLink="/main/carrito">
         <mat-icon matBadge="15" matBadgeColor="warn">shopping_cart</mat-icon>
       </button>
 
-      <button
-        *ngIf="!(user$ | async); else logout"
-        mat-button
-        routerLink="/main/login/signIn"
-      >
+      <button *ngIf="!(user$ | async); else logout" mat-button routerLink="/main/login/signIn" class="menu-button">
         <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
       </button>
       <ng-template #logout>
@@ -66,16 +50,11 @@
         </button>
       </ng-template>
       <button mat-button>
-        <mat-icon matBadge="5" matBadgeColor="warn"
-          >notifications_none</mat-icon
-        >
+        <mat-icon matBadge="5" matBadgeColor="warn">notifications_none</mat-icon>
       </button>
     </div>
-    <div
-      class="categories fadeIn animated"
-      #megaMenu
-      [style.display]="openedMenu ? 'block' : 'none'"
-    >
+    
+    <div class="categories  animated" #megaMenu [ngClass]="{'fadeInUp': openedMenu, 'fadeOut': !openedMenu}" [style.display]="firstOpening ? 'block' : 'none'">
       <div style="display: flex">
         <nav class="categories__nav">
           <ul class="categories__list">
@@ -86,68 +65,79 @@
               <div class="categories__item--name">Destacados</div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Computo</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Imagen/Impresion</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Tablets y smartphone</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Redes y seguridad</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Software</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Accesorios y perifericos</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Gadgets</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>PC´s y laptops</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Gamer</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
             <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+              <div class="categories__item--name">
                 <div>Adaptadores y cables</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
-            <li class="categories__item">
-              <div class="categories__item--name ms-flex ms-flex--center">
+            <li class="categories__item w3-margin-bottom">
+              <div class="categories__item--name">
                 <div>Inalambrico</div>
+                <span class="ms-fill"></span>
                 <mat-icon>keyboard_arrow_right</mat-icon>
               </div>
             </li>
@@ -162,22 +152,14 @@
 </div>
 
 <div style="min-height: 85vh">
-  <div
-    class="nav-categs-overlay"
-    (click)="toggleMenu()"
-    [style.display]="openedMenu ? 'block' : 'none'"
-  ></div>
+  <div class="nav-categs-overlay" (click)="toggleMenu()" [style.display]="openedMenu ? 'block' : 'none'"></div>
   <router-outlet></router-outlet>
 </div>
 <footer class="footer">
   <div class="footer__section">
     <div class="w3-row-padding ms-row">
       <div class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-center">
-        <img
-          src="../../assets/images/logo-black.png"
-          class="footer__logo w3-margin-top"
-          alt=""
-        />
+        <img src="../../assets/images/logo-black.png" class="footer__logo w3-margin-top" alt="" />
       </div>
       <div class="w3-col col-lg-4 col-sm-6 col-xxl-3">
         <h4 class="footer__title">Búsqueda rápida</h4>
@@ -209,14 +191,8 @@
           clientees como tú.
         </div>
         <div class="email-form background-color w3-margin-top w3-margin-bottom">
-          <input
-            matInput
-            type="text"
-            placeholder="Déjanos tu email"
-            autocomplete="off"
-            class="email-form__input"
-            style="border: none"
-          />
+          <input matInput type="text" placeholder="Déjanos tu email" autocomplete="off" class="email-form__input"
+            style="border: none" />
 
           <button mat-button class="email-form__button">Suscríbete</button>
         </div>
