@@ -1,1 +1,64 @@
-<p>shopping-cart works!</p>
+<div
+  class="ms-content"
+  style="position: relative"
+>
+<div>Inicio > Mi Carrito</div>
+<div class="w3-margin-top div-content">
+  <div class="w3-container div-content__left">
+    <div class="ms-flex w3-margin-bottom w3-padding" style="justify-content: space-between">
+      <button mat-raised-button color="primary" *ngIf="(view$|async) == 1; else firstButton">
+        <mat-icon>check_circle_outline</mat-icon>
+        Revisa tu orden
+      </button>
+      <ng-template #firstButton>
+        <button mat-button class="button--desactive"(click)="firstView()">
+          <mat-icon>check_circle_outline</mat-icon>
+          Revisa tu orden
+        </button>
+      </ng-template>
+      <button mat-raised-button color="primary" *ngIf="(view$|async) == 2; else secondButton">
+        <mat-icon>local_shipping</mat-icon>
+        Método de Entrega
+      </button>
+      <ng-template #secondButton>
+        <button mat-button class="button--desactive"(click)="secondView()">
+          <mat-icon>local_shipping</mat-icon>
+          Método de Entrega
+        </button>
+      </ng-template>
+      <button mat-raised-button color="primary" *ngIf="(view$|async) == 3; else thirdButton">
+        <mat-icon>request_page</mat-icon>
+        Método de Pago
+      </button>
+      <ng-template #thirdButton>
+        <button mat-button class="button--desactive"(click)="thirdView()">
+          <mat-icon>request_page</mat-icon>
+          Método de Pago
+        </button>
+      </ng-template>
+      
+    </div>
+    <div class="w3-margin-top div-content__scroll">
+      <div *ngIf="(view$|async) == 1">
+        <app-shopping-list></app-shopping-list>
+      </div>
+      <div *ngIf="(view$|async) == 2">
+        <app-delivery></app-delivery>
+      </div>
+      <div *ngIf="(view$|async) == 3">
+        <app-payment-method></app-payment-method>
+      </div>
+       
+    </div>
+  </div>
+  <div class="div-content__rigth">
+    <div class="w3-padding">
+      <div class="resume">
+        <h2 class="resume__title">Resumen de pedido</h2>
+        <div class="resume__divider"></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
