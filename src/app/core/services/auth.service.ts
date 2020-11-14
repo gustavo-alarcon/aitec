@@ -22,6 +22,8 @@ export class AuthService {
   usersRef = `users`
 
   public user$: Observable<User>;
+  public getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
+
 
   public authLoader: boolean = false;
 
@@ -37,65 +39,52 @@ export class AuthService {
     this.afAuth.setPersistence('local');
 
     // observe user authentication
-    this.user$ = this.getUserObservable()
+    this.user$ = this.afAuth.user.pipe(
+      switchMap(user => {
+        if(user){
+          return this.afs.collection('users').doc<User>(user.uid).valueChanges()
+        } else {
+          return of(null)
+        }
+      })
+    )
+    this.getUser$ = this.getUserObservable()
   }
 
-  private getUserObservable(): Observable<User>{
-    return this.afAuth.user.pipe(
-      switchMap(user => {
-        if (user) {
-          console.log(user)
-          return this.afs.collection<User>('users').doc(user.uid).get({source: "server"}).pipe(
-            map(res =>{
+  private getUserObservable(): Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>{
+    return this.afAuth.authState.pipe(
+      switchMap(authUser => {
+        console.log(authUser)
+        if(authUser){
+          console.log(authUser);
+          return this.afs.collection<User>('users').doc(authUser.uid).get({source: "server"}).pipe(
+            map(res => {
               if(res.exists){
                 return <User>res.data()
               } else {
                 return null
               }
             }),
-            switchMap(userDB => {
-              console.log(userDB);
-              if(!userDB){
-                if(user.email){
-                  this.snackbar.open("Registrando...", "Aceptar")
-                  this.afs.collection('users').doc(user.uid).set({uid: user.uid, email: user.email}).then(()=> {
-                    console.log("written")
-                    return this.afAuth.signOut()
-                  }).then(()=> (
-                    this.router.navigateByUrl(`/main/login`).then(()=> (
-                      this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
-                    ))
-                  )).catch(err => {
-                    this.snackbar.open("¡Ocurrió un error!", "Aceptar")
-                    console.log(err)
-                  });
-                } else {
+            map(dbUser => {
+              if(!dbUser){
+                if(!authUser.email){
                   this.snackbar.open("Este usuario no posee correo válido. Inicie sesión con cuenta válida.", "Aceptar")
                   this.afAuth.signOut()
-                }
-                return of(null)
-              } else {
-                if(Object.keys(userDB).length == 2){
-                  this.snackbar.open("Por favor, complete su regístro", "Aceptar")
-                  this.afAuth.signOut().then(()=>(
-                    this.router.navigateByUrl(`/main/login`).then(()=> (
-                      this.router.navigateByUrl(`/main/login/signUp?providerType=${user.providerData[0].providerId}&email=${user.email}`)
-                    ))
-                  ))
-                  return of(null)
+                  return {authUser: null, dbUser: null, type: "unexistent"}
                 } else {
-                  return this.afs.collection<User>('users').doc(user.uid).valueChanges()
+                  return {authUser, dbUser: null, type: "unregistered"}
                 }
+              } else {
+                  return {authUser, dbUser, type: "registered"}
               }
             })
           )
         } else {
-          return of(null);
+          return of({authUser: null, dbUser: null, type: null})
         }
       }),
-      shareReplay()
+      shareReplay(1)
     )
-
   }
 
   public confirmPasswordReset(code: string, password: string): Promise<void> {
@@ -162,7 +151,7 @@ export class AuthService {
 
   //User from DB
   getUserByEmail(email: string): Observable<User> {
-    return this.afs.collection<User>(this.usersRef, ref => ref.where("email", "==", email)).get()
+    return this.afs.collection<User>(this.usersRef, ref => ref.where("email", "==", email)).get({source: "server"})
       .pipe(
         map(snap => {
           if (snap.empty) {
@@ -178,27 +167,29 @@ export class AuthService {
     return from(this.afAuth.fetchSignInMethodsForEmail(email))
   }
 
-  registerUser(user: User, pass?: string){
+  registerUser(authUser: firebase.default.User, dbUser: User, pass?: string): Promise<any>{
     let userRef: DocumentReference = null;
-
+    let uid: string = null;
       if(pass){
-        this.user$ = null;
-        return from(this.signUpEmail(user.email, pass)).pipe(
-          switchMap(cred => {
-            let uid = cred.user.uid
-            userRef = this.afs.firestore.collection(this.usersRef).doc(cred.user.uid);
-            return from(userRef.set({...user, uid}, {merge: true}).then(()=>{
-              this.user$ = this.getUserObservable()
-            }))
+        return this.signUpEmail(dbUser.email, pass).then((cred) => {
+          uid = cred.user.uid
+          userRef = this.afs.firestore.collection(this.usersRef).doc(uid);
+          return userRef.set({...dbUser, uid})
+          }).then(res => {
+            this.snackbar.open("Bienvenido!", "Aceptar")
+            return this.router.navigateByUrl(`/main`)
+          }).catch(err => {
+            this.handleError(err)
           })
-        )
       } else {
-        return this.getUserByEmail(user.email).pipe(
-          switchMap(userDB => {
-            userRef = this.afs.firestore.collection(this.usersRef).doc(userDB.uid)
-            return from(userRef.set({...user}, {merge: true}))
-          })
-        )
+        let uid = authUser.uid
+        userRef = this.afs.firestore.collection(this.usersRef).doc(uid)
+        return userRef.set({...dbUser, uid}).then(res => {
+          this.snackbar.open("Bienvenido!", "Aceptar")
+          return this.router.navigateByUrl(`/main`)
+        }).catch(err => {
+          this.handleError(err)
+        })
       }
   }
 

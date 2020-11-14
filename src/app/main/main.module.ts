@@ -9,10 +9,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatBadgeModule} from '@angular/material/badge';
+import { MatDividerModule } from '@angular/material/divider';
 
 @NgModule({
   declarations: [
-    MainComponent
+    MainComponent,
   ],
   imports: [
     CommonModule,
@@ -20,7 +21,8 @@ import {MatBadgeModule} from '@angular/material/badge';
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDividerModule
   ]
 })
 export class MainModule { }
