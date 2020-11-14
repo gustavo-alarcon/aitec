@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, from, Observable, of } from 'rxjs';
 import { debounceTime, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { TermsComponent } from '../../terms/terms.component';
 
 @Component({
   selector: 'app-sign-up',
@@ -13,7 +15,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
   styleUrls: ['./sign-up.component.scss']
 })
 export class SignUpComponent implements OnInit {
-  userRedirect$: Observable<User>;
+  getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
 
   providerType:["email", "google", "facebook"]= ["email", "google", "facebook"];
   personalInfoType:["natural", "juridica"] = ["natural", "juridica"]
@@ -39,27 +41,13 @@ export class SignUpComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private activatedRoute: ActivatedRoute,
     private snackbar: MatSnackBar,
-    public router: Router
+    public router: Router,
+    private dialog: MatDialog,
   ) { }
 
   ngOnInit(): void {
-    this.userRedirect$ = this.auth.user$.pipe(
-      debounceTime(500),
-      tap(user => {
-      if(user){
-        this.snackbar.open("Bienvenido", "Aceptar")
-        this.router.navigateByUrl('/main')
-      }
-    }))
-
-    this.providerTypeParam = 
-      this.activatedRoute.snapshot.queryParams["providerType"] == "google.com" ? "google" :
-      this.activatedRoute.snapshot.queryParams["providerType"] == "facebook.com" ? "facebook":null;
-    this.emailParam = this.activatedRoute.snapshot.queryParams["email"];
-    console.log(this.providerTypeParam,this.emailParam);
-    this.initForms(this.providerTypeParam, this.emailParam);
+    this.initForms();
     this.initObservables()
   }
   deb(){
@@ -67,26 +55,26 @@ export class SignUpComponent implements OnInit {
     console.log(this.emailForm)
     console.log(this.personalInfoForm)
   }
+
+  termsAndConditions(){
+    this.dialog.open(TermsComponent)
+  }
   
-  initForms(providerType: string, email: string){
+  initForms(){
     //Por definir providerForm
     this.providerForm = this.fb.control(
-      providerType ? providerType : this.providerType[0], 
+      this.providerType[0], 
       Validators.required)
     this.emailForm = this.fb.group({
       //Falta chequear rellenado con email FALTAAAAAAA
       email: this.fb.control(
-        email ? email : "", [Validators.required, Validators.email], this.emailRepeatedValidator()
+        "", [Validators.required, Validators.email], this.emailRepeatedValidator()
       ),
       pass: this.fb.control(
-        {value: null, disabled: (providerType == this.providerType[1] ||
-          providerType == this.providerType[2])
-        }, [Validators.required, this.samePassValidator()]
+        null, [Validators.required, this.samePassValidator()]
       ),
       repeatedPass: this.fb.control(
-        {value: null, disabled: (providerType == this.providerType[1] ||
-          providerType == this.providerType[2])
-        }, [Validators.required, this.samePassValidator()]
+        null, [Validators.required, this.samePassValidator()]
       ),
     })
     this.personalInfoForm = this.fb.group({
@@ -125,8 +113,9 @@ export class SignUpComponent implements OnInit {
 
   initObservables(){
     this.providerType$ = this.providerForm.valueChanges.pipe(
+      startWith(this.providerForm.value),
       map((res: "email"| "google"| "facebook") => {
-        this.emailForm.get("email").reset("");
+        console.log(res)
         if(res == "google" || res =="facebook"){
           this.emailForm.get("pass").disable()
           this.emailForm.get("repeatedPass").disable()
@@ -136,11 +125,11 @@ export class SignUpComponent implements OnInit {
           this.emailForm.get("repeatedPass").enable()
           return true
         }
-      }),
-      startWith(this.providerForm.value == "email")
+      })
     );
 
     this.personalInfoType$ = this.personalInfoForm.get("type").valueChanges.pipe(
+      startWith(this.personalInfoForm.get("type").value),
       map((res: "natural"| "juridica") => {
         if(res == "natural"){
           this.personalInfoForm.get("business").disable()
@@ -155,9 +144,35 @@ export class SignUpComponent implements OnInit {
         }
       })
     )
+    this.getUser$ = this.auth.getUser$.pipe(
+      tap(userData => {
+      if(userData){
+        console.log(userData)
+        switch(userData.type){
+          case "registered":
+            this.snackbar.open("Bienvenido...", "Aceptar")
+            this.router.navigateByUrl('/main')
+            break;
+          case "unregistered":
+            switch(userData.authUser.providerData[0].providerId){
+              case 'google.com':
+                this.providerForm.setValue(this.providerType[1])
+                break;
+              case 'facebook.com':
+                this.providerForm.setValue(this.providerType[2])
+                break;
+            }
+            this.emailForm.get("email").setValue(userData.authUser.email)
+            this.providerForm.disable()
+            break;
+          case "unexistent":
+            break;
+        }
+      }
+    }))
   }
 
-  registerUser(){
+  registerUser(userData: {authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}){
     this.emailForm.markAsPending();
     let user = {
       email: this.emailForm.get("email").value,
@@ -165,12 +180,8 @@ export class SignUpComponent implements OnInit {
       feed: this.feedForm.value,
     };
 
-    this.auth.registerUser(user, this.emailForm.get("pass").enabled ? 
-      this.emailForm.get("pass").value:null).subscribe(
-        res => {
-          this.snackbar.open("Registro exitoso! Por favor, inicie sesión.", "Aceptar");
-          this.router.navigateByUrl("/main/login/signIn")
-        },
+    this.auth.registerUser(userData.authUser, user, this.emailForm.get("pass").enabled ? 
+      this.emailForm.get("pass").value:null).catch(
         err => {
           this.snackbar.open("Ocurrió un error. Vuelva a intentarlo.", "Aceptar");
           console.log(err);
@@ -216,9 +227,7 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    if(Object.keys(user).length != 2){
-                      return {repeatedUser: true}
-                    }
+                    return {repeatedUser: true}
                   } 
                   //Usuario no registrado en db
                   return null
@@ -235,9 +244,7 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    if(Object.keys(user).length != 2){
-                      return {repeatedUser: true}
-                    }
+                    return {repeatedUser: true}
                   } 
                   //Usuario no registrado en db
                   return null
@@ -254,9 +261,7 @@ export class SignUpComponent implements OnInit {
                 map(user => {
                   //Usuario registrado en DB
                   if(user){
-                    if(Object.keys(user).length != 2){
-                      return {repeatedUser: true}
-                    }
+                    return {repeatedUser: true}
                   } 
                   //Usuario no registrado en db
                   return null
