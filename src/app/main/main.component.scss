@@ -31,6 +31,9 @@
     &::placeholder {
       color: #aeaeae;
     }
+    &:focus{
+      outline: none;
+    }
   }
 
   &__button {
@@ -40,10 +43,6 @@
     color: #cbcbcb;
   }
 }
-.search-form__input:focus {
-  outline: none;
-}
-
 .social__button {
   border: 1px solid white;
   margin: 0 0.5em;
@@ -106,6 +105,9 @@
   &__input {
     margin: 5px 0;
     width: 100%;
+    &:focus{
+      outline: none;
+    }
   }
 
   &__button {

@@ -48,6 +48,7 @@ export class PaymentMethodComponent implements OnInit {
 
   ngOnInit(): void {
     this.cardForm = this.fb.group({
+      type:[null],
       numero: [null],
       month: [null],
       year: [null],
@@ -61,7 +62,9 @@ export class PaymentMethodComponent implements OnInit {
     });
   }
 
- 
+  chooseType(type){
+    this.cardForm.get('type').setValue(type)
+  }
 
   addNewPhoto(formControlName: string, image: File[]) {
     if (image.length === 0) return;

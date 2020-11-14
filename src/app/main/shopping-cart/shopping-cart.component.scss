@@ -8,10 +8,10 @@
   &__rigth {
     border-left: 1px solid #c4c4c4;
   }
-  &__left{
+  &__left {
     width: calc(100% - 350px);
   }
-  &__scroll{
+  &__scroll {
     overflow: auto;
   }
 }
@@ -20,19 +20,68 @@
   padding: 15px 30px;
   width: 100%;
   min-width: 350px;
+  max-width: 400px;
+  font-family: Montserrat;
+  color: #828282;
   &__title {
     font-family: Roboto;
     font-style: normal;
     font-weight: bold;
-    font-size: 22px;
-    line-height: 26px;
-    /* identical to box height */
-
+    font-size: 1.2em;
     color: #2b2b2b;
   }
   &__divider {
     width: 100%;
     height: 2px;
     background-color: #828282;
+  }
+  &__list {
+    font-size:0.9em
+  }
+  &__descrip {
+    letter-spacing: 0.05em;
+  }
+  &__small {
+    font-size: 0.7em;
+    margin-top: 5px;
+  }
+  &__subtitle {
+    font-family: Raleway;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 16px;
+    color: #555555;
+  }
+  &__button {
+    width: 250px;
+  }
+}
+
+.email-form {
+  display: flex;
+  margin: auto;
+  font-size: 1em;
+  width: 100%;
+  padding-left: 15px;
+  border: 1px solid #c4c4c4;
+  box-sizing: border-box;
+  border-radius: 5px;
+
+  &__input {
+    margin: 5px 0;
+    width: 100%;
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__button {
+    border-radius: 0;
+    min-width: 45px !important;
+    padding: 5px !important;
+    background-color: black;
+    color: white;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
   }
 }
