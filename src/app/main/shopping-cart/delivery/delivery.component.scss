@@ -1,0 +1,12 @@
+.delivery {
+  padding: 35px;
+  border: 1px solid #e5e5e5;
+  box-sizing: border-box;
+  max-width: 500px;
+  margin: auto;
+  &__title {
+    font-size: 1.1em;
+    font-weight: 700;
+    font-family: Raleway;
+  }
+}

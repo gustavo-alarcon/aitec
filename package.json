@@ -32,6 +32,7 @@
     "express": "^4.15.2",
     "firebase": "^8.0.1",
     "jquery": "^3.5.1",
+    "ng2-img-max": "^2.2.4",
     "ngx-pagination": "^5.0.0",
     "ngx-slick-carousel": "^0.5.1",
     "rxjs": "~6.6.0",
