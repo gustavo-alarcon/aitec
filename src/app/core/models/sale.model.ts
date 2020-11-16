@@ -118,6 +118,12 @@ export interface Sale {
     observation: string
   }
 
+  rateData?: {
+    serviceRate: number,
+    productRate: number,
+    observation?: string,
+  }
+
   createdAt: Date,
   createdBy: User,
 

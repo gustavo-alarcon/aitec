@@ -847,6 +847,15 @@ export class DatabaseService {
     return of(batch);
   }
 
+  onSaveRate(saleid: string, sale: Sale["rateData"]): Promise<void> {
+    let saleRef: DocumentReference = this.afs.firestore
+      .collection(this.salesRef)
+      .doc(saleid);
+    let saleData: Sale["rateData"] = sale;
+    
+    return saleRef.update(saleData);
+  }
+
 
   onUpdateSaleVoucher(
     saleId: string,
@@ -1258,5 +1267,16 @@ export class DatabaseService {
       .valueChanges();
   }
 
+  getUserFinishedSales(user: User): Observable<Sale[]> {
+    return this.afs.collection<Sale>(this.salesRef, 
+      ref => ref.where("user.uid", "==", user.uid)
+        .where("status","==", (new saleStatusOptions()).finished)
+        .orderBy("createdAt", "desc").limit(10))
+      .get().pipe(map((snap) => {
+        return snap.docs
+          .map(el => <Sale>el.data())
+          .filter(el => (((el.rateData === undefined))))
+      }));
+  }
   
 }
