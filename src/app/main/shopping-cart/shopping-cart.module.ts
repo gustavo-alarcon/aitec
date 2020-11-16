@@ -25,7 +25,8 @@ import { ShoppingListComponent } from './shopping-list/shopping-list.component';
 import { DeliveryComponent } from './delivery/delivery.component';
 import { PaymentMethodComponent } from './payment-method/payment-method.component';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 @NgModule({
   declarations: [
     ShoppingCartComponent,
@@ -57,7 +58,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
     MatAutocompleteModule,
     MatListModule,
     Ng2ImgMaxModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    QuantityDivModule,
   ],
 })
 export class ShoppingCartModule {}

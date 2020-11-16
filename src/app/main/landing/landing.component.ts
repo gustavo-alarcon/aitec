@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
   selector: 'app-landing',
@@ -53,9 +54,17 @@ export class LandingComponent implements OnInit {
     }
   ]};
 
-  constructor() { }
+  listproducts:Array<any>
+  offers:Array<any>
+
+  constructor(
+    private dbs: DatabaseService
+  ) { }
 
   ngOnInit(): void {
+    this.listproducts = this.dbs.products.filter(el=>!el.promo).slice(0,8)
+    
+    this.offers = this.dbs.products.filter(el=>el.promo)
   }
 
 }

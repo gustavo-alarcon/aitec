@@ -1,16 +1,14 @@
 <div>
   <div
     class="ms-flex ms-flex--center quantity"
-    *ngIf="quantity$ | async as quantity;else noAdded"
+    *ngIf="quantity$ | async as quantity; else noAdded"
   >
     <button
       mat-mini-fab
       [ngClass]="
         size == 'md'
           ? 'quantityButton quantityButton--md w3-margin-right'
-          : size == 'sm'
-          ? 'quantityButton quantityButton--sm w3-margin-right'
-          : 'quantityButton w3-margin-right'
+          : 'quantityButton quantityButton--sm'
       "
       (click)="decrease(product)"
       [disabled]="quantity == 1"
@@ -33,9 +31,7 @@
       [ngClass]="
         size == 'md'
           ? 'quantityButton quantityButton--md w3-margin-left'
-          : size == 'sm'
-          ? 'quantityButton quantityButton--sm w3-margin-left'
-          : 'quantityButton w3-margin-left'
+          : 'quantityButton quantityButton--sm'
       "
       (click)="increase(product)"
       [disabled]="product['realStock'] <= quantity"

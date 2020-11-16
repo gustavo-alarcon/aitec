@@ -154,7 +154,7 @@
 
 <div style="min-height: 85vh">
   <div class="nav-categs-overlay" (click)="toggleMenu()" [style.display]="openedMenu ? 'block' : 'none'"></div>
-  <router-outlet></router-outlet>
+  <router-outlet (activate)="onActivate($event)"></router-outlet>
 </div>
 <footer class="footer">
   <div class="footer__section">

@@ -14,141 +14,153 @@
     />
   </div>
   <div ngxSlickItem class="slide">
-    <img src="https://aitecperu.com.pe/media/cabeceras/xxAFoO37X.png.pagespeed.ic.jk5UDZ3mLz.webp" class="w3-block" alt="">
+    <img
+      src="https://aitecperu.com.pe/media/cabeceras/xxAFoO37X.png.pagespeed.ic.jk5UDZ3mLz.webp"
+      class="w3-block"
+      alt=""
+    />
   </div>
 </ngx-slick-carousel>
 <div class="w3-padding w3-center">
   <div class="font--primary">
-    <mat-icon fontSet="material-icons-outlined" class="section__icon">offline_bolt</mat-icon>
+    <mat-icon fontSet="material-icons-outlined" class="section__icon"
+      >offline_bolt</mat-icon
+    >
   </div>
   <h2 class="title-section">Ofertas</h2>
 </div>
 <img src="../../../assets/images/banner_ofertas.png" class="w3-block" alt="" />
-<div class="w3-section w3-margin-left w3-margin-right">
-  <div class="w3-row">
-    <div class="w3-col s0 m1 l1">
-      <p class="w3-hide-small"></p>
-    </div>
-    <div class="w3-col s12 m10 l10">
-      <div class="section">
-        <ngx-slick-carousel
-          class="carousel"
-          #slickModal="slick-carousel"
-          [config]="slideConfig2"
-        >
-          <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-            <div class="w3-padding">
-              <app-product-div [offer]="true"></app-product-div>
-            </div>
-          </div>
-        </ngx-slick-carousel>
-      </div>
-      <div class="section">
-        <div class="ms-flex">
-          <div class="w3-col m6 l6" style="display: flex; align-items: center">
-            <div class="w3-center">
-              <h2 class="section__title font--primary">Productos Estrella</h2>
-              <p class="section__paragraph">
-                Lorem ipsum dolor sit amet consectetur adipiscing, elit eros
-                sodales nostra neque ullamcorper, tortor cursus nascetur aptent
-                habitasse.
-              </p>
-              <button
-                mat-flat-button
-                color="primary"
-                class="section__button w3-margin-top"
-                routerLink="/main/productos"
-              >
-                <span> Ver productos</span>
-              </button>
-            </div>
-          </div>
-          <div class="w3-col m6 l6">
-            <img
-              src="../../../assets/images/computadora.png"
-              class="w3-block"
-              alt=""
-            />
-          </div>
+
+<div class="w3-section ms-container">
+  <div class="section">
+    <ngx-slick-carousel
+      class="carousel"
+      #slickModal="slick-carousel"
+      [config]="slideConfig2"
+    >
+      <div ngxSlickItem *ngFor="let slide of offers" class="slide">
+        <div class="w3-padding">
+          <app-product-div [product]="slide"></app-product-div>
         </div>
       </div>
-      <div class="section">
-        <div class="w3-padding w3-center">
-          <div class="font--primary">
-            <mat-icon class="section__icon">important_devices</mat-icon>
-          </div>
-          <h2 class="title-section">Nuestros Productos</h2>
+    </ngx-slick-carousel>
+  </div>
+  <div class="section">
+    <div class="ms-flex">
+      <div class="w3-col m6 l6" style="display: flex; align-items: center">
+        <div class="w3-center">
+          <h2 class="section__title font--primary">Productos Estrella</h2>
+          <p class="section__paragraph">
+            Lorem ipsum dolor sit amet consectetur adipiscing, elit eros sodales
+            nostra neque ullamcorper, tortor cursus nascetur aptent habitasse.
+          </p>
+          <button
+            mat-flat-button
+            color="primary"
+            class="section__button w3-margin-top"
+            routerLink="/main/productos"
+          >
+            <span> Ver productos</span>
+          </button>
         </div>
-        <mat-tab-group
-          class="section__tab w3-margin-top"
-          mat-align-tabs="center"
-          color="primary"
-        >
-          <mat-tab label="Los más buscados">
-            <div class="w3-margin-top">
-              <div class="w3-row">
-                <div
-                  *ngFor="let prod of prods"
-                  class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
-                >
-                  <div class="w3-padding">
-                    <app-product-div [offer]="false"></app-product-div>
-                  </div>
-                </div>
-              </div>
-              <div class="w3-center w3-margin-top">
-                <button routerLink="/main/productos" mat-flat-button color="primary" class="section__button">
-                  <span> Ver más</span>
-                </button>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Últimos productos">
-            <div class="w3-margin-top">
-              <div class="w3-row">
-                <div
-                  *ngFor="let prod of prods"
-                  class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
-                >
-                <div class="w3-padding">
-                  <app-product-div [offer]="false"></app-product-div>
-                </div>
-                </div>
-              </div>
-              <div class="w3-center w3-margin-top">
-                <button mat-flat-button routerLink="/main/productos" color="primary" class="section__button">
-                  <span> Ver más</span>
-                </button>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Ofertas">
-            <div class="w3-padding w3-margin-top">
-              <div class="w3-row">
-                <div
-                  *ngFor="let prod of prods"
-                  class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
-                >
-                <div class="w3-padding">
-                  <app-product-div [offer]="false"></app-product-div>
-                </div>
-                </div>
-              </div>
-              <div class="w3-center w3-margin-top">
-                <button mat-flat-button color="primary" routerLink="/main/productos" class="section__button">
-                  <span> Ver más</span>
-                </button>
-              </div>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
       </div>
-    </div>
-    <div class="w3-col s0 m1 l1">
-      <p class="w3-hide-small"></p>
+      <div class="w3-col m6 l6">
+        <img
+          src="../../../assets/images/computadora.png"
+          class="w3-block"
+          alt=""
+        />
+      </div>
     </div>
   </div>
+  <div class="section">
+    <div class="w3-padding w3-center">
+      <div class="font--primary">
+        <mat-icon class="section__icon">important_devices</mat-icon>
+      </div>
+      <h2 class="title-section">Nuestros Productos</h2>
+    </div>
+    <mat-tab-group
+      class="section__tab w3-margin-top"
+      mat-align-tabs="center"
+      color="primary"
+    >
+      <mat-tab label="Los más buscados">
+        <div class="w3-margin-top">
+          <div class="w3-row">
+            <div
+              *ngFor="let prod of listproducts"
+              class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
+            >
+              <div class="w3-padding">
+                <app-product-div [product]="prod"></app-product-div>
+              </div>
+            </div>
+          </div>
+          <div class="w3-center w3-margin-top">
+            <button
+              routerLink="/main/productos"
+              mat-flat-button
+              color="primary"
+              class="section__button"
+            >
+              <span> Ver más</span>
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Últimos productos">
+        <div class="w3-margin-top">
+          <div class="w3-row">
+            <div
+              *ngFor="let prod of listproducts"
+              class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
+            >
+              <div class="w3-padding">
+                <app-product-div [product]="prod"></app-product-div>
+              </div>
+            </div>
+          </div>
+          <div class="w3-center w3-margin-top">
+            <button
+              mat-flat-button
+              routerLink="/main/productos"
+              color="primary"
+              class="section__button"
+            >
+              <span> Ver más</span>
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="Ofertas">
+        <div class="w3-padding w3-margin-top">
+          <div class="w3-row">
+            <div
+              *ngFor="let prod of listproducts"
+              class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom"
+            >
+              <div class="w3-padding">
+                <app-product-div [product]="prod"></app-product-div>
+              </div>
+            </div>
+          </div>
+          <div class="w3-center w3-margin-top">
+            <button
+              mat-flat-button
+              color="primary"
+              routerLink="/main/productos"
+              class="section__button"
+            >
+              <span> Ver más</span>
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
 </div>
+
 <div class="section">
   <div class="w3-padding w3-center">
     <div class="font--primary">
@@ -158,37 +170,37 @@
   </div>
   <div class="section w3-margin-top">
     <ngx-slick-carousel
-          class="carousel"
-          #slickModal="slick-carousel"
-          [config]="slideConfig3"
-        >
-          <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-            <div class="w3-padding">
-              <div class="customer">
-                <div class="customer__image w3-padding">
-                  <img
-                    src="../../../assets/images/profile_customer.png"
-                    class="w3-block"
-                    alt=""
-                  />
-                </div>
-                <div class="customer__content">
-                  <h3 class="customer__title">Marisol Tapia</h3>
-                  <p class="customer__comment">
-                    Lorem ipsum dolor sit amet consectetur adipiscing, elit eros sodales
-                    nostra neque ullamcorper.
-                  </p>
-                  <div class="customer__rating">
-                    <mat-icon>star</mat-icon>
-                    <mat-icon>star</mat-icon>
-                    <mat-icon>star</mat-icon>
-                    <mat-icon>star</mat-icon>
-                    <mat-icon>star_half</mat-icon>
-                  </div>
-                </div>
+      class="carousel"
+      #slickModal="slick-carousel"
+      [config]="slideConfig3"
+    >
+      <div ngxSlickItem *ngFor="let slide of prods" class="slide">
+        <div class="w3-padding">
+          <div class="customer">
+            <div class="customer__image w3-padding">
+              <img
+                src="../../../assets/images/profile_customer.png"
+                class="w3-block"
+                alt=""
+              />
+            </div>
+            <div class="customer__content">
+              <h3 class="customer__title">Marisol Tapia</h3>
+              <p class="customer__comment">
+                Lorem ipsum dolor sit amet consectetur adipiscing, elit eros
+                sodales nostra neque ullamcorper.
+              </p>
+              <div class="customer__rating">
+                <mat-icon>star</mat-icon>
+                <mat-icon>star</mat-icon>
+                <mat-icon>star</mat-icon>
+                <mat-icon>star</mat-icon>
+                <mat-icon>star_half</mat-icon>
               </div>
             </div>
           </div>
-        </ngx-slick-carousel>
+        </div>
+      </div>
+    </ngx-slick-carousel>
   </div>
 </div>
