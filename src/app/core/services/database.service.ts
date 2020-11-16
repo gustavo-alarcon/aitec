@@ -59,7 +59,8 @@ export class DatabaseService {
   public productView;
 
   public total: number = 0;
-  public delivery: number = 6;
+  public delivery = new BehaviorSubject<number>(0);
+  public delivery$ = this.delivery.asObservable();
 
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;

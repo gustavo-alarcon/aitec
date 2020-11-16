@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { DatabaseService } from 'src/app/core/services/database.service';
 
 
 @Component({
@@ -44,7 +45,7 @@ export class PaymentMethodComponent implements OnInit {
     data: [],
   };
 
-  constructor(private fb: FormBuilder, private ng2ImgMax: Ng2ImgMaxService) {}
+  constructor(private fb: FormBuilder, private ng2ImgMax: Ng2ImgMaxService,private dbs: DatabaseService) {}
 
   ngOnInit(): void {
     this.cardForm = this.fb.group({
@@ -60,6 +61,7 @@ export class PaymentMethodComponent implements OnInit {
       name: [null],
       address: [null],
     });
+    
   }
 
   chooseType(type){

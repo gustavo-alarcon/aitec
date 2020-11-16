@@ -3,6 +3,7 @@
   box-sizing: border-box;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   position: relative;
+  cursor: pointer;
   &__star {
     position: absolute;
     top: 0;
@@ -16,19 +17,22 @@
     }
   }
   &__image {
-    width: 90%;
-    margin: auto;
-    margin-bottom: 3em;
+    height: 100%;
+    min-height: 250px;
+    max-height: 250px;
+    object-fit: contain;
+
   }
   &__title {
     font-family: Montserrat;
-    font-weight: bold;
-    font-size: 1.1em;
+    font-size: 1em;
+    height: 3em;
+    overflow: hidden;
     color: #2b2b2b;
   }
   &__descrip {
     font-family: Roboto;
-    font-size: 0.7em;
+    font-size: 0.8em;
     color: #828282;
   }
   &__offer {
@@ -37,12 +41,11 @@
   }
   &__price {
     font-family: Roboto;
-    font-size: 1.1em;
     font-weight: 500;
-    color: #215b90;
-  }
-  &__add {
-    font-family: Roboto;
+    color: var(--primary-color);
+    &--number{
+      font-size: 1.3em;
+    }
   }
   &__discount {
     background-color: #ff8a00;

@@ -1,46 +1,103 @@
-<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-<div class="ms-container w3-section" style="position: relative" *ngIf="product$ | async as product">
+<!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
+<div
+  class="ms-container w3-section"
+  style="position: relative"
+  *ngIf="product$ | async as product"
+>
   <div>
     <button mat-button color="primary" routerLink="/main/productos">
       Volver al listado
-    </button> | Productos  >  {{product.category}}     
+    </button>
+    | Productos > {{ product.category }}
   </div>
   <mat-card class="product">
     <mat-card-content>
-      <div class="w3-row-padding w3-padding">
+      <div class="w3-row w3-padding">
         <div class="w3-col l8 m7">
-          <div class="w3-padding w3-center">
-            <gallery id="mini" imageSize='contain' [loadingStrategy]="'lazy'"
-            [counter]="false" thumbPosition="left"></gallery>
+          <div class="gallery">
+            <div class="gallery__side">
+              <div
+                class="gallery__div border--primary w3-block"
+                [ngClass]="
+                img.ind == selectImage.ind ? 'gallery__div--select' : 'none'
+                "
+                *ngFor="let img of galleryImg"
+              >
+                <img
+                  [src]="img.photoURL"
+                  (click)="changeSelectImage(img)"
+                  class="gallery__div--image"
+                  alt=""
+                />
+              </div>
+            </div>
+            <figure #image class="zoom" (mousemove)="zoom($event)" [style.background-image]="'url('+selectImage.photoURL+')'">
+              <div style="background-color: white;">
+                <img [src]="selectImage.photoURL" class="gallery__image" />
+              </div>
+            </figure>
+           
           </div>
+          <!--gallery id="mini" imageSize='contain' [loadingStrategy]="'lazy'"
+            [counter]="false" thumbPosition="left"></gallery-->
         </div>
         <div class="w3-col l4 m5">
           <div class="ms-flex ms-flex--center">
             <span>100 vendidos</span>
             <span class="ms-fill"></span>
             <button mat-icon-button color="primary">
-              <mat-icon>favorite</mat-icon>
+              <mat-icon>favorite_border</mat-icon>
             </button>
           </div>
-          <h2 class="product__title">{{product.description}}</h2>
-          <div *ngIf="product.promo"class="product__promo ms-flex">
-            <div style="width: fit-content;">Antes <strike>{{product.price}}</strike></div>
-            <div class="product__promo--discount">{{product.promoData.offer}} % Dscto</div>
+          <h2 class="product__title">{{ product.description }}</h2>
+          <div *ngIf="product.promo" class="product__promo ms-flex">
+            <div style="width: fit-content">
+              Antes <strike>{{ product.price }}</strike>
+            </div>
+            <div class="product__promo--discount">
+              {{ product.promoData.offer }} % Dscto
+            </div>
           </div>
           <div class="product__price w3-section">
             <span *ngIf="product.promo">Ahora</span>
             <span class="product__price--number">
-              S/. {{product.promo?product.promoData.price:product.price|number:'.2'}}
+              S/.
+              {{
+                product.promo
+                  ? product.promoData.price
+                  : (product.price | number: ".2")
+              }}
             </span>
           </div>
-          <div class="product__stock">{{product.realStock}} Unidades disponibles</div>
+          <div class="product__stock">
+            {{ product.realStock }} Unidades disponibles
+          </div>
           <div class="w3-section">
             <div>Paga con:</div>
-            <div class="ms-flex w3-section" style="justify-content: space-around;">
-              <img src="../../../assets/images/visa.png" class="mini-img" alt="">
-              <img src="../../../assets/images/mastercad.png" class="mini-img" alt="">
-              <img src="../../../assets/images/visa_electron.png" class="mini-img" alt="">
-              <img src="../../../assets/images/american.png" class="mini-img" alt="">
+            <div
+              class="ms-flex w3-section"
+              style="justify-content: space-around"
+            >
+              <img
+                src="../../../assets/images/visa.png"
+                class="mini-img"
+                alt=""
+              />
+              <img
+                src="../../../assets/images/mastercad.png"
+                class="mini-img"
+                alt=""
+              />
+              <img
+                src="../../../assets/images/visa_electron.png"
+                class="mini-img"
+                alt=""
+              />
+              <img
+                src="../../../assets/images/american.png"
+                class="mini-img"
+                alt=""
+              />
             </div>
           </div>
           <p>Garantia: <strong>1 año</strong></p>
@@ -50,24 +107,20 @@
         </div>
       </div>
       <div class="w3-section w3-padding">
-        <p style="font-size: 1.2em;">Marca: <strong>{{product.brand}}</strong></p>
+        <p style="font-size: 1.2em">
+          Marca: <strong>{{ product.brand }}</strong>
+        </p>
         <div class="w3-section">
-          <h4 class="product__subtitle">
-            Descripción
-          </h4>
-          <p>{{product.additionalDescription}}</p>
+          <h4 class="product__subtitle">Descripción</h4>
+          <p>{{ product.additionalDescription }}</p>
         </div>
         <div class="w3-section">
-          <h4 class="product__subtitle">
-            Caracteristicas
-          </h4>
-          <div *ngFor="let caract of product.caracteristicas">{{caract}}</div>
+          <h4 class="product__subtitle">Caracteristicas</h4>
+          <div *ngFor="let caract of product.caracteristicas">{{ caract }}</div>
         </div>
         <div class="w3-section">
-          <h4 class="product__subtitle">
-            Calificaciones 
-          </h4>
-          <div style="color: #f2c94c;">
+          <h4 class="product__subtitle">Calificaciones</h4>
+          <div style="color: #f2c94c">
             <mat-icon>star</mat-icon>
             <mat-icon>star</mat-icon>
             <mat-icon>star</mat-icon>
@@ -75,39 +128,34 @@
             <mat-icon>star_half</mat-icon>
           </div>
         </div>
-        
       </div>
     </mat-card-content>
   </mat-card>
   <div class="w3-section">
-    <h4 class="product__subtitle">
-      Productos similares
-    </h4>
+    <h4 class="product__subtitle">Productos similares</h4>
     <ngx-slick-carousel
-          class="carousel"
-          #slickModal="slick-carousel"
-          [config]="slideConfig2"
-        >
-          <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-            <div class="w3-padding">
-              <app-product-div [offer]="true"></app-product-div>
-            </div>
-          </div>
-        </ngx-slick-carousel>
+      class="carousel"
+      #slickModal="slick-carousel"
+      [config]="slideConfig2"
+    >
+      <div ngxSlickItem *ngFor="let slide of prods" class="slide">
+        <div class="w3-padding">
+          <app-product-div [product]="slide"></app-product-div>
+        </div>
+      </div>
+    </ngx-slick-carousel>
   </div>
   <div class="w3-section">
-    <h4 class="product__subtitle">
-      Consultas sobre el producto 
-    </h4>
+    <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
     <div>
-      <mat-form-field class="w3-margin-right w3-small" style="width: 70%;"  appearance="outline">
+      <mat-form-field
+        class="w3-margin-right w3-small"
+        style="width: 70%"
+        appearance="outline"
+      >
         <mat-label>Escribe tu pregunta</mat-label>
-        <input
-          autocomplete="off"
-          matInput
-          placeholder="Escribe tu pregunta"
-        />
+        <input autocomplete="off" matInput placeholder="Escribe tu pregunta" />
       </mat-form-field>
       <button mat-raised-button color="primary">Preguntar</button>
     </div>

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaginationInstance } from 'ngx-pagination';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
   selector: 'app-store',
@@ -8,18 +10,22 @@ import { PaginationInstance } from 'ngx-pagination';
 })
 export class StoreComponent implements OnInit {
 
-  prods:Array<number> = [1,2,3,4,5,6,7,8,9,10,11,12,13, 14,15,16]
-
   config: PaginationInstance = {
     id: "custom",
-    itemsPerPage: 12,
+    itemsPerPage: 9,
     currentPage: 1,
   };
 
+  products:Array<any>
+
   p: number = 1;
-  constructor() { }
+  constructor(
+    private dbs: DatabaseService,
+    public auth: AuthService
+  ) { }
 
   ngOnInit(): void {
+    this.products = this.dbs.products
   }
 
 }
