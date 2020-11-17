@@ -5,10 +5,22 @@
   *ngIf="product$ | async as product"
 >
   <div>
-    <button mat-button color="primary" routerLink="/main/productos">
-      Volver al listado
-    </button>
-    | Productos > {{ product.category }}
+    <a mat-flat-button routerLink="/main">Inicio</a> >
+    <a mat-flat-button routerLink="/main/productos">Productos</a>
+    <span>
+      >
+      <a mat-flat-button (click)="navigate(product.category, null)">{{
+        product.category
+      }}</a></span
+    >
+    <span *ngIf="searchSubCategory">
+      >
+      <a
+        mat-flat-button
+        (click)="navigate(product.category, product.subcategory)"
+        >{{ product.subcategory }}</a
+      ></span
+    >
   </div>
   <mat-card class="product">
     <mat-card-content>
@@ -19,7 +31,7 @@
               <div
                 class="gallery__div border--primary w3-block"
                 [ngClass]="
-                img.ind == selectImage.ind ? 'gallery__div--select' : 'none'
+                  img.ind == selectImage.ind ? 'gallery__div--select' : 'none'
                 "
                 *ngFor="let img of galleryImg"
               >
@@ -31,12 +43,16 @@
                 />
               </div>
             </div>
-            <figure #image class="zoom" (mousemove)="zoom($event)" [style.background-image]="'url('+selectImage.photoURL+')'">
-              <div style="background-color: white;">
+            <figure
+              #image
+              class="zoom"
+              (mousemove)="zoom($event)"
+              [style.background-image]="'url(' + selectImage.photoURL + ')'"
+            >
+              <div style="background-color: white">
                 <img [src]="selectImage.photoURL" class="gallery__image" />
               </div>
             </figure>
-           
           </div>
           <!--gallery id="mini" imageSize='contain' [loadingStrategy]="'lazy'"
             [counter]="false" thumbPosition="left"></gallery-->

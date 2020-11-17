@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -50,7 +50,8 @@ export class ProductDetailComponent implements OnInit {
     public auth: AuthService,
     private route: ActivatedRoute,
     private gallery: Gallery,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -90,5 +91,16 @@ export class ProductDetailComponent implements OnInit {
     let x = offsetX/zoomer.offsetWidth*100
     let y = offsetY/zoomer.offsetHeight*100
     this.renderer.setStyle(this.image.nativeElement,'background-position', x + '% ' + y + '%')
+  }
+
+  navigate(category, subcategory) {
+    if(subcategory){
+      this.router.navigate(['/main/productos', category], {
+        queryParams: { sub: subcategory },
+      });
+    }else{
+      this.router.navigate(['/main/productos', category]);
+    }
+    
   }
 }

@@ -13,6 +13,13 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./store.component.scss'],
 })
 export class StoreComponent implements OnInit {
+  categories:Array<any> = [
+    {category:'Promociones'},
+    {category:'PCs y laptops', subcategories:['Laptops','Accesorios']},
+    {category:'Computo', subcategories:['Accesorios y Cables','Procesadores']},
+    {category:'Tablets y smartphones', subcategories:['Tablets','Smartphones']},
+    {category:'Gamer', subcategories:['Accesorios','Audio','Microfono','Sillas Gamer','Mouse']},
+  ]
   config: PaginationInstance = {
     id: 'custom',
     itemsPerPage: 9,
@@ -46,6 +53,9 @@ export class StoreComponent implements OnInit {
       map(([word, id, param, frag]) => {
         console.log(param);
         console.log(id);
+        let promo = id.id == 'Promociones'
+        console.log(promo);
+        
         if (param.sub) {
           this.searchSubCategory = param.sub;
         }else{
@@ -54,12 +64,17 @@ export class StoreComponent implements OnInit {
         if (id.id) {
           this.searchCategory = id.id;
         }
-        return this.dbs.products
+
+        if(promo){
+          return this.dbs.products.filter((el) => el.promo)
+        }else{
+          return this.dbs.products
           .filter((el) =>
             el.description.toLowerCase().includes(word.toLowerCase())
           )
           .filter((el) => (id.id ? el.category == id.id : true))
           .filter((el) => (param.sub ? el.subcategory == param.sub : true))
+          
           .filter((el) =>
             frag
               ? el['description'].toLowerCase().includes(frag) ||
@@ -68,6 +83,8 @@ export class StoreComponent implements OnInit {
                 el['subcategory'].toLowerCase().includes(frag)
               : true
           );
+        }
+        
       }),
       tap((res) => {
         this.products = res;
