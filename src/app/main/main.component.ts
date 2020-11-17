@@ -1,24 +1,14 @@
-import { Observable, of } from 'rxjs';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { User } from '../core/models/user.model';
 import { AuthService } from '../core/services/auth.service';
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { map, shareReplay, filter, startWith, switchMap } from 'rxjs/operators';
 import { DatabaseService } from '../core/services/database.service';
 import { MatDialog } from '@angular/material/dialog';
 import { RateDialogComponent } from './rate-dialog/rate-dialog.component';
 import { Sale } from '../core/models/sale.model';
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  Renderer2,
-  ViewChild,
-} from '@angular/core';
-import { DatabaseService } from '../core/services/database.service';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main',
@@ -27,11 +17,6 @@ import { filter, map, startWith } from 'rxjs/operators';
 })
 export class MainComponent implements OnInit {
   user$: Observable<User>
-  constructor(
-    private auth: AuthService,
-    private dbs: DatabaseService,
-    private dialog: MatDialog
-  ) { }
   openedMenu:boolean = false
   firstOpening: boolean = false;
 
@@ -46,7 +31,9 @@ export class MainComponent implements OnInit {
     private auth: AuthService,
     private router: Router,
     public dbs: DatabaseService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private dialog: MatDialog
+
   ) {}
 
   ngOnInit(): void {
