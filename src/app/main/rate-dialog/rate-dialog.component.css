@@ -1,13 +1,10 @@
 
-p{
-  font-family: Montserrat;
+span{
+  font-family: Roboto, Montserrat;
   font-style: normal;
-  font-weight: normal;
-  font-size: 14px;
-  line-height: 17px;
+  font-weight: 500;
   letter-spacing: 0.05em;
-  font-feature-settings: 'pnum' on, 'lnum' on;
-  color: #828282;
+  color: #2B2B2B;
 }
 .rate {
     float: left;

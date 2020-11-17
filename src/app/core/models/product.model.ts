@@ -25,6 +25,8 @@ export interface Product {
   createdBy: User;
   editedAt: Date;
   editedBy: User;
+
+  purchaseNumber?: number;  //Número total de compras
 }
 
 interface PromoData {

@@ -30,6 +30,8 @@ export class MainComponent implements OnInit {
           if(user){
             return this.dbs.getUserFinishedSales(user).pipe(
               map(sales => {
+                console.log(sales);
+                console.log(sales[0]);
                 if (sales.length) {
                   let dialogRef = this.dialog.open(RateDialogComponent, {
                     width: '307px',
