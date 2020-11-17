@@ -1,0 +1,90 @@
+<div mat-dialog-title>
+  <div style="display:flex; flex-direction: row; flex-wrap: nowrap; 
+      justify-content: space-between; align-items: center;">
+    <h2 class="ms-font-rubik ms-color-2b title-dialog">
+      Ayudanos a mejorar
+    </h2>
+    <div>
+      <button mat-button type="button" (click)="onCancelForm()">
+        <mat-icon>
+          close
+        </mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <mat-divider></mat-divider>
+</div>
+<mat-dialog-content>
+  <span class="w3-margin-bottom" style="color:#555555">Por favor danos tu calificación: </span>
+  <form [formGroup]="formGroup" 
+    style="display: flex; flex-direction: column; align-items: center;">
+    <div style="display: flex; flex-direction: row; justify-content: space-between; 
+      align-items: center; width: 100%">
+      <div><span>Producto</span></div>
+      <div class="rate">
+        <input formControlName="productRate"
+          type="radio" id="productStar5" value="5" /><label for="productStar5" title="text">5 stars</label>
+        <input formControlName="productRate"
+          type="radio" id="productStar4" value="4" /><label for="productStar4" title="text">4 stars</label>
+        <input formControlName="productRate"
+          type="radio" id="productStar3" value="3" /><label for="productStar3" title="text">3 stars</label>
+        <input formControlName="productRate"
+          type="radio" id="productStar2" value="2" /><label for="productStar2" title="text">2 stars</label>
+        <input formControlName="productRate"
+          type="radio" id="productStar1" value="1" /><label for="productStar1" title="text">1 star</label>
+      </div>
+    </div>
+    
+    <div style="display: flex; flex-direction: row; justify-content: space-between; 
+      align-items: center; width: 100%">
+      <div><span>Servicio</span></div>
+      <div class="rate">
+        <input formControlName="serviceRate"
+          type="radio" id="serviceStar5" value="5" /><label for="serviceStar5" title="text">5 stars</label>
+        <input formControlName="serviceRate"
+          type="radio" id="serviceStar4" value="4" /><label for="serviceStar4" title="text">4 stars</label>
+        <input formControlName="serviceRate"
+          type="radio" id="serviceStar3" value="3" /><label for="serviceStar3" title="text">3 stars</label>
+        <input formControlName="serviceRate"
+          type="radio" id="serviceStar2" value="2" /><label for="serviceStar2" title="text">2 stars</label>
+        <input formControlName="serviceRate"
+          type="radio" id="serviceStar1" value="1" /><label for="serviceStar1" title="text">1 star</label>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: row; justify-content: space-between; 
+      align-items: center; width: 100%">
+      <div><span>Entrega</span></div>
+      <div class="rate">
+        <input formControlName="deliveryRate"
+          type="radio" id="deliveryStar5" value="5" /><label for="deliveryStar5" title="text">5 stars</label>
+        <input formControlName="deliveryRate"
+          type="radio" id="deliveryStar4" value="4" /><label for="deliveryStar4" title="text">4 stars</label>
+        <input formControlName="deliveryRate"
+          type="radio" id="deliveryStar3" value="3" /><label for="deliveryStar3" title="text">3 stars</label>
+        <input formControlName="deliveryRate"
+          type="radio" id="deliveryStar2" value="2" /><label for="deliveryStar2" title="text">2 stars</label>
+        <input formControlName="deliveryRate"
+          type="radio" id="deliveryStar1" value="1" /><label for="deliveryStar1" title="text">1 star</label>
+      </div>
+    </div>
+    
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Comentarios.</mat-label>
+      <textarea formControlName="observation" matInput></textarea>
+      <!-- <mat-hint>Opcional</mat-hint> -->
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="center">
+  <button color="primary"
+    mat-raised-button (click)="onSubmitForm()" type="button"
+      style="width:100%; margin-bottom: 8px;"
+      [disabled]="formGroup.status != 'VALID'"><b>Enviar mi calificación</b></button>
+</mat-dialog-actions>
+
+
+

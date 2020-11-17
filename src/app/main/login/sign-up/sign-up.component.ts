@@ -18,7 +18,7 @@ export class SignUpComponent implements OnInit {
   getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
 
   providerType:["email", "google", "facebook"]= ["email", "google", "facebook"];
-  personalInfoType:["natural", "juridica"] = ["natural", "juridica"]
+  personalInfoType:["natural", "jurídica"] = ["natural", "jurídica"]
 
   providerTypeParam: string = null;
   emailParam: string = null;
@@ -56,9 +56,7 @@ export class SignUpComponent implements OnInit {
     console.log(this.personalInfoForm)
   }
 
-  termsAndConditions(){
-    this.dialog.open(TermsComponent)
-  }
+  
   
   initForms(){
     //Por definir providerForm
@@ -81,27 +79,31 @@ export class SignUpComponent implements OnInit {
       type: this.fb.control(
         this.personalInfoType[0], [Validators.required]
       ),
+      //Person and Business
       name: this.fb.control(
         null, Validators.required
       ),
+      phone: this.fb.control(
+        null, [Validators.required]
+      ),
+      //Person
       lastName: this.fb.control(
         null, Validators.required
       ),
       dni: this.fb.control(
         null, [Validators.required, Validators.maxLength(8), Validators.minLength(8)]
       ),
-      phone: this.fb.control(
-        null, [Validators.required]
-      ),
-      business: this.fb.control(
-        {value: null, disabled: true}, Validators.required
-      ),
+      //Business
       ruc: this.fb.control(
         {value: null, disabled: true}, Validators.required
       ),
       address: this.fb.control(
         {value: null, disabled: true}, Validators.required
       ),
+      contactPerson: this.fb.control(
+        {value: null, disabled: true}, Validators.required
+      ),
+      
     })
     this.feedForm = this.fb.control(
       false
@@ -109,6 +111,10 @@ export class SignUpComponent implements OnInit {
     this.conditionForm = this.fb.control(
       false, Validators.requiredTrue
     )
+  }
+
+  termsAndConditions(){
+    this.dialog.open(TermsComponent)
   }
 
   initObservables(){
@@ -132,14 +138,20 @@ export class SignUpComponent implements OnInit {
       startWith(this.personalInfoForm.get("type").value),
       map((res: "natural"| "juridica") => {
         if(res == "natural"){
-          this.personalInfoForm.get("business").disable()
+          this.personalInfoForm.get("lastName").enable()
+          this.personalInfoForm.get("dni").enable()
+
           this.personalInfoForm.get("ruc").disable()
           this.personalInfoForm.get("address").disable()
+          this.personalInfoForm.get("contactPerson").disable()
           return false
         } else {
-          this.personalInfoForm.get("business").enable()
+          this.personalInfoForm.get("lastName").disable()
+          this.personalInfoForm.get("dni").disable()
+
           this.personalInfoForm.get("ruc").enable()
           this.personalInfoForm.get("address").enable()
+          this.personalInfoForm.get("contactPerson").enable()
           return true
         }
       })
@@ -176,7 +188,7 @@ export class SignUpComponent implements OnInit {
     this.emailForm.markAsPending();
     let user = {
       email: this.emailForm.get("email").value,
-      ...this.personalInfoForm.value,
+      personData: this.personalInfoForm.value,
       feed: this.feedForm.value,
     };
 

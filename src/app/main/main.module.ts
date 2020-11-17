@@ -10,10 +10,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import {MatBadgeModule} from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { RateDialogComponent } from './rate-dialog/rate-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
   declarations: [
     MainComponent,
+    RateDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -22,7 +28,14 @@ import { MatDividerModule } from '@angular/material/divider';
     MatIconModule,
     MatButtonModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    ReactiveFormsModule,
+    MatInputModule
+  ],
+  entryComponents: [
+    RateDialogComponent,
   ]
 })
 export class MainModule { }

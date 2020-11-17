@@ -847,6 +847,15 @@ export class DatabaseService {
     return of(batch);
   }
 
+  onSaveRate(saleid: string, sale: Sale["rateData"]): Promise<void> {
+    let saleRef: DocumentReference = this.afs.firestore
+      .collection(this.salesRef)
+      .doc(saleid);
+    let rateData: Sale["rateData"] = sale;
+    
+    return saleRef.update({rateData});
+  }
+
 
   onUpdateSaleVoucher(
     saleId: string,
@@ -879,7 +888,7 @@ export class DatabaseService {
     return batch;
   }
 
-  onUpdateStock(
+  /*onUpdateStock(
     requestedProducts: Sale["requestedProducts"],
     batch: firebase.default.firestore.WriteBatch,
     decrease: boolean
@@ -912,9 +921,9 @@ export class DatabaseService {
     });
 
     return batch;
-  }
+  }*/
 
-  onDoubleUpdateStock(requestedProductsToDecrease: Sale['requestedProducts'],
+  /*onDoubleUpdateStock(requestedProductsToDecrease: Sale['requestedProducts'],
     requestedProductsToIncrease: Sale['requestedProducts'],
     batch: firebase.default.firestore.WriteBatch){
       let requestedProductRef: DocumentReference;
@@ -962,7 +971,7 @@ export class DatabaseService {
       })
       console.log(productList);
       return batch
-  }
+  }*/
 
   //configuracion
   getDistricts(): Observable<any> {
@@ -1258,5 +1267,16 @@ export class DatabaseService {
       .valueChanges();
   }
 
+  getUserFinishedSales(user: User): Observable<Sale[]> {
+    return this.afs.collection<Sale>(this.salesRef, 
+      ref => ref.where("user.uid", "==", user.uid)
+        .where("status","==", (new saleStatusOptions()).finished)
+        .orderBy("createdAt", "desc").limit(5))
+      .get().pipe(map((snap) => {
+        return snap.docs
+          .map(el => <Sale>el.data())
+          .filter(el => (((el.rateData === undefined))))
+      }));
+  }
   
 }

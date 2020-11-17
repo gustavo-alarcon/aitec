@@ -7,17 +7,24 @@ export interface User {
     coord: { lat: number; lng: number };
   };
 
-  type: string;
+  personData: naturalPerson | businessPerson;
+
+  lastLogin?: Date;
+  lastBrowser?: string[]
+}
+interface naturalPerson {
+  type:"natural";
   name: string;
   lastName: string;
   dni: number;
   phone: string;
-  business: string;
+}
+
+interface businessPerson {
+  type:"jurídica";
+  name: string;         //Social reason
   ruc: number;
   address: string;
-  feed: boolean;
-
-
-  lastLogin?: Date;
-  lastBrowser?: string[]
+  phone: string;
+  contactPerson: string;
 }
