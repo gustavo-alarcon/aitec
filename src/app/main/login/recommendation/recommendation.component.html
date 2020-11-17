@@ -1,0 +1,33 @@
+<div class="recomContainer">
+  <p style="color: #1A4063; font-weight: bold; font-size:large; padding-left: 16px">★ RECOMENDADOS</p>
+  <div class="cardsContainer">
+    <div *ngFor="let raw of (products$ | async)" 
+      class="cardContainer">
+      <div class="cardContainer__discount" *ngIf="raw?.promo">
+        <div class="cardContainer__discount--number">
+          {{(raw.price - raw.promoData.promoPrice)/raw.price * 100 |number:'1.0-0'}}
+        </div>
+        <div class="cardContainer__discount--percent">
+          <div>%</div>
+          <div>OFF</div>
+        </div>
+      </div>
+      <div *ngIf="raw.photoURL; else defaultPicture">
+        <div class="reveal">
+          <img [defaultImage]="defaultImage" [lazyLoad]="raw.photoURL" [offset]="100">
+        </div>
+      </div>
+      <ng-template #defaultPicture>
+        <div class="reveal">
+          <img src="../../../assets/images/no-image.png" class="w3-card-4">
+        </div>
+      </ng-template>
+      <div>
+        <p class="titleRecom">{{raw.description}}</p>
+        <p class="descriptionRecom">{{raw.additionalDescription}}</p>
+        <p class="priceNow">Ahora   {{(raw.promo ? raw.promoData.promoPrice : raw.price) |currency:"S/."}}</p>
+        <p class="priceBefore" *ngIf="raw.promo">Antes  <span>{{(raw.price) |currency:"S/."}}</span></p>
+      </div>
+    </div>
+  </div>
+</div>

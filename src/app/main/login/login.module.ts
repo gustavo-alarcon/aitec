@@ -16,6 +16,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TermsComponent } from '../terms/terms.component';
+import { RecommendationComponent } from './recommendation/recommendation.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { TermsComponent } from '../terms/terms.component';
     LoginComponent,
     SignInComponent,
     SignUpComponent,
-    TermsComponent
+    TermsComponent,
+    RecommendationComponent
   ],
   imports: [
     CommonModule,
