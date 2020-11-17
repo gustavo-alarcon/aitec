@@ -74,6 +74,7 @@
         <mat-option
           *ngFor="let option of filteredDistrito$ | async"
           [value]="option"
+          (click)="selectDelivery(option)"
         >
           {{ option.distrito | titlecase }}
         </mat-option>

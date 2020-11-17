@@ -1,8 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { StoreRoutingModule } from './store-routing.module';
-import { StoreComponent } from './store.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -13,15 +10,18 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgxPaginationModule } from 'ngx-pagination';
 import { ProductDivModule } from '../product-div/product-div.module';
-import { MatExpansionModule } from '@angular/material/expansion';
-import {MatListModule} from '@angular/material/list';
+import { GalleryModule } from 'ng-gallery';
+import { SlickCarouselModule } from 'ngx-slick-carousel';
+import { ProductDetailRoutingModule } from './product-detail-routing.module';
+import { ProductDetailComponent } from './product-detail.component';
+import { QuantityDivModule } from '../quantity-div/quantity-div.module';
+
 @NgModule({
-  declarations: [StoreComponent],
+  declarations: [ProductDetailComponent],
   imports: [
     CommonModule,
-    StoreRoutingModule,
+    ProductDetailRoutingModule,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
@@ -34,9 +34,9 @@ import {MatListModule} from '@angular/material/list';
     ReactiveFormsModule,
     MatProgressBarModule,
     ProductDivModule,
-    NgxPaginationModule,
-    MatExpansionModule,
-    MatListModule
+    GalleryModule,
+    SlickCarouselModule,
+    QuantityDivModule
   ]
 })
-export class StoreModule { }
+export class ProductDetailModule { }

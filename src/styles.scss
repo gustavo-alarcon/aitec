@@ -118,7 +118,7 @@ a {
 
 :root {
   // --primary-color: #1c31ea;
-  --primary-color: #3483FA;
+  --primary-color:#1c31ea;
   --accent-color: #ff8f00;
   --warn-color: #f44336;
   --forth-color: #f44336;
@@ -372,12 +372,6 @@ img.ng-lazyloaded {
   font-family: "Raleway", sans-serif;
 }
 
-/*panel*/
-.mat-expansion-panel-header-title {
-  font-family: Poppins;
-  display: flex;
-  align-items: center;
-}
 
 .mat-expansion-panel-body {
   font-family: "Raleway", sans-serif;
@@ -419,7 +413,7 @@ img.ng-lazyloaded {
 }
 
 .ticket__total {
-  background: var(--primary-color);
+  background: #FF8A00;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 5px;
   font-size: 1.5em;
@@ -484,7 +478,7 @@ img.ng-lazyloaded {
 
 .ms-table__th,
 .ms-table__td {
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .ms-table__td {
@@ -588,6 +582,12 @@ img.ng-lazyloaded {
     width: 970px;
   }
 }
+@media (min-width: 1200px){
+  .ms-container {
+    width: 1200px;
+}
+}
+
 
 .ms-content{
   max-width:1400px;
@@ -677,4 +677,19 @@ img.ng-lazyloaded {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #003e6e;
+}
+
+
+
+.slide.slick-list:focus {
+  outline: none!important;
+}
+
+.slick-arrow.slick-prev, .slick-arrow.slick-next {
+  height: 40px;
+    width: 40px;
+}
+.slick-arrow.slick-prev:before, .slick-arrow.slick-next:before{
+  color: var(--primary-color) !important;
+  font-size: 30px;
 }

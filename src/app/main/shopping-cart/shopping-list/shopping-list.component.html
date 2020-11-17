@@ -1,81 +1,138 @@
-<table mat-table [dataSource]="dataSource" matSort class="ms-table">
-  <ng-container class="w3-center" matColumnDef="index">
-    <th *matHeaderCellDef class="w3-center ms-table__th">
-      Nº
-    </th>
-    <td mat-cell *matCellDef="let element; let i = index" class="ms-table__td">
-      {{1 + i }}
-    </td>
-  </ng-container>
-  <ng-container class="w3-center" matColumnDef="image">
-    <th *matHeaderCellDef class="w3-center ms-table__th">
-      Imagen Referencial
-    </th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td" style="padding:10px">
-      <img
+<div *ngIf="dataSource.data.length>0;else nothing">
+  <table mat-table [dataSource]="dataSource" matSort class="ms-table">
+    <ng-container class="w3-center" matColumnDef="index">
+      <th *matHeaderCellDef class="w3-center ms-table__th">Nº</th>
+      <td
+        mat-cell
+        *matCellDef="let element; let i = index"
+        class="ms-table__td"
+      >
+        {{ 1 + i }}
+      </td>
+    </ng-container>
+    <ng-container class="w3-center" matColumnDef="image">
+      <th *matHeaderCellDef class="w3-center ms-table__th">
+        Imagen Referencial
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td"
+        style="padding: 10px"
+      >
+        <img
           [src]="element['product']['photoURL']"
           class="border--primary"
-          style="object-fit: cover; width: 75px; height: 75px; border:1px solid"
+          style="
+            object-fit: contain;
+            width: 75px;
+            height: 75px;
+            border: 1px solid;
+          "
           alt=""
         />
-    </td>
-  </ng-container>
-  <ng-container class="w3-center" matColumnDef="product">
-    <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 35%">
-      Productos
-    </th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td" style="padding: 0px 10px">
-      {{ element["product"]["description"] | titlecase }}
-      
-    </td>
-  </ng-container>
+      </td>
+    </ng-container>
+    <ng-container class="w3-center" matColumnDef="product">
+      <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 200px">
+        Productos
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td"
+        style="padding: 0px 10px"
+      >
+        <a (click)="navigateProduct(element.product.sku)">{{
+          element["product"]["description"] | titlecase
+        }}</a>
+      </td>
+    </ng-container>
 
-  <ng-container class="w3-center" matColumnDef="sku">
-    <th *matHeaderCellDef class="w3-center ms-table__th">
-      SKU
-    </th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="padding: 0px 10px">
-      {{ element["product"]["sku"] }}
-    </td>
-  </ng-container>
+    <ng-container class="w3-center" matColumnDef="sku">
+      <th *matHeaderCellDef class="w3-center ms-table__th">SKU</th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td w3-center"
+        style="padding: 0px 10px"
+      >
+        {{ element["product"]["sku"] }}
+      </td>
+    </ng-container>
 
-  <ng-container class="w3-center" matColumnDef="unit">
-    <th *matHeaderCellDef class="w3-center ms-table__th">Precio Unitario</th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td w3-right-align" style="padding: 0px 10px">
-      S/.{{ element["product"]["price"] | number: ".2" }}
-    </td>
-  </ng-container>
+    <ng-container class="w3-center" matColumnDef="unit">
+      <th *matHeaderCellDef class="w3-center ms-table__th">Precio Unitario</th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td w3-right-align"
+        style="padding: 0px 10px"
+      >
+        S/.{{ getPrice(element) | number: ".2" }}
+      </td>
+    </ng-container>
 
-  <ng-container class="w3-center" matColumnDef="quantity">
-    <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 20%">
-      Cantidad
-    </th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="padding: 0px 10px">
-      
-    </td>
-  </ng-container>
-  <ng-container class="w3-center" matColumnDef="subtotal">
-    <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 10%">
-      Subtotal
-    </th>
-    <td mat-cell *matCellDef="let element" class="ms-table__td w3-right-align" style="padding: 0px 10px">
-      S/.{{ element.quantity * element.product.price | number: ".2" }}
-    </td>
-  </ng-container>
-  <ng-container class="w3-center" matColumnDef="delete" sticky>
-    <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center ms-table__th">
-      Acciones
-    </th>
-    <td
-      mat-cell
-      *matCellDef="let element; let ind = index"
-      class="ms-table__td w3-center"
-    >
-      <button mat-button color="warn">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </td>
-  </ng-container>
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-</table>
+    <ng-container class="w3-center" matColumnDef="quantity">
+      <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 200px">
+        Cantidad
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td w3-center"
+        style="padding: 0px 10px; width: 200px"
+      >
+        <app-quantity-div
+          [product]="element['product']"
+          size="sm"
+        ></app-quantity-div>
+      </td>
+    </ng-container>
+    <ng-container class="w3-center" matColumnDef="subtotal">
+      <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 10%">
+        Subtotal
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let element"
+        class="ms-table__td w3-right-align"
+        style="padding: 0px 10px"
+      >
+        S/.{{ element.quantity * getPrice(element) | number: ".2" }}
+      </td>
+    </ng-container>
+    <ng-container class="w3-center" matColumnDef="delete" sticky>
+      <th
+        *matHeaderCellDef
+        style="padding-left: 0.5em"
+        class="w3-center ms-table__th"
+      >
+        Acciones
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let element; let ind = index"
+        class="ms-table__td w3-center"
+      >
+        <button mat-button color="warn" (click)="delete(ind)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+  <mat-paginator
+    #productsPaginator
+    style="border-radius: 0px 0px 10px 10px"
+    [pageSizeOptions]="[5, 10, 20]"
+    showFirstLastButtons
+  ></mat-paginator>
+</div>
+<ng-template #nothing>
+  <mat-card>
+    <div class="w3-center">No hay elementos añadidos</div>
+  </mat-card>
+  
+</ng-template>
