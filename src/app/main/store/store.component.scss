@@ -6,9 +6,7 @@
   margin: auto;
 }
 .categories {
-  position: absolute;
-  background-color: white;
-  width: 100%;
+  position: relative;
   &__list {
     margin-bottom: 0;
     padding-inline-start: 0;
@@ -58,4 +56,66 @@
     color: var(--primary);
     padding: 10px;
   }
+}
+
+
+.categories__item .megadrop {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  list-style: none;
+  top: 0px;
+  left: 220px;
+  width: 800px;
+  min-height: 100%;
+  text-align: left;
+  margin-top:30px;
+  background-color: white;
+  padding: 0;
+  z-index: 99;
+  overflow: hidden;
+  border: 1px solid black;
+}
+.categories__item:hover .megadrop {
+  opacity: 1;
+  visibility: visible;
+  margin-top: 0px;
+}
+
+.filtro {
+  &__title {
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+
+  &__panel {
+    box-shadow: none;
+  }
+
+  &__panel .mat-expansion-panel-header {
+    padding: 0px 10px 0px 0px;
+    border-bottom: 1px solid #c4c4c4;
+    border-radius: 0;
+  }
+
+  &__panel .mat-expansion-panel-header:hover {
+    background-color: transparent;
+  }
+
+  &__scroll {
+    max-height: 28em;
+    overflow: auto;
+  }
+}
+
+::ng-deep .filtro__panel .mat-expansion-panel-body {
+  padding: 0 0 0 10px;
+}
+
+.category-button {
+  line-height: 36px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
 }

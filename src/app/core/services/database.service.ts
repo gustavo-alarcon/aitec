@@ -69,7 +69,7 @@ export class DatabaseService {
     {
       additionalDescription: 'Laptop Asus Vivobook 15 F512da Ryzen5 8gbram 512gbssd Vega 8',
       alertMinimum: 0,
-      category: "PC's y laptops",
+      category: "PCs y laptops",
       subcategory:'Laptops',
       brand:'Asus',
       caracteristicas:['Número de modelo: F512DA-RS51','Tipo de memoria RAM DDR4','Tamaño de la pantalla 15.6 "','Velocidad de la memoria RAM 2400 MHz','Puertos de video HDMI','Tipo de batería Polímero de litio'],
@@ -198,7 +198,7 @@ export class DatabaseService {
     },
     {
       additionalDescription: 'NO COMPRE SOPORTES DE PLÁSTICO QUE PONEN EN RIESGO SU LAPTOP, COMPRE DE ALUMINIO QUE ES LUJOSO, LIVIANO, FUERTE Y DURADERO, NO SE OXIDA NI RAJA O DETERIORA. NUESTRO PRODUCTO LE DURARÁ MUCHOS AÑOS. Compre el original de aluminio grueso y estructura solida. No imitaciones de metal pintado que se despinta y oxida.',
-      category: "PC's y laptops",
+      category: "PCs y laptops",
       subcategory:'Accesorios',
       brand:'Ivoler',
       caracteristicas:['Modelo: Ivoler Business','Color: Plateado','Tipo de soporte Portátil Plegable', 'Materiales Aluminio Aeroespacial', 'Tamaño máximo soportado 17 "'],

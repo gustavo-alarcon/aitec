@@ -1,111 +1,97 @@
-<div class="store__container">
+<div class="store__container w3-section">
+  <div class="ms-flex ms-flex--center" style="justify-content: space-between">
+    <div>
+      <a routerLink="/main">Inicio</a> > 
+      <a routerLink="/main/productos">Productos</a>
+      <span *ngIf="searchCategory">
+         > <a [routerLink]="['/main/productos',searchCategory]">{{searchCategory}}</a></span>
+         <span *ngIf="searchSubCategory">
+          > <a (click)="navigate(searchCategory,searchSubCategory)">{{searchSubCategory}}</a></span>
+    </div>
+
+    <mat-form-field appearance="outline" class="store__search">
+      <mat-label>Busca en los resultados</mat-label>
+      <input
+        matInput
+        placeholder="Busca en los resultados"
+        autocomplete="off"
+        [formControl]="searchForm"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
   <div class="w3-row-padding ms-row">
     <div class="w3-col l3 m3 w3-hide-small w3-hide-medium">
-      <div class="categories__nav">
-        <ul class="categories__list">
-          <li class="categories__item">
-            <div>Promociones</div>
-          </li>
-          <li class="categories__item">
-            <div>Destacados</div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Computo</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Imagen/Impresion</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Tablets y smartphone</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Redes y seguridad</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Software</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Accesorios y perifericos</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Gadgets</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>PC´s y laptops</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Gamer</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Adaptadores y cables</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-          <li class="categories__item">
-            <div class="ms-flex ms-flex--center">
-              <div>Inalambrico</div>
-              <span class="ms-fill"></span>
-              <mat-icon>keyboard_arrow_right</mat-icon>
-            </div>
-          </li>
-        </ul>
+      <div style="padding: 8px 0">
+        <mat-expansion-panel class="filtro__panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title (click)="navigateCategory('PCs y laptops')"> PC's y laptops </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-selection-list #shoes [multiple]="false">
+            <mat-list-option (click)="navigate('PCs y laptops','Laptops')">
+              Laptops
+            </mat-list-option>
+            <mat-list-option (click)="navigate('PCs y laptops','Accesorios')">
+              Accesorios
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-expansion-panel>
+        <mat-expansion-panel class="filtro__panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title (click)="navigateCategory('Computo')"> Computo </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-selection-list #shoes [multiple]="false">
+            <mat-list-option (click)="navigate('Computo','Accesorios y cables')">
+              Accesorios y cables
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Computo','Procesadores')">
+              Procesadores
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-expansion-panel>
+        <mat-expansion-panel class="filtro__panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title (click)="navigateCategory('Tablets y smartphones')"> Tablets y smartphones </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-selection-list #shoes [multiple]="false">
+            <mat-list-option (click)="navigate('Tablets y smartphones','Tablets')">
+              Tablets
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Tablets y smartphones','Smartphones')">
+              Smartphones
+            </mat-list-option>
+          </mat-selection-list>
+          
+        </mat-expansion-panel>
+        <mat-expansion-panel class="filtro__panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title (click)="navigateCategory('Gamer')"> Gamer </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-selection-list #shoes [multiple]="false">
+            <mat-list-option (click)="navigate('Gamer','Accesorios')">
+              Accesorios
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Gamer','Audio')">
+              Audio
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Gamer','Microfono')">
+              Micrófono
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Gamer','Silla Gamer')">
+              Silla Gamer
+            </mat-list-option>
+            <mat-list-option (click)="navigate('Gamer','Mouse')">
+              Mouse
+            </mat-list-option>
+          </mat-selection-list>
+        </mat-expansion-panel>
       </div>
     </div>
     
-    <div class="store__section w3-section w3-col l9">
-      <div class="ms-flex" style="justify-content: space-between">
-        <div>Inicio > Productos</div>
-  
-        <mat-form-field appearance="outline" class="store__search">
-          <mat-label>Busca en los resultados</mat-label>
-          <input
-            matInput
-            placeholder="Busca en los resultados"
-            autocomplete="off"
-          />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
+    <div class="store__section w3-col l9">
+      
       <div class="w3-margin-top">
-        <div class="w3-row ms-row">
+        <div class="w3-row ms-row" style="min-height: 80vh;" *ngIf="products$ | async">
           <div
             *ngFor="let product of products | paginate: config"
             class="w3-col col-lg-4 col-sm-6 w3-margin-bottom"
