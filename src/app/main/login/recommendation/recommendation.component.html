@@ -1,7 +1,8 @@
-<div class="recomContainer">
+<div *ngIf="products$ | async as products"
+  class="recomContainer">
   <p style="color: #1A4063; font-weight: bold; font-size:large; padding-left: 16px">★ RECOMENDADOS</p>
   <div class="cardsContainer">
-    <div *ngFor="let raw of (products$ | async)" 
+    <div *ngFor="let raw of products" 
       class="cardContainer">
       <div class="cardContainer__discount" *ngIf="raw?.promo">
         <div class="cardContainer__discount--number">

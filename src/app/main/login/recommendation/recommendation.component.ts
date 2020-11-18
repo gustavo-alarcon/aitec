@@ -9,7 +9,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./recommendation.component.scss']
 })
 export class RecommendationComponent implements OnInit {
-  defaultImage = "../../../assets/images/default-image.png";
+  defaultImage = "../../../assets/images/no-image.png";
   products$: Observable<Product[]>=null
 
   constructor(

@@ -17,6 +17,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TermsComponent } from '../terms/terms.component';
 import { RecommendationComponent } from './recommendation/recommendation.component';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 @NgModule({
@@ -41,7 +42,9 @@ import { RecommendationComponent } from './recommendation/recommendation.compone
     MatRadioModule,
     MatCheckboxModule,
     MatDialogModule,
-    MatDividerModule
+    MatDividerModule,
+    LazyLoadImageModule,
+
   ], 
   entryComponents: [
     TermsComponent

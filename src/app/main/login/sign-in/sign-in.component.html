@@ -1,96 +1,101 @@
 <ng-container *ngIf="getUser$ | async"></ng-container>
-<div style="display:flex; flex-direction: column; align-items: center">
-  <div style="width:100%; max-width: 500px;">   
-    <div class="menuContainer">
-      <div class="activated">
-        MI CUENTA
-      </div>
-      <div class="deactivated" 
-        (click)="router.navigateByUrl('/main/login/signUp')">
-        REGISTRARSE
-      </div>
-    </div>
-    <div class="mainContainer">
-      <p style="font-weight: bold;">Hola, ingresa tus datos para continuar.</p>
-        <form [formGroup]="dataFormGroup">
-            <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-                <mat-label>Usuario</mat-label>
-                <input matInput type="text" formControlName="email" placeholder="Correo electrónico" autocomplete="off">
-                <mat-error>
-                    <span *ngIf="dataFormGroup.get('email').errors?.required">Usuario requerido</span>
-                    <span *ngIf="dataFormGroup.get('email').errors?.providerLogin">Email no válido</span>
-
-                    <ng-container *ngIf="dataFormGroup.get('email').errors?.providerLogin as provLogin">
-                        <span *ngIf="provLogin == 'noRegistered' else registered">
-                            Usuario no registrado.
-                        </span>
-                        <ng-template #registered>
-                            Haga click en Ingresar con {{provLogin |titlecase}}.
-                        </ng-template>
-                    </ng-container>
-                </mat-error>
-                <mat-hint *ngIf="(registerLogin$ | async)">
-                    Email registrado
-                </mat-hint>
-            </mat-form-field>
-
-            <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-                <mat-label>Contraseña</mat-label>
-                <input matInput [type]="hidePass ? 'password' : 'text'" formControlName="pass" placeholder="***"
-                    autocomplete="off">
-                <button mat-icon-button matSuffix (click)="hidePass = !hidePass"
-                    [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hidePass">
-                    <mat-icon>{{hidePass ? 'visibility_off' : 'visibility'}}</mat-icon>
-                </button>
-                <mat-error style="display: flex; flex-direction: row; justify-content: space-between;">
-                    <span *ngIf="dataFormGroup.get('pass').errors?.required">Contraseña requerida</span>
-                    <span *ngIf="dataFormGroup.get('pass').hasError('minlength')">Mínimo 6 caracteres</span>
-                    <!-- <span *ngIf="registerLogin$ | async" class="password" (click)="passwordReset()"> Olvidé mi contraseña</span> -->
-                </mat-error>
-                <!-- <mat-hint *ngIf="registerLogin$ | async" align="end">
-                <span class="password" (click)="passwordReset()"> Olvidé mi contraseña</span>
-                </mat-hint> -->
-            </mat-form-field>
-        </form>
-        
-        <div style="display:flex;flex-direction: column; align-items:center">
-        
-            <button
-                style="max-width:260px"
-                color="primary"
-                mat-raised-button 
-                class="w3-block w3-margin-bottom w3-margin-top"
-                (click)="login()"
-                [disabled]="!dataFormGroup.valid">
-                Ingresar
-            </button>
-
-            <button style="max-width:260px"
-                color="primary"
-                mat-raised-button 
-                class="w3-block w3-margin-bottom w3-margin-top"
-                (click)="signInProvider('facebook')">
-                Ingresar con <strong>Facebook</strong>
-            </button>
-
-            <button color="warn"
-                style="max-width:260px"
-                mat-raised-button class="w3-block w3-margin-bottom"   
-                (click)="signInProvider('google')">
-                Ingresar con <strong>Google</strong>
-            </button>
+<div style="width: 100%; position: relative; margin-top: 32px; margin-bottom: 32px">
+  <div style="display:flex; flex-direction: column; align-items: center;">
+    <div style="width:100%; max-width: 500px;">   
+      <div class="menuContainer">
+        <div class="activated">
+          MI CUENTA
         </div>
+        <div class="deactivated" 
+          (click)="router.navigateByUrl('/main/login/signUp')">
+          REGISTRARSE
+        </div>
+      </div>
+      <div class="mainContainer">
+        <p style="font-weight: bold;">Hola, ingresa tus datos para continuar.</p>
+          <form [formGroup]="dataFormGroup">
+              <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+                  <mat-label>Usuario</mat-label>
+                  <input matInput type="text" formControlName="email" placeholder="Correo electrónico" autocomplete="off">
+                  <mat-error>
+                      <span *ngIf="dataFormGroup.get('email').errors?.required">Usuario requerido</span>
+                      <span *ngIf="dataFormGroup.get('email').errors?.providerLogin">Email no válido</span>
+
+                      <ng-container *ngIf="dataFormGroup.get('email').errors?.providerLogin as provLogin">
+                          <span *ngIf="provLogin == 'noRegistered' else registered">
+                              Usuario no registrado.
+                          </span>
+                          <ng-template #registered>
+                              Haga click en Ingresar con {{provLogin |titlecase}}.
+                          </ng-template>
+                      </ng-container>
+                  </mat-error>
+                  <mat-hint *ngIf="(registerLogin$ | async)">
+                      Email registrado
+                  </mat-hint>
+              </mat-form-field>
+
+              <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+                  <mat-label>Contraseña</mat-label>
+                  <input matInput [type]="hidePass ? 'password' : 'text'" formControlName="pass" placeholder="***"
+                      autocomplete="off">
+                  <button mat-icon-button matSuffix (click)="hidePass = !hidePass"
+                      [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hidePass">
+                      <mat-icon>{{hidePass ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
+                  <mat-error style="display: flex; flex-direction: row; justify-content: space-between;">
+                      <span *ngIf="dataFormGroup.get('pass').errors?.required">Contraseña requerida</span>
+                      <span *ngIf="dataFormGroup.get('pass').hasError('minlength')">Mínimo 6 caracteres</span>
+                      <!-- <span *ngIf="registerLogin$ | async" class="password" (click)="passwordReset()"> Olvidé mi contraseña</span> -->
+                  </mat-error>
+                  <!-- <mat-hint *ngIf="registerLogin$ | async" align="end">
+                  <span class="password" (click)="passwordReset()"> Olvidé mi contraseña</span>
+                  </mat-hint> -->
+              </mat-form-field>
+          </form>
+          
+          <div style="display:flex;flex-direction: column; align-items:center">
+          
+              <button
+                  style="max-width:260px"
+                  color="primary"
+                  mat-raised-button 
+                  class="w3-block w3-margin-bottom w3-margin-top"
+                  (click)="login()"
+                  [disabled]="!dataFormGroup.valid">
+                  Ingresar
+              </button>
+
+              <button style="max-width:260px"
+                  color="primary"
+                  mat-raised-button 
+                  class="w3-block w3-margin-bottom w3-margin-top"
+                  (click)="signInProvider('facebook')">
+                  Ingresar con <strong>Facebook</strong>
+              </button>
+
+              <button color="warn"
+                  style="max-width:260px"
+                  mat-raised-button class="w3-block w3-margin-bottom"   
+                  (click)="signInProvider('google')">
+                  Ingresar con <strong>Google</strong>
+              </button>
+          </div>
 
 
-        <p *ngIf="registerLogin$ | async else fogotPass" 
-            class="forgotPass" (click)="passwordReset()">
-            Olvidé mi contraseña
-        </p>
-        <ng-template #fogotPass>
-            <p class="forgotPass" (click)="passwordForgot()">
-                Olvidé mi contraseña.
-            </p>
-        </ng-template>
+          <p *ngIf="registerLogin$ | async else fogotPass" 
+              class="forgotPass" (click)="passwordReset()">
+              Olvidé mi contraseña
+          </p>
+          <ng-template #fogotPass>
+              <p class="forgotPass" (click)="passwordForgot()">
+                  Olvidé mi contraseña.
+              </p>
+          </ng-template>
+      </div>
     </div>
   </div>
+  <app-recommendation></app-recommendation>
 </div>
+
+
