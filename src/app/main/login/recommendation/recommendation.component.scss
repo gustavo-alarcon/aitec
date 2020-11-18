@@ -1,0 +1,135 @@
+.recomContainer {
+  position: absolute;
+  right: 16px;
+  top: 0;
+  width: fit-content;
+  margin-top: 16px
+}
+
+.cardsContainer {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 0px 0px 5px 5px;
+  width: fit-content;
+  padding: 16px;
+  // position: absolute;
+  right: 0;
+}
+
+.cardContainer {
+  width: 300px; 
+  display: flex; 
+  flex-direction: row; 
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  &__discount {
+    background-color: #ff8a00;
+    color: white;
+    position: absolute;
+    top: 0;
+    left: -10px;
+    padding: 8px 5px 20px;
+    display: flex;
+    font-family: Roboto;
+    clip-path: polygon(100% 0, 100% 68%, 51% 100%, 0 68%, 0 0);
+    &--number {
+      font-weight: 600;
+      font-size: 1.4em;
+      letter-spacing: -0.05em;
+    }
+    &--percent {
+      font-size: 0.6em;
+      padding-top: 0.6em;
+      color: #f2f2f2;
+      padding-left: 0.3em;
+      text-align: left;
+      line-height: 1.2em;
+    }
+  }
+}
+
+.reveal {
+  display: inline-block;
+  margin-right: 16px;
+  img {
+    width: 90px; 
+    height: 79px; 
+    object-fit:cover;
+  }
+}
+
+.triangleTopLeft {
+  width: auto;
+  height: 120px;
+  position: relative;
+  border: 1px solid yellow;
+}
+
+.slogan {
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  clip-path: polygon(0 0, 0% 100%, 100% 0);
+  background-color: blue;
+}
+
+.promo {
+  position: absolute;
+  top: 20px;
+  left: 0px;
+  z-index: 3;
+  transform: rotate(-45deg);
+  font-size: 0.9em;
+}
+
+.titleRecom {
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 15px;
+  color: #2B2B2B;
+}
+
+.descriptionRecom {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 8px;
+  line-height: 9px;
+  color: #828282;
+}
+
+.priceNow {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 16px;
+  color: #215B90;
+}
+
+.priceBefore {
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 11px;
+  line-height: 13px;
+  color: #828282;
+  span {
+    color: red;
+    text-decoration: line-through;
+  }
+}
+
+@media(max-width: 1200px) {
+  .recomContainer {
+    display: none
+  }
+}

@@ -1,62 +1,80 @@
-<div style="display:flex; flex-direction: column; align-items: center">
-  <div style="width:100%; max-width: 500px;">
-    <div class="menuContainer">
-      <div class="deactivated"
-        (click)="router.navigateByUrl('/main/login/signIn')">
-        MI CUENTA
+<div style="width: 100%; position: relative; margin-top: 32px; margin-bottom: 32px;">
+  <div style="display:flex; flex-direction: column; align-items: center">
+    <div style="width:100%; max-width: 500px;">
+      <div class="menuContainer">
+        <div class="deactivated"
+          (click)="router.navigateByUrl('/main/login/signIn')">
+          MI CUENTA
+        </div>
+        <div class="activated">
+          REGISTRARSE
+        </div>
       </div>
-      <div class="activated">
-        REGISTRARSE
-      </div>
-    </div>
-    <div class="mainContainer" *ngIf="getUser$ | async as user">
-      <p style="font-weight: bold;" (click)="deb()">Hola, requerimos los siguientes datos</p>
+      <div class="mainContainer" *ngIf="getUser$ | async as user">
+        <p style="font-weight: bold;" (click)="deb()">Hola, requerimos los siguientes datos</p>
 
-      <mat-radio-group [formControl]="providerForm" 
-        class="w3-margin-bottom" 
-        style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">
-        <mat-radio-button 
-          
-          *ngFor="let option of providerType" 
-          [value]="option">{{option | titlecase}}</mat-radio-button>
-      </mat-radio-group>
+        <mat-radio-group [formControl]="providerForm" 
+          class="w3-margin-bottom" 
+          style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">
+          <mat-radio-button 
+            
+            *ngFor="let option of providerType" 
+            [value]="option">{{option | titlecase}}</mat-radio-button>
+        </mat-radio-group>
 
-      <form [formGroup]="emailForm">
-          <mat-form-field 
-            *ngIf="(providerForm.value == providerType[0]) || 
-              ((user.authUser?.providerData[0]?.providerId?.slice(0, -4) == providerForm.value) && 
-              (user.authUser?.email==emailForm.get('email').value))
-              else signIn"
-            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-              <mat-label>Usuario</mat-label>
-              <input 
-                [readonly]="((user.authUser?.providerData[0]?.providerId?.slice(0, -4) == providerForm.value) && 
-                (user.authUser?.email==emailForm.get('email').value))"
-                matInput type="text" formControlName="email" 
-                placeholder="Correo electrónico" autocomplete="off">
-              <mat-error>
-                    <span *ngIf="emailForm.get('email')?.errors?.required">Usuario requerido</span>
-                    <span *ngIf="emailForm.get('email')?.errors?.email">Email no válido</span>
-                    <span *ngIf="emailForm.get('email')?.errors?.repeatedUser">
-                        Este usuario ya se encuentra registrado.</span>
-                    <span *ngIf="emailForm.get('email')?.errors?.wrongProvider as prov">
-                        Por favor, seleccione {{prov |titlecase}}.</span>
-              </mat-error>
-              <mat-hint *ngIf="(registerLogin$ | async)">
-                  Email registrado
-              </mat-hint>
-          </mat-form-field>
-
-          <ng-container *ngIf="providerType$ | async">
-
-            <mat-form-field *ngIf="emailForm.get('pass').enabled"
+        <form [formGroup]="emailForm">
+            <mat-form-field 
+              *ngIf="(providerForm.value == providerType[0]) || 
+                ((user.authUser?.providerData[0]?.providerId?.slice(0, -4) == providerForm.value) && 
+                (user.authUser?.email==emailForm.get('email').value))
+                else signIn"
               class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-                <mat-label>Contraseña</mat-label>
-                <input matInput [type]="hidePass ? 'password' : 'text'" formControlName="pass" placeholder="***"
+                <mat-label>Usuario</mat-label>
+                <input 
+                  [readonly]="((user.authUser?.providerData[0]?.providerId?.slice(0, -4) == providerForm.value) && 
+                  (user.authUser?.email==emailForm.get('email').value))"
+                  matInput type="text" formControlName="email" 
+                  placeholder="Correo electrónico" autocomplete="off">
+                <mat-error>
+                      <span *ngIf="emailForm.get('email')?.errors?.required">Usuario requerido</span>
+                      <span *ngIf="emailForm.get('email')?.errors?.email">Email no válido</span>
+                      <span *ngIf="emailForm.get('email')?.errors?.repeatedUser">
+                          Este usuario ya se encuentra registrado.</span>
+                      <span *ngIf="emailForm.get('email')?.errors?.wrongProvider as prov">
+                          Por favor, seleccione {{prov |titlecase}}.</span>
+                </mat-error>
+                <mat-hint *ngIf="(registerLogin$ | async)">
+                    Email registrado
+                </mat-hint>
+            </mat-form-field>
+
+            <ng-container *ngIf="providerType$ | async">
+
+              <mat-form-field *ngIf="emailForm.get('pass').enabled"
+                class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+                  <mat-label>Contraseña</mat-label>
+                  <input matInput [type]="hidePass ? 'password' : 'text'" formControlName="pass" placeholder="***"
+                      autocomplete="off">
+                  <button mat-icon-button matSuffix (click)="hidePass = !hidePass"
+                      [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hidePass">
+                      <mat-icon>{{hidePass ? 'visibility_off' : 'visibility'}}</mat-icon>
+                  </button>
+                  <mat-error style="display: flex; flex-direction: row; justify-content: space-between;">
+                      <span *ngIf="emailForm.get('pass')?.errors?.required">Contraseña requerida</span>
+                      <span *ngIf="emailForm.get('pass').hasError('minlength')">Mínimo 6 caracteres</span>
+                      <span *ngIf="emailForm.get('pass')?.errors?.noRepeatedPass">La contraseña no es la misma</span>
+
+                  </mat-error>
+              </mat-form-field>
+
+              <mat-form-field *ngIf="emailForm.get('pass').enabled"
+                class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+                <mat-label>Repetir contraseña</mat-label>
+                <input matInput [type]="hideRepeatedPass ? 'password' : 'text'" formControlName="repeatedPass" placeholder="***"
                     autocomplete="off">
-                <button mat-icon-button matSuffix (click)="hidePass = !hidePass"
-                    [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hidePass">
-                    <mat-icon>{{hidePass ? 'visibility_off' : 'visibility'}}</mat-icon>
+                <button mat-icon-button matSuffix (click)="hideRepeatedPass = !hideRepeatedPass"
+                    [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hideRepeatedPass">
+                    <mat-icon>{{hideRepeatedPass ? 'visibility_off' : 'visibility'}}</mat-icon>
                 </button>
                 <mat-error style="display: flex; flex-direction: row; justify-content: space-between;">
                     <span *ngIf="emailForm.get('pass')?.errors?.required">Contraseña requerida</span>
@@ -64,144 +82,129 @@
                     <span *ngIf="emailForm.get('pass')?.errors?.noRepeatedPass">La contraseña no es la misma</span>
 
                 </mat-error>
-            </mat-form-field>
-
-            <mat-form-field *ngIf="emailForm.get('pass').enabled"
-              class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-              <mat-label>Repetir contraseña</mat-label>
-              <input matInput [type]="hideRepeatedPass ? 'password' : 'text'" formControlName="repeatedPass" placeholder="***"
-                  autocomplete="off">
-              <button mat-icon-button matSuffix (click)="hideRepeatedPass = !hideRepeatedPass"
-                  [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hideRepeatedPass">
-                  <mat-icon>{{hideRepeatedPass ? 'visibility_off' : 'visibility'}}</mat-icon>
-              </button>
-              <mat-error style="display: flex; flex-direction: row; justify-content: space-between;">
-                  <span *ngIf="emailForm.get('pass')?.errors?.required">Contraseña requerida</span>
-                  <span *ngIf="emailForm.get('pass').hasError('minlength')">Mínimo 6 caracteres</span>
-                  <span *ngIf="emailForm.get('pass')?.errors?.noRepeatedPass">La contraseña no es la misma</span>
-
-              </mat-error>
-            </mat-form-field>
-          </ng-container>
-          
-          <ng-template #signIn>
-            <div style="display:flex; flex-direction: wrap; justify-content: center;">
-              <button 
-                style="max-width:260px"
-                [color]="providerForm.value == 'google' ? 'warn' : 'primary'"
-                mat-raised-button 
-                class="w3-block w3-margin-bottom w3-margin-top"
-                (click)="signInProvider(providerForm.value)">
-                Ingresar con <strong>{{providerForm.value | titlecase}}</strong>
-            </button>
-            </div>
+              </mat-form-field>
+            </ng-container>
             
-          </ng-template>
+            <ng-template #signIn>
+              <div style="display:flex; flex-direction: wrap; justify-content: center;">
+                <button 
+                  style="max-width:260px"
+                  [color]="providerForm.value == 'google' ? 'warn' : 'primary'"
+                  mat-raised-button 
+                  class="w3-block w3-margin-bottom w3-margin-top"
+                  (click)="signInProvider(providerForm.value)">
+                  Ingresar con <strong>{{providerForm.value | titlecase}}</strong>
+              </button>
+              </div>
+              
+            </ng-template>
 
-      </form>
+        </form>
 
-      <p style="font-weight: bold;"><mat-icon>account_box</mat-icon>Información Personal</p>
+        <p style="font-weight: bold;"><mat-icon>account_box</mat-icon>Información Personal</p>
 
-      <form [formGroup]="personalInfoForm">
+        <form [formGroup]="personalInfoForm">
 
-        <mat-radio-group formControlName="type" class="w3-margin-bottom" 
-        style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">          <mat-radio-button 
-            *ngFor="let option of personalInfoType" 
-            [value]="option">P. {{option | titlecase}}</mat-radio-button>
-        </mat-radio-group>
+          <mat-radio-group formControlName="type" class="w3-margin-bottom" 
+          style="display:flex; flex-direction: row; justify-content: space-between; flex-wrap: wrap;">          <mat-radio-button 
+              *ngFor="let option of personalInfoType" 
+              [value]="option">P. {{option | titlecase}}</mat-radio-button>
+          </mat-radio-group>
 
-        <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-            <mat-label>{{personalInfoType[0] ? 'Nombres':'Razón social'}}</mat-label>
-            <input matInput type="text" formControlName="name" placeholder="Nombres" autocomplete="off">
+          <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+              <mat-label>{{personalInfoType[0] ? 'Nombres':'Razón social'}}</mat-label>
+              <input matInput type="text" formControlName="name" placeholder="Nombres" autocomplete="off">
+              <mat-error>
+                    <span *ngIf="personalInfoForm.get('name')?.errors?.required">Campo requerido</span>
+              </mat-error>
+          </mat-form-field>
+
+          <ng-container *ngIf="personalInfoType$|async"></ng-container>
+
+          <mat-form-field *ngIf="personalInfoForm.get('lastName').enabled"
+            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>Apellidos</mat-label>
+            <input matInput type="text" formControlName="lastName" placeholder="Apellidos" autocomplete="off">
             <mat-error>
-                  <span *ngIf="personalInfoForm.get('name')?.errors?.required">Campo requerido</span>
+                  <span *ngIf="personalInfoForm.get('lastName')?.errors?.required">Campo requerido</span>
             </mat-error>
-        </mat-form-field>
+          </mat-form-field>
+          <mat-form-field *ngIf="personalInfoForm.get('dni').enabled"
+            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>DNI</mat-label>
+            <input matInput type="number" formControlName="dni" placeholder="DNI" autocomplete="off">
+            <mat-error>
+                  <span *ngIf="personalInfoForm.get('dni')?.errors?.required">Campo requerido</span>
+                  <span *ngIf="personalInfoForm.get('dni')?.errors?.maxLength ||
+                    personalInfoForm.get('dni')?.errors?.maxLength ">Se requieren 8 dígitos.</span>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>Teléfono</mat-label>
+            <input matInput type="tel" formControlName="phone" placeholder="Teléfono" autocomplete="off">
+            <mat-error>
+                  <span *ngIf="personalInfoForm.get('phone')?.errors?.required">Campo requerido</span>
+            </mat-error>
+          </mat-form-field>
 
-        <ng-container *ngIf="personalInfoType$|async"></ng-container>
+          <mat-form-field *ngIf="personalInfoForm.get('ruc').enabled"
+            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>RUC</mat-label>
+            <input matInput type="number" formControlName="ruc" placeholder="RUC" autocomplete="off">
+            <mat-error>
+                  <span *ngIf="personalInfoForm.get('ruc')?.errors?.required">Campo requerido</span>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field *ngIf="personalInfoForm.get('address').enabled"
+            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>Dirección</mat-label>
+            <input matInput type="text" formControlName="address" placeholder="Dirección" autocomplete="off">
+            <mat-error>
+                  <span *ngIf="personalInfoForm.get('address')?.errors?.required">Campo requerido</span>
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field *ngIf="personalInfoForm.get('contactPerson').enabled"
+            class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
+            <mat-label>Persona de contacto</mat-label>
+            <input matInput type="text" formControlName="contactPerson" placeholder="Apellidos" autocomplete="off">
+            <mat-error>
+                  <span *ngIf="personalInfoForm.get('contactPerson')?.errors?.required">Campo requerido</span>
+            </mat-error>
+          </mat-form-field>
+        </form>
 
-        <mat-form-field *ngIf="personalInfoForm.get('lastName').enabled"
-          class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>Apellidos</mat-label>
-          <input matInput type="text" formControlName="lastName" placeholder="Apellidos" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('lastName')?.errors?.required">Campo requerido</span>
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field *ngIf="personalInfoForm.get('dni').enabled"
-          class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>DNI</mat-label>
-          <input matInput type="number" formControlName="dni" placeholder="DNI" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('dni')?.errors?.required">Campo requerido</span>
-                <span *ngIf="personalInfoForm.get('dni')?.errors?.maxLength ||
-                  personalInfoForm.get('dni')?.errors?.maxLength ">Se requieren 8 dígitos.</span>
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>Teléfono</mat-label>
-          <input matInput type="tel" formControlName="phone" placeholder="Teléfono" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('phone')?.errors?.required">Campo requerido</span>
-          </mat-error>
-        </mat-form-field>
+        <p style="font-weight: bold;"><mat-icon>email</mat-icon>Mantenme Actualizado</p>
 
-        <mat-form-field *ngIf="personalInfoForm.get('ruc').enabled"
-          class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>RUC</mat-label>
-          <input matInput type="number" formControlName="ruc" placeholder="RUC" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('ruc')?.errors?.required">Campo requerido</span>
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field *ngIf="personalInfoForm.get('address').enabled"
-          class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>Dirección</mat-label>
-          <input matInput type="text" formControlName="address" placeholder="Dirección" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('address')?.errors?.required">Campo requerido</span>
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field *ngIf="personalInfoForm.get('contactPerson').enabled"
-          class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-          <mat-label>Persona de contacto</mat-label>
-          <input matInput type="text" formControlName="contactPerson" placeholder="Apellidos" autocomplete="off">
-          <mat-error>
-                <span *ngIf="personalInfoForm.get('contactPerson')?.errors?.required">Campo requerido</span>
-          </mat-error>
-        </mat-form-field>
-      </form>
+          <mat-checkbox [formControl]="feedForm">
+            <span style="white-space: normal;">Quiero recibir noticias, promociones y novedades de nuevos productos.</span>
+          </mat-checkbox>
 
-      <p style="font-weight: bold;"><mat-icon>email</mat-icon>Mantenme Actualizado</p>
-
-        <mat-checkbox [formControl]="feedForm">
-          <span style="white-space: normal;">Quiero recibir noticias, promociones y novedades de nuevos productos.</span>
+        <mat-checkbox [formControl]="conditionForm">
+          <p>Acepto <span (click)="termsAndConditions()"
+            style="color:#0044CC; text-decoration: underline">términos y condiciones</span></p>
         </mat-checkbox>
+        
+        <div style="display:flex;flex-direction: column; align-items:center">
+        
+          <button 
+              style="max-width:260px"
+              color="primary"
+              mat-raised-button 
+              class="w3-block w3-margin-bottom w3-margin-top"
+              [disabled]="!(providerForm.valid || providerForm.disabled)
+                        || !emailForm.valid
+                        || !personalInfoForm.valid
+                        || !feedForm.valid
+                        || !conditionForm.valid"
+              (click)="registerUser(user)">
+              Registrarse
+          </button>
 
-      <mat-checkbox [formControl]="conditionForm">
-        <p>Acepto <span (click)="termsAndConditions()"
-           style="color:#0044CC; text-decoration: underline">términos y condiciones</span></p>
-      </mat-checkbox>
-      
-      <div style="display:flex;flex-direction: column; align-items:center">
-      
-        <button 
-            style="max-width:260px"
-            color="primary"
-            mat-raised-button 
-            class="w3-block w3-margin-bottom w3-margin-top"
-            [disabled]="!(providerForm.valid || providerForm.disabled)
-                      || !emailForm.valid
-                      || !personalInfoForm.valid
-                      || !feedForm.valid
-                      || !conditionForm.valid"
-            (click)="registerUser(user)">
-            Registrarse
-        </button>
+        </div>
+
 
       </div>
-
-
     </div>
   </div>
+  <app-recommendation></app-recommendation>
 </div>

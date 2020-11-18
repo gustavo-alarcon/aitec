@@ -10,6 +10,8 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import {LazyLoadImageModule } from 'ng-lazyload-image';
+
 
 
 @NgModule({
@@ -23,6 +25,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(environment.firebaseConfig, "aitec-ecommerce"),
     MatSnackBarModule,
+    LazyLoadImageModule,
   ],
   providers: [
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },

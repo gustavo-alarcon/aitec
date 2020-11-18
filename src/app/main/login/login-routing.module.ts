@@ -7,17 +7,15 @@ import { SignUpComponent } from './sign-up/sign-up.component';
 const routes: Routes = [
   {
     path: '',
-    component: LoginComponent,
-    children: [
-      {
-        path: 'signIn',
-        component: SignInComponent
-      },
-      {
-        path: 'signUp',
-        component: SignUpComponent
-      }
-    ]
+    component: LoginComponent
+  },
+  {
+    path: 'signIn',
+    component: SignInComponent
+  },
+  {
+    path: 'signUp',
+    component: SignUpComponent
   }
   
 ]

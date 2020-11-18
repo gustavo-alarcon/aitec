@@ -16,6 +16,8 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TermsComponent } from '../terms/terms.component';
+import { RecommendationComponent } from './recommendation/recommendation.component';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 @NgModule({
@@ -23,7 +25,8 @@ import { TermsComponent } from '../terms/terms.component';
     LoginComponent,
     SignInComponent,
     SignUpComponent,
-    TermsComponent
+    TermsComponent,
+    RecommendationComponent
   ],
   imports: [
     CommonModule,
@@ -39,7 +42,9 @@ import { TermsComponent } from '../terms/terms.component';
     MatRadioModule,
     MatCheckboxModule,
     MatDialogModule,
-    MatDividerModule
+    MatDividerModule,
+    LazyLoadImageModule,
+
   ], 
   entryComponents: [
     TermsComponent

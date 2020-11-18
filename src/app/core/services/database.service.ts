@@ -1667,5 +1667,10 @@ export class DatabaseService {
           .filter(el => (((el.rateData === undefined))))
       }));
   }
+
+  getRecommendedProducts(number: number): Observable<Product[]>{
+    return this.afs.collection<Product>(this.productsListRef, 
+      ref => ref.orderBy("purchaseNumber", "desc").limit(number)).valueChanges();
+  }
   
 }

@@ -30,7 +30,7 @@ export interface Product {
 }
 
 interface PromoData {
-  quantity: number;
+  quantity: 1;
   promoPrice: number;
 }
 
