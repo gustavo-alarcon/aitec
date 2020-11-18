@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-contact',
@@ -10,6 +11,8 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ContactComponent implements OnInit {
   formGroup: FormGroup;
+
+  init$:Observable<any>
 
   latitud: number = -12.046301;
   longitud: number = -77.031027;
@@ -21,6 +24,19 @@ export class ContactComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
+  loadingAll = new BehaviorSubject<boolean>(true);
+  loadingAll$ = this.loading.asObservable();
+
+
+  emailContact:string
+
+  contact:{
+    address:string;
+    phone:string;
+    email:string;
+    coords:any
+  }
+
   ngOnInit(): void {
     this.formGroup = this.fb.group({
       email: [null, [Validators.required, Validators.email]],
@@ -28,6 +44,26 @@ export class ContactComponent implements OnInit {
       name: [null, [Validators.required]],
       phone: [null, [Validators.required]],
     });
+    this.getData()
+  }
+
+  getData(){
+    this.init$ = this.afs.collection(`/db/aitec/config`).doc('generalConfig').get().pipe(
+      map((snap) => {
+      return snap.data()
+    }),
+    tap(res=>{
+      this.loadingAll.next(false)
+      
+      if(res.contact){
+        this.contact = res.contact
+        this.center = res.contact.coords
+      }
+
+      if(res.emailContact){
+        this.emailContact = res.emailContact
+      }
+    }));
   }
 
   sendEmail() {
@@ -42,14 +78,15 @@ export class ContactComponent implements OnInit {
     const batch = this.afs.firestore.batch();
 
     let message = {
-      to: ['mocharan@meraki-s.com'],
+      to: [this.emailContact],
       from: this.formGroup.value['email'],
       template: {
         name: 'info',
         data: {
           message: mess,
           name: this.formGroup.value['name'],
-          number: this.formGroup.value['phone'],
+          phone: this.formGroup.value['phone'],
+          email: this.formGroup.value['email']
         },
       },
     };
