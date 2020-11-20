@@ -2,6 +2,7 @@
   "name": "aitec",
   "short_name": "aitec",
   "theme_color": "#1976d2",
+  "gcm_sender_id": "483311992725",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",
