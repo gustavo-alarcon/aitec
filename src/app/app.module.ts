@@ -12,7 +12,7 @@ import { environment } from 'src/environments/environment';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import {LazyLoadImageModule } from 'ng-lazyload-image';
 import { ServiceWorkerModule } from '@angular/service-worker';
-
+import * as firebase from 'firebase';
 
 
 @NgModule({

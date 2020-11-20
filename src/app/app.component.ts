@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { filter, take, tap } from 'rxjs/operators';
 import { GeneralConfig } from './core/models/generalConfig.model';
 import { AuthService } from './core/services/auth.service';
 import { DatabaseService } from './core/services/database.service';
 import { ThemeService } from './core/services/theme.service';
+import { PushService } from './core/services/push.service';
+
 
 @Component({
   selector: 'app-root',
@@ -21,7 +23,8 @@ export class AppComponent {
     public themeService: ThemeService,
     private dbs: DatabaseService,
     private snackBar: MatSnackBar,
-    private auth: AuthService
+    private auth: AuthService,
+    public push: PushService
   ){}
 
   ngOnInit(){
@@ -33,6 +36,13 @@ export class AppComponent {
         }
       }),
     )
-    this.user$ = this.auth.user$
+    this.user$ = this.auth.user$.pipe(
+      filter(user => !!user),
+      take(1),
+      tap(user => {
+        this.push.getPermission(user)
+        this.push.receiveMessages()
+      })
+    )
   }
 }
