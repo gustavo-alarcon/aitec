@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { AngularFireMessaging } from '@angular/fire/messaging'
 import * as firebase from 'firebase'
-import { from, Subject } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { from, Observable, Subject } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { Push } from '../models/push.model';
 import { User } from '../models/user.model';
 
 
@@ -12,17 +13,15 @@ import { User } from '../models/user.model';
 })
 export class PushService {
 
-
-  private messageSource= new Subject()
-  currentMessage = this.messageSource.asObservable()
+  messagesRef: 'messages'='messages';
 
   constructor(
     private afs: AngularFirestore,
     private mss: AngularFireMessaging
   ) { }
 
-  getPermission(user: User){
-    from(Notification.requestPermission()).pipe(
+  getPermission(user: User): Observable<any>{
+    return from(Notification.requestPermission()).pipe(
       switchMap(not => {
         console.log("Notification permission granted.")
         console.log(not);
@@ -31,17 +30,7 @@ export class PushService {
       tap(token => {
         this.saveTokenFb(user, token)
       })
-    ).subscribe(
-      res => {console.log("Success!")},
-      err => console.log(err) 
     )
-  }
-
-  receiveMessages() {
-    this.mss.onMessage(res => {
-      console.log('Message received. ', res)
-      this.messageSource.next(res);
-    })
   }
 
   saveTokenFb(user: User, token: string) {
@@ -53,5 +42,21 @@ export class PushService {
       let tokens = {...currentTokens, [token]: true}
       userRef.update({ fcmTokens: tokens})
     }
+  }
+
+  sendPush(sendingUser: User, recipientUser: User, message: string, title: string){
+    let messagesRef = this.afs.collection(this.messagesRef).doc<Push>()
+    let messageData: Push = {
+      id: messagesRef.ref.id,
+      read: false,
+      sendingUser, recipientUser,
+      message, title
+    }
+    messagesRef.set(messageData).catch(console.log)
+  }
+
+  getUserNotifications(user: User):Observable<Push[]>{
+    return this.afs.collection<Push>(this.messagesRef, 
+      ref=> ref.where("recipientUser.uid", "==", user.uid)).valueChanges()
   }
 }

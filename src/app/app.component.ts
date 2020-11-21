@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, switchMap, take, tap } from 'rxjs/operators';
 import { GeneralConfig } from './core/models/generalConfig.model';
 import { AuthService } from './core/services/auth.service';
 import { DatabaseService } from './core/services/database.service';
 import { ThemeService } from './core/services/theme.service';
 import { PushService } from './core/services/push.service';
+import { User } from './core/models/user.model';
 
 
 @Component({
@@ -17,7 +18,8 @@ import { PushService } from './core/services/push.service';
 export class AppComponent {
   title = 'aitec';
   version$: Observable<GeneralConfig>
-  user$: Observable<any>
+  user$: Observable<User>
+  push$: Observable<any>
 
   constructor(
     public themeService: ThemeService,
@@ -36,12 +38,11 @@ export class AppComponent {
         }
       }),
     )
-    this.user$ = this.auth.user$.pipe(
+    this.push$ = this.auth.user$.pipe(
       filter(user => !!user),
       take(1),
-      tap(user => {
-        this.push.getPermission(user)
-        this.push.receiveMessages()
+      switchMap(user => {
+        return this.push.getPermission(user)
       })
     )
   }
