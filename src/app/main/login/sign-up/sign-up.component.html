@@ -112,8 +112,8 @@
           </mat-radio-group>
 
           <mat-form-field class="w3-small w3-margin-bottom" appearance="outline" style="display:block">
-              <mat-label>{{personalInfoType[0] ? 'Nombres':'Razón social'}}</mat-label>
-              <input matInput type="text" formControlName="name" placeholder="Nombres" autocomplete="off">
+              <mat-label>{{personalInfoForm.get("type").value =='natural' ? 'Nombres':'Razón social'}}</mat-label>
+              <input matInput type="text" formControlName="name" placeholder="{{personalInfoForm.get('type').value =='natural' ? 'Nombres':'Razón social'}}" autocomplete="off">
               <mat-error>
                     <span *ngIf="personalInfoForm.get('name')?.errors?.required">Campo requerido</span>
               </mat-error>

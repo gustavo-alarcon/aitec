@@ -28,6 +28,7 @@
     "@angular/platform-browser-dynamic": "~10.2.0",
     "@angular/platform-server": "~10.2.0",
     "@angular/router": "~10.2.0",
+    "@angular/service-worker": "~10.2.0",
     "@nguniversal/express-engine": "^10.1.0",
     "@ngx-gallery/core": "^5.0.0-beta.0",
     "express": "^4.15.2",
