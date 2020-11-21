@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith, take, tap } from 'rxjs/operators';
@@ -27,6 +27,7 @@ export class ShoppingCartComponent implements OnInit {
   /*delivery*/
   formGroup: FormGroup;
   delivery: number = 1;
+  deliveryForm:FormControl = new FormControl(this.delivery)
   latitud: number = -12.046301;
   longitud: number = -77.031027;
 
@@ -80,6 +81,10 @@ export class ShoppingCartComponent implements OnInit {
   filteredProvincia$: Observable<any>;
   filteredDistrito$: Observable<any>;
 
+  provincias$:Observable<any>
+  distritos$:Observable<any>
+
+  chooseDelivery$:Observable<any>
   /*Payments*/
   cardForm: FormGroup;
   documentForm: FormGroup;
@@ -185,6 +190,29 @@ export class ShoppingCartComponent implements OnInit {
         })
       );
 
+      this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
+        startWith(''),
+        map(dept=>{
+          
+          
+          if(typeof dept === 'object'){
+            this.selectProvincias(dept)
+            
+          }
+          return true
+        })
+      )
+
+      this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
+        startWith(''),
+        map(prov=>{
+          if(prov && typeof prov === 'object'){
+            this.selectDistritos(prov)
+            
+          }
+          return true
+        })
+      )
     this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
       startWith(''),
       map((value) => {
@@ -202,6 +230,20 @@ export class ShoppingCartComponent implements OnInit {
         );
       })
     );
+
+    this.chooseDelivery$ = this.deliveryForm.valueChanges.pipe(
+      startWith(1),
+      tap(res=>{
+        console.log(res);
+        
+        if(this.formGroup.get('distrito').value){
+          if (res == 1) {
+            this.dbs.delivery.next(this.formGroup.get('distrito').value.delivery);
+          }else{
+            this.dbs.delivery.next(0);
+          }
+        }
+      }))
 
     /*Payments*/
     this.cardForm = this.fb.group({
@@ -292,13 +334,15 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   selectProvincias(option) {
-    this.formGroup.get('provincia').enable();
     this.provincias = option.provincias;
+    this.formGroup.get('provincia').enable();
+    
   }
 
   selectDistritos(option) {
-    this.formGroup.get('distrito').enable();
     this.distritos = option.distritos;
+    this.formGroup.get('distrito').enable();
+    
   }
 
   selectDelivery(option) {

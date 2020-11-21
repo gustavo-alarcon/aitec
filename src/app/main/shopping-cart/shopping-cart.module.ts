@@ -27,6 +27,8 @@ import { PaymentMethodComponent } from './payment-method/payment-method.componen
 import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
+
+
 @NgModule({
   declarations: [
     ShoppingCartComponent,

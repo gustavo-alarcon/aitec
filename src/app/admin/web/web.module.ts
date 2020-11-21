@@ -17,6 +17,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTabsModule } from '@angular/material/tabs';
 import { GoogleMapsModule } from '@angular/google-maps';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatChipsModule } from '@angular/material/chips';
+import { Ng2ImgMaxModule } from 'ng2-img-max';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { SlickCarouselModule } from 'ngx-slick-carousel';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
 
 import { WebRoutingModule } from './web-routing.module';
 import { WebComponent } from './web.component';
@@ -24,6 +34,8 @@ import { BannerComponent } from './banner/banner.component';
 import { CreateEditBannerComponent } from './create-edit-banner/create-edit-banner.component';
 import { ContactComponent } from './contact/contact.component';
 import { LandingComponent } from './landing/landing.component';
+import { CreatEditTestimonyComponent } from './creat-edit-testimony/creat-edit-testimony.component';
+import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +44,8 @@ import { LandingComponent } from './landing/landing.component';
     CreateEditBannerComponent,
     ContactComponent,
     LandingComponent,
+    CreatEditTestimonyComponent,
+    DeleteDialogComponent
   ],
   imports: [
     CommonModule,
@@ -52,7 +66,17 @@ import { LandingComponent } from './landing/landing.component';
     MatInputModule,
     MatBadgeModule,
     MatTabsModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    MatRadioModule,
+    MatChipsModule,
+    Ng2ImgMaxModule,
+    MatAutocompleteModule,
+    DragDropModule,
+    SlickCarouselModule,
+    MatSelectModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatCardModule
   ],
 })
 export class WebModule {}

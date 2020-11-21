@@ -12,6 +12,10 @@ const routes: Routes = [
         path: 'web',
         loadChildren: () => import('./web/web.module').then(mod => mod.WebModule)
       },
+      {
+        path: 'sale-configuration',
+        loadChildren: () => import('./configuration-sales/configuration-sales.module').then(mod => mod.ConfigurationSalesModule)
+      }
       /*
       {
         path: 'login',

@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { Gallery, GalleryRef } from 'ng-gallery';
 
 @Component({
   selector: 'app-product-detail',
@@ -16,7 +15,7 @@ export class ProductDetailComponent implements OnInit {
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
-
+productDiv:any
   prods:Array<any> = []
   galleryImg:Array<any>
   selectImage:any
@@ -49,7 +48,6 @@ export class ProductDetailComponent implements OnInit {
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
-    private gallery: Gallery,
     private renderer: Renderer2,
     private router: Router
   ) {}
@@ -60,17 +58,14 @@ export class ProductDetailComponent implements OnInit {
         return this.dbs.products.filter((el) => el.sku == param.id)[0];
       }),
       tap(res=>{
+        console.log('produvt');
+        console.log(res);
+        this.productDiv = res
         this.loading.next(false)
         this.prods = this.dbs.products.filter(el=>el.category==res.category)
         this.galleryImg = res.gallery.map((el,i)=>{return {ind:i+1,photoURL:el}})
         this.selectImage = this.galleryImg[0]
-        const galleryRef: GalleryRef = this.gallery.ref('mini');
-        res.gallery.forEach(el=>{
-          galleryRef.addImage({
-            src: el,
-            thumb: el
-          });
-        })
+       
       })
     );
   }
@@ -80,14 +75,10 @@ export class ProductDetailComponent implements OnInit {
   }
 
   zoom(e){
-    
-    let offsetX;
-    let offsetY;
-    
     var zoomer = e.currentTarget;
-    offsetX = e.offsetX ?e.offsetX :e.touches[0].pageX
-    
-    offsetY = e.offsetY ?  e.offsetY : e.touches[0].pageX
+    let offsetX = e.offsetX
+    let offsetY = e.offsetY 
+
     let x = offsetX/zoomer.offsetWidth*100
     let y = offsetY/zoomer.offsetHeight*100
     this.renderer.setStyle(this.image.nativeElement,'background-position', x + '% ' + y + '%')

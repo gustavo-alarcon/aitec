@@ -26,4 +26,6 @@ export class AdminComponent implements OnInit {
   toggleSideMenu(): void {
     this.openedMenu = !this.openedMenu;
   }
+
+  login(){}
 }

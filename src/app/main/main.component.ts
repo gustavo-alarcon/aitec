@@ -43,8 +43,6 @@ export class MainComponent implements OnInit {
           if(user){
             return this.dbs.getUserFinishedSales(user).pipe(
               map(sales => {
-                console.log(sales);
-                console.log(sales[0]);
                 if (sales.length) {
                   let dialogRef = this.dialog.open(RateDialogComponent, {
                     width: '307px',
@@ -103,6 +101,19 @@ export class MainComponent implements OnInit {
 
   onActivate(event) {
     window.scroll(0, 0);
+  }
+
+  getName(user){
+    let name;
+    let lastName;
+    if(user.personData){
+      name=user.personData.name.split(' ')[0]
+      lastName=user.personData.lastName.split(' ')[0]
+    }else{
+      name=user.name.split(' ')[0]
+      lastName=user.lastName.split(' ')[0]
+    }
+    return name + ' ' + lastName
   }
 
   clearInput() {
