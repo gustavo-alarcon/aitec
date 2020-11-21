@@ -65,6 +65,38 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
+  public categories:Array<any> = [
+    {
+      category:'PCs y laptops', 
+      subcategories:[
+        {name:'Laptops',categories:['Laptop1','Laptop2','Laptop3']},
+        {name:'Accesorios',categories:['Accesorios1','Accesorios2','Accesorios3']}
+      ]
+    },
+    {
+      category:'Computo', 
+      subcategories:[
+        {name:'Accesorios y Cables',categories:['Accesorios','Cables']},
+        {name:'Procesadores',categories:[]}
+      ]
+    },
+    {
+      category:'Tablets y smartphones', 
+      subcategories:[
+        {name:'Tablets',categories:['Tablet1','Tablet2','Tablet3']},
+        {name:'Smartphones', categories:['samsung','apple','huawei','nokia']}
+      ]
+    },
+    {
+      category:'Gamer', 
+      subcategories:[
+        {name:'Accesorios',categories:['Cables','enchufes','envaces']},
+        {name:'Audio',categories:[]},
+        {name:'Microfono',categories:[]},
+        {name:'Sillas Gamer',categories:['recubiertas','inclinables']}
+      ]
+    },
+  ]
   public products = [
     {
       additionalDescription: 'Laptop Asus Vivobook 15 F512da Ryzen5 8gbram 512gbssd Vega 8',

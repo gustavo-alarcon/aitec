@@ -83,17 +83,11 @@
         <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
       </button>
       </ng-template>
-      <div *ngIf="user$ | async; else login">
-        <button mat-button routerLink="/main/carrito" matTooltip="Carrito">
-          <mat-icon
-            [matBadge]="dbs.order.length"
-            [matBadgeHidden]="dbs.order.length == 0"
-            matBadgeColor="warn"
-            >shopping_cart</mat-icon
-          >
-        </button>
-        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
-          <mat-icon>person</mat-icon>
+      <div *ngIf="user$ | async as user; else login">
+        
+        <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+          <mat-icon style="vertical-align: middle;margin-right: 8px;">person</mat-icon> 
+          {{getName(user)}}
         </button>
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="logOut()">
@@ -108,7 +102,14 @@
             <span>Mis favoritos</span>
           </button>
         </mat-menu>
-        
+        <button mat-button routerLink="/main/carrito" matTooltip="Carrito">
+          <mat-icon
+            [matBadge]="dbs.order.length"
+            [matBadgeHidden]="dbs.order.length == 0"
+            matBadgeColor="warn"
+            >shopping_cart</mat-icon
+          >
+        </button>
         <button mat-button matTooltip="Notificaciones">
           <mat-icon matBadge="5" matBadgeColor="warn"
             >notifications_none</mat-icon

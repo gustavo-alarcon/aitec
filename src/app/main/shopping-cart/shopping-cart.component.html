@@ -47,8 +47,8 @@
           <h4 class="delivery__title w3-center">
             Por favor registra tus datos y verifícalos
           </h4>
-          <mat-radio-group color="primary" [(ngModel)]="delivery">
-            <mat-radio-button [value]="1"> Entrega en domicilio </mat-radio-button>
+          <mat-radio-group color="primary" [formControl]="deliveryForm">
+            <mat-radio-button [value]="1" > Entrega en domicilio </mat-radio-button>
             <mat-radio-button class="w3-margin-left" [value]="2">
               Recojo en tienda
             </mat-radio-button>
@@ -71,14 +71,13 @@
                 <mat-option
                   *ngFor="let option of filteredDepartamento$ | async"
                   [value]="option"
-                  (onSelectionChange)="selectProvincias(option)"
                 >
                   {{ option.departamento | titlecase }}
                 </mat-option>
               </mat-autocomplete>
               <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
             </mat-form-field>
-            <mat-form-field class="w3-block" appearance="outline">
+            <mat-form-field class="w3-block" appearance="outline"  *ngIf="provincias$|async">
               <mat-label>Provincia</mat-label>
               <input
                 type="text"
@@ -89,20 +88,21 @@
               />
               <mat-autocomplete
                 autoActiveFirstOption
+               
                 #autoP="matAutocomplete"
                 [displayWith]="showProvincia"
+                
               >
                 <mat-option
                   *ngFor="let option of filteredProvincia$ | async"
                   [value]="option"
-                  (onSelectionChange)="selectDistritos(option)"
                 >
                   {{ option.provincia | titlecase }}
                 </mat-option>
               </mat-autocomplete>
               <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
             </mat-form-field>
-            <mat-form-field class="w3-block" appearance="outline">
+            <mat-form-field class="w3-block" appearance="outline" *ngIf="distritos$|async">
               <mat-label>Distrito</mat-label>
               <input
                 type="text"
@@ -126,7 +126,7 @@
               </mat-autocomplete>
               <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
             </mat-form-field>
-            <div *ngIf="delivery == 1">
+            <div *ngIf="(chooseDelivery$|async) == 1">
               <mat-form-field class="w3-block" appearance="outline">
                 <mat-label>Dirección</mat-label>
                 <input

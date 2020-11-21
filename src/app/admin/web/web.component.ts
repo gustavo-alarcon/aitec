@@ -8,7 +8,8 @@ import { Component, OnInit } from '@angular/core';
 export class WebComponent implements OnInit {
   links = [
     { name: 'Banners', route: 'banners' },
-    { name: 'Contacto', route: 'contacto' }
+    { name: 'Contacto', route: 'contacto' },
+    { name: 'Landing', route: 'landing' }
   ];
 
   activeLink = this.links[0];

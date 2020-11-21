@@ -41,7 +41,7 @@
             <mat-expansion-panel-header>
               <mat-panel-title>
                 <a
-                mat-list-item
+                  mat-list-item
                   [routerLink]="['/main/productos', cat.category]"
                   >{{ cat.category }}</a
                 >
@@ -58,7 +58,11 @@
             </mat-nav-list>
           </mat-expansion-panel>
           <ng-template #nosubcategory>
-            <a mat-list-item style="border-bottom: 1px solid #c4c4c4;" [routerLink]="['/main/productos', cat.category]">
+            <a
+              mat-list-item
+              style="border-bottom: 1px solid #c4c4c4"
+              [routerLink]="['/main/productos', cat.category]"
+            >
               {{ cat.category }}
             </a>
           </ng-template>
@@ -132,3 +136,4 @@
     </div>
   </div>
 </div>
+
