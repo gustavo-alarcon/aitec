@@ -11,6 +11,9 @@ export interface User {
 
   lastLogin?: Date;
   lastBrowser?: string[]
+  fcmTokens?: {
+    [token: string]: true
+  }
 }
 interface naturalPerson {
   type:"natural";

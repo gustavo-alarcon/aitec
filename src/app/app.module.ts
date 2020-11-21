@@ -11,7 +11,8 @@ import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import {LazyLoadImageModule } from 'ng-lazyload-image';
-
+import { ServiceWorkerModule } from '@angular/service-worker';
+import * as firebase from 'firebase';
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import {LazyLoadImageModule } from 'ng-lazyload-image';
     AngularFireModule.initializeApp(environment.firebaseConfig, "aitec-ecommerce"),
     MatSnackBarModule,
     LazyLoadImageModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
