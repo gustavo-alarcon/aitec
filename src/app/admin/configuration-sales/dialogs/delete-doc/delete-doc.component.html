@@ -1,0 +1,19 @@
+<div style="max-width: 320px;">
+  <div mat-dialog-title>
+      <h2 class="title-dialog">
+          Eliminar {{data.title}}
+      </h2>
+      <mat-divider></mat-divider>
+      <mat-progress-bar *ngIf="loading$ | async" mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <div mat-dialog-content>
+      <p>¿Desea continuar con la acción?</p>
+  </div>
+
+  <div class="contain">
+      <button mat-raised-button mat-dialog-close >Cerrar</button>
+      <button class="w3-margin-left" mat-raised-button color='warn'
+          [disabled]="loading$ | async" (click)="save()">Borrar</button>
+  </div>
+</div>

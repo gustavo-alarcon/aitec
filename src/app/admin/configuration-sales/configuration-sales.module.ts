@@ -20,21 +20,34 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { Ng2ImgMaxModule } from 'ng2-img-max';
 
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { DeliveryStoresComponent } from './delivery-stores/delivery-stores.component';
-import { DepartmentDialogComponent } from './dialogs/department-dialog/department-dialog.component';
-import { ProvinceDialogComponent } from './dialogs/province-dialog/province-dialog.component';
 import { DeliveryDialogComponent } from './dialogs/delivery-dialog/delivery-dialog.component';
 import { StoreDialogComponent } from './dialogs/store-dialog/store-dialog.component';
 import { BrandComponent } from './dialogs/brand/brand.component';
 import { GeneralComponent } from './general/general.component';
-
+import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/create-edit-categories.component';
+import { BrandsViewComponent } from './brands-view/brands-view.component';
+import { DeleteDocComponent } from './dialogs/delete-doc/delete-doc.component';
 
 @NgModule({
-  declarations: [ConfigurationSalesComponent, CategoriesComponent, DeliveryStoresComponent, DepartmentDialogComponent, ProvinceDialogComponent, DeliveryDialogComponent, StoreDialogComponent, BrandComponent, GeneralComponent],
+  declarations: [
+    ConfigurationSalesComponent,
+    CategoriesComponent,
+    DeliveryStoresComponent,
+    DeliveryDialogComponent,
+    StoreDialogComponent,
+    BrandComponent,
+    GeneralComponent,
+    CreateEditCategoriesComponent,
+    BrandsViewComponent,
+    DeleteDocComponent,
+  ],
   imports: [
     CommonModule,
     ConfigurationSalesRoutingModule,
@@ -58,7 +71,9 @@ import { GeneralComponent } from './general/general.component';
     MatAutocompleteModule,
     MatSelectModule,
     MatTableModule,
-    MatPaginatorModule
-  ]
+    MatPaginatorModule,
+    MatExpansionModule,
+    Ng2ImgMaxModule
+  ],
 })
-export class ConfigurationSalesModule { }
+export class ConfigurationSalesModule {}

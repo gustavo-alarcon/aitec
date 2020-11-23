@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { LandingService } from 'src/app/core/services/landing.service';
 
 @Component({
   selector: 'app-contact',
@@ -27,7 +28,8 @@ export class ContactComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private afs: AngularFirestore,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private ld:LandingService
   ) {}
 
   loading = new BehaviorSubject<boolean>(true);
@@ -57,10 +59,7 @@ export class ContactComponent implements OnInit {
   }
 
   getData(){
-    this.init$ = this.afs.collection(`/db/aitec/config`).doc('generalConfig').get().pipe(
-      map((snap) => {
-      return snap.data()
-    }),
+    this.init$ = this.ld.getConfig().pipe(
     tap(res=>{
       this.loading.next(false)
       if(res.social){

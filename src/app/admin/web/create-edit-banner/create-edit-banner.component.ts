@@ -91,16 +91,21 @@ export class CreateEditBannerComponent implements OnInit {
       })
     )
 
-    this.category$ = this.createForm.get('category').valueChanges.pipe(
-      startWith<any>(''),
-      map(value=>{
-        let fil = this.dbs.categories.map(el=>{
-          let first = [el.category]
-          let subs = el.subcategories.map(lo=>{
-            let sub = [el.category + ' >> ' + lo.name]
+    this.category$ = combineLatest(
+      this.createForm.get('category').valueChanges.pipe(
+        startWith<any>('')
+      ),
+      this.dbs.getCategories()
+    ).pipe(
+      
+      map(([value,categories])=>{
+        let fil = categories.map(el=>{
+          let first = [el['category']]
+          let subs = el['subcategories'].map(lo=>{
+            let sub = [el['category'] + ' >> ' + lo.name]
             if(lo.categories.length){
               let secs = lo.categories.map(sec=>{
-                return el.category + ' >> ' + lo.name + ' >> ' + sec
+                return el['category'] + ' >> ' + lo.name + ' >> ' + sec
               })
               return sub.concat(secs)
             }else{
@@ -115,11 +120,15 @@ export class CreateEditBannerComponent implements OnInit {
       })
     )
 
-    this.brand$ = this.createForm.get('brand').valueChanges.pipe(
-      startWith<any>(''),
-      map(value=>{
+    this.brand$ = combineLatest(
+      this.createForm.get('brand').valueChanges.pipe(
+        startWith<any>('')
+      ),
+      this.dbs.getBrands()
+    ).pipe(
+      map(([value,brands])=>{
         
-        return this.brands.filter(el=>value?el.toLowerCase().includes(value.toLowerCase()):true)
+        return brands.map(el=>el['name']).filter(el=>value?el['name'].toLowerCase().includes(value.toLowerCase()):true)
       })
     )
     /*this.category$ = combineLatest(
@@ -332,8 +341,6 @@ export class CreateEditBannerComponent implements OnInit {
   }
 
   onSubmitForm() {
-    console.log(this.createForm.value);
-    
     this.createForm.markAsPending();
     this.createForm.disable()
     this.loading.next(true)

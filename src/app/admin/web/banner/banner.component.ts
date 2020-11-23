@@ -8,6 +8,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { CreateEditBannerComponent } from '../create-edit-banner/create-edit-banner.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
+import { LandingService } from 'src/app/core/services/landing.service';
 @Component({
   selector: 'app-banner',
   templateUrl: './banner.component.html',
@@ -33,24 +34,18 @@ export class BannerComponent implements OnInit {
 
   constructor(
     private dialog: MatDialog,
-    public dbs: DatabaseService,
+    private dbs: DatabaseService,
+    private ld:LandingService,
     private afs: AngularFirestore,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
-    let init$ = this.afs.collection(`/db/aitec/config/generalConfig/banners`,ref=>ref.where('type','==','carousel')).valueChanges().pipe(
-      shareReplay(1)
-    )
-    this.carousel$ =  init$.pipe(
-      map(items => {
-        
-        return items.sort((a, b) => a['position'] - b['position'])
-      }),
+    
+    this.carousel$ =  this.ld.getBanners('carousel').pipe(
       tap(res => {
         this.carousel = [...res]
         this.indCarousel = res.length + 1
-       
 
       })
     )
@@ -67,7 +62,7 @@ export class BannerComponent implements OnInit {
     let batch = this.afs.firestore.batch();
 
     array.forEach((el, i) => {
-      const ref: DocumentReference = this.afs.firestore.collection(`/db/aitec/config/generalConfig/banners`).doc(el['id']);
+      const ref: DocumentReference = this.afs.firestore.collection(this.ld.bannerRef).doc(el['id']);
       batch.update(ref, {
         position: i
       })

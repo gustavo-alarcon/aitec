@@ -1,11 +1,12 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { PlacesService } from 'src/app/core/services/places.service';
 
 @Component({
   selector: 'app-delivery-dialog',
@@ -30,9 +31,11 @@ export class DeliveryDialogComponent implements OnInit {
   provincias$: Observable<any>;
   distritos$: Observable<any>;
 
+  deliveryDistritos:Array<any> = [];
+
   constructor(
     private fb: FormBuilder,
-    private dbs: DatabaseService,
+    private pl:PlacesService,
     private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA)
     public data: { edit: boolean; data?: any },
@@ -41,123 +44,75 @@ export class DeliveryDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.departamentos = this.pl.getDepartamentos()
     this.formGroup = this.fb.group({
-      departamento: [null],
-      provincia: [null],
+      departamento: [this.data.edit?this.data.data.departamento:null,Validators.required],
+      provincia: [this.data.edit?this.data.data.provincia:null,Validators.required],
       distrito: [null],
-      delivery: [null],
+      delivery: [this.data.edit?this.data.data.delivery:null,[Validators.required,Validators.min(0)]],
     });
+    
+    if(this.data.edit){
+      this.deliveryDistritos=this.data.data.distritos
 
-    this.formGroup.get('departamento').disable();
-    this.formGroup.get('provincia').disable();
-    this.formGroup.get('distrito').disable();
-
-    this.init$ = this.getDepartamentos().pipe(
-      tap((res) => {
-        this.departamentos = res;
-        this.formGroup.get('departamento').enable();
-      })
-    );
-    this.filteredDepartamento$ = this.init$.pipe(
-      switchMap((departamentos) => {
-        if (departamentos) {
-          return this.formGroup.get('departamento').valueChanges.pipe(
-            startWith(''),
-            map((value) => {
-              if (departamentos) {
-                return departamentos.filter((el) =>
-                  value ? el['name'].toLowerCase().includes(value) : true
-                );
-              } else {
-                return of([]);
-              }
-            })
+    }else{
+      this.formGroup.get('provincia').disable();
+      this.formGroup.get('distrito').disable();
+    }
+    
+    this.filteredDepartamento$ = this.formGroup
+      .get('departamento')
+      .valueChanges.pipe(
+        startWith(''),
+        map((value) => {
+          return this.departamentos.filter((el) =>
+            value ? el.name.toLowerCase().includes(value) : true
           );
-        } else {
-          return of([]);
-        }
-      })
-    );
+        })
+      );
 
-    this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
-      startWith(''),
-      switchMap((dept) => {
-        if (dept) {
-          if (typeof dept == 'object') {
-            return this.getProvincia(dept.id);
-          } else {
-            return of(null);
+      this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
+        startWith(''),
+        map(dept=>{
+          
+          
+          if(typeof dept === 'object'){
+            this.selectProvincias(dept)
+            this.formGroup.get('provincias').setValue('')
           }
-        } else {
-          return of(null);
-        }
-      }),
-      tap((res) => {
-        if (res) {
-          this.formGroup.get('provincia').enable();
-        }
+          return true
+        })
+      )
+
+      this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
+        startWith(''),
+        map(prov=>{
+          if(prov && typeof prov === 'object'){
+            this.selectDistritos(prov)
+            
+          }
+          return true
+        })
+      )
+    this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
+      startWith(''),
+      map((value) => {
+        return this.provincias.filter((el) =>
+          value ? el.name.toLowerCase().includes(value) : true
+        );
       })
     );
 
-    this.distritos$ = this.provincias$.pipe(
-      switchMap((all) => {
-        if (all) {
-          return this.formGroup.get('provincia').valueChanges.pipe(
-            startWith(''),
-            switchMap((prov) => {
-              console.log(prov);
-
-              if (prov) {
-                if (typeof prov == 'object') {
-                  return this.getDistritos(prov.id);
-                } else {
-                  return of(null);
-                }
-              } else {
-                return of(null);
-              }
-            }),
-            tap((res) => {
-              if (res) {
-                this.formGroup.get('distrito').enable();
-              }
-            })
-          );
-        } else {
-          return of(null);
-        }
+    this.filteredDistrito$ = this.formGroup.get('distrito').valueChanges.pipe(
+      startWith(''),
+      map((value) => {
+        return this.distritos.filter((el) =>
+          value ? el.name.toLowerCase().includes(value) : true
+        );
       })
     );
 
-    this.filteredProvincia$ = combineLatest(
-      this.provincias$,
-      this.formGroup.get('provincia').valueChanges.pipe(startWith(''))
-    ).pipe(
-      map(([provs, value]) => {
-        if (provs) {
-          return provs.filter((el) =>
-            value ? el.name.toLowerCase().includes(value) : true
-          );
-        } else {
-          return of([]);
-        }
-      })
-    );
-
-    this.filteredDistrito$ = combineLatest(
-      this.distritos$,
-      this.formGroup.get('distrito').valueChanges.pipe(startWith(''))
-    ).pipe(
-      map(([distritos, value]) => {
-        if (distritos) {
-          return distritos.filter((el) =>
-            value ? el.name.toLowerCase().includes(value) : true
-          );
-        } else {
-          return of([]);
-        }
-      })
-    );
+    
   }
 
   showDepartamento(staff): string | undefined {
@@ -170,36 +125,87 @@ export class DeliveryDialogComponent implements OnInit {
     return staff ? staff['name'] : undefined;
   }
 
-  getDepartamentos() {
-    return this.afs
-      .collection(`/db/aitec/config/generalConfig/departamentos`)
-      .valueChanges()
-      .pipe(shareReplay(1));
+  selectProvincias(option) {
+    this.provincias = this.pl.getProvincias(option.id);
+    this.formGroup.get('provincia').enable();
+    
   }
 
-  getProvincia(id) {
-    return this.afs
-      .collection(`/db/aitec/config/generalConfig/provincias`, (ref) =>
-        ref.where('department_id', '==', id)
-      )
-      .get()
-      .pipe(
-        map((snap) => {
-          return snap.docs.map((el) => el.data());
-        })
-      );
+  selectDistritos(option) {
+    this.distritos = this.pl.getDistritos(option.id);
+    this.formGroup.get('distrito').enable();
+    
   }
 
-  getDistritos(id) {
-    return this.afs
-      .collection(`/db/aitec/config/generalConfig/distritos`, (ref) =>
-        ref.where('province_id', '==', id)
-      )
-      .get()
-      .pipe(
-        map((snap) => {
-          return snap.docs.map((el) => el.data());
-        })
-      );
+  selectDelivery(option) {
+    if(option=='all'){
+      this.deliveryDistritos = this.distritos
+    }else{
+      if (!this.deliveryDistritos.find(el=>el.id==option.id)) {
+        this.deliveryDistritos.push(option)
+      }
+    }
+
+    this.formGroup.get('distrito').setValue('')
+    
+  }
+
+  onSubmitForm(){
+    this.formGroup.markAsPending();
+    this.formGroup.disable()
+    this.loading.next(true)
+    let newDelivery={
+      id:this.data.edit?this.data.data.id:'',
+      departamento:this.formGroup.get('departamento').value,
+      provincia:this.formGroup.get('provincia').value,
+      distritos:this.deliveryDistritos,
+      delivery:this.formGroup.get('delivery').value,
+      createdAt: this.data.edit?this.data.data.createdAt:new Date()
+    }
+    console.log(newDelivery);
+    if(this.data.edit){
+      this.edit(newDelivery)
+    }else{
+      this.create(newDelivery)
+    }
+
+  }
+  
+  create(newCategory) {
+    let productRef = this.afs.firestore
+      .collection(`/db/aitec/config/generalConfig/delivery`)
+      .doc();
+
+    let batch = this.afs.firestore.batch();
+
+    newCategory.id = productRef.id;
+
+    batch.set(productRef, newCategory);
+
+    batch.commit().then(() => {
+      this.dialogRef.close(true);
+      this.loading.next(false);
+      this.snackBar.open('Delivery creado', 'Cerrar', {
+        duration: 6000,
+      });
+    });
+  }
+
+  edit(newCategory) {
+    let productRef = this.afs.firestore
+      .collection(`/db/aitec/config/generalConfig/delivery`)
+      .doc();
+
+    let batch = this.afs.firestore.batch();
+
+    batch.update(productRef, newCategory);
+
+    batch.commit().then(() => {
+      this.dialogRef.close(true);
+      this.loading.next(false);
+      this.snackBar.open('Delivery creado', 'Cerrar', {
+        duration: 6000,
+      });
+    });
   }
 }

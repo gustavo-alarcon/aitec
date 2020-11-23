@@ -1,1 +1,97 @@
-<p>brand works!</p>
+<div mat-dialog-title>
+  <h2
+    *ngIf="!data.edit"
+    style="font-size: 1.2em; font-family: Montserrat; font-weight: 900"
+  >
+    <mat-icon style="vertical-align: middle">add_circle</mat-icon>
+    {{ data.edit ? "Editar" : "Agregar" }} Marca
+  </h2>
+  <mat-divider></mat-divider>
+  <mat-progress-bar
+    mode="indeterminate"
+    *ngIf="loading$ | async"
+  ></mat-progress-bar>
+</div>
+<mat-dialog-content style="width: 400px; max-width: 85vw">
+  <form [formGroup]="createForm">
+    <!-- Photo  -->
+    <div style="margin: 16px 0; text-align: center">
+      <img
+        class="w3-card-4"
+        (click)="photoURL.click()"
+        *ngIf="createForm.get('photoURL').value != null"
+        style="max-width: 100%; max-height: 200px; object-fit: contain"
+        [src]="createForm.get('photoURL').value"
+        alt="fotografía"
+      />
+      <img
+        class="w3-card-4"
+        (click)="photoURL.click()"
+        *ngIf="createForm.get('photoURL').value == null"
+        style="max-width: 100%; max-height: 200px; object-fit: contain"
+        [src]="noImage"
+        alt="sin fotografía"
+      />
+
+      <mat-progress-bar
+        *ngIf="photos?.resizing$.photoURL | async"
+        style="width: 100%"
+        mode="indeterminate"
+      >
+      </mat-progress-bar>
+      <span
+        *ngIf="photos.resizing$.photoURL | async"
+        class="w3-small ms-color-11 ms-font-montserrat"
+        style="width: 100%"
+        >*comprimiendo</span
+      >
+      <input
+        style="display: none"
+        #photoURL
+        type="file"
+        accept="image/*"
+        (change)="addNewPhoto('photoURL', photoURL.files)"
+      />
+    </div>
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input
+        autocomplete="off"
+        formControlName="name"
+        type="text"
+        matInput
+        placeholder="Nombre"
+      />
+      <mat-error>Campo requerido</mat-error>
+    </mat-form-field>
+  </form>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
+    Cancelar
+  </button>
+  <div *ngIf="data.edit">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="editSubmit()"
+      type="button"
+      [disabled]="createForm.status != 'VALID'"
+    >
+      Editar
+    </button>
+  </div>
+  <div *ngIf="!data.edit">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmitForm()"
+      type="button"
+      [disabled]="createForm.status != 'VALID'"
+    >
+      Guardar
+    </button>
+  </div>
+</mat-dialog-actions>
