@@ -9,6 +9,7 @@ import { RateDialogComponent } from './rate-dialog/rate-dialog.component';
 import { Sale } from '../core/models/sale.model';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LandingService } from '../core/services/landing.service';
 
 @Component({
   selector: 'app-main',
@@ -25,18 +26,36 @@ export class MainComponent implements OnInit {
   filteredProducts$: Observable<any>;
 
   @ViewChild("megaMenu") menu: ElementRef;
-  selectCategory:any
+  listCategories:Array<any> = []
+  selectCategory:{
+    category:string;
+    subcategories:any;
+    brands:any;
+  }=null
 
+  init$:Observable<any>
+  footer:any
   constructor(
     private auth: AuthService,
     private router: Router,
     public dbs: DatabaseService,
+    private ld:LandingService,
     private renderer: Renderer2,
     private dialog: MatDialog
 
   ) {}
 
   ngOnInit(): void {
+    this.init$ = combineLatest(
+      this.dbs.getCategories(),
+      this.ld.getConfig()
+    ).pipe(
+      map(([categories,info])=>{
+        this.listCategories = categories
+        return info
+      })
+    )
+    
     this.user$ = this.auth.user$.pipe(
       switchMap(
         user => {

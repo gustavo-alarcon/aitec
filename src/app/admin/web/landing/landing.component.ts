@@ -5,13 +5,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, shareReplay, startWith, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { CreatEditTestimonyComponent } from '../creat-edit-testimony/creat-edit-testimony.component';
 import { CreateEditBannerComponent } from '../create-edit-banner/create-edit-banner.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
+import { LandingService } from 'src/app/core/services/landing.service';
 
 @Component({
   selector: 'app-landing',
@@ -21,6 +22,7 @@ import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component'
 export class LandingComponent implements OnInit {
   category: FormControl = new FormControl('');
   category$: Observable<string[]>;
+  categories:Array<any>=[]
   selectCategories: Array<string>=[]
 
   dataSource = new MatTableDataSource();
@@ -62,45 +64,36 @@ export class LandingComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog,
     public dbs: DatabaseService,
+    private ld:LandingService,
     private afs: AngularFirestore,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    let init1$ = this.afs
-      .collection(`/db/aitec/config/generalConfig/banners`, (ref) =>
-        ref.where('type', '==', 'promo')
-      )
-      .valueChanges()
-      .pipe(shareReplay(1));
-    this.banner$ = init1$.pipe(
-      map((items) => {
-        return items;
-      }),
+    
+    this.banner$ = this.ld.getBanners('promo').pipe(
       tap((res) => {
         this.banner = [...res];
         this.indBanner = res.length + 1;
       })
     );
 
-    let init$ = this.afs
-      .collection(`/db/aitec/config/generalConfig/testimonies`, (ref) =>
-        ref.orderBy('createdAt', 'asc')
-      )
-      .valueChanges()
-      .pipe(shareReplay(1));
 
-    this.testimonies$ = init$.pipe(
+    this.testimonies$ = this.ld.getTestimonies().pipe(
       tap((res) => {
         this.dataSource.data = res;
       })
     );
 
-    this.category$ = this.category.valueChanges.pipe(
-      startWith<any>(''),
-      map((value) => {
-        let fil = this.dbs.categories.map((el) => el.category);
-
+    this.category$ = combineLatest(
+      this.category.valueChanges.pipe(   
+        startWith<any>(''),
+      ),
+      this.dbs.getCategories()
+    ).pipe(
+      map(([value,categories]) => {
+        let fil = categories.map((el) => el['category']);
+        this.categories = categories
         return fil.filter((el) =>
           value ? el.toLowerCase().includes(value.toLowerCase()) : true
         );
@@ -135,6 +128,16 @@ export class LandingComponent implements OnInit {
     });
   }
 
+  deleteBDialog(id: string) {
+    this.dialog.open(DeleteDialogComponent, {
+      data: {
+        id:id,
+        title:'Banner',
+        type:'banner'
+      }
+    })
+  }
+
   deleteDialog(id: string) {
     this.dialog.open(DeleteDialogComponent, {
       data: {
@@ -154,8 +157,9 @@ export class LandingComponent implements OnInit {
     });
   }
 
+
   addCategory() {
-    if (this.dbs.categories.find((el) => el.category == this.category.value)) {
+    if (this.categories.find((el) => el.category == this.category.value)) {
       this.selectCategories.push(this.category.value);
       this.category.setValue('');
     } else {

@@ -1,0 +1,24 @@
+<div class="w3-section">
+  <button mat-raised-button (click)="openDialog(false,null)" color="primary">
+    <span>Agregar</span>
+    <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
+  </button>
+  <div class="w3-margin-top ms-flex w3-margin-bottom" *ngIf="init$|async as carousel">
+    <div *ngFor="let image of carousel" class="banner__category">
+        <img [src]="image.photoURL" class="banner__image">
+        <p><strong>{{image.name | titlecase}}</strong></p>
+        <div class="ms-flex w3-margin-top">
+            <span class="ms-fill"></span>
+            <div>
+                <button mat-icon-button color="primary" (click)="openDialog(true,image)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="primary" style="margin-left: 10px;"
+                    (click)="deleteDialog(image.id)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

@@ -1,0 +1,14 @@
+.banner__category {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid gray;
+  margin-top: 16px;
+  margin-right: 16px;
+}
+
+.banner__image {
+  width: 100%;
+  max-width: 350px;
+  max-height: 200px;
+  object-fit: contain;
+}

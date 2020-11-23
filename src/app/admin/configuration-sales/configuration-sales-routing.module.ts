@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
 import { DeliveryStoresComponent } from './delivery-stores/delivery-stores.component';
@@ -21,6 +22,10 @@ const routes: Routes = [
       {
         path: 'general',
         component: GeneralComponent,
+      },
+      {
+        path: 'marcas',
+        component: BrandsViewComponent,
       }
     ],
   },
