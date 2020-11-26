@@ -46,6 +46,7 @@ $mat-aitec-primary-palette: (
   ),
 );
 
+
 $aitec-primary: mat-palette($mat-aitec-primary-palette);
 $aitec-accent: mat-palette($mat-amber, 800);
 $aitec-warn: mat-palette($mat-red);

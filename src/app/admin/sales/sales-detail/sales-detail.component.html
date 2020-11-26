@@ -1,0 +1,297 @@
+<div *ngIf="auth.user$ | async as user" class="general-container background-color">
+    <div style="display: flex; flex-direction: row; justify-content: space-between;">
+        <b style="font-size: 28px;">
+            #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
+        </b>
+        <span>
+            <button
+                *ngIf="(sale.status != saleStatusOptions.confirmedDocument) && (sale.status != saleStatusOptions.requested)"
+                style="height: 40px;" [disabled]="loading$ | async" (click)="onSubmitForm(sale.status, user, true)"
+                mat-raised-button color="warn" type="button">
+                <b>Deshacer</b>
+            </button>
+        </span>
+        <span *ngIf="sale.status != saleStatusOptions.cancelled">
+            <button (click)="onSubmitForm(saleStatusOptions.cancelled, user)" [disabled]="loading$ | async" mat-mini-fab
+                color="warn" type="button">
+                <mat-icon>close</mat-icon>
+            </button>
+        </span>
+    </div>
+    <div *ngIf="products$ | async as products" class="actionsContainer formFieldRounded">
+        <mat-form-field *ngIf="sale.status == saleStatusOptions.requested" class="content w3-small"
+            style="display: block; width:100%; margin-bottom: 0;" appearance="outline">
+            <mat-icon matPrefix></mat-icon>
+            <mat-label>Buscar producto</mat-label>
+            <input [formControl]="searchProductControl" #product type="text" autocomplete="off" matInput
+                placeholder="Buscar producto" [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption [displayWith]="displayFn.bind(this)">
+                <mat-option *ngFor="let product of products" [value]="product">
+                    {{product.description}}
+                </mat-option>
+            </mat-autocomplete>
+            <mat-error>
+                <span *ngIf="searchProductControl.errors?.required">Campo requerido</span>
+            </mat-error>
+        </mat-form-field>
+    </div>
+    <div class="w3-margin-top">
+        <table [formGroup]="productForm" class="table-sale">
+            <tr>
+                <th class="quantity">Cant.</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+            </tr>
+            <tr formArrayName="productList"
+                *ngFor="let item of productForm.get('productList')['controls']; let i = index">
+
+                <div [formGroupName]="i" style="display:contents">
+                    <!-- Quantity -->
+                    <td class="table-sale__td table-sale__td--space" style="overflow: auto;">
+                        <input *ngIf="sale.status == saleStatusOptions.requested else readQuantity" autocomplete="off"
+                            class="table-sale__input--thin" formControlName="quantity" type="number" max=99 min=0
+                            required>
+                        <ng-template #readQuantity>
+                            {{item.get('quantity').value}}
+                        </ng-template>
+                        ({{item.get('product').value['unit']['abbreviation']}})
+                    </td>
+                    <!-- Description -->
+                    <td class="table-sale__td table-sale__td--space" style="overflow: auto;">
+
+                        <!-- We have promo-->
+                        <span *ngIf="item.get('product').value.promo">
+                            <mat-icon style="cursor: pointer; font-size:medium; width:auto"
+                                matTooltip="Precio: {{item.get('product').value.price | currency: 'S/. '}} por {{item.get('product').value.unit.abbreviation}}">
+                                info
+                            </mat-icon>
+                            <ng-container *ngFor="let promo of item.value.product.promoData; let i=index">
+                                <mat-icon style="cursor: pointer; font-size:medium; width:auto" #tooltip="matTooltip"
+                                    matTooltip="Oferta ({{getPromos(item.value)[i].numberPromos}}): 
+                                    {{getPromos(item.value)[i].promo.quantity}} {{(item.get('product').value.unit.abbreviation)}}
+                                    X
+                                    {{getPromos(item.value)[i].promo.promoPrice | currency: 'S/. '}}">
+                                    new_releases
+                                </mat-icon>
+                            </ng-container>
+                            {{item.get('product').value.description}}
+                        </span>
+                        <!-- Normal -->
+                        
+                        <!-- Normal -->
+                        <span *ngIf="!item.get('product').value.promo">
+                            <mat-icon style="cursor: pointer; font-size:medium; width:auto"
+                                matTooltip="{{item.get('product').value.price | currency: 'S/. '}} por {{item.get('product').value.unit.abbreviation}}">
+                                info
+                            </mat-icon>
+                            {{item.get('product').value.description}}
+
+                        </span>
+
+
+                        <ng-container *ngIf="item.get('product').value.package">
+                            <br>
+                            <ol style="margin: 0; padding-left: 14px;">
+                                <li *ngFor="let field of item.get('chosenOptions')['controls']; let i2=index">
+                                    <ng-container *ngIf="(item.get('product').value.items[i2].productsOptions.length == 1
+                                                || sale.status != saleStatusOptions.confirmedStock) else noSingle">
+                                        {{field.value.description | titlecase}}
+                                        <mat-icon style="cursor: pointer; font-size:medium; width:auto"
+                                            matTooltip="{{field.value.unit.abbreviation}}">
+                                            info
+                                        </mat-icon>
+                                    </ng-container>
+                                    <ng-template #noSingle>
+                                        <select style="max-width: 100px;" [formControl]="field">
+                                            <option
+                                                *ngFor="let product of item.get('product').value.items[i2].productsOptions"
+                                                [ngValue]="product">
+                                                {{product.description | titlecase}} ({{product.unit.abbreviation}})
+                                            </option>
+                                        </select>
+                                    </ng-template>
+                                </li>
+                            </ol>
+                        </ng-container>
+
+
+
+                    </td>
+                    <!-- price -->
+                    <td class="w3-right-align table-sale__td table-sale__td--space">
+                        <span>{{giveProductPrice(item.value) | currency: 'S/. ':'symbol':'2.2-2'}}</span>
+                        <mat-icon *ngIf="sale.status == saleStatusOptions.requested" class="removeIcon" color="primary"
+                            (click)="onDeleteProduct(i)">
+                            remove_circle
+                        </mat-icon>
+                        <span *ngIf="sale.status == saleStatusOptions.confirmedStock">
+                            <mat-icon style="cursor: pointer; font-size:medium; width:auto; margin-left: 4px" 
+                                matTooltip="Editar precio"
+                                (click)="editItem(item.value, i)">
+                                create
+                            </mat-icon>
+                        </span>
+                    </td>
+                </div>
+
+            </tr>
+            <tr>
+                <td class="table-sale__td table-sale__td--border"></td>
+                <td class="w3-right-align table-sale__td table-sale__td--border">
+                    SubTotal
+                </td>
+                <td class="w3-right-align table-sale__td table-sale__td--border table-sale__td--space"
+                    style="padding-right:32px">
+                    <span>{{getTotalPrice() -
+                        getTotalPrice()/1.1494*0.1494 | currency:'S/. ':'symbol':'2.2-2'}}
+                    </span>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="table-sale__td"></td>
+                <td class="w3-right-align table-sale__td">
+                    IVA
+                </td>
+                <td class="w3-right-align table-sale__td table-sale__td--space" style="padding-right:32px">
+                    <span>
+                        {{getTotalPrice()/1.1494*0.1494 | currency:'S/. ':'symbol':'2.2-2'}}
+                    </span>
+                </td>
+
+            </tr>
+            <tr>
+                <td class="table-sale__td"></td>
+                <td class="w3-right-align table-sale__td">
+                    Total
+                </td>
+                <td class="w3-right-align table-sale__td table-sale__td--space" style="padding-right:32px">
+                    <span>
+                        {{getTotalPrice() | currency:'S/. ':'symbol':'2.2-2'}}
+                    </span>
+                </td>
+
+            </tr>
+            <!-- <tr>
+                <td class="table-sale__td table-sale__td--border"></td>
+                <td class="w3-right-align table-sale__td table-sale__td--border">
+                    Delivery
+                </td>
+                <td class="w3-right-align table-sale__td table-sale__td--border table-sale__td--space"
+                    style="padding-right:32px">
+                    S/. <input *ngIf="sale.status == saleStatusOptions.attended else readDelivery"
+                            autocomplete="off" class="table-sale__input--width" 
+                            formControlName="deliveryPrice" type="number"
+                            required min=0>
+                        <ng-template #readDelivery>
+                            {{this.productForm.get('deliveryPrice').value |number:'2.2-2'}}
+                        </ng-template>
+                </td>
+            </tr> -->
+        </table>
+    </div>
+    <!-- <div class="total-div">
+        <div class="bigCheckbox">
+            <mat-checkbox 
+                [disabled]="(loading$ | async) || !(user.confi || user.accountant)"
+                [formControl]="voucherCheckedForm"
+                (click)="confirmVoucherChecked($event, user)"
+                color="primary"></mat-checkbox>
+        </div>
+        <div class="voucher-div">
+            <div (click)="checkVouchers(user)" class="photo">
+                <mat-icon style="font-size: xx-large; height: auto; width:auto;"
+                    *ngIf="sale.voucher.length > 1">collections_bookmark</mat-icon>
+                <mat-icon style="font-size: xx-large; height: auto; width:auto;"
+                    *ngIf="sale.voucher.length == 1">book</mat-icon>
+            </div>
+            <div class="photo-number">
+                <span>{{sale.voucher.length | number:"2.0-0"}} voucher</span>
+            </div>
+        </div>
+        <div class="ticket__total">
+            <span style="white-space: nowrap;">
+                {{getTotalPrice() + productForm.get('deliveryPrice').value | currency:'S/. '}}
+            </span>
+        </div>
+    </div> -->
+    <!-- <div class="voucher-div">
+        <div class="photo-number">
+            <span>{{sale.voucher.length | number:"2.0-0"}} voucher</span>
+        </div>
+    </div> -->
+
+    <!-- confirmedRequestData -->
+    <form style="display:contents" [formGroup]="confirmedRequestForm" *ngIf="
+            sale.status == saleStatusOptions.confirmedStock ||
+            sale.status == saleStatusOptions.confirmedRequest ||
+            sale.status == saleStatusOptions.confirmedDocument ||
+            sale.status == saleStatusOptions.cancelled
+            ">
+        <!-- observation -->
+        <div>
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Observación de cliente</mat-label>
+                <textarea [value]="sale.observations ? sale.observations : 'Sin observaciones'" #observation2 readonly
+                    style="min-height: 50px;" matInput></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Observación de respuestas</mat-label>
+                <textarea formControlName="observation" #observation
+                    [readonly]="sale.status != saleStatusOptions.confirmedStock" style="min-height: 50px;" matInput
+                    maxlength="150"></textarea>
+                <mat-hint align="end">{{observation.value?.length || 0}}/150</mat-hint>
+            </mat-form-field>
+        </div>
+    </form>
+
+    <!-- confirmedDocumentData -->
+    <form style="display:contents" [formGroup]="confirmedDocumentForm" *ngIf="
+        sale.status == saleStatusOptions.confirmedRequest ||
+        sale.status == saleStatusOptions.confirmedDocument ||
+        sale.status == saleStatusOptions.cancelled
+        ">
+        <div style="width: 100%;
+                display:flex; flex-direction: row; justify-content: space-between">
+            <!-- document  -->
+            <!-- <mat-form-field style="width: 32%"
+                appearance="outline">
+            <mat-label>Tipo de Comp.</mat-label>
+            <input formControlName="document" readonly
+                autocomplete="off" type="text"
+                matInput placeholder="Tipo de Comp.">
+            </mat-form-field> -->
+
+            <!-- documentNumber  -->
+            <mat-form-field style="width: 100%" appearance="outline">
+                <mat-label>Número de Comprobante</mat-label>
+                <input formControlName="documentNumber" [readonly]="sale.status != saleStatusOptions.confirmedRequest"
+                    autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
+                <mat-error>
+                    <!-- <span *ngIf="productForm.get('mermaStock').errors?.required">Campo requerido</span>
+                <span *ngIf="productForm.get('mermaStock').errors?.min">Solo positivos</span> -->
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </form>
+
+    <button *ngIf="sale.status == saleStatusOptions.requested" class="w3-block w3-margin-top" mat-raised-button
+        color="primary" type="button" (click)="onSubmitForm(saleStatusOptions.confirmedStock, user)" [disabled]="(loading$ | async) || !productForm.valid || 
+            !productForm.get('productList')['controls']?.length||
+            !confirmedRequestForm.valid">
+        <b>Confirmar Stock</b>
+    </button>
+
+    <button *ngIf="sale.status == saleStatusOptions.confirmedStock" class="w3-block w3-margin-top" mat-raised-button
+        color="primary" type="button" (click)="onSubmitForm(saleStatusOptions.confirmedRequest, user)"
+        [disabled]="(loading$ | async) || !confirmedRequestForm.valid">
+        <b>Confirmar pedido</b>
+    </button>
+
+    <button *ngIf="sale.status == saleStatusOptions.confirmedRequest" class="w3-block w3-margin-top" mat-raised-button
+        color="primary" type="button" (click)="onSubmitForm(saleStatusOptions.confirmedDocument, user)"
+        [disabled]="(loading$ | async) || !confirmedDocumentForm.valid">
+        <b>Confirmar comprobante</b>
+    </button>
+
+</div>

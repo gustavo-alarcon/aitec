@@ -5,129 +5,81 @@
       <a mat-flat-button routerLink="/main/productos">Productos</a>
       <span *ngIf="searchCategory">
         >
-        <a mat-flat-button [routerLink]="['/main/productos', searchCategory]">{{
-          searchCategory
-        }}</a></span
-      >
+        <a mat-flat-button (click)="navigateOnlyCategory(searchCategory)">
+          {{searchCategory | titlecase}}
+        </a>
+      </span>
       <span *ngIf="searchSubCategory">
         >
-        <a
-          mat-flat-button
-          (click)="navigate(searchCategory, searchSubCategory)"
-          >{{ searchSubCategory }}</a
-        ></span
-      >
+        <a mat-flat-button (click)="navigateCategory(searchCategory, searchSubCategory)">
+          {{ searchSubCategory | titlecase}}
+        </a></span>
+      <span *ngIf="searchSubSubCategory">
+        >
+        <a mat-flat-button (click)="navigateSubCategory(searchCategory, searchSubCategory,searchSubSubCategory)">
+          {{ searchSubSubCategory | titlecase}}
+        </a></span>
+      <span *ngIf="search">
+        > Búsqueda: <strong>{{ search | titlecase}}</strong>
+      </span>
+      <span *ngIf="searchPromo">
+        > Promociones
+      </span>
+      <span *ngIf="searchBrand">
+        > Marca: <strong>{{ searchBrand | titlecase}}</strong>
+      </span>
     </div>
 
     <mat-form-field appearance="outline" class="store__search">
       <mat-label>Busca en los resultados</mat-label>
-      <input
-        matInput
-        placeholder="Busca en los resultados"
-        autocomplete="off"
-        [formControl]="searchForm"
-      />
+      <input matInput placeholder="Busca en los resultados" autocomplete="off" [formControl]="searchForm" />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
   </div>
   <div class="w3-row-padding ms-row">
     <div class="w3-col l3 m3 w3-hide-small w3-hide-medium">
-      <div style="padding: 8px 0">
-        <mat-nav-list *ngFor="let cat of categories">
-          <mat-expansion-panel
-            class="filtro__panel"
-            *ngIf="cat.subcategories; else nosubcategory"
-          >
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <a
-                  mat-list-item
-                  [routerLink]="['/main/productos', cat.category]"
-                  >{{ cat.category }}</a
-                >
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <mat-nav-list>
-              <a
-                mat-list-item
-                (click)="navigate(cat.category, link)"
-                *ngFor="let link of cat.subcategories"
-              >
-                {{ link }}
-              </a>
-            </mat-nav-list>
-          </mat-expansion-panel>
-          <ng-template #nosubcategory>
-            <a
-              mat-list-item
-              style="border-bottom: 1px solid #c4c4c4"
-              [routerLink]="['/main/productos', cat.category]"
-            >
-              {{ cat.category }}
-            </a>
-          </ng-template>
+      <div style="padding: 8px 0" *ngIf="category$|async as categories">
+        <mat-nav-list>
+          <mat-list-item  style="border-bottom: 1px solid #c4c4c4">
+            <a matLine [routerLink]="['/main/productos', { promo: true }]">Promociones</a>
+
+          </mat-list-item>
+          <mat-list-item *ngFor="let cat of categories"  style="border-bottom: 1px solid #c4c4c4">
+            <a matLine href="...">{{ cat.category }}</a>
+            <button mat-icon-button (click)="showInfo(cat)">
+              <mat-icon>navigate_next</mat-icon>
+           </button>
+          </mat-list-item>
+
         </mat-nav-list>
       </div>
     </div>
 
     <div class="store__section w3-col l9">
       <div class="w3-margin-top">
-        <div
-          class="w3-row ms-row"
-          style="min-height: 80vh"
-          *ngIf="products$ | async"
-        >
-          <div
-            *ngFor="let product of products | paginate: config"
-            class="w3-col col-lg-4 col-sm-6 w3-margin-bottom"
-          >
+        <div class="w3-row ms-row" style="min-height: 80vh" *ngIf="products$ | async">
+          <div *ngFor="let product of products | paginate: config" class="w3-col col-lg-4 col-sm-6 w3-margin-bottom">
             <div class="w3-padding">
-              <app-product-div
-                [product]="product"
-                [offer]="false"
-              ></app-product-div>
+              <app-product-div [product]="product" [offer]="false"></app-product-div>
             </div>
           </div>
         </div>
-        <pagination-template
-          #p="paginationApi"
-          [id]="config.id"
-          (pageChange)="config.currentPage = $event"
-          maxSize="6"
-          autoHide="true"
-          class="paginator"
-        >
+        <pagination-template #p="paginationApi" [id]="config.id" (pageChange)="config.currentPage = $event" maxSize="6"
+          autoHide="true" class="paginator">
           <div class="ms-flex ms-flex--center">
-            <button
-              mat-button
-              class="paginator__button"
-              (click)="p.previous()"
-              [disabled]="p.isFirstPage()"
-            >
+            <button mat-button class="paginator__button" (click)="p.previous()" [disabled]="p.isFirstPage()">
               <mat-icon>keyboard_arrow_left</mat-icon>
             </button>
 
-            <div
-              *ngFor="let page of p.pages"
-              [class.paginator__current]="p.getCurrent() === page.value"
-            >
-              <a
-                (click)="p.setCurrent(page.value)"
-                *ngIf="p.getCurrent() !== page.value"
-                class="paginator__number"
-              >
+            <div *ngFor="let page of p.pages" [class.paginator__current]="p.getCurrent() === page.value">
+              <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value" class="paginator__number">
                 <span>{{ page.label }}</span>
               </a>
               <div *ngIf="p.getCurrent() === page.value">
                 <span>{{ page.label }}</span>
               </div>
             </div>
-            <button
-              mat-button
-              class="paginator__button"
-              (click)="p.next()"
-              [disabled]="p.isLastPage()"
-            >
+            <button mat-button class="paginator__button" (click)="p.next()" [disabled]="p.isLastPage()">
               <mat-icon>keyboard_arrow_right</mat-icon>
             </button>
           </div>
@@ -136,4 +88,3 @@
     </div>
   </div>
 </div>
-

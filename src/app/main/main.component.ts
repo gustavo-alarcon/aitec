@@ -18,7 +18,7 @@ import { LandingService } from '../core/services/landing.service';
 })
 export class MainComponent implements OnInit {
   user$: Observable<User>
-  openedMenu:boolean = false
+  openedMenu: boolean = false
   firstOpening: boolean = false;
 
   searchForm: FormControl = new FormControl('');
@@ -26,40 +26,40 @@ export class MainComponent implements OnInit {
   filteredProducts$: Observable<any>;
 
   @ViewChild("megaMenu") menu: ElementRef;
-  listCategories:Array<any> = []
-  selectCategory:{
-    category:string;
-    subcategories:any;
-    brands:any;
-  }=null
+  listCategories: Array<any> = []
+  selectCategory: {
+    category: string;
+    subcategories: any;
+    brands: Array<any>;
+  } = null
 
-  init$:Observable<any>
-  footer:any
+  init$: Observable<any>
+  footer: any
   constructor(
     private auth: AuthService,
     private router: Router,
     public dbs: DatabaseService,
-    private ld:LandingService,
+    private ld: LandingService,
     private renderer: Renderer2,
     private dialog: MatDialog
 
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.init$ = combineLatest(
       this.dbs.getCategories(),
       this.ld.getConfig()
     ).pipe(
-      map(([categories,info])=>{
+      map(([categories, info]) => {
         this.listCategories = categories
         return info
       })
     )
-    
+
     this.user$ = this.auth.user$.pipe(
       switchMap(
         user => {
-          if(user){
+          if (user) {
             return this.dbs.getUserFinishedSales(user).pipe(
               map(sales => {
                 if (sales.length) {
@@ -74,7 +74,7 @@ export class MainComponent implements OnInit {
                   dialogRef.afterClosed().pipe(
                     switchMap((rate: Sale["rateData"]) => this.dbs.onSaveRate(sales[0].id, rate)))
                     .subscribe(() => {
-                        console.log("rated!")
+                      console.log("rated!")
                     }, console.log)
                 }
                 return user
@@ -98,11 +98,11 @@ export class MainComponent implements OnInit {
       map((value) => {
         return value.length
           ? this.dbs.products.filter(
-              (option) =>
-                option['description'].toLowerCase().includes(value) ||
-                option['sku'].toLowerCase().includes(value) ||
-                option['category'].toLowerCase().includes(value)
-            )
+            (option) =>
+              option['description'].toLowerCase().includes(value) ||
+              option['sku'].toLowerCase().includes(value) ||
+              option['category'].toLowerCase().includes(value)
+          )
           : [];
       })
     );
@@ -122,15 +122,15 @@ export class MainComponent implements OnInit {
     window.scroll(0, 0);
   }
 
-  getName(user){
+  getName(user) {
     let name;
     let lastName;
-    if(user.personData){
-      name=user.personData.name.split(' ')[0]
-      lastName=user.personData.lastName.split(' ')[0]
-    }else{
-      name=user.name.split(' ')[0]
-      lastName=user.lastName.split(' ')[0]
+    if (user.personData) {
+      name = user.personData.name.split(' ')[0]
+      lastName = user.personData.lastName.split(' ')[0]
+    } else {
+      name = user.name.split(' ')[0]
+      lastName = user.lastName.split(' ')[0]
     }
     return name + ' ' + lastName
   }
@@ -142,9 +142,17 @@ export class MainComponent implements OnInit {
   navigate() {
     let name = this.searchForm.value;
     if (name.length > 1) {
-      this.router.navigate(['/main/productos'], { fragment: name });
+      this.router.navigate(['/main/productos'], {
+        queryParams: { search: name },
+      });
       this.clearInput();
     }
+  }
+
+  navigatePromo() {
+    this.router.navigate(['/main/productos'], {
+      queryParams: { promo: true },
+    });
   }
 
   navigateProduct(product) {
@@ -152,17 +160,45 @@ export class MainComponent implements OnInit {
     this.clearInput();
   }
 
+  navigateOnlyCategory(category) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat]);
+  }
+
+  navigateCategory(category, subcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub]);
+    this.toggleMenu()
+  }
+
+  navigateSubCategory(category, subcategory, subsubcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    let subsub = subsubcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub, subsub]);
+    this.toggleMenu()
+  }
+
+  navigateBrand(name) {
+    this.router.navigate(['/main/productos'], {
+      queryParams: { brand: name },
+    });
+  }
+
   showSelectedUser(staff): string | undefined {
     return staff ? staff['description'] : undefined;
   }
 
-  openSection(title){
-    this.selectCategory=title
-    this.renderer.setStyle(this.menu.nativeElement, "visibility",'visible');
+  openSection(title) {
+    this.selectCategory = title
+    console.log(this.selectCategory);
+
+    this.renderer.setStyle(this.menu.nativeElement, "visibility", 'visible');
   }
 
-  closeSection(){
-    this.selectCategory=null
-    this.renderer.setStyle(this.menu.nativeElement, "visibility",'hidden');
+  closeSection() {
+    this.selectCategory = null
+    this.renderer.setStyle(this.menu.nativeElement, "visibility", 'hidden');
   }
 }

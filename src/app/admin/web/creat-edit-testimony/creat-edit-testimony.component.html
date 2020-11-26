@@ -58,7 +58,7 @@
           </div>
           <div>
             <mat-form-field appearance="outline" style="width: 80px;">
-              <input matInput type="number" placeholder="0" formControlName="rating">
+              <input matInput (keydown)="onKeydown($event)" type="number" placeholder="0" formControlName="rating">
               <span matSuffix>&nbsp;/5</span>
             </mat-form-field>
           </div>

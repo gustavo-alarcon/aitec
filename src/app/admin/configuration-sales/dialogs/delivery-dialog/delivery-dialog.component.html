@@ -129,7 +129,7 @@
       color="primary"
       (click)="editSubmit()"
       type="button"
-      [disabled]="formGroup.status != 'VALID'"
+      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length"
     >
       Editar
     </button>
@@ -140,7 +140,7 @@
       color="primary"
       (click)="onSubmitForm()"
       type="button"
-      [disabled]="formGroup.status != 'VALID'"
+      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length"
     >
       Guardar
     </button>

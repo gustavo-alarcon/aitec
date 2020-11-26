@@ -25,12 +25,18 @@ export class QuantityDivComponent implements OnInit {
 
     this.quantity$ = this.dbs.orderObs$.pipe(
       map((order) => {
+        console.log(order);
+        
         let index = order.findIndex(
           (el) => el['product']['sku'] == this.product['sku']
         );
+        console.log(index);
+        
         if (index >= 0) {
           let orderProduct = order[index];
           return orderProduct['quantity'];
+        }else{
+          return null
         }
       }),
       tap((res) => {

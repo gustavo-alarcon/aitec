@@ -1,14 +1,11 @@
 //import { Banner } from './../../../../core/models/banners.model';
 import { AngularFirestore, DocumentReference } from '@angular/fire/firestore';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { startWith, map, take, takeLast, switchMap, filter, ignoreElements } from 'rxjs/operators';
+import { startWith, map, take, takeLast, switchMap, filter} from 'rxjs/operators';
 import { Ng2ImgMaxService } from 'ng2-img-max';
-//import { DatabaseService } from './../../../../core/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Observable, BehaviorSubject, combineLatest, concat, interval, of, forkJoin } from 'rxjs';
-import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Observable, BehaviorSubject, combineLatest, concat,  of, forkJoin } from 'rxjs';
+import { Component, OnInit, Inject} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -21,7 +18,6 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 export class CreateEditBannerComponent implements OnInit {
 
   redirects:Array<string> = ['Ninguno','Link externo','Categoría/subcategoría','Marca','Producto']
-  brands = ['logitech','samsung','philips','teros']
 
   category$: Observable<string[]>
   products$: Observable<any>

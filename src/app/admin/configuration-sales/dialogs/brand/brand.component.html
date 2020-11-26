@@ -62,7 +62,14 @@
         matInput
         placeholder="Nombre"
       />
-      <mat-error>Campo requerido</mat-error>
+      <mat-error>
+        <span *ngIf="createForm.get('name').errors?.required"
+          >Campo requerido</span
+        >
+        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
+          encuentra
+          repetido.</span>
+      </mat-error>
     </mat-form-field>
   </form>
   <mat-divider></mat-divider>

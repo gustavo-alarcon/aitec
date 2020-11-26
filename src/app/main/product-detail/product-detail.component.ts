@@ -58,8 +58,6 @@ productDiv:any
         return this.dbs.products.filter((el) => el.sku == param.id)[0];
       }),
       tap(res=>{
-        console.log('produvt');
-        console.log(res);
         this.productDiv = res
         this.loading.next(false)
         this.prods = this.dbs.products.filter(el=>el.category==res.category)

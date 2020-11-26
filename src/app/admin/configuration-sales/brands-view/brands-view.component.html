@@ -5,7 +5,7 @@
   </button>
   <div class="w3-margin-top ms-flex w3-margin-bottom" *ngIf="init$|async as carousel">
     <div *ngFor="let image of carousel" class="banner__category">
-        <img [src]="image.photoURL" class="banner__image">
+        <img  [defaultImage]="defaultImage" [lazyLoad]="image.photoURL" [offset]="100" class="banner__image">
         <p><strong>{{image.name | titlecase}}</strong></p>
         <div class="ms-flex w3-margin-top">
             <span class="ms-fill"></span>

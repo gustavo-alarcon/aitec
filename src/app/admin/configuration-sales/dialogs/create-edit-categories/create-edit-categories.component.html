@@ -35,9 +35,9 @@
                 <span *ngIf="packageForm.get('category').errors?.required"
                   >Campo requerido</span
                 >
-                <!--span *ngIf="packageForm.get('category').errors?.descriptionRepeatedValidator">Este contenido ya se
+                <span *ngIf="packageForm.get('category').errors?.descriptionRepeatedValidator">Esta categoría ya se
                   encuentra
-                  repetido.</span-->
+                  repetido.</span>
               </mat-error>
             </mat-form-field>
             <!-- totalItems -->
@@ -55,10 +55,10 @@
               />
             </mat-form-field>
           </div>
-          <div class="w3-row-padding">
+          <div class="grid-container">
             <ng-container *ngIf="totalItems$ | async"></ng-container>
             <div
-              class="w3-col m4 l4"
+              class="grid-item"
               *ngFor="let group of itemsFormArray.controls; let i = index"
             >
               <!-- itemsFormArray -->
@@ -164,9 +164,12 @@
         />
         <mat-autocomplete
           autoActiveFirstOption
+          [displayWith]="showBrand"
           #brandAutocomplete="matAutocomplete"
         >
-          <mat-option *ngFor="let brand of brands" [value]="brand">
+          <mat-option *ngFor="let brand of brands" [value]="brand"
+          (click)="addProduct(option)"
+          (keyup.enter)="addProduct(option)">
             {{ brand['name'] }}
           </mat-option>
           

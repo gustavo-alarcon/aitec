@@ -7,8 +7,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigurationSalesComponent implements OnInit {
   links = [
-    { name: 'Categorías', route: 'categorias' },
     { name: 'Marcas', route: 'marcas' },
+    { name: 'Categorías', route: 'categorias' },
     { name: 'Delivery - Tiendas', route: 'delivery' },
     { name: 'General', route: 'general' },
   ];

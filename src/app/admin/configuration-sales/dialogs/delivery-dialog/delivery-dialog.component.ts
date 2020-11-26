@@ -54,6 +54,8 @@ export class DeliveryDialogComponent implements OnInit {
     
     if(this.data.edit){
       this.deliveryDistritos=this.data.data.distritos
+      this.formGroup.get('departamento').disable();
+      this.formGroup.get('provincia').disable();
 
     }else{
       this.formGroup.get('provincia').disable();
@@ -65,8 +67,9 @@ export class DeliveryDialogComponent implements OnInit {
       .valueChanges.pipe(
         startWith(''),
         map((value) => {
+          let val = typeof value == 'object'?value['name']:value
           return this.departamentos.filter((el) =>
-            value ? el.name.toLowerCase().includes(value) : true
+            value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
           );
         })
       );
@@ -74,11 +77,15 @@ export class DeliveryDialogComponent implements OnInit {
       this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
         startWith(''),
         map(dept=>{
-          
-          
-          if(typeof dept === 'object'){
-            this.selectProvincias(dept)
-            this.formGroup.get('provincias').setValue('')
+          if(!this.data.edit){
+            if(this.formGroup.get('provincia').value){
+              this.formGroup.get('provincia').setValue('')
+              this.formGroup.get('distrito').disable()
+            }
+            
+            if(typeof dept === 'object'){
+              this.selectProvincias(dept)
+            }
           }
           return true
         })
@@ -87,18 +94,26 @@ export class DeliveryDialogComponent implements OnInit {
       this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
         startWith(''),
         map(prov=>{
+         if(!this.data.edit){
           if(prov && typeof prov === 'object'){
             this.selectDistritos(prov)
             
           }
+         }else{
+          this.selectDistritos(this.data.data.provincia)
+         }
           return true
         })
       )
     this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
       startWith(''),
       map((value) => {
+        let val = ''
+        if(value){
+          val = typeof value == 'object'?value['name']:value
+        }
         return this.provincias.filter((el) =>
-          value ? el.name.toLowerCase().includes(value) : true
+          val ? el.name.toLowerCase().includes(val.toLowerCase()) : true
         );
       })
     );
@@ -106,8 +121,12 @@ export class DeliveryDialogComponent implements OnInit {
     this.filteredDistrito$ = this.formGroup.get('distrito').valueChanges.pipe(
       startWith(''),
       map((value) => {
+        let val = ''
+        if(value){
+          val = typeof value == 'object'?value['name']:value
+        }
         return this.distritos.filter((el) =>
-          value ? el.name.toLowerCase().includes(value) : true
+          value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
         );
       })
     );
@@ -194,7 +213,7 @@ export class DeliveryDialogComponent implements OnInit {
   edit(newCategory) {
     let productRef = this.afs.firestore
       .collection(`/db/aitec/config/generalConfig/delivery`)
-      .doc();
+      .doc(this.data.data.id);
 
     let batch = this.afs.firestore.batch();
 
@@ -203,7 +222,7 @@ export class DeliveryDialogComponent implements OnInit {
     batch.commit().then(() => {
       this.dialogRef.close(true);
       this.loading.next(false);
-      this.snackBar.open('Delivery creado', 'Cerrar', {
+      this.snackBar.open('Cambios guardados', 'Cerrar', {
         duration: 6000,
       });
     });

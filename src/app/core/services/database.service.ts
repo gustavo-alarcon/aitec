@@ -72,6 +72,7 @@ export class DatabaseService {
       alertMinimum: 0,
       category: "PCs y laptops",
       subcategory:'Laptops',
+      subsubcategory:'Laptop1',
       brand:'Asus',
       caracteristicas:['Número de modelo: F512DA-RS51','Tipo de memoria RAM DDR4','Tamaño de la pantalla 15.6 "','Velocidad de la memoria RAM 2400 MHz','Puertos de video HDMI','Tipo de batería Polímero de litio'],
       createdAt: null,
@@ -495,13 +496,7 @@ export class DatabaseService {
       );
   }
 
-  getCategoriesDoc(): Observable<any> {
-    return this.generalConfigDoc.get().pipe(
-      map((snap) => {
-        return snap.data()['categories'];
-      })
-    );
-  }
+  
 
   getProvidersDoc(): Observable<any> {
     return this.generalConfigDoc.get().pipe(
@@ -516,21 +511,43 @@ export class DatabaseService {
   getCategories(){
     return this.afs
     .collection(`/db/aitec/config/generalConfig/categories`, (ref) =>
-      ref.orderBy('createdAt', 'asc')
+      ref.orderBy('createdAt', 'desc')
     )
     .valueChanges()
     .pipe(shareReplay(1));
   }
 
+  getCategoriesDoc(): Observable<any> {
+    return this.afs
+    .collection(`/db/aitec/config/generalConfig/categories`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    ).get().pipe(
+      map((snap) => {
+        return snap.docs.map((el) => el.data());
+      })
+    );
+  }
+
   getBrands(){
     return this.afs
     .collection(`/db/aitec/config/generalConfig/brands`, (ref) =>
-      ref.orderBy('createdAt', 'asc')
+      ref.orderBy('createdAt', 'desc')
     )
     .valueChanges()
     .pipe(shareReplay(1));
   }
   
+  getBrandsDoc(): Observable<any> {
+    return this.afs
+    .collection(`/db/aitec/config/generalConfig/brands`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    ).get().pipe(
+      map((snap) => {
+        return snap.docs.map((el) => el.data());
+      })
+    );
+  }
+
   getDelivery(){
     return this.afs
     .collection(`/db/aitec/config/generalConfig/delivery`, (ref) =>

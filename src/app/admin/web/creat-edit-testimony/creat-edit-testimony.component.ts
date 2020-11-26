@@ -236,4 +236,14 @@ export class CreatEditTestimonyComponent implements OnInit {
     }
   }
 
+  onKeydown(event) {
+    
+    let permit =
+      event.keyCode === 8 ||
+      event.keyCode === 46 ||
+      event.keyCode === 37 ||
+      event.keyCode === 39;
+    return permit ? true : !isNaN(Number(event.key));
+  }
+
 }
