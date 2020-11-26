@@ -13,6 +13,8 @@ import { DeleteDocComponent } from '../dialogs/delete-doc/delete-doc.component';
 export class BrandsViewComponent implements OnInit {
   init$: Observable<any>;
 
+  defaultImage = "../../../../assets/images/logo-black.png";
+  
   constructor(private dialog: MatDialog, private dbs: DatabaseService) {}
 
   ngOnInit(): void {
@@ -28,12 +30,13 @@ export class BrandsViewComponent implements OnInit {
     });
   }
 
-  deleteDialog(id: string) {
+  deleteDialog(brand) {
     this.dialog.open(DeleteDocComponent, {
       data: {
-        id:id,
+        id:brand.id,
         title:'Marca',
-        type:'brands'
+        type:'brands',
+        image:brand
       }
     })
   }

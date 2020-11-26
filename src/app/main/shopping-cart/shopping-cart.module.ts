@@ -27,6 +27,7 @@ import { PaymentMethodComponent } from './payment-method/payment-method.componen
 import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
+import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { QuantityDivModule } from '../quantity-div/quantity-div.module';
     ShoppingListComponent,
     DeliveryComponent,
     PaymentMethodComponent,
+    SaleDialogComponent,
   ],
   imports: [
     CommonModule,

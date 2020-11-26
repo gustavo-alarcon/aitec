@@ -51,7 +51,8 @@ export class CreateEditCategoriesComponent implements OnInit {
 
     this.brand$ = combineLatest(
       this.brandForm.valueChanges.pipe(
-        startWith<any>('')
+        startWith<any>(''),
+        map(el=>typeof el == 'object'?el['name']:el)
       ),
       this.dbs.getBrands()
     ).pipe(
@@ -77,17 +78,17 @@ export class CreateEditCategoriesComponent implements OnInit {
       this.packageForm = this.fb.group({
         category: this.fb.control(this.data.data.category, {
           validators: [Validators.required],
-          //asyncValidators: this.descriptionRepeatedValidator(this.dbs, this.data),
+          asyncValidators: this.descriptionRepeatedValidator(this.data),
           updateOn: 'blur',
         }),
 
-        totalItems: [this.data.data.totalItems],
+        totalItems: [this.data.data.subcategories.length],
       });
     } else {
       this.packageForm = this.fb.group({
         category: this.fb.control(null, {
           validators: [Validators.required],
-          //asyncValidators: this.descriptionRepeatedValidator(this.dbs, this.data),
+          asyncValidators: this.descriptionRepeatedValidator(this.data),
           updateOn: 'blur',
         }),
 
@@ -100,21 +101,34 @@ export class CreateEditCategoriesComponent implements OnInit {
     this.totalItems$ = this.packageForm.get('totalItems').valueChanges.pipe(
       //startWith<number>(this.packageForm.get('totalItems').value),
       tap((total) => {
-        this.itemsFormArray.clear();
-        for (let i = 0; i < total; i++) {
-          this.itemsFormArray.push(
-            this.fb.group({
-              name: [''],
-              sub: [null],
-              categories: [[]],
-            })
-          );
+        let leng = this.itemsFormArray.length
+
+        if(total>leng){
+          let number = total - leng
+          for (let i = 0; i < number; i++) {
+            this.itemsFormArray.push(
+              this.fb.group({
+                name: [''],
+                sub: [null],
+                categories: [[]],
+              })
+            );
+          }
+        }else if(leng> total){
+
+          for (let i = total; i < leng; i++) {
+            this.itemsFormArray.removeAt(i)
+          }
         }
+        
+        
       })
     );
   }
 
   onSelectProduct(formGroup: FormGroup) {
+    console.log(formGroup);
+    
     let product = formGroup.get('sub').value;
 
     if (product) {
@@ -138,7 +152,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   addProduct() {
     if (this.brandForm.value['id']) {
       this.selectBrand.push(this.brandForm.value);
-      this.brandForm.setValue('');
+      this.brandForm.setValue(null);
     } else {
       this.snackBar.open("Debe seleccionar un producto", "Cerrar", {
         duration: 6000
@@ -149,6 +163,10 @@ export class CreateEditCategoriesComponent implements OnInit {
   removeProduct(item): void {
     let index = this.selectBrand.indexOf(item);
     this.selectBrand.splice(index, 1);
+  }
+
+  showBrand(staff): string | undefined {
+    return staff ? staff['name'] : undefined;
   }
 
   onSubmitForm() {
@@ -213,22 +231,22 @@ export class CreateEditCategoriesComponent implements OnInit {
     });
   }
 
-  descriptionRepeatedValidator(dbs, data) {
-    /*return (control: AbstractControl): Observable<{'descriptionRepeatedValidator': boolean}> => {
+  descriptionRepeatedValidator(data) {
+    return (control: AbstractControl): Observable<{'descriptionRepeatedValidator': boolean}> => {
       const value = control.value.toUpperCase();
       if(data.edit){
-        if(data.data.description.toUpperCase() == value){
+        if(data.data.category.toUpperCase() == value){
           return of(null)
         }
         else{
-          return dbs.getPackagesList().pipe(
-            map(res => !!res.find(el => el.description.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
+          return this.dbs.getCategoriesDoc().pipe(
+            map(res => !!res.find(el => el.category.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
           }
         }
       else{
-        return dbs.getPackagesList().pipe(
-          map(res => !!res.find(el => el.description.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
+        return this.dbs.getCategoriesDoc().pipe(
+          map(res => !!res.find(el => el.category.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
         }
-    }*/
+    }
   }
 }

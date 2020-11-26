@@ -17,14 +17,14 @@
         
         <ng-container class="w3-center" matColumnDef="departamento">
           <th *matHeaderCellDef class="w3-center">Departamento</th>
-          <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+          <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
             {{ element["departamento"]['name'] | titlecase }}
           </td>
         </ng-container>
 
         <ng-container class="w3-center" matColumnDef="provincia">
           <th *matHeaderCellDef class="w3-center">Provincia</th>
-          <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+          <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
             {{ element["provincia"]['name'] }}
           </td>
         </ng-container>
@@ -34,10 +34,12 @@
           <td
             mat-cell
             *matCellDef="let element"
-            class="w3-right-align"
             style="padding: 0px 10px"
           >
-            <div *ngFor="let dist of element['distritos']">{{dist.name}}</div>
+          <ul>
+            <li *ngFor="let dist of element['distritos']">{{dist.name}}</li>
+          </ul>
+            
           </td>
         </ng-container>
         <ng-container class="w3-center" matColumnDef="delivery">
@@ -45,24 +47,24 @@
           <td
             mat-cell
             *matCellDef="let element"
-            class="w3-right-align"
+            class="w3-center"
             style="padding: 0px 10px"
           >
-            {{element.delivery}}
+           S/. {{element.delivery | number:'.2'}}
           </td>
         </ng-container>
         <ng-container class="w3-center" matColumnDef="actions" sticky>
           <th
             *matHeaderCellDef
             style="padding-left: 0.5em"
-            class="w3-center ms-table__th"
+            class="w3-center"
           >
             Acciones
           </th>
           <td
             mat-cell
             *matCellDef="let element; let ind = index"
-            class="ms-table__td w3-center"
+            class="w3-center"
           >
             <ng-container>
               <mat-menu #rawMenu="matMenu">

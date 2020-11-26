@@ -13,13 +13,8 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./store.component.scss'],
 })
 export class StoreComponent implements OnInit {
-  categories:Array<any> = [
-    {category:'Promociones'},
-    {category:'PCs y laptops', subcategories:['Laptops','Accesorios']},
-    {category:'Computo', subcategories:['Accesorios y Cables','Procesadores']},
-    {category:'Tablets y smartphones', subcategories:['Tablets','Smartphones']},
-    {category:'Gamer', subcategories:['Accesorios','Audio','Microfono','Sillas Gamer','Mouse']},
-  ]
+  
+  category$: Observable<any>;
   config: PaginationInstance = {
     id: 'custom',
     itemsPerPage: 9,
@@ -34,6 +29,13 @@ export class StoreComponent implements OnInit {
 
   searchCategory: string;
   searchSubCategory: string;
+  searchSubSubCategory: string;
+
+  search:string;
+  searchPromo:string;
+  searchBrand:string;
+
+
   constructor(
     private dbs: DatabaseService,
     private route: ActivatedRoute,
@@ -42,27 +44,53 @@ export class StoreComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.category$ = this.dbs.getCategories()
+
     this.products = this.dbs.products;
 
     this.products$ = combineLatest(
       this.searchForm.valueChanges.pipe(startWith('')),
       this.route.params,
-      this.route.queryParams,
-      this.route.fragment
+      this.route.queryParams
     ).pipe(
-      map(([word, id, param, frag]) => {
+      map(([word, id, param]) => {
+        let cat=''
+        let sub = ''
+        let subsub=''
+
+        let frag = null
+        let promo = false
+        let brand = null
+        
         console.log(param);
         console.log(id);
-        let promo = id.id == 'Promociones'
-        console.log(promo);
         
-        if (param.sub) {
-          this.searchSubCategory = param.sub;
-        }else{
-          this.searchSubCategory = null;
+        if (param.search) {
+          this.search = param.search;
+          frag = param.search.toLowerCase()
         }
+
+        if (param.brand) {
+          this.searchBrand = param.search;
+          brand = param.brand.toLowerCase()
+        }
+
+        if (param.promo) {
+          this.searchPromo = param.promo;
+          promo = true
+        }
+
         if (id.id) {
-          this.searchCategory = id.id;
+          cat = id.id.split('-').join(' ')
+          this.searchCategory = cat;
+        }
+        if (id.cat) {
+          sub = id.cat.split('-').join(' ')
+          this.searchSubCategory = sub;
+        }
+        if (id.sub) {
+          subsub = id.sub.split('-').join(' ')
+          this.searchSubSubCategory = subsub;
         }
 
         if(promo){
@@ -72,9 +100,12 @@ export class StoreComponent implements OnInit {
           .filter((el) =>
             el.description.toLowerCase().includes(word.toLowerCase())
           )
-          .filter((el) => (id.id ? el.category == id.id : true))
-          .filter((el) => (param.sub ? el.subcategory == param.sub : true))
-          
+          .filter((el) =>
+            brand?el.brand.toLowerCase().includes(brand):true
+          )
+          .filter((el) => (cat ? el.category.toLowerCase() == cat.toLowerCase() : true))
+          .filter((el) => (sub ? el.subcategory.toLowerCase() == sub.toLowerCase() : true))
+          .filter((el) => (subsub ? el.subsubcategory.toLowerCase() == subsub.toLowerCase() : true))
           .filter((el) =>
             frag
               ? el['description'].toLowerCase().includes(frag) ||
@@ -92,13 +123,26 @@ export class StoreComponent implements OnInit {
     );
   }
 
-  navigate(category, subcategory) {
-    this.router.navigate(['/main/productos', category], {
-      queryParams: { sub: subcategory },
-    });
+  navigateOnlyCategory(category) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat]);
   }
 
-  navigateCategory(category) {
-    this.router.navigate(['/main/productos', category]);
+  navigateCategory(category, subcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub]);
+  }
+
+  navigateSubCategory(category, subcategory, subsubcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    let subsub = subsubcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub, subsub]);
+  }
+
+  showInfo(link){
+    console.log(link);
+    
   }
 }

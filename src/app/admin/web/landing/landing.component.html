@@ -1,95 +1,45 @@
-<mat-progress-bar
-  mode="indeterminate"
-  *ngIf="loading$ | async"
-></mat-progress-bar>
-<div >
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<div>
   <div class="w3-section">
     <h4 style="font-size: 1.2em;font-weight: 600;">Ofertas</h4>
-    <button
-      mat-raised-button
-      class="w3-margin-bottom"
-      color="primary"
-      (click)="openDialog(false)"
-    >
+    <button mat-raised-button class="w3-margin-bottom" color="primary" (click)="openDialog(false)">
       <span>Agregar</span>
       <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
     </button>
 
     <div *ngIf="banner$ | async as images">
-      <img
-        [src]="banner.photoURL"
-        *ngFor="let banner of images"
-        class="w3-block"
-        alt=""
-      />
-      <div
-        *ngIf="images.length"
-        class="w3-margin-top w3-block w3-margin-bottom"
-      >
-        <mat-progress-bar
-          mode="indeterminate"
-          *ngIf="loadingPos$ | async"
-        ></mat-progress-bar>
-        <div
-          class="row-category"
-          style="justify-content: space-between; padding: 10px 0"
-          *ngIf="images.length > 1"
-        >
+      <img [src]="banner.photoURL" *ngFor="let banner of images" class="w3-block" alt="" />
+      <div *ngIf="images.length" class="w3-margin-top w3-block w3-margin-bottom">
+        <mat-progress-bar mode="indeterminate" *ngIf="loadingPos$ | async"></mat-progress-bar>
+        <div class="row-category" style="justify-content: space-between; padding: 10px 0" *ngIf="images.length > 1">
           <span style="font-weight: 700">Ordenar posición</span>
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="savePosition(images)"
-            [disabled]="loadingPos$ | async"
-          >
+          <button mat-raised-button color="primary" (click)="savePosition(images)" [disabled]="loadingPos$ | async">
             <span>Guardar</span>
           </button>
         </div>
-        <div
-          cdkDropList
-          class="banner__list border--primary"
-          (cdkDropListDropped)="drop(images, $event)"
-        >
+        <div cdkDropList class="banner__list border--primary" (cdkDropListDropped)="drop(images, $event)">
           <mat-card class="banner__box" *ngFor="let image of images" cdkDrag>
             <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
-            <div
-              class="ms-flex ms-flex--center"
-              style="justify-content: space-between"
-            >
+            <div class="ms-flex ms-flex--center" style="justify-content: space-between">
               <img [src]="image.photoURL" style="width: 30%" alt="" />
               <div style="width: 25%">
                 <div><strong>Redirige a:</strong></div>
                 <div>{{ image.redirectTo }}</div>
               </div>
-              <div
-                *ngIf="image.redirectTo == 'Categoría/subcategoría'"
-                style="width: 25%"
-              >
+              <div *ngIf="image.redirectTo == 'Categoría/subcategoría'" style="width: 25%">
                 <div>{{ image.category }}</div>
               </div>
               <div *ngIf="image.redirectTo == 'Marca'" style="width: 25%">
                 <div>{{ image.brand }}</div>
               </div>
-              <div
-                *ngIf="image.redirectTo == 'Link externo'"
-                style="width: 25%"
-              >
+              <div *ngIf="image.redirectTo == 'Link externo'" style="width: 25%">
                 <div>{{ image.link }}</div>
               </div>
               <div style="width: fit-content">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  (click)="editDialog('carousel', true, image)"
-                >
+                <button mat-icon-button color="primary" (click)="editDialog('carousel', true, image)">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button
-                  mat-icon-button
-                  color="primary"
-                  style="margin-left: 10px"
-                  (click)="deleteBDialog(image.id)"
-                >
+                <button mat-icon-button color="primary" style="margin-left: 10px" (click)="deleteBDialog(image.id)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -101,13 +51,59 @@
   </div>
   <hr />
   <div class="w3-section">
+
+    <h4 style="font-size: 1.2em;font-weight: 600;">Medio</h4>
+
+    <mat-progress-bar mode="indeterminate" *ngIf="loadingMid$ | async"></mat-progress-bar>
+    <div class="w3-section w3-row-padding" *ngIf="footer$|async">
+      <form [formGroup]="createForm" class="w3-row">
+        <div class="w3-col m6 l6 w3-padding">
+          <mat-form-field class="w3-block" appearance="outline">
+            <mat-label>Título</mat-label>
+            <input autocomplete="off" formControlName="title" type="text" matInput placeholder="Título" />
+            <mat-error>Campo requerido</mat-error>
+          </mat-form-field>
+          <mat-form-field class="w3-block" appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <textarea autocomplete="off" formControlName="descrip" type="text" matInput placeholder="Descripción"
+              rows="6"></textarea>
+          </mat-form-field>
+
+
+        </div>
+        <div class="w3-col m6 l6 w3-padding">
+          <!-- Photo  -->
+          <div style="margin: 16px 0;text-align: center; ">
+            <img class="w3-card-4" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value!=null"
+              style="max-width:100%;max-height: 200px; object-fit: contain;" [src]="createForm.get('photoURL').value"
+              alt="fotografía">
+            <img class="w3-card-4" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value==null"
+              style="max-width:100%;max-height: 200px; object-fit: contain;" [src]="noImage" alt="sin fotografía">
+
+            <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width:100%" mode="indeterminate">
+            </mat-progress-bar>
+            <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
+              style="width:100%">*comprimiendo</span>
+            <input style="display: none" #photoURL type="file" accept='image/*'
+              (change)="addNewPhoto('photoURL', photoURL.files)" />
+          </div>
+        </div>
+
+
+
+
+      </form>
+    </div>
+    <div class="ms-flex">
+      <span class="ms-fill"></span>
+      <button mat-raised-button color="primary" (click)="create()" type="button"
+        [disabled]="createForm.status != 'VALID'">Guardar</button>
+    </div>
+  </div>
+  <hr>
+  <div class="w3-section">
     <h4 style="font-size: 1.2em;font-weight: 600;">Testimonios</h4>
-    <button
-      mat-raised-button
-      class="w3-margin-bottom"
-      color="primary"
-      (click)="openTestimony(false, null)"
-    >
+    <button mat-raised-button class="w3-margin-bottom" color="primary" (click)="openTestimony(false, null)">
       <span>Crear</span>
       <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
     </button>
@@ -124,72 +120,59 @@
           </ng-container>
           <ng-container class="w3-center" matColumnDef="image">
             <th *matHeaderCellDef class="w3-center">Imagen Referencial</th>
-            <td mat-cell *matCellDef="let element" style="padding: 10px">
-              <img
-                [src]="element['photoURL']"
-                class="border--primary"
+            <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 10px">
+              <img [defaultImage]="defaultImage" [lazyLoad]="element['photoURL']" [offset]="100" class="border--primary"
                 style="
                   object-fit: contain;
                   width: 75px;
                   height: 75px;
                   border: 1px solid;
-                "
-                alt=""
-              />
+                " alt="" />
             </td>
           </ng-container>
           <ng-container class="w3-center" matColumnDef="name">
             <th *matHeaderCellDef class="w3-center">Nombre</th>
-            <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+            <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
               {{ element["name"] | titlecase }}
             </td>
           </ng-container>
-  
+
           <ng-container class="w3-center" matColumnDef="message">
             <th *matHeaderCellDef class="w3-center">Opinión</th>
             <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
               {{ element["message"] }}
             </td>
           </ng-container>
-  
+
           <ng-container class="w3-center" matColumnDef="rating">
             <th *matHeaderCellDef class="w3-center">Calificación</th>
-            <td
-              mat-cell
-              *matCellDef="let element"
-              class="w3-right-align"
-              style="padding: 0px 10px"
-            >
-              <!--falta ver, con estrellas-->
+            <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+              <div style="color: #f2c94c;">
+                <span *ngFor="let star of getStars(element.rating)">
+                  <mat-icon *ngIf="star;else nofill">star</mat-icon>
+                  <ng-template #nofill>
+                    <mat-icon>star_outline</mat-icon>
+                  </ng-template>
+
+                </span>
+              </div>
             </td>
           </ng-container>
           <ng-container class="w3-center" matColumnDef="actions" sticky>
-            <th
-              *matHeaderCellDef
-              style="padding-left: 0.5em"
-              class="w3-center ms-table__th"
-            >
+            <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
               Acciones
             </th>
-            <td
-              mat-cell
-              *matCellDef="let element; let ind = index"
-              class="ms-table__td w3-center"
-            >
+            <td mat-cell *matCellDef="let element; let ind = index" class="w3-center">
               <ng-container>
                 <mat-menu #rawMenu="matMenu">
-                  <button
-                    class="w3-small"
-                    mat-menu-item
-                    (click)="openTestimony(true, element)"
-                  >
+                  <button class="w3-small" mat-menu-item (click)="openTestimony(true, element)">
                     <mat-icon>edit</mat-icon> Editar
                   </button>
                   <button class="w3-small" mat-menu-item (click)="deleteDialog(element.id)">
                     <mat-icon>delete</mat-icon> Borrar
                   </button>
                 </mat-menu>
-  
+
                 <button mat-icon-button [matMenuTriggerFor]="rawMenu">
                   <mat-icon>more_vert</mat-icon>
                 </button>
@@ -199,19 +182,15 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
-        <mat-paginator
-          #productsPaginator
-          style="border-radius: 0px 0px 10px 10px"
-          [pageSizeOptions]="[5, 10, 20]"
-          showFirstLastButtons
-        ></mat-paginator>
+        <mat-paginator #productsPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons></mat-paginator>
       </div>
     </div>
-    
+
   </div>
   <hr />
   <div class="w3-section">
-    
+
     <div class="ms-flex">
       <h4 style="font-size: 1.2em;font-weight: 600;width: fit-content">Footer</h4>
       <span class="ms-fill"></span>
@@ -222,31 +201,14 @@
       <div class="w3-col m6 l6">
         <h2 style="font-size: 1em; font-weight: 600">Búsqueda rápida</h2>
         <hr />
-        <mat-form-field
-          *ngIf="category$ | async as categories"
-          style="margin-bottom: 8px; display: block"
-          appearance="outline"
-        >
+        <mat-form-field *ngIf="category$ | async as categories" style="margin-bottom: 8px; display: block"
+          appearance="outline">
           <mat-label>Categorías</mat-label>
-          <input
-            autocomplete="off"
-            [formControl]="category"
-            [matAutocomplete]="categoryAutocomplete"
-            type="text"
-            (keyup.enter)="addCategory()"
-            matInput
-          />
-          <mat-autocomplete
-            autoActiveFirstOption
-            #categoryAutocomplete="matAutocomplete"
-            [displayWith]="showSelected"
-          >
-            <mat-option
-              *ngFor="let category of categories"
-              [value]="category"
-              (click)="addCategory()"
-              (keyup.enter)="addCategory()"
-            >
+          <input autocomplete="off" [formControl]="category" [matAutocomplete]="categoryAutocomplete" type="text"
+            (keyup.enter)="addCategory()" matInput />
+          <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete" [displayWith]="showSelected">
+            <mat-option *ngFor="let category of categories" [value]="category" (click)="addCategory()"
+              (keyup.enter)="addCategory()">
               {{ category }}
             </mat-option>
           </mat-autocomplete>
@@ -254,16 +216,9 @@
         </mat-form-field>
         <div class="w3-section">
           <ng-container *ngFor="let item of selectCategories">
-            <div
-              class="w3-border-bottom w3-border-lightgray w3-padding"
-              style="display: flex; align-items: center"
-            >
+            <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display: flex; align-items: center">
               <span>{{ item }}</span>
-              <button
-                mat-icon-button
-                (click)="removeCategory(item)"
-                type="button"
-              >
+              <button mat-icon-button (click)="removeCategory(item)" type="button">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -279,40 +234,24 @@
         <form [formGroup]="linkForm" class="w3-row">
           <mat-form-field class="w3-block" appearance="outline">
             <mat-label>Nombre</mat-label>
-            <input
-              autocomplete="off"
-              formControlName="name"
-              type="text"
-              matInput
-            />
+            <input autocomplete="off" formControlName="name" type="text" matInput />
             <mat-error>Campo requerido</mat-error>
           </mat-form-field>
           <mat-form-field class="w3-block" appearance="outline">
             <mat-label>link</mat-label>
-            <input
-              autocomplete="off"
-              formControlName="link"
-              type="text"
-              matInput
-            />
+            <input autocomplete="off" formControlName="link" type="text" matInput />
           </mat-form-field>
           <div class="ms-flex">
             <span class="ms-fill"></span>
-            <button mat-flat-button color="primary" (click)="addLink()"[disabled]="!linkForm.valid" class="w3-margin-top">Agregar</button>
+            <button mat-flat-button color="primary" (click)="addLink()" [disabled]="!linkForm.valid"
+              class="w3-margin-top">Agregar</button>
           </div>
         </form>
         <div class="w3-section">
           <ng-container *ngFor="let item of selectLink">
-            <div
-              class="w3-border-bottom w3-border-lightgray w3-padding"
-              style="display: flex; align-items: center"
-            >
+            <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display: flex; align-items: center">
               <span>{{ item['name'] }}</span>
-              <button
-                mat-icon-button
-                (click)="removeLink(item)"
-                type="button"
-              >
+              <button mat-icon-button (click)="removeLink(item)" type="button">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -323,6 +262,6 @@
         </div>
       </div>
     </div>
-    
+
   </div>
 </div>

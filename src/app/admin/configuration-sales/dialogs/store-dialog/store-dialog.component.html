@@ -1,1 +1,148 @@
-<p>store-dialog works!</p>
+<div mat-dialog-title>
+  <h2 style="font-size: 1.1em; font-family: Montserrat; font-weight: 600">
+    <mat-icon style="vertical-align: middle">edit</mat-icon>
+    {{ data.edit ? "Editar" : "Agregar" }} Delivery
+  </h2>
+  <mat-divider></mat-divider>
+  <mat-progress-bar
+    mode="indeterminate"
+    *ngIf="loading$ | async"
+  ></mat-progress-bar>
+</div>
+<mat-dialog-content style="max-width: 400px">
+  <form [formGroup]="formGroup" class="w3-row">
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Departamento</mat-label>
+      <input
+        type="text"
+        placeholder="Departamento"
+        matInput
+        formControlName="departamento"
+        [matAutocomplete]="autoD"
+      />
+      <mat-autocomplete
+        #autoD="matAutocomplete"
+        [displayWith]="showDepartamento"
+      >
+        <mat-option
+          *ngFor="let option of filteredDepartamento$ | async"
+          [value]="option"
+        >
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+    </mat-form-field>
+    <mat-form-field
+      class="w3-block"
+      appearance="outline"
+      *ngIf="provincias$ | async"
+    >
+      <mat-label>Provincia</mat-label>
+      <input
+        type="text"
+        placeholder="Provincia"
+        matInput
+        formControlName="provincia"
+        [matAutocomplete]="autoP"
+      />
+      <mat-autocomplete
+        autoActiveFirstOption
+        #autoP="matAutocomplete"
+        [displayWith]="showProvincia"
+      >
+        <mat-option
+          *ngFor="let option of filteredProvincia$ | async"
+          [value]="option"
+        >
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+    </mat-form-field>
+    <mat-form-field
+      class="w3-block"
+      appearance="outline"
+      *ngIf="distritos$ | async"
+    >
+      <mat-label>Distrito</mat-label>
+      <input
+        type="text"
+        placeholder="Distrito"
+        matInput
+        formControlName="distrito"
+        [matAutocomplete]="autoX"
+      />
+      <mat-autocomplete
+        autoActiveFirstOption
+        #autoX="matAutocomplete"
+        [displayWith]="showDistrito"
+      >
+        <mat-option value="all"  (click)="selectDelivery('all')"
+        (keyup.enter)="selectDelivery('all')"> Todos los distritos </mat-option>
+        <mat-option
+          *ngFor="let option of filteredDistrito$ | async"
+          [value]="option"
+          (click)="selectDelivery(option)"
+          (keyup.enter)="selectDelivery(option)"
+        >
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+    </mat-form-field>
+    <div class="w3-section">
+      <ng-container *ngFor="let item of deliveryDistritos">
+        <div
+          class="w3-border-bottom w3-border-lightgray w3-padding"
+          style="display: flex; align-items: center"
+        >
+          <span>{{ item["name"] }}</span>
+          <button mat-icon-button (click)="removeProduct(item)" type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </ng-container>
+    </div>
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Delivery</mat-label>
+      <input
+        #input
+        autocomplete="off"
+        formControlName="delivery"
+        type="number"
+        matInput
+      />
+    </mat-form-field>
+  </form>
+
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
+    Cancelar
+  </button>
+  <div *ngIf="data.edit">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="editSubmit()"
+      type="button"
+      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length"
+    >
+      Editar
+    </button>
+  </div>
+  <div *ngIf="!data.edit">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmitForm()"
+      type="button"
+      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length"
+    >
+      Guardar
+    </button>
+  </div>
+</mat-dialog-actions>

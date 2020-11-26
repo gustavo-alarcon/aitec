@@ -27,6 +27,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 import { WebRoutingModule } from './web-routing.module';
 import { WebComponent } from './web.component';
@@ -76,7 +77,8 @@ import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
     MatSelectModule,
     MatTableModule,
     MatPaginatorModule,
-    MatCardModule
+    MatCardModule,
+    LazyLoadImageModule
   ],
 })
 export class WebModule {}
