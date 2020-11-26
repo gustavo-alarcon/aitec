@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, switchMap, switchMapTo, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -15,7 +15,7 @@ export class ProductDetailComponent implements OnInit {
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
-productDiv:any
+  productDiv:any
   prods:Array<any> = []
   galleryImg:Array<any>
   selectImage:any
@@ -53,19 +53,29 @@ productDiv:any
   ) {}
 
   ngOnInit(): void {
+    this.productDiv = null
     this.product$ = this.route.params.pipe(
-      map((param) => {
-        return this.dbs.products.filter((el) => el.sku == param.id)[0];
+      switchMap((param) => {
+        return combineLatest(
+          this.dbs.getProduct(param.id),
+          this.dbs.getProductsListValueChanges()
+          ).pipe(
+            map(([product,prods])=>{
+              this.prods = prods.filter(el=>el.category==product.category)
+              return product
+            })
+          )
       }),
       tap(res=>{
         this.productDiv = res
         this.loading.next(false)
-        this.prods = this.dbs.products.filter(el=>el.category==res.category)
+        
         this.galleryImg = res.gallery.map((el,i)=>{return {ind:i+1,photoURL:el}})
         this.selectImage = this.galleryImg[0]
        
       })
     );
+
   }
   
   changeSelectImage(image){

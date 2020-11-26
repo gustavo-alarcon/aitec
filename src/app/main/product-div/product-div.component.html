@@ -24,7 +24,7 @@
       <div class="product__price">
         <span *ngIf="product.promo">Ahora</span>
         <span class="product__price--number" *ngIf="product.promo">
-          S/. {{ product.promoData.price | number: ".2" }}
+          S/. {{ product.promoData.promoPrice | number: ".2" }}
         </span>
         <span class="product__price--number" *ngIf="!product.promo">
           S/. {{ product.price | number: ".2" }}

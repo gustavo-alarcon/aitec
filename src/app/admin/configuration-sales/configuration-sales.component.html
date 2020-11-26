@@ -4,8 +4,8 @@
     Configuración Ventas
   </h2>
   <nav mat-tab-nav-bar>
-    <a mat-tab-link *ngFor="let link of links" [routerLink]="link['route']"
-      routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+    <a mat-tab-link *ngFor="let link of links" [routerLink]="link['route']" routerLinkActive #rla="routerLinkActive"
+      [active]="rla.isActive">
       {{link['name']}}
     </a>
   </nav>

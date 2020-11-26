@@ -93,11 +93,16 @@ export class MainComponent implements OnInit {
       })
     );
 
-    this.filteredProducts$ = this.searchForm.valueChanges.pipe(
-      filter((input) => input !== null),
-      map((value) => {
+    this.filteredProducts$ = combineLatest(
+      this.searchForm.valueChanges.pipe(
+        filter((input) => input !== null),
+      ),
+      this.dbs.getProductsList()
+    ).pipe(
+     
+      map(([value,products]) => {
         return value.length
-          ? this.dbs.products.filter(
+          ? products.filter(
             (option) =>
               option['description'].toLowerCase().includes(value) ||
               option['sku'].toLowerCase().includes(value) ||

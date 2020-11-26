@@ -25,6 +25,7 @@ export class ShoppingCartComponent implements OnInit {
   products: Array<any>;
   total:number = 0
   /*delivery*/
+  initDelivery$:Observable<any>
   formGroup: FormGroup;
   delivery: number = 1;
   deliveryForm:FormControl = new FormControl(this.delivery)
@@ -167,6 +168,13 @@ export class ShoppingCartComponent implements OnInit {
     );
 
     /*Delivery*/
+    this.initDelivery$ = this.dbs.getDelivery().pipe(
+      tap(res=>{
+        console.log(res);
+        
+      })
+    )
+
     this.formGroup = this.fb.group({
       departamento: [null],
       provincia: [null],
@@ -309,7 +317,7 @@ export class ShoppingCartComponent implements OnInit {
 
   getPrice(item) {
     if (item.product.promo) {
-      return item.product.promoData.price * item.quantity;
+      return item.product.promoData.promoPrice * item.quantity;
     } else {
       return item.product.price * item.quantity;
     }

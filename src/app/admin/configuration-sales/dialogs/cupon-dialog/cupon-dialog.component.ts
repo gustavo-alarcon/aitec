@@ -1,8 +1,8 @@
 import { AngularFirestore } from '@angular/fire/firestore';
-import { startWith, map, take, takeLast, switchMap, filter} from 'rxjs/operators';
+import { startWith, map, take, takeLast, switchMap, filter } from 'rxjs/operators';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Observable, BehaviorSubject, combineLatest} from 'rxjs';
-import { Component, OnInit, Inject} from '@angular/core';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Component, OnInit, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -14,7 +14,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class CuponDialogComponent implements OnInit {
 
-  redirects:Array<string> = ['Toda la compra','Categoría/subcategoría','Marca','Productos']
+  redirects: Array<string> = ['Toda la compra', 'Categoría/subcategoría', 'Marca', 'Productos']
   category$: Observable<string[]>
   products$: Observable<any>
   brand$: Observable<any>
@@ -26,7 +26,7 @@ export class CuponDialogComponent implements OnInit {
   products: Array<any> = []
 
   createForm: FormGroup
- 
+
   constructor(
     private fb: FormBuilder,
     private dbs: DatabaseService,
@@ -38,7 +38,7 @@ export class CuponDialogComponent implements OnInit {
 
   ngOnInit() {
     this.createForm = this.fb.group({
-      discount:[this.data.edit ? this.data.data.discount : null, Validators.required],
+      discount: [this.data.edit ? this.data.data.discount : null, Validators.required],
       name: [this.data.edit ? this.data.data.name : null],
       brand: [this.data.edit ? this.data.data.brand : null],
       category: [this.data.edit ? this.data.data.category : null],
@@ -46,16 +46,21 @@ export class CuponDialogComponent implements OnInit {
       product: [null]
     })
 
-    this.products$ =this.createForm.get('product').valueChanges.pipe(
-      startWith<any>(''),
-      filter((input) => input !== null),
-      map((value) => {
+    this.products$ = combineLatest(
+      this.createForm.get('product').valueChanges.pipe(
+        startWith<any>(''),
+        filter((input) => input !== null)
+      ),
+      this.dbs.getProductsList()
+    ).pipe(
+      
+      map(([value,products]) => {
         return value
-          ? this.dbs.products.filter(
-              (option) =>
-                option['description'].toLowerCase().includes(value) ||
-                option['sku'].toLowerCase().includes(value)
-            )
+          ? products.filter(
+            (option) =>
+              option['description'].toLowerCase().includes(value) ||
+              option['sku'].toLowerCase().includes(value)
+          )
           : [];
       })
     )
@@ -66,26 +71,26 @@ export class CuponDialogComponent implements OnInit {
       ),
       this.dbs.getCategories()
     ).pipe(
-      
-      map(([value,categories])=>{
-        let fil = categories.map(el=>{
+
+      map(([value, categories]) => {
+        let fil = categories.map(el => {
           let first = [el['category']]
-          let subs = el['subcategories'].map(lo=>{
+          let subs = el['subcategories'].map(lo => {
             let sub = [el['category'] + ' >> ' + lo.name]
-            if(lo.categories.length){
-              let secs = lo.categories.map(sec=>{
+            if (lo.categories.length) {
+              let secs = lo.categories.map(sec => {
                 return el['category'] + ' >> ' + lo.name + ' >> ' + sec
               })
               return sub.concat(secs)
-            }else{
+            } else {
               return sub
             }
-           
+
           })
-          return first.concat(subs).reduce((a,b)=>a.concat(b),[])
-        }).reduce((a,b)=>a.concat(b),[])
-        
-        return fil.filter(el=>value?el.toLowerCase().includes(value.toLowerCase()):true)
+          return first.concat(subs).reduce((a, b) => a.concat(b), [])
+        }).reduce((a, b) => a.concat(b), [])
+
+        return fil.filter(el => value ? el.toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -95,9 +100,9 @@ export class CuponDialogComponent implements OnInit {
       ),
       this.dbs.getBrands()
     ).pipe(
-      map(([value,brands])=>{
-        
-        return brands.map(el=>el['name']).filter(el=>value?el['name'].toLowerCase().includes(value.toLowerCase()):true)
+      map(([value, brands]) => {
+
+        return brands.map(el => el['name']).filter(el => value ? el['name'].toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -139,14 +144,14 @@ export class CuponDialogComponent implements OnInit {
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
-      products: this.products.map(el => {return {id:el['id'],description:el['description']}}),
-      dateLimit:this.createForm.get('dateLimit').value,
+      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
+      dateLimit: this.createForm.get('dateLimit').value,
       createdAt: new Date()
     }
 
-    if(this.data.edit){
+    if (this.data.edit) {
       this.edit(newCoupon)
-    }else{
+    } else {
       this.create(newCoupon)
     }
   }

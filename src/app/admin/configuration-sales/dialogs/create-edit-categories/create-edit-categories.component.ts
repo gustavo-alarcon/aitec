@@ -29,9 +29,9 @@ export class CreateEditCategoriesComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
-  brandForm:FormControl = new FormControl('')
-  brand$:Observable<any>
-  selectBrand:Array<any> = []
+  brandForm: FormControl = new FormControl('')
+  brand$: Observable<any>
+  selectBrand: Array<any> = []
 
   constructor(
     private dialogRef: MatDialogRef<CreateEditCategoriesComponent>,
@@ -40,7 +40,7 @@ export class CreateEditCategoriesComponent implements OnInit {
     private snackBar: MatSnackBar,
     private afs: AngularFirestore,
     @Inject(MAT_DIALOG_DATA) public data: { data: any; edit: boolean }
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initForm();
@@ -52,13 +52,13 @@ export class CreateEditCategoriesComponent implements OnInit {
     this.brand$ = combineLatest(
       this.brandForm.valueChanges.pipe(
         startWith<any>(''),
-        map(el=>typeof el == 'object'?el['name']:el)
+        map(el => typeof el == 'object' ? el['name'] : el)
       ),
       this.dbs.getBrands()
     ).pipe(
-      map(([value,brands])=>{
-        
-        return brands.filter(el=>value?el['name'].toLowerCase().includes(value.toLowerCase()):true)
+      map(([value, brands]) => {
+
+        return brands.filter(el => value ? el['name'].toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -103,7 +103,7 @@ export class CreateEditCategoriesComponent implements OnInit {
       tap((total) => {
         let leng = this.itemsFormArray.length
 
-        if(total>leng){
+        if (total > leng) {
           let number = total - leng
           for (let i = 0; i < number; i++) {
             this.itemsFormArray.push(
@@ -114,21 +114,21 @@ export class CreateEditCategoriesComponent implements OnInit {
               })
             );
           }
-        }else if(leng> total){
+        } else if (leng > total) {
 
           for (let i = total; i < leng; i++) {
             this.itemsFormArray.removeAt(i)
           }
         }
-        
-        
+
+
       })
     );
   }
 
   onSelectProduct(formGroup: FormGroup) {
     console.log(formGroup);
-    
+
     let product = formGroup.get('sub').value;
 
     if (product) {
@@ -179,11 +179,11 @@ export class CreateEditCategoriesComponent implements OnInit {
     console.log(subs);
 
     let newCategory = {
-      id: this.data.edit?this.data.data.id:'',
+      id: this.data.edit ? this.data.data.id : '',
       category: this.packageForm.get('category').value,
       subcategories: subs,
       brands: this.selectBrand,
-      createdAt: this.data.edit?this.data.data.createdAt:new Date(),
+      createdAt: this.data.edit ? this.data.data.createdAt : new Date(),
     };
 
     if (this.data.edit) {
@@ -232,21 +232,21 @@ export class CreateEditCategoriesComponent implements OnInit {
   }
 
   descriptionRepeatedValidator(data) {
-    return (control: AbstractControl): Observable<{'descriptionRepeatedValidator': boolean}> => {
+    return (control: AbstractControl): Observable<{ 'descriptionRepeatedValidator': boolean }> => {
       const value = control.value.toUpperCase();
-      if(data.edit){
-        if(data.data.category.toUpperCase() == value){
+      if (data.edit) {
+        if (data.data.category.toUpperCase() == value) {
           return of(null)
         }
-        else{
+        else {
           return this.dbs.getCategoriesDoc().pipe(
-            map(res => !!res.find(el => el.category.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
-          }
+            map(res => !!res.find(el => el.category.toUpperCase() == value) ? { descriptionRepeatedValidator: true } : null))
         }
-      else{
+      }
+      else {
         return this.dbs.getCategoriesDoc().pipe(
-          map(res => !!res.find(el => el.category.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
-        }
+          map(res => !!res.find(el => el.category.toUpperCase() == value) ? { descriptionRepeatedValidator: true } : null))
+      }
     }
   }
 }

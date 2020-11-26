@@ -49,16 +49,16 @@ export class BrandComponent implements OnInit {
 
   ngOnInit() {
     console.log(this.data);
-    
+
     this.createForm = this.fb.group({
-      photoURL:[this.data.edit ? this.data.data.photoURL : null, Validators.required],
-      name: [this.data.edit ? this.data.data.name : null, [Validators.required],[this.nameRepeatedValidator(this.data)]]
+      photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
+      name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]]
     })
 
 
   }
 
-  
+
   addNewPhoto(formControlName: string, image: File[]) {
     this.createForm.get(formControlName).setValue(null);
     if (image.length === 0)
@@ -122,8 +122,8 @@ export class BrandComponent implements OnInit {
     ).subscribe((photoUrl) => {
       productData.photoURL = <string>photoUrl
       productData.photoPath = `/brands/pictures/${dataRef.id}-${photo.name}`;
-    
-      
+
+
       batch.set(dataRef, productData);
 
       batch.commit().then(() => {
@@ -181,7 +181,7 @@ export class BrandComponent implements OnInit {
   }
   onSubmitForm() {
     console.log(this.createForm.value);
-    
+
     this.createForm.markAsPending();
     this.createForm.disable()
     this.loading.next(true)
@@ -194,7 +194,7 @@ export class BrandComponent implements OnInit {
       photoPath: '',
       createdAt: new Date()
     }
-    
+
     this.create(newDoc, this.photos.data.photoURL)
   }
 
@@ -225,21 +225,21 @@ export class BrandComponent implements OnInit {
   }
 
   nameRepeatedValidator(data) {
-    return (control: AbstractControl): Observable<{'nameRepeatedValidator': boolean}> => {
+    return (control: AbstractControl): Observable<{ 'nameRepeatedValidator': boolean }> => {
       const value = control.value.toUpperCase();
-      if(data.edit){
-        if(data.data.name.toUpperCase() == value){
+      if (data.edit) {
+        if (data.data.name.toUpperCase() == value) {
           return of(null)
         }
-        else{
+        else {
           return this.dbs.getBrandsDoc().pipe(
-            map(res => !!res.find(el => el.name.toUpperCase() == value)  ? {nameRepeatedValidator: true} : null),)
-          }
+            map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
         }
-      else{
+      }
+      else {
         return this.dbs.getBrandsDoc().pipe(
-          map(res => !!res.find(el => el.name.toUpperCase() == value)  ? {nameRepeatedValidator: true} : null),)
-        }
+          map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
+      }
     }
   }
 

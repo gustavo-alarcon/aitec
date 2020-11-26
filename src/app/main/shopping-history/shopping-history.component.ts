@@ -22,9 +22,9 @@ export class ShoppingHistoryComponent implements OnInit {
   p: number = 1;
   p1: number = 1;
 
-  dataX:any
+  dataX: any
 
-  constructor(private dbs: DatabaseService, private auth: AuthService) {}
+  constructor(private dbs: DatabaseService, private auth: AuthService) { }
 
   ngOnInit(): void {
     const view = this.dbs.getCurrentMonthOfViewDate();
@@ -63,7 +63,7 @@ export class ShoppingHistoryComponent implements OnInit {
       })
     );
 
-    
+
   }
 
   getTotal(order) {

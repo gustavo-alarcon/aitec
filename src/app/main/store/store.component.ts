@@ -46,14 +46,14 @@ export class StoreComponent implements OnInit {
   ngOnInit(): void {
     this.category$ = this.dbs.getCategories()
 
-    this.products = this.dbs.products;
-
     this.products$ = combineLatest(
       this.searchForm.valueChanges.pipe(startWith('')),
       this.route.params,
-      this.route.queryParams
+      this.route.queryParams,
+      this.dbs.getProductsListValueChanges()
     ).pipe(
-      map(([word, id, param]) => {
+      map(([word, id, param,products]) => {
+        let prods = products.filter(el=>el.published)
         let cat=''
         let sub = ''
         let subsub=''
@@ -62,16 +62,13 @@ export class StoreComponent implements OnInit {
         let promo = false
         let brand = null
         
-        console.log(param);
-        console.log(id);
-        
         if (param.search) {
           this.search = param.search;
           frag = param.search.toLowerCase()
         }
 
         if (param.brand) {
-          this.searchBrand = param.search;
+          this.searchBrand = param.brand;
           brand = param.brand.toLowerCase()
         }
 
@@ -94,9 +91,9 @@ export class StoreComponent implements OnInit {
         }
 
         if(promo){
-          return this.dbs.products.filter((el) => el.promo)
+          return prods.filter((el) => el.promo)
         }else{
-          return this.dbs.products
+          return prods
           .filter((el) =>
             el.description.toLowerCase().includes(word.toLowerCase())
           )

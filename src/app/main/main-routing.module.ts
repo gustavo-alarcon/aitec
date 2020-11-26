@@ -44,6 +44,10 @@ const routes: Routes = [
         path: 'carrito',
         loadChildren: () => import('./shopping-cart/shopping-cart.module').then(mod => mod.ShoppingCartModule)
       },
+      {
+        path: 'mispedidos',
+        loadChildren: () => import('./shopping-history/shopping-history.module').then(mod => mod.ShoppingHistoryModule)
+      }
     ]
   }
 ]

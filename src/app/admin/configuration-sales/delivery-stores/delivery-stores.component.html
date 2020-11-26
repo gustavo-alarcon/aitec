@@ -14,7 +14,7 @@
             }}
           </td>
         </ng-container>
-        
+
         <ng-container class="w3-center" matColumnDef="departamento">
           <th *matHeaderCellDef class="w3-center">Departamento</th>
           <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
@@ -31,48 +31,27 @@
 
         <ng-container class="w3-center" matColumnDef="distritos">
           <th *matHeaderCellDef class="w3-center">Distritos</th>
-          <td
-            mat-cell
-            *matCellDef="let element"
-            style="padding: 0px 10px"
-          >
-          <ul>
-            <li *ngFor="let dist of element['distritos']">{{dist.name}}</li>
-          </ul>
-            
+          <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+            <ul>
+              <li *ngFor="let dist of element['distritos']">{{dist.name}}</li>
+            </ul>
+
           </td>
         </ng-container>
         <ng-container class="w3-center" matColumnDef="delivery">
           <th *matHeaderCellDef class="w3-center">Delivery</th>
-          <td
-            mat-cell
-            *matCellDef="let element"
-            class="w3-center"
-            style="padding: 0px 10px"
-          >
-           S/. {{element.delivery | number:'.2'}}
+          <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+            S/. {{element.delivery | number:'.2'}}
           </td>
         </ng-container>
         <ng-container class="w3-center" matColumnDef="actions" sticky>
-          <th
-            *matHeaderCellDef
-            style="padding-left: 0.5em"
-            class="w3-center"
-          >
+          <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
             Acciones
           </th>
-          <td
-            mat-cell
-            *matCellDef="let element; let ind = index"
-            class="w3-center"
-          >
+          <td mat-cell *matCellDef="let element; let ind = index" class="w3-center">
             <ng-container>
               <mat-menu #rawMenu="matMenu">
-                <button
-                  class="w3-small"
-                  mat-menu-item
-                  (click)="openDialog(true,element)"
-                >
+                <button class="w3-small" mat-menu-item (click)="openDialog(true,element)">
                   <mat-icon>edit</mat-icon> Editar
                 </button>
                 <button class="w3-small" mat-menu-item (click)="deleteDialog(element.id)">
@@ -89,12 +68,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
-      <mat-paginator
-        #productsPaginator
-        style="border-radius: 0px 0px 10px 10px"
-        [pageSizeOptions]="[5, 10, 20]"
-        showFirstLastButtons
-      ></mat-paginator>
+      <mat-paginator #productsPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons></mat-paginator>
     </div>
   </div>
 </div>

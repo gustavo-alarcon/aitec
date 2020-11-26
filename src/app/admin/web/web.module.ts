@@ -81,4 +81,4 @@ import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
     LazyLoadImageModule
   ],
 })
-export class WebModule {}
+export class WebModule { }

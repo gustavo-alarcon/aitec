@@ -1,28 +1,23 @@
 <div mat-dialog-title>
   <h2 *ngIf="!data.edit" style="font-size:1.2em; font-family: Montserrat; font-weight: 900;">
-      <mat-icon style="vertical-align:middle">add_circle</mat-icon>
-      Agregar Banner
+    <mat-icon style="vertical-align:middle">add_circle</mat-icon>
+    Agregar Banner
   </h2>
   <h2 *ngIf="data.edit" style="font-size:1.2em; font-family: Montserrat; font-weight: 900;">
-      <mat-icon style="vertical-align:middle">edit</mat-icon>
-      Editar Banner
+    <mat-icon style="vertical-align:middle">edit</mat-icon>
+    Editar Banner
   </h2>
   <mat-divider></mat-divider>
   <mat-progress-bar mode='indeterminate' *ngIf="loading$ | async"></mat-progress-bar>
 </div>
 <mat-dialog-content style="width: 800px; max-width: 80vw;">
   <form [formGroup]="createForm" class="w3-row">
-      <div class="w3-col m6 l6 w3-padding">
-        
-        <mat-form-field class="w3-block" appearance="outline">
-          <mat-label>Cupón</mat-label>
-          <input
-            autocomplete="off"
-            formControlName="name"
-            type="text"
-            matInput
-          />
-          <!--mat-error>
+    <div class="w3-col m6 l6 w3-padding">
+
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Cupón</mat-label>
+        <input autocomplete="off" formControlName="name" type="text" matInput />
+        <!--mat-error>
             <span *ngIf="createForm.get('name').errors?.required"
               >Campo requerido</span
             >
@@ -30,18 +25,12 @@
               encuentra
               repetido.</span>
           </mat-error-->
-        </mat-form-field>
-        <mat-form-field class="w3-block" appearance="outline">
-          <mat-label>Descuento (%)</mat-label>
-          <input
-            autocomplete="off"
-            formControlName="discount"
-            type="number"
-            matInput
-            placeholder="Descuento"
-          />
-          <span matSuffix>&nbsp;%</span>
-          <!--mat-error>
+      </mat-form-field>
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Descuento (%)</mat-label>
+        <input autocomplete="off" formControlName="discount" type="number" matInput placeholder="Descuento" />
+        <span matSuffix>&nbsp;%</span>
+        <!--mat-error>
             <span *ngIf="createForm.get('name').errors?.required"
               >Campo requerido</span
             >
@@ -49,102 +38,100 @@
               encuentra
               repetido.</span>
           </mat-error-->
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha limite</mat-label>
-          <input readonly matInput [matDatepicker]="picker">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-        <!--mat-form-field class="content" appearance="outline">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha limite</mat-label>
+        <input readonly matInput [matDatepicker]="picker">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <!--mat-form-field class="content" appearance="outline">
           <input readonly matInput placeholder="FECHA / PERIODO" 
           formControlName="dateLimit" [satDatepicker]="picker">
           <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
           <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
       </mat-form-field-->
+    </div>
+    <div class="w3-col m6 l6 w3-padding">
+      <div>
+        <label>Descuento a:</label>
+        <mat-radio-group class="example-radio-group" color="primary" formControlName="redirectTo">
+          <mat-radio-button *ngFor="let season of redirects" [value]="season">
+            {{season}}
+          </mat-radio-button>
+        </mat-radio-group>
       </div>
-      <div class="w3-col m6 l6 w3-padding">
-        <div>
-          <label>Descuento a:</label>
-          <mat-radio-group class="example-radio-group" color="primary" formControlName="redirectTo">
-            <mat-radio-button *ngFor="let season of redirects" [value]="season">
-              {{season}}
-            </mat-radio-button>
-          </mat-radio-group>
-        </div>
-        <hr>
-        
-        <div *ngIf="createForm.get('redirectTo').value=='Producto'">
-            <h2 style="font-size:1em; font-weight:600">
-                <mat-icon style="vertical-align:middle">format_list_bulleted</mat-icon> Lista de Productos
-            </h2>
-            <hr>
-            <mat-form-field *ngIf="products$ | async as products" style="margin-bottom: 8px; display:block"
-                appearance="outline">
-                <mat-label>Productos</mat-label>
-                <input autocomplete="off" formControlName="product" [matAutocomplete]="productAutocomplete" type="text"
-                    (keyup.enter)="addProduct()" matInput>
-                <mat-autocomplete autoActiveFirstOption #productAutocomplete="matAutocomplete"
-                    [displayWith]="showSelected">
-                    <mat-option *ngFor="let product of products" [value]="product" (click)="addProduct()"
-                        (keyup.enter)="addProduct()">
-                        {{product['description']}}
-                    </mat-option>
-                </mat-autocomplete>
-                <mat-hint>
-                    Presione ENTER para agregar
-                </mat-hint>
-            </mat-form-field>
-  
-  
-            <div class="w3-section">
-                <ng-container *ngFor="let item of products">
-                    <div class="w3-border-bottom w3-border-lightgray w3-padding"
-                        style="display:flex; align-items: center">
-                        <span>{{item['description']}}</span>
-                        <button mat-icon-button (click)="removeProduct(item)" type="button">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                </ng-container>
-            </div>
-            <div *ngIf="!products.length" class="w3-center">
-                <p style="font-size:14px">Agregue un producto a la lista</p>
-            </div>
-        </div>
-        
-        <div *ngIf="createForm.get('redirectTo').value=='Categoría/subcategoría'">
-         
-          <mat-form-field *ngIf="category$ | async as categories"  style="margin-bottom: 8px; display:block"
-              appearance="outline">
-              <mat-label>Categorías</mat-label>
-              <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text" matInput>
-              <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete">
-                  
-                  <mat-option *ngFor="let category of categories" [value]="category">
-                    {{category}}
-                </mat-option>
-              </mat-autocomplete>
-          </mat-form-field>
-        </div>
+      <hr>
 
-        <div *ngIf="createForm.get('redirectTo').value=='Marca'">
-         
-          <mat-form-field *ngIf="brand$ | async as brands"  style="margin-bottom: 8px; display:block"
-              appearance="outline">
-              <mat-label>Marcas</mat-label>
-              <input autocomplete="off" formControlName="brand" [matAutocomplete]="brandAutocomplete" type="text" matInput>
-              <mat-autocomplete autoActiveFirstOption #brandAutocomplete="matAutocomplete">
-                  
-                  <mat-option *ngFor="let brand of brands" [value]="brand">
-                    {{brand}}
-                </mat-option>
-              </mat-autocomplete>
-          </mat-form-field>
+      <div *ngIf="createForm.get('redirectTo').value=='Producto'">
+        <h2 style="font-size:1em; font-weight:600">
+          <mat-icon style="vertical-align:middle">format_list_bulleted</mat-icon> Lista de Productos
+        </h2>
+        <hr>
+        <mat-form-field *ngIf="products$ | async as products" style="margin-bottom: 8px; display:block"
+          appearance="outline">
+          <mat-label>Productos</mat-label>
+          <input autocomplete="off" formControlName="product" [matAutocomplete]="productAutocomplete" type="text"
+            (keyup.enter)="addProduct()" matInput>
+          <mat-autocomplete autoActiveFirstOption #productAutocomplete="matAutocomplete" [displayWith]="showSelected">
+            <mat-option *ngFor="let product of products" [value]="product" (click)="addProduct()"
+              (keyup.enter)="addProduct()">
+              {{product['description']}}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-hint>
+            Presione ENTER para agregar
+          </mat-hint>
+        </mat-form-field>
+
+
+        <div class="w3-section">
+          <ng-container *ngFor="let item of products">
+            <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display:flex; align-items: center">
+              <span>{{item['description']}}</span>
+              <button mat-icon-button (click)="removeProduct(item)" type="button">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+        <div *ngIf="!products.length" class="w3-center">
+          <p style="font-size:14px">Agregue un producto a la lista</p>
         </div>
       </div>
-     
-      
+
+      <div *ngIf="createForm.get('redirectTo').value=='Categoría/subcategoría'">
+
+        <mat-form-field *ngIf="category$ | async as categories" style="margin-bottom: 8px; display:block"
+          appearance="outline">
+          <mat-label>Categorías</mat-label>
+          <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text"
+            matInput>
+          <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete">
+
+            <mat-option *ngFor="let category of categories" [value]="category">
+              {{category}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="createForm.get('redirectTo').value=='Marca'">
+
+        <mat-form-field *ngIf="brand$ | async as brands" style="margin-bottom: 8px; display:block" appearance="outline">
+          <mat-label>Marcas</mat-label>
+          <input autocomplete="off" formControlName="brand" [matAutocomplete]="brandAutocomplete" type="text" matInput>
+          <mat-autocomplete autoActiveFirstOption #brandAutocomplete="matAutocomplete">
+
+            <mat-option *ngFor="let brand of brands" [value]="brand">
+              {{brand}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+    </div>
+
+
 
   </form>
   <mat-divider></mat-divider>
@@ -153,12 +140,12 @@
 <mat-dialog-actions align="end">
   <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
   <div *ngIf="data.edit">
-      <button mat-raised-button color="primary" (click)="editSubmit()" type="button"
+    <button mat-raised-button color="primary" (click)="editSubmit()" type="button"
       [disabled]="createForm.status != 'VALID'">Editar</button>
   </div>
   <div *ngIf="!data.edit">
-      <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
+    <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
       [disabled]="createForm.status != 'VALID'">Guardar</button>
   </div>
-  
+
 </mat-dialog-actions>
