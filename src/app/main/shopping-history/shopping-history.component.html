@@ -1,1 +1,115 @@
-<p>shopping-history works!</p>
+<div class="ms-container">
+  <div class="formFieldRounded" *ngIf="(view$ | async)==1">
+    <h2 class="title2">Historial de compras </h2>
+    <!--mat-form-field appearance="outline" class="w3-margin-top w3-margin-bottom w3-block"
+        style="max-width: 350px;">
+        <input matInput placeholder="FECHA / PERIODO" [formControl]="dateForm" [satDatepicker]="picker">
+        <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
+        <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
+    </mat-form-field>
+    <button *ngIf="prueba$ | async" mat-raised-button style="height: 45px;" (click)="downloadXls()" color="accent">
+        Descargar Excel
+      </button-->
+    <div *ngIf="init$ | async as sales">
+      <div class="w3-hide-small w3-hide-medium" style="display: flex;">
+        <div style="width: 70%">
+          <mat-card *ngFor="let sale of sales| paginate: { itemsPerPage: 6, currentPage: p }"
+            class="card-record  w3-margin-bottom" (click)="showList(sale,false)">
+            <div class="ms-flex ms-flex--center" style="justify-content: space-between">
+              <div class="corr">#{{sale.correlativeType}}{{("000"+sale.correlative).slice(-4)}}
+              </div>
+              <div class="dates">
+                <div matTooltip="Fecha Solicitada">
+                  {{sale['createdAt'].toMillis() | date: 'dd-MMM-yyyy' }}
+                </div>
+                <div *ngIf="sale.confirmedRequestData" matTooltip="Fecha Asignada">
+                  {{sale.confirmedRequestData['assignedDate'].toMillis() | date: 'dd-MMM-yyyy' }}
+                </div>
+              </div>
+              <div style="width: 120px;">
+                <div [ngClass]="getColor(sale.status)">{{getStatus(sale.status)}}</div>
+              </div>
+              <div [ngClass]="sale.voucherChecked?'check done':'check'">
+                <mat-icon *ngIf="sale.voucherChecked">done</mat-icon>
+              </div>
+              <div>
+                <div class="total">S/.
+                  {{(getTotal(sale.requestedProducts) + sale.deliveryPrice) | number: '.2'}}
+                </div>
+              </div>
+            </div>
+
+          </mat-card>
+          <div style="display: flex; width: 100%; justify-content: flex-end;" *ngIf="sales.length>6">
+            <pagination-controls (pageChange)="p = $event" previousLabel="" nextLabel="" maxSize="6">
+            </pagination-controls>
+          </div>
+        </div>
+        <mat-card *ngIf="chooseSale" class="ticket ticket--small">
+          <div class="ms-flex ms-flex--center">
+            <h2 class="title2">Compra
+              #{{chooseSale.correlativeType}}{{("000"+chooseSale.correlative).slice(-4)}}
+            </h2>
+            <span class="ms-fill"></span>
+            <button mat-icon-button (click)="hideList()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <!--app-shopping-cart [delivery]="chooseSale.deliveryPrice" [change]="false"
+                    [order]="chooseSale.requestedProducts" [modified]="false">
+                </app-shopping-cart-->
+
+        </mat-card>
+      </div>
+      <div class="w3-hide-large ">
+        <mat-card *ngFor="let sale of sales| paginate: { itemsPerPage: 6, currentPage: p1 }"
+          class="card-record  w3-margin-bottom" (click)="showList(sale,true)">
+          <div class="ms-flex ms-flex--center">
+            <div>
+              <div class="corr">#{{sale.correlativeType}}{{("000"+sale.correlative).slice(-4)}}
+              </div>
+              <div class="dates">
+                <div matTooltip="Fecha Solicitada">
+                  {{sale['createdAt'].toMillis() | date: 'dd-MMM-yyyy' }}</div>
+                <div matTooltip="Fecha Asignada" *ngIf="sale.confirmedRequestData">
+                  {{sale.confirmedRequestData['assignedDate'].toMillis() | date: 'dd-MMM-yyyy' }}
+                </div>
+              </div>
+            </div>
+            <span class="ms-fill"></span>
+            <div style="width: 60%;">
+              <div class="ms-flex" style="margin-bottom: 8px;">
+                <div style="width: 75%;">
+                  <div [ngClass]="getColor(sale.status)">{{getStatus(sale.status)}}</div>
+                </div>
+                <span class="ms-fill"></span>
+                <div [ngClass]="sale.voucherChecked?'check done':'check'">
+                  <mat-icon *ngIf="sale.voucherChecked">done</mat-icon>
+                </div>
+              </div>
+              <div class="total">S/. {{(sale.total + sale.deliveryPrice) | number: '.2'}}</div>
+            </div>
+          </div>
+        </mat-card>
+        <div style="display: flex; width: 100%; justify-content: flex-end;" *ngIf="sales.length>6">
+          <pagination-controls (pageChange)="p1 = $event" previousLabel="" nextLabel="" maxSize="6">
+          </pagination-controls>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <div *ngIf="(view$|async)==2">
+    <div class="ms-flex ms-flex--center">
+      <button mat-icon-button style="margin-left: -10px; margin-top: -10px;" (click)="back()">
+        <mat-icon>keyboard_backspace</mat-icon>
+      </button>
+      <h2 class="title2 w3-margin-left">Lista de compras
+        #{{chooseSale.correlativeType}}{{("000"+chooseSale.correlative).slice(-4)}}</h2>
+    </div>
+    <!--app-shopping-cart [delivery]="chooseSale.deliveryPrice" [change]="false" [order]="chooseSale.requestedProducts"
+        [modified]="false"></app-shopping-cart-->
+
+  </div>
+</div>

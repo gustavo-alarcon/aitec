@@ -4,10 +4,7 @@
     {{ data.edit ? "Editar Categoría" : "Crear Categoría" }}
   </h2>
   <mat-divider></mat-divider>
-  <mat-progress-bar
-    mode="indeterminate"
-    *ngIf="loading$ | async"
-  ></mat-progress-bar>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 </div>
 <mat-dialog-content style="width: 1200px; max-width: 80vw">
   <div class="ms-flex" style="min-height: 50vh">
@@ -16,61 +13,35 @@
         <div>
           <div style="display: flex; flex-direction: row; width: 100%">
             <!-- description  -->
-            <mat-form-field
-              style="margin-bottom: 8px; width: 48%"
-              appearance="outline"
-            >
+            <mat-form-field style="margin-bottom: 8px; width: 48%" appearance="outline">
               <mat-label>Nombre categoría</mat-label>
-              <input
-                #input
-                autocomplete="off"
-                maxlength="40"
-                formControlName="category"
-                type="text"
-                matInput
-                placeholder="Nombre de la categoría"
-              />
+              <input #input autocomplete="off" maxlength="40" formControlName="category" type="text" matInput
+                placeholder="Nombre de la categoría" />
 
               <mat-error>
-                <span *ngIf="packageForm.get('category').errors?.required"
-                  >Campo requerido</span
-                >
-                <!--span *ngIf="packageForm.get('category').errors?.descriptionRepeatedValidator">Este contenido ya se
+                <span *ngIf="packageForm.get('category').errors?.required">Campo requerido</span>
+                <span *ngIf="packageForm.get('category').errors?.descriptionRepeatedValidator">Esta categoría ya se
                   encuentra
-                  repetido.</span-->
+                  repetido.</span>
               </mat-error>
             </mat-form-field>
             <!-- totalItems -->
 
-            <mat-form-field
-              style="margin-left: 10px; display: block"
-              appearance="outline"
-            >
+            <mat-form-field style="margin-left: 10px; display: block" appearance="outline">
               <mat-label>Número de subcategorías</mat-label>
-              <input
-                type="number"
-                formControlName="totalItems"
-                autocomplete="off"
-                matInput
-              />
+              <input type="number" formControlName="totalItems" autocomplete="off" matInput />
             </mat-form-field>
           </div>
-          <div class="w3-row-padding">
+          <div class="grid-container">
             <ng-container *ngIf="totalItems$ | async"></ng-container>
-            <div
-              class="w3-col m4 l4"
-              *ngFor="let group of itemsFormArray.controls; let i = index"
-            >
+            <div class="grid-item" *ngFor="let group of itemsFormArray.controls; let i = index">
               <!-- itemsFormArray -->
-              <form
-                [formGroup]="group"
-                style="
+              <form [formGroup]="group" style="
                   margin-bottom: 8px;
                   padding: 12px;
                   border-radius: 10px;
                   border: 1px solid lightgrey;
-                "
-              >
+                ">
                 <div style="margin-bottom: 8px">
                   <strong>Subcategoría {{ i + 1 }} </strong>
                 </div>
@@ -78,58 +49,33 @@
                   <mat-label>Nombre</mat-label>
                   <input type="text" matInput formControlName="name" />
                 </mat-form-field>
-                <div
-                  class="ms-flex"
-                  style="
+                <div class="ms-flex" style="
                     flex-direction: row;
                     justify-content: space-between;
                     align-items: center;
                     width: 100%;
-                  "
-                >
-                  <mat-form-field
-                    style="width: 70%"
-                    appearance="outline"
-                    class="w3-small"
-                  >
+                  ">
+                  <mat-form-field style="width: 70%" appearance="outline" class="w3-small">
                     <mat-label>Subcategorías</mat-label>
-                    <input
-                      type="text"
-                      formControlName="sub"
-                      autocomplete="off"
-                      matInput
-                    />
+                    <input type="text" formControlName="sub" autocomplete="off" matInput />
                   </mat-form-field>
-                  <button
-                    mat-flat-button
-                    class="w3-small w3-block w3-margin-bottom"
-                    color="primary"
-                    style="width: 25%; min-width: 36px; padding: 0"
-                    (click)="onSelectProduct(group)"
-                  >
+                  <button mat-flat-button class="w3-small w3-block w3-margin-bottom" color="primary"
+                    style="width: 25%; min-width: 36px; padding: 0" (click)="onSelectProduct(group)">
                     <mat-icon>add</mat-icon>
                   </button>
                 </div>
 
-                <div
-                  *ngIf="
+                <div *ngIf="
                     group.get('categories').value.length;
                     else emptyProducts
-                  "
-                >
+                  ">
                   <mat-divider></mat-divider>
-                  <div
-                    *ngFor="let product of group.get('categories').value"
-                    class="ms-flex w3-margin-top"
-                  >
+                  <div *ngFor="let product of group.get('categories').value" class="ms-flex w3-margin-top">
                     <div style="width: 80%">
                       {{ product | titlecase }}
                     </div>
                     <div>
-                      <mat-icon
-                        class="removeIcon"
-                        (click)="onRemoveProduct(product, group)"
-                      >
+                      <mat-icon class="removeIcon" (click)="onRemoveProduct(product, group)">
                         remove_circle
                       </mat-icon>
                     </div>
@@ -149,36 +95,22 @@
     </div>
     <div class="w3-col m4 l4 w3-padding">
       <h4>Marcas</h4>
-      <mat-form-field
-        *ngIf="brand$ | async as brands"
-        style="margin-bottom: 8px; display: block"
-        appearance="outline"
-      >
+      <mat-form-field *ngIf="brand$ | async as brands" style="margin-bottom: 8px; display: block" appearance="outline">
         <mat-label>Marcas</mat-label>
-        <input
-          autocomplete="off"
-          [formControl]="brandForm"
-          [matAutocomplete]="brandAutocomplete"
-          type="text"
-          matInput
-        />
-        <mat-autocomplete
-          autoActiveFirstOption
-          #brandAutocomplete="matAutocomplete"
-        >
-          <mat-option *ngFor="let brand of brands" [value]="brand">
+        <input autocomplete="off" [formControl]="brandForm" [matAutocomplete]="brandAutocomplete" type="text"
+          matInput />
+        <mat-autocomplete autoActiveFirstOption [displayWith]="showBrand" #brandAutocomplete="matAutocomplete">
+          <mat-option *ngFor="let brand of brands" [value]="brand" (click)="addProduct(option)"
+            (keyup.enter)="addProduct(option)">
             {{ brand['name'] }}
           </mat-option>
-          
+
         </mat-autocomplete>
         <mat-hint> Presione ENTER para agregar </mat-hint>
       </mat-form-field>
       <div class="w3-section">
         <ng-container *ngFor="let item of selectBrand">
-          <div
-            class="w3-border-bottom w3-border-lightgray w3-padding"
-            style="display: flex; align-items: center"
-          >
+          <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display: flex; align-items: center">
             <span>{{ item["name"] }}</span>
             <button mat-icon-button (click)="removeProduct(item)" type="button">
               <mat-icon>delete</mat-icon>
@@ -198,13 +130,8 @@
   <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
     Cancelar
   </button>
-  <button
-    mat-raised-button
-    color="accent"
-    (click)="onSubmitForm()"
-    type="button"
-    [disabled]="!packageForm.valid || !itemsFormArray.valid"
-  >
+  <button mat-raised-button color="accent" (click)="onSubmitForm()" type="button"
+    [disabled]="!packageForm.valid || !itemsFormArray.valid">
     Guardar
   </button>
 </mat-dialog-actions>

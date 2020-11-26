@@ -1,12 +1,12 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, concat, Observable, of } from 'rxjs';
-import { switchMap, take, takeLast } from 'rxjs/operators';
+import { map, switchMap, take, takeLast } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 @Component({
   selector: 'app-brand',
@@ -49,16 +49,16 @@ export class BrandComponent implements OnInit {
 
   ngOnInit() {
     console.log(this.data);
-    
+
     this.createForm = this.fb.group({
-      photoURL:[this.data.edit ? this.data.data.photoURL : null, Validators.required],
-      name: [this.data.edit ? this.data.data.name : null, Validators.required]
+      photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
+      name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]]
     })
 
 
   }
 
-  
+
   addNewPhoto(formControlName: string, image: File[]) {
     this.createForm.get(formControlName).setValue(null);
     if (image.length === 0)
@@ -122,8 +122,8 @@ export class BrandComponent implements OnInit {
     ).subscribe((photoUrl) => {
       productData.photoURL = <string>photoUrl
       productData.photoPath = `/brands/pictures/${dataRef.id}-${photo.name}`;
-    
-      
+
+
       batch.set(dataRef, productData);
 
       batch.commit().then(() => {
@@ -181,7 +181,7 @@ export class BrandComponent implements OnInit {
   }
   onSubmitForm() {
     console.log(this.createForm.value);
-    
+
     this.createForm.markAsPending();
     this.createForm.disable()
     this.loading.next(true)
@@ -194,7 +194,7 @@ export class BrandComponent implements OnInit {
       photoPath: '',
       createdAt: new Date()
     }
-    
+
     this.create(newDoc, this.photos.data.photoURL)
   }
 
@@ -221,6 +221,25 @@ export class BrandComponent implements OnInit {
       this.edit(update, 'photo', this.photos.data.photoURL)
     } else {
       this.edit(update, 'any')
+    }
+  }
+
+  nameRepeatedValidator(data) {
+    return (control: AbstractControl): Observable<{ 'nameRepeatedValidator': boolean }> => {
+      const value = control.value.toUpperCase();
+      if (data.edit) {
+        if (data.data.name.toUpperCase() == value) {
+          return of(null)
+        }
+        else {
+          return this.dbs.getBrandsDoc().pipe(
+            map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
+        }
+      }
+      else {
+        return this.dbs.getBrandsDoc().pipe(
+          map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
+      }
     }
   }
 

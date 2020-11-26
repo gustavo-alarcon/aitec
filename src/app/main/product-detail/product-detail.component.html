@@ -78,7 +78,7 @@
               S/.
               {{
                 product.promo
-                  ? product.promoData.price
+                  ? product.promoData.promoPrice
                   : (product.price | number: ".2")
               }}
             </span>
@@ -116,7 +116,7 @@
           </div>
           <p>Garantia: <strong>1 año</strong></p>
           <div class="w3-center">
-            <app-quantity-div [product]="product" size="md"></app-quantity-div>
+            <app-quantity-div [product]="productDiv" size="md"></app-quantity-div>
           </div>
         </div>
       </div>

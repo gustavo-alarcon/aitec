@@ -25,6 +25,14 @@ const routes: Routes = [
         loadChildren: () => import('./store/store.module').then(mod => mod.StoreModule)
       },
       {
+        path: 'productos/:id/:cat',
+        loadChildren: () => import('./store/store.module').then(mod => mod.StoreModule)
+      },
+      {
+        path: 'productos/:id/:cat/:sub',
+        loadChildren: () => import('./store/store.module').then(mod => mod.StoreModule)
+      },
+      {
         path: 'producto/:id',
         loadChildren: () => import('./product-detail/product-detail.module').then(mod => mod.ProductDetailModule)
       },
@@ -36,6 +44,10 @@ const routes: Routes = [
         path: 'carrito',
         loadChildren: () => import('./shopping-cart/shopping-cart.module').then(mod => mod.ShoppingCartModule)
       },
+      {
+        path: 'mispedidos',
+        loadChildren: () => import('./shopping-history/shopping-history.module').then(mod => mod.ShoppingHistoryModule)
+      }
     ]
   }
 ]

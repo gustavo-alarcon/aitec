@@ -5,14 +5,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, shareReplay, startWith, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, concat, Observable, of } from 'rxjs';
+import { map, shareReplay, startWith, switchMap, take, takeLast, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { CreatEditTestimonyComponent } from '../creat-edit-testimony/creat-edit-testimony.component';
 import { CreateEditBannerComponent } from '../create-edit-banner/create-edit-banner.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { LandingService } from 'src/app/core/services/landing.service';
+import { Ng2ImgMaxService } from 'ng2-img-max';
+import { AngularFireStorage } from '@angular/fire/storage';
 
 @Component({
   selector: 'app-landing',
@@ -22,8 +24,8 @@ import { LandingService } from 'src/app/core/services/landing.service';
 export class LandingComponent implements OnInit {
   category: FormControl = new FormControl('');
   category$: Observable<string[]>;
-  categories:Array<any>=[]
-  selectCategories: Array<string>=[]
+  categories: Array<any> = []
+  selectCategories: Array<string> = []
 
   dataSource = new MatTableDataSource();
   displayedColumns: string[] = [
@@ -55,22 +57,49 @@ export class LandingComponent implements OnInit {
 
   loadingFooter = new BehaviorSubject<boolean>(false);
   loadingFooter$ = this.loadingFooter.asObservable();
-  footer$:Observable<any>
+  footer$: Observable<any>
 
   linkForm: FormGroup;
-  selectLink: Array<any>=[]
+  selectLink: Array<any> = []
+
+  //middle
+  loadingMid = new BehaviorSubject<boolean>(false)
+  loadingMid$ = this.loadingMid.asObservable()
+
+  createForm: FormGroup
+  //variables
+  noImage = '../../../../assets/images/no-image.png';
+  photos: {
+    resizing$: {
+      photoURL: Observable<boolean>
+    },
+    data: {
+      photoURL: File
+    }
+  } = {
+      resizing$: {
+        photoURL: new BehaviorSubject<boolean>(false)
+      },
+      data: {
+        photoURL: null
+      }
+    }
+
+  defaultImage = "../../../../assets/images/logo-black.png";
 
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     public dbs: DatabaseService,
-    private ld:LandingService,
+    private ld: LandingService,
     private afs: AngularFirestore,
-    private snackBar: MatSnackBar
-  ) {}
+    private snackBar: MatSnackBar,
+    private ng2ImgMax: Ng2ImgMaxService,
+    private storage: AngularFireStorage
+  ) { }
 
   ngOnInit(): void {
-    
+
     this.banner$ = this.ld.getBanners('promo').pipe(
       tap((res) => {
         this.banner = [...res];
@@ -86,12 +115,12 @@ export class LandingComponent implements OnInit {
     );
 
     this.category$ = combineLatest(
-      this.category.valueChanges.pipe(   
+      this.category.valueChanges.pipe(
         startWith<any>(''),
       ),
       this.dbs.getCategories()
     ).pipe(
-      map(([value,categories]) => {
+      map(([value, categories]) => {
         let fil = categories.map((el) => el['category']);
         this.categories = categories
         return fil.filter((el) =>
@@ -101,11 +130,17 @@ export class LandingComponent implements OnInit {
     );
 
     this.linkForm = this.fb.group({
-      name: [null,Validators.required],
-      link: [null,Validators.required],
+      name: [null, Validators.required],
+      link: [null, Validators.required],
     });
 
     this.getFooter()
+
+    this.createForm = this.fb.group({
+      photoURL: [null, Validators.required],
+      title: [null, Validators.required],
+      descrip: [null, Validators.required]
+    })
   }
 
   openDialog(movil: boolean) {
@@ -131,9 +166,9 @@ export class LandingComponent implements OnInit {
   deleteBDialog(id: string) {
     this.dialog.open(DeleteDialogComponent, {
       data: {
-        id:id,
-        title:'Banner',
-        type:'banner'
+        id: id,
+        title: 'Banner',
+        type: 'banner'
       }
     })
   }
@@ -141,9 +176,9 @@ export class LandingComponent implements OnInit {
   deleteDialog(id: string) {
     this.dialog.open(DeleteDialogComponent, {
       data: {
-        id:id,
-        title:'Testimonio',
-        type:'testi'
+        id: id,
+        title: 'Testimonio',
+        type: 'testi'
       }
     })
   }
@@ -176,8 +211,8 @@ export class LandingComponent implements OnInit {
 
   addLink() {
     this.selectLink.push(this.linkForm.value);
-      this.linkForm.reset();
-    
+    this.linkForm.reset();
+
   }
 
   removeLink(item): void {
@@ -189,8 +224,12 @@ export class LandingComponent implements OnInit {
     moveItemInArray(array, event.previousIndex, event.currentIndex);
   }
 
-  getStars(number){
-
+  getStars(number) {
+    let star = [false, false, false, false, false]
+    for (let i = 0; i < number; i++) {
+      star[i] = true
+    }
+    return star
   }
 
   savePosition(array) {
@@ -215,22 +254,26 @@ export class LandingComponent implements OnInit {
     });
   }
 
-  getFooter(){
+  getFooter() {
     this.footer$ = this.afs.collection(`/db/aitec/config`).doc('generalConfig').get().pipe(
       map((snap) => {
-      return snap.data()
-    }),
-    tap(res=>{
-      this.loadingFooter.next(false)
-      if(res.footer){
-        this.selectCategories = res.footer.search
-        this.selectLink = res.footer.links
-      }
-      
-    }));
+        return snap.data()
+      }),
+      tap(res => {
+        this.loadingFooter.next(false)
+        if (res.footer) {
+          this.selectCategories = res.footer.search
+          this.selectLink = res.footer.links
+        }
+
+        if (res.middle) {
+          this.createForm.setValue(res.middle)
+        }
+
+      }));
   }
 
-  saveFooter(){
+  saveFooter() {
     this.loadingFooter.next(true);
 
     const ref = this.afs.firestore
@@ -241,7 +284,7 @@ export class LandingComponent implements OnInit {
     batch.update(ref, {
       footer: {
         search: this.selectCategories,
-        links:this.selectLink
+        links: this.selectLink
       },
     });
 
@@ -252,4 +295,99 @@ export class LandingComponent implements OnInit {
       });
     });
   }
+
+  addNewPhoto(formControlName: string, image: File[]) {
+    this.createForm.get(formControlName).setValue(null);
+    if (image.length === 0)
+      return;
+    let reader = new FileReader();
+    this.photos.resizing$[formControlName].next(true);
+
+    this.ng2ImgMax.resizeImage(image[0], 10000, 426)
+      .pipe(
+        take(1)
+      ).subscribe(result => {
+        this.photos.data[formControlName] = new File([result], formControlName + result.name.match(/\..*$/));
+        reader.readAsDataURL(image[0]);
+        reader.onload = (_event) => {
+          this.createForm.get(formControlName).setValue(reader.result);
+          this.photos.resizing$[formControlName].next(false);
+        }
+      },
+        error => {
+          this.photos.resizing$[formControlName].next(false);
+          this.snackBar.open('Por favor, elija una imagen en formato JPG, o PNG', 'Aceptar');
+          this.createForm.get(formControlName).setValue(null);
+
+        }
+      );
+  }
+
+
+  uploadPhoto(id: string, file: File): Observable<string | number> {
+    const path = `/user/pictures/${id}-${file.name}`;
+
+    // Reference to storage bucket
+    const ref = this.storage.ref(path);
+
+    // The main task
+    let uploadingTask = this.storage.upload(path, file);
+
+    let snapshot$ = uploadingTask.percentageChanges()
+    let url$ = of('url!').pipe(
+      switchMap((res) => {
+        return <Observable<string>>ref.getDownloadURL();
+      }))
+
+    let upload$ = concat(
+      snapshot$,
+      url$)
+
+    return upload$;
+  }
+
+  create() {
+    this.loadingMid.next(true)
+    const ref = this.afs.firestore
+      .collection(`/db/aitec/config`)
+      .doc('generalConfig');
+    let productData = this.createForm.value
+    let batch = this.afs.firestore.batch();
+
+    productData.photoURL = null;
+    if (this.photos.data.photoURL) {
+      this.uploadPhoto(ref.id, this.photos.data.photoURL).pipe(
+        takeLast(1),
+      ).subscribe((photoUrl) => {
+        productData.photoURL = <string>photoUrl
+        batch.update(ref, {
+          middle: productData
+        });
+
+        batch.commit().then(() => {
+
+          this.loadingMid.next(false)
+          this.snackBar.open("Cambios Guardados", "Cerrar", {
+            duration: 6000
+          })
+        })
+      })
+    } else {
+      batch.update(ref, {
+        middle: productData
+      });
+
+      batch.commit().then(() => {
+
+        this.loadingMid.next(false)
+        this.snackBar.open("Cambios Guardados", "Cerrar", {
+          duration: 6000
+        })
+      })
+    }
+
+
+
+  }
+
 }

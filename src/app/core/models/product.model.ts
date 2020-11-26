@@ -25,7 +25,9 @@ export interface Product {
   createdBy: User;
   editedAt: Date;
   editedBy: User;
-
+  subcategory?:string;
+  subsubcategory?:string;
+  brand?:string;
   purchaseNumber?: number;  //Número total de compras
 }
 

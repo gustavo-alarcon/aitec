@@ -29,9 +29,9 @@ export class CreateEditCategoriesComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
-  brandForm:FormControl = new FormControl('')
-  brand$:Observable<any>
-  selectBrand:Array<any> = []
+  brandForm: FormControl = new FormControl('')
+  brand$: Observable<any>
+  selectBrand: Array<any> = []
 
   constructor(
     private dialogRef: MatDialogRef<CreateEditCategoriesComponent>,
@@ -40,7 +40,7 @@ export class CreateEditCategoriesComponent implements OnInit {
     private snackBar: MatSnackBar,
     private afs: AngularFirestore,
     @Inject(MAT_DIALOG_DATA) public data: { data: any; edit: boolean }
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.initForm();
@@ -51,13 +51,14 @@ export class CreateEditCategoriesComponent implements OnInit {
 
     this.brand$ = combineLatest(
       this.brandForm.valueChanges.pipe(
-        startWith<any>('')
+        startWith<any>(''),
+        map(el => typeof el == 'object' ? el['name'] : el)
       ),
       this.dbs.getBrands()
     ).pipe(
-      map(([value,brands])=>{
-        
-        return brands.filter(el=>value?el['name'].toLowerCase().includes(value.toLowerCase()):true)
+      map(([value, brands]) => {
+
+        return brands.filter(el => value ? el['name'].toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -77,17 +78,17 @@ export class CreateEditCategoriesComponent implements OnInit {
       this.packageForm = this.fb.group({
         category: this.fb.control(this.data.data.category, {
           validators: [Validators.required],
-          //asyncValidators: this.descriptionRepeatedValidator(this.dbs, this.data),
+          asyncValidators: this.descriptionRepeatedValidator(this.data),
           updateOn: 'blur',
         }),
 
-        totalItems: [this.data.data.totalItems],
+        totalItems: [this.data.data.subcategories.length],
       });
     } else {
       this.packageForm = this.fb.group({
         category: this.fb.control(null, {
           validators: [Validators.required],
-          //asyncValidators: this.descriptionRepeatedValidator(this.dbs, this.data),
+          asyncValidators: this.descriptionRepeatedValidator(this.data),
           updateOn: 'blur',
         }),
 
@@ -100,21 +101,34 @@ export class CreateEditCategoriesComponent implements OnInit {
     this.totalItems$ = this.packageForm.get('totalItems').valueChanges.pipe(
       //startWith<number>(this.packageForm.get('totalItems').value),
       tap((total) => {
-        this.itemsFormArray.clear();
-        for (let i = 0; i < total; i++) {
-          this.itemsFormArray.push(
-            this.fb.group({
-              name: [''],
-              sub: [null],
-              categories: [[]],
-            })
-          );
+        let leng = this.itemsFormArray.length
+
+        if (total > leng) {
+          let number = total - leng
+          for (let i = 0; i < number; i++) {
+            this.itemsFormArray.push(
+              this.fb.group({
+                name: [''],
+                sub: [null],
+                categories: [[]],
+              })
+            );
+          }
+        } else if (leng > total) {
+
+          for (let i = total; i < leng; i++) {
+            this.itemsFormArray.removeAt(i)
+          }
         }
+
+
       })
     );
   }
 
   onSelectProduct(formGroup: FormGroup) {
+    console.log(formGroup);
+
     let product = formGroup.get('sub').value;
 
     if (product) {
@@ -138,7 +152,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   addProduct() {
     if (this.brandForm.value['id']) {
       this.selectBrand.push(this.brandForm.value);
-      this.brandForm.setValue('');
+      this.brandForm.setValue(null);
     } else {
       this.snackBar.open("Debe seleccionar un producto", "Cerrar", {
         duration: 6000
@@ -151,6 +165,10 @@ export class CreateEditCategoriesComponent implements OnInit {
     this.selectBrand.splice(index, 1);
   }
 
+  showBrand(staff): string | undefined {
+    return staff ? staff['name'] : undefined;
+  }
+
   onSubmitForm() {
     this.loading.next(true);
 
@@ -161,11 +179,11 @@ export class CreateEditCategoriesComponent implements OnInit {
     console.log(subs);
 
     let newCategory = {
-      id: this.data.edit?this.data.data.id:'',
+      id: this.data.edit ? this.data.data.id : '',
       category: this.packageForm.get('category').value,
       subcategories: subs,
       brands: this.selectBrand,
-      createdAt: this.data.edit?this.data.data.createdAt:new Date(),
+      createdAt: this.data.edit ? this.data.data.createdAt : new Date(),
     };
 
     if (this.data.edit) {
@@ -213,22 +231,22 @@ export class CreateEditCategoriesComponent implements OnInit {
     });
   }
 
-  descriptionRepeatedValidator(dbs, data) {
-    /*return (control: AbstractControl): Observable<{'descriptionRepeatedValidator': boolean}> => {
+  descriptionRepeatedValidator(data) {
+    return (control: AbstractControl): Observable<{ 'descriptionRepeatedValidator': boolean }> => {
       const value = control.value.toUpperCase();
-      if(data.edit){
-        if(data.data.description.toUpperCase() == value){
+      if (data.edit) {
+        if (data.data.category.toUpperCase() == value) {
           return of(null)
         }
-        else{
-          return dbs.getPackagesList().pipe(
-            map(res => !!res.find(el => el.description.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
-          }
+        else {
+          return this.dbs.getCategoriesDoc().pipe(
+            map(res => !!res.find(el => el.category.toUpperCase() == value) ? { descriptionRepeatedValidator: true } : null))
         }
-      else{
-        return dbs.getPackagesList().pipe(
-          map(res => !!res.find(el => el.description.toUpperCase() == value)  ? {descriptionRepeatedValidator: true} : null),)
-        }
-    }*/
+      }
+      else {
+        return this.dbs.getCategoriesDoc().pipe(
+          map(res => !!res.find(el => el.category.toUpperCase() == value) ? { descriptionRepeatedValidator: true } : null))
+      }
+    }
   }
 }

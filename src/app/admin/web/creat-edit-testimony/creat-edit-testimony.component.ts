@@ -15,7 +15,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./creat-edit-testimony.component.scss']
 })
 export class CreatEditTestimonyComponent implements OnInit {
-  
+
   loading = new BehaviorSubject<boolean>(false)
   loading$ = this.loading.asObservable()
 
@@ -43,25 +43,25 @@ export class CreatEditTestimonyComponent implements OnInit {
     private snackBar: MatSnackBar,
     private ng2ImgMax: Ng2ImgMaxService,
     @Inject(MAT_DIALOG_DATA) public data: { edit: boolean, data?: any },
-    private dialogRef: MatDialogRef< CreatEditTestimonyComponent>,
+    private dialogRef: MatDialogRef<CreatEditTestimonyComponent>,
     private afs: AngularFirestore,
     private storage: AngularFireStorage
   ) { }
 
   ngOnInit() {
     console.log(this.data);
-    
+
     this.createForm = this.fb.group({
-      photoURL:[this.data.edit ? this.data.data.photoURL : null, Validators.required],
+      photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
       name: [this.data.edit ? this.data.data.name : null, Validators.required],
       message: [this.data.edit ? this.data.data.message : null, Validators.required],
-      rating: [this.data.edit ? this.data.data.rating : null,[ Validators.required,Validators.max(5)]]
+      rating: [this.data.edit ? this.data.data.rating : null, [Validators.required, Validators.max(5)]]
     })
 
 
   }
 
-  
+
   addNewPhoto(formControlName: string, image: File[]) {
     this.createForm.get(formControlName).setValue(null);
     if (image.length === 0)
@@ -125,8 +125,8 @@ export class CreatEditTestimonyComponent implements OnInit {
     ).subscribe((photoUrl) => {
       productData.photoURL = <string>photoUrl
       productData.photoPath = `/user/pictures/${dataRef.id}-${photo.name}`;
-    
-      
+
+
       batch.set(dataRef, productData);
 
       batch.commit().then(() => {
@@ -184,7 +184,7 @@ export class CreatEditTestimonyComponent implements OnInit {
   }
   onSubmitForm() {
     console.log(this.createForm.value);
-    
+
     this.createForm.markAsPending();
     this.createForm.disable()
     this.loading.next(true)
@@ -199,7 +199,7 @@ export class CreatEditTestimonyComponent implements OnInit {
       photoPath: '',
       createdAt: new Date()
     }
-    
+
     this.create(newDoc, this.photos.data.photoURL)
   }
 
@@ -234,6 +234,16 @@ export class CreatEditTestimonyComponent implements OnInit {
     } else {
       this.edit(update, 'any')
     }
+  }
+
+  onKeydown(event) {
+
+    let permit =
+      event.keyCode === 8 ||
+      event.keyCode === 46 ||
+      event.keyCode === 37 ||
+      event.keyCode === 39;
+    return permit ? true : !isNaN(Number(event.key));
   }
 
 }

@@ -22,6 +22,11 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+//import { SatDatepickerModule, SatNativeDateModule } from 'saturn-datepicker';
+//import { MAT_DATE_LOCALE as MAT_DATE_LOCALESAT } from 'saturn-datepicker';
+
 
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
@@ -34,6 +39,8 @@ import { GeneralComponent } from './general/general.component';
 import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/create-edit-categories.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { DeleteDocComponent } from './dialogs/delete-doc/delete-doc.component';
+import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
+import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
 
 @NgModule({
   declarations: [
@@ -47,6 +54,8 @@ import { DeleteDocComponent } from './dialogs/delete-doc/delete-doc.component';
     CreateEditCategoriesComponent,
     BrandsViewComponent,
     DeleteDocComponent,
+    CuponDialogComponent,
+    AsesoresDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -73,7 +82,9 @@ import { DeleteDocComponent } from './dialogs/delete-doc/delete-doc.component';
     MatTableModule,
     MatPaginatorModule,
     MatExpansionModule,
-    Ng2ImgMaxModule
-  ],
+    Ng2ImgMaxModule,
+    LazyLoadImageModule,
+    MatDatepickerModule
+  ]
 })
-export class ConfigurationSalesModule {}
+export class ConfigurationSalesModule { }

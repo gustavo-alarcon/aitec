@@ -1,11 +1,11 @@
 <div class="ms-container w3-padding-top">
   <h2 class="title">
     <mat-icon style="vertical-align: middle;">build</mat-icon>
-    Configuracion Ventas
+    Configuración Ventas
   </h2>
   <nav mat-tab-nav-bar>
-    <a mat-tab-link *ngFor="let link of links" [routerLink]="link['route']"
-      routerLinkActive #rla="routerLinkActive" [active]="rla.isActive">
+    <a mat-tab-link *ngFor="let link of links" [routerLink]="link['route']" routerLinkActive #rla="routerLinkActive"
+      [active]="rla.isActive">
       {{link['name']}}
     </a>
   </nav>

@@ -1,14 +1,10 @@
-//import { Banner } from './../../../../core/models/banners.model';
 import { AngularFirestore, DocumentReference } from '@angular/fire/firestore';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { startWith, map, take, takeLast, switchMap, filter, ignoreElements } from 'rxjs/operators';
+import { startWith, map, take, takeLast, switchMap, filter } from 'rxjs/operators';
 import { Ng2ImgMaxService } from 'ng2-img-max';
-//import { DatabaseService } from './../../../../core/database.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Observable, BehaviorSubject, combineLatest, concat, interval, of, forkJoin } from 'rxjs';
-import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Observable, BehaviorSubject, combineLatest, concat, of, forkJoin } from 'rxjs';
+import { Component, OnInit, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -20,8 +16,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class CreateEditBannerComponent implements OnInit {
 
-  redirects:Array<string> = ['Ninguno','Link externo','Categoría/subcategoría','Marca','Producto']
-  brands = ['logitech','samsung','philips','teros']
+  redirects: Array<string> = ['Ninguno', 'Link externo', 'Categoría/subcategoría', 'Marca', 'Producto']
 
   category$: Observable<string[]>
   products$: Observable<any>
@@ -60,7 +55,7 @@ export class CreateEditBannerComponent implements OnInit {
     private dbs: DatabaseService,
     private snackBar: MatSnackBar,
     private ng2ImgMax: Ng2ImgMaxService,
-    @Inject(MAT_DIALOG_DATA) public data: { edit: boolean,type:string, index?: number, data?: any },
+    @Inject(MAT_DIALOG_DATA) public data: { edit: boolean, type: string, index?: number, data?: any },
     private dialogRef: MatDialogRef<CreateEditBannerComponent>,
     private afs: AngularFirestore,
     private storage: AngularFireStorage
@@ -68,7 +63,7 @@ export class CreateEditBannerComponent implements OnInit {
 
   ngOnInit() {
     this.createForm = this.fb.group({
-      redirectTo:[this.data.edit ? this.data.data.redirectTo : null, Validators.required],
+      redirectTo: [this.data.edit ? this.data.data.redirectTo : null, Validators.required],
       category: [this.data.edit ? this.data.data.category : null],
       brand: [this.data.edit ? this.data.data.brand : null],
       link: [this.data.edit ? this.data.data.link : null],
@@ -77,16 +72,21 @@ export class CreateEditBannerComponent implements OnInit {
       product: [null]
     })
 
-    this.products$ =this.createForm.get('product').valueChanges.pipe(
-      startWith<any>(''),
-      filter((input) => input !== null),
-      map((value) => {
+    this.products$ = combineLatest(
+      this.createForm.get('product').valueChanges.pipe(
+        startWith<any>(''),
+        filter((input) => input !== null)
+      ),
+      this.dbs.getProductsList()
+    ).pipe(
+      
+      map(([value,products]) => {
         return value
-          ? this.dbs.products.filter(
-              (option) =>
-                option['description'].toLowerCase().includes(value) ||
-                option['sku'].toLowerCase().includes(value)
-            )
+          ? products.filter(
+            (option) =>
+              option['description'].toLowerCase().includes(value) ||
+              option['sku'].toLowerCase().includes(value)
+          )
           : [];
       })
     )
@@ -97,26 +97,26 @@ export class CreateEditBannerComponent implements OnInit {
       ),
       this.dbs.getCategories()
     ).pipe(
-      
-      map(([value,categories])=>{
-        let fil = categories.map(el=>{
+
+      map(([value, categories]) => {
+        let fil = categories.map(el => {
           let first = [el['category']]
-          let subs = el['subcategories'].map(lo=>{
+          let subs = el['subcategories'].map(lo => {
             let sub = [el['category'] + ' >> ' + lo.name]
-            if(lo.categories.length){
-              let secs = lo.categories.map(sec=>{
+            if (lo.categories.length) {
+              let secs = lo.categories.map(sec => {
                 return el['category'] + ' >> ' + lo.name + ' >> ' + sec
               })
               return sub.concat(secs)
-            }else{
+            } else {
               return sub
             }
-           
+
           })
-          return first.concat(subs).reduce((a,b)=>a.concat(b),[])
-        }).reduce((a,b)=>a.concat(b),[])
-        
-        return fil.filter(el=>value?el.toLowerCase().includes(value.toLowerCase()):true)
+          return first.concat(subs).reduce((a, b) => a.concat(b), [])
+        }).reduce((a, b) => a.concat(b), [])
+
+        return fil.filter(el => value ? el.toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -126,9 +126,9 @@ export class CreateEditBannerComponent implements OnInit {
       ),
       this.dbs.getBrands()
     ).pipe(
-      map(([value,brands])=>{
-        
-        return brands.map(el=>el['name']).filter(el=>value?el['name'].toLowerCase().includes(value.toLowerCase()):true)
+      map(([value, brands]) => {
+
+        return brands.map(el => el['name']).filter(el => value ? el['name'].toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
     /*this.category$ = combineLatest(
@@ -149,24 +149,24 @@ export class CreateEditBannerComponent implements OnInit {
             }
             return filter;
           }))*/
-          /*this.products$ = combineLatest(
-        this.dbs.getProducts(),
-        this.createForm.get('product').valueChanges.pipe(
-          filter(input => input !== null),
-          startWith<any>(''))
-        //map(value => typeof value === 'string' ? value.toLowerCase() : value.description.toLowerCase()))
-      ).pipe(
-        map(([products, name]) => {
-          if (this.data.edit) {
-            if (this.products.length == 0) {
-              this.products = products.filter(el => this.data.data.products.includes(el.id))
-            }
+    /*this.products$ = combineLatest(
+  this.dbs.getProducts(),
+  this.createForm.get('product').valueChanges.pipe(
+    filter(input => input !== null),
+    startWith<any>(''))
+  //map(value => typeof value === 'string' ? value.toLowerCase() : value.description.toLowerCase()))
+).pipe(
+  map(([products, name]) => {
+    if (this.data.edit) {
+      if (this.products.length == 0) {
+        this.products = products.filter(el => this.data.data.products.includes(el.id))
+      }
 
-          }
-          return name ? products.filter(option => option.description.toLowerCase().includes(name)) : products;
-        })
-      );*/
-  
+    }
+    return name ? products.filter(option => option.description.toLowerCase().includes(name)) : products;
+  })
+);*/
+
 
   }
 
@@ -358,7 +358,7 @@ export class CreateEditBannerComponent implements OnInit {
       photomovilURL: '',
       photomovilPath: '',
       published: true,
-      products: this.products.map(el => {return {id:el['id'],description:el['description']}}),
+      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
       position: this.data.index
     }
     this.createBanner(newBanner, this.photos.data.photoURL, this.photos.data.photomovilURL)
@@ -411,7 +411,7 @@ export class CreateEditBannerComponent implements OnInit {
     change = newP.length > 0 || old.length > 0
 
     if (change) {
-      update['products'] = this.products.map(el => {return {id:el['id'],description:el['description']}})
+      update['products'] = this.products.map(el => { return { id: el['id'], description: el['description'] } })
     }
 
     if (photo && movil) {
