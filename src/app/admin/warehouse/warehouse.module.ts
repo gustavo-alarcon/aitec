@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -23,20 +24,16 @@ import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
-import { NgxSummernoteModule } from 'ngx-summernote';
-import { HttpClientModule } from '@angular/common/http';
 
-import { ProductsListRoutingModule } from './products-list-routing.module';
-import { ProductsListComponent } from './products-list.component';
-import { CreateEditProductComponent } from './create-edit-product/create-edit-product.component';
-import { ProductEditPromoComponent } from './product-edit-promo/product-edit-promo.component';
+import { WarehouseRoutingModule } from './warehouse-routing.module';
+import { WarehouseComponent } from './warehouse.component';
 
 
 @NgModule({
-  declarations: [ProductsListComponent, CreateEditProductComponent, ProductEditPromoComponent],
+  declarations: [WarehouseComponent],
   imports: [
     CommonModule,
-    ProductsListRoutingModule,
+    WarehouseRoutingModule,
     MatMenuModule,
     MatTableModule,
     MatPaginatorModule,
@@ -59,9 +56,7 @@ import { ProductEditPromoComponent } from './product-edit-promo/product-edit-pro
     LazyLoadImageModule,
     MatCardModule,
     MatStepperModule,
-    MatRadioModule,
-    NgxSummernoteModule,
-    HttpClientModule
+    MatRadioModule
   ]
 })
-export class ProductsListModule { }
+export class WarehouseModule { }

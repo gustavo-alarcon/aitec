@@ -83,10 +83,11 @@ console.log(this.getCurrentMonthOfViewDate());
       ),
       this.dateForm.get('end').valueChanges.pipe(
         startWith(endDate),
-        map(end =>  end.setHours(23, 59, 59))
+        map(end =>  end?end.setHours(23, 59, 59):null)
       )
     ).pipe(
       switchMap(([startdate,enddate]) => {
+        
         return this.dbs.getSales({ begin: startdate, end: enddate })
       }),
       map(sales => {
