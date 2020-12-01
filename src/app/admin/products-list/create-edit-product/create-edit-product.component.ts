@@ -375,7 +375,9 @@ export class CreateEditProductComponent implements OnInit {
       timeguarantee: this.secondFormGroup.get('timeguarantee').value
     }
     console.log(newProduct);
-    //this.createProduct(newProduct)
+    console.log(this.photos.data);
+    
+    this.createProduct(newProduct)
     
   }
 
