@@ -34,6 +34,7 @@ export interface Product {
 interface PromoData {
   quantity: 1;
   promoPrice: number;
+  offer?:number;
 }
 
 export interface MermaTransfer {

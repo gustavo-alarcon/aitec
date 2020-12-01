@@ -93,12 +93,9 @@
         </p>
         <div class="w3-section">
           <h4 class="product__subtitle">Descripción</h4>
-          <p>{{ product.additionalDescription }}</p>
+          <div>{{ product.additionalDescription }}</div>
         </div>
-        <div class="w3-section">
-          <h4 class="product__subtitle">Caracteristicas</h4>
-          <div *ngFor="let caract of product.caracteristicas">{{ caract }}</div>
-        </div>
+       
         <div class="w3-section">
           <h4 class="product__subtitle">Calificaciones</h4>
           <div style="color: #f2c94c">

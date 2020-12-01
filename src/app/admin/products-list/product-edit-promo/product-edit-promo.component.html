@@ -1,0 +1,76 @@
+<div mat-dialog-title>
+  <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.2em">
+    Promoción
+  </h2>
+  <mat-divider></mat-divider>
+</div>
+<mat-dialog-content>
+  <form [formGroup]="productForm" style="display:flex; flex-direction: column;">
+
+    <!-- promo  -->
+    <div style="display: flex; flex-direction: row; justify-content: flex-end;">
+      <mat-slide-toggle formControlName="promo" style="margin-bottom: 8px" color="primary">
+        Habilitar Promoción
+      </mat-slide-toggle>
+    </div>
+
+    <ng-container *ngIf="promoState$ | async">
+
+      <!-- quantity  -->
+      <mat-form-field style="display:block; margin-bottom: 8px" appearance="outline">
+        <mat-label>Cantidad </mat-label>
+        <input autocomplete="off" formControlName="quantity" type="number" min="0" matInput placeholder="Precio">
+        <mat-error>
+          <span *ngIf="productForm.get('quantity').errors?.required">Campo requerido</span>
+        </mat-error>
+        <mat-hint>
+          * La promoción aplicará cuando el cliente asigne la cantidad especificada
+        </mat-hint>
+      </mat-form-field>
+
+
+
+      <!-- promoPrice  -->
+      <mat-form-field style="display:block; margin-bottom: 8px; margin-top: 16px" appearance="outline">
+        <mat-label>Precio Promocional (S/.)</mat-label>
+        <input autocomplete="off" formControlName="promoPrice" type="number" min="0" matInput placeholder="Precio">
+        <mat-error>
+          <span *ngIf="productForm.get('promoPrice').errors?.required">Campo requerido</span>
+        </mat-error>
+      </mat-form-field>
+
+      <ng-container *ngIf="discountsCalc$ | async">
+
+        <!-- percentageDisccount  -->
+        <mat-form-field style="display:block; margin-bottom: 8px; margin-top: 8px" appearance="outline">
+          <mat-label>Porcentaje de Descuento (%)</mat-label>
+          <input readonly autocomplete="off" formControlName="percentageDisccount" type="number" matInput
+            placeholder="Precio">
+          <span matSuffix>%</span>
+          <mat-error>
+            <span *ngIf="productForm.get('percentageDisccount').errors?.required">Campo requerido</span>
+          </mat-error>
+        </mat-form-field>
+
+        <!-- moneyDisccount  -->
+        <mat-form-field style="display:block; margin-bottom: 8px; margin-top: 8px" appearance="outline">
+          <mat-label>Descuento en soles (S/.)</mat-label>
+          <input readonly autocomplete="off" formControlName="moneyDisccount" type="text" min="0" matInput
+            placeholder="Precio">
+          <mat-error>
+            <span *ngIf="productForm.get('moneyDisccount').errors?.required">Campo requerido</span>
+          </mat-error>
+        </mat-form-field>
+      </ng-container>
+
+    </ng-container>
+
+  </form>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="accent" (click)="onSubmitForm()" type="button"
+    [disabled]="productForm.status != 'VALID'">Guardar</button>
+</mat-dialog-actions>

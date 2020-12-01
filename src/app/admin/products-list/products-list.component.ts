@@ -16,6 +16,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { Product } from 'src/app/core/models/product.model';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
+import { ProductEditPromoComponent } from './product-edit-promo/product-edit-promo.component';
 
 @Component({
   selector: 'app-products-list',
@@ -170,7 +171,7 @@ export class ProductsListComponent implements OnInit {
   }
 
   onPromo(product: Product) {
-    /*
+    
     let dialogRef: MatDialogRef<ProductEditPromoComponent>;
     dialogRef = this.dialog.open(ProductEditPromoComponent, {
       width: '350px',
@@ -189,7 +190,7 @@ export class ProductsListComponent implements OnInit {
         default:
           break;
       }
-    })*/
+    })
   }
 
   onCreateEditItem(edit: boolean, product?: Product) {

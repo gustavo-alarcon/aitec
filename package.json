@@ -39,8 +39,10 @@
     "ng2-img-max": "^2.2.4",
     "ngx-pagination": "^5.0.0",
     "ngx-slick-carousel": "^0.5.1",
+    "ngx-summernote": "^0.8.0",
     "rxjs": "~6.6.0",
     "slick-carousel": "^1.8.1",
+    "summernote": "^0.8.18",
     "tslib": "^2.0.0",
     "xlsx": "^0.16.9",
     "zone.js": "~0.10.2"

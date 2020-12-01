@@ -83,7 +83,6 @@
   width: 100%;
   min-width: 250px;
   max-width: 350px;
-  font-family: Montserrat;
   color: #828282;
   &__title {
     font-family: Roboto;
@@ -98,7 +97,8 @@
     background-color: #828282;
   }
   &__list {
-    font-size:0.9em
+    font-size:0.9em;
+    font-family: Montserrat;
   }
   &__descrip {
     letter-spacing: 0.05em;

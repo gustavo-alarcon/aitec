@@ -64,6 +64,19 @@ export class CreateEditProductComponent implements OnInit {
   dataSource = new MatTableDataSource();
   displayedColumns: string[] = ['warehouse', 'stock', 'serie', 'actions'];
 
+  config = {
+    placeholder: 'Descripción o contenido del módulo',
+    tabsize: 2,
+    height: '100px',
+    lang: 'es-ES',
+    toolbar: [
+      ['fontsize', ['fontname', 'fontsize', 'color']],
+      ['style', ['bold', 'italic', 'underline', 'clear']],
+      ['para', ['style', 'ul', 'ol', 'paragraph', 'height']],
+    ],
+    fontNames: ['Helvetica', 'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Roboto', 'Times']
+  };
+
   constructor(
     private dbs: DatabaseService,
     private fb: FormBuilder,
@@ -362,7 +375,7 @@ export class CreateEditProductComponent implements OnInit {
       timeguarantee: this.secondFormGroup.get('timeguarantee').value
     }
     console.log(newProduct);
-    this.createProduct(newProduct)
+    //this.createProduct(newProduct)
     
   }
 

@@ -135,10 +135,12 @@
         </div>
         <div class="w3-row-padding">
           <div class="w3-col">
-            <mat-form-field class="w3-block" appearance="outline">
+            <!--mat-form-field class="w3-block" appearance="outline">
               <mat-label>Descripción</mat-label>
               <textarea matInput formControlName="additionalDescription" class="w3-block" rows="8" required></textarea>
-            </mat-form-field>
+              
+            </mat-form-field-->
+            <textarea formControlName="additionalDescription" [ngxSummernote]="config" cols="20" rows="3" required></textarea>
           </div>
 
         </div>
