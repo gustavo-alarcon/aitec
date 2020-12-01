@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
@@ -24,8 +24,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-//import { SatDatepickerModule, SatNativeDateModule } from 'saturn-datepicker';
-//import { MAT_DATE_LOCALE as MAT_DATE_LOCALESAT } from 'saturn-datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
 
 
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
@@ -55,7 +55,7 @@ import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dial
     BrandsViewComponent,
     DeleteDocComponent,
     CuponDialogComponent,
-    AsesoresDialogComponent,
+    AsesoresDialogComponent
   ],
   imports: [
     CommonModule,
@@ -84,7 +84,12 @@ import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dial
     MatExpansionModule,
     Ng2ImgMaxModule,
     LazyLoadImageModule,
-    MatDatepickerModule
-  ]
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatRadioModule
+  ],
+  providers: [
+    DatePipe
+  ],
 })
 export class ConfigurationSalesModule { }

@@ -8,6 +8,7 @@ import { map, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteDocComponent } from '../dialogs/delete-doc/delete-doc.component';
 import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dialog.component';
+import { StoreDialogComponent } from '../dialogs/store-dialog/store-dialog.component';
 
 @Component({
   selector: 'app-delivery-stores',
@@ -16,26 +17,29 @@ import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dia
 })
 export class DeliveryStoresComponent implements OnInit {
   dataSource = new MatTableDataSource();
-  displayedColumns: string[] = [
-    'index',
-    'departamento',
-    'provincia',
-    'distritos',
-    'delivery',
-    'actions',
-  ];
+  displayedColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'delivery', 'actions'];
 
   @ViewChild('productsPaginator', { static: false }) set content(
     paginator1: MatPaginator
   ) {
     this.dataSource.paginator = paginator1;
   }
-  
-  init$:Observable<any>
+
+  dataStoreSource = new MatTableDataSource();
+  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address', 'actions'];
+
+  @ViewChild('storePaginator', { static: false }) set content2(
+    paginator1: MatPaginator
+  ) {
+    this.dataStoreSource.paginator = paginator1;
+  }
+
+  init$: Observable<any>
+  initStore$: Observable<any>
   constructor(
     private afs: AngularFirestore,
     private dialog: MatDialog,
-    private dbs:DatabaseService
+    private dbs: DatabaseService
   ) { }
 
   ngOnInit(): void {
@@ -44,24 +48,38 @@ export class DeliveryStoresComponent implements OnInit {
         this.dataSource.data = res;
       })
     );
+
+    this.initStore$ = this.dbs.getStores().pipe(
+      tap((res) => {
+        this.dataStoreSource.data = res;
+      })
+    );
   }
-  openDialog(movil: boolean,data) {
-    let ind = 0
-    
+
+  openDialog(movil: boolean, data) {
     this.dialog.open(DeliveryDialogComponent, {
       data: {
         edit: movil,
-        data:data
+        data: data
       }
     })
   }
 
-  deleteDialog(id: string) {
+  openStoreDialog(movil: boolean, data) {
+    this.dialog.open(StoreDialogComponent, {
+      data: {
+        edit: movil,
+        data: data
+      }
+    })
+  }
+
+  deleteDialog(id: string,type:string,title:string) {
     this.dialog.open(DeleteDocComponent, {
       data: {
-        id:id,
-        title:'Delivery',
-        type:'delivery'
+        id: id,
+        title: title,
+        type: type
       }
     })
   }

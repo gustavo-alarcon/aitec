@@ -1,15 +1,18 @@
-<div class="ms-container">
-  <div class="formFieldRounded" *ngIf="(view$ | async)==1">
+<div class="ms-container w3-section w3-padding">
+  <div *ngIf="(view$ | async)==1">
     <h2 class="title2">Historial de compras </h2>
-    <!--mat-form-field appearance="outline" class="w3-margin-top w3-margin-bottom w3-block"
-        style="max-width: 350px;">
-        <input matInput placeholder="FECHA / PERIODO" [formControl]="dateForm" [satDatepicker]="picker">
-        <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
-        <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
+
+    <mat-form-field class="w3-margin-top w3-margin-bottom w3-block" style="max-width: 350px;" appearance="outline">
+      <mat-label>FECHA/PERIODO</mat-label>
+      <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
+        <input readonly matStartDate formControlName="start" placeholder="Fecha Inicio">
+        <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+
+
     </mat-form-field>
-    <button *ngIf="prueba$ | async" mat-raised-button style="height: 45px;" (click)="downloadXls()" color="accent">
-        Descargar Excel
-      </button-->
     <div *ngIf="init$ | async as sales">
       <div class="w3-hide-small w3-hide-medium" style="display: flex;">
         <div style="width: 70%">
@@ -20,9 +23,11 @@
               </div>
               <div class="dates">
                 <div matTooltip="Fecha Solicitada">
+                  <mat-icon class="font--primary">assignment_turned_in</mat-icon>
                   {{sale['createdAt'].toMillis() | date: 'dd-MMM-yyyy' }}
                 </div>
                 <div *ngIf="sale.confirmedRequestData" matTooltip="Fecha Asignada">
+                  <mat-icon class="font--primary">assignment_turned_in</mat-icon>
                   {{sale.confirmedRequestData['assignedDate'].toMillis() | date: 'dd-MMM-yyyy' }}
                 </div>
               </div>
@@ -47,13 +52,72 @@
         </div>
         <mat-card *ngIf="chooseSale" class="ticket ticket--small">
           <div class="ms-flex ms-flex--center">
-            <h2 class="title2">Compra
+            <h2 class="title2">Lista de compras
               #{{chooseSale.correlativeType}}{{("000"+chooseSale.correlative).slice(-4)}}
             </h2>
             <span class="ms-fill"></span>
             <button mat-icon-button (click)="hideList()">
               <mat-icon>close</mat-icon>
             </button>
+          </div>
+          <div>
+            <div class="resume__divider"></div>
+            <div class="resume__list w3-section">
+              <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px">
+                <div style="width: 20%">Cant.</div>
+                <div style="width: 55%">Descripción</div>
+                <div style="width: 25%">Precio</div>
+              </div>
+              <div *ngFor="let prod of chooseSale.requestedProducts" class="ms-flex" style="font-family: Montserrat;">
+                <div style="width: 20%" class="w3-center">
+                  {{prod.quantity | number:'2.'}}
+                </div>
+                <div style="width: 55%">
+                  {{prod.product.description}}
+                </div>
+                <div style="width: 25%">
+                  S/. {{giveProductPrice(prod) | number:'.2'}}
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <div class="resume__descrip w3-section">
+            <div class="ms-flex ms-flex--center">
+              <span>Subtotal</span>
+              <span class="ms-fill"></span>
+              <span>{{ chooseSale.total * 0.82 | number: ".2" }}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Cargos adicionales</span>
+              <span class="ms-fill"></span>
+              <span>0.00</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Descuento promocional</span>
+              <span class="ms-fill"></span>
+              <span>0.00</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>IGV</span>
+              <span class="ms-fill"></span>
+              <span>{{ chooseSale.total * 0.18 | number: ".2" }}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Delivery</span>
+              <span class="ms-fill"></span>
+              <span>{{chooseSale.deliveryPrice | number: ".2"}}</span>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <div *ngIf="(view$|async) != 1">
+            <div style="display: flex; margin-top: 20px;justify-content: space-between;">
+              <span class="ms-fill"></span>
+              <div class="ticket__total">
+                S/. {{ chooseSale.total | number: ".2" }}
+              </div>
+            </div>
           </div>
           <!--app-shopping-cart [delivery]="chooseSale.deliveryPrice" [change]="false"
                     [order]="chooseSale.requestedProducts" [modified]="false">

@@ -5,8 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
-//import { LazyLoadImageModule } from 'ng-lazyload-image';
-//import { Ng2ImgMaxModule } from 'ng2-img-max';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatDialogModule } from '@angular/material/dialog';
 
 
@@ -18,8 +17,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatButtonModule,
     MatIconModule,
     QuantityDivModule,
-    //LazyLoadImageModule,
-    //Ng2ImgMaxModule,
+    LazyLoadImageModule,
     MatDialogModule 
   ],
   exports:[

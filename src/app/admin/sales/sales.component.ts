@@ -22,14 +22,12 @@ export class SalesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    //On desktop mode, locationPadding is used to identify top padding when displaying
-    //detail (we are using paginator, so we needed it)
     this.locationPadding$ = this.locationSubject.asObservable().pipe(
       map(location => {
         let aux = location+1 > 10 ? (location % 10) : location;
-        //console.log(aux);
-        let x = 166 + 32 + (148 + 48)*aux;//180+180*aux;
-        if(aux > 0){
+        console.log(aux);
+        let x = 180+180*aux;
+        if(aux > 1){
           return x.toFixed(0)+"px"
         } else {
           return "32px"
@@ -60,9 +58,17 @@ export class SalesComponent implements OnInit {
       return amount * price
     }
   }
-  
   giveTotalPrice(sale: Sale): number{
     return sale.requestedProducts.reduce((a,b) => a + this.givePrice(b), 0)
+  }
+  locationPadding(location: number): string{
+    console.log(location);
+    let x = 112+180*location;
+    if(location > 2){
+      return x.toFixed(0)+" !important"
+    } else {
+      return "32px"
+    }
   }
 
 }

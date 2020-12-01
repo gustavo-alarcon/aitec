@@ -10,14 +10,12 @@
         <div>OFF</div>
       </div>
     </div>
-    <img mat-card-image [src]="product.photoURL" class="product__image" alt="" />
+    <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="product.photoURL" [offset]="100"
+      class="product__image" alt="" />
     <mat-card-content>
       <h4 class="product__title w3-margin-top">{{ product.description }}</h4>
-  
-      <div
-        class="product__descrip"
-        [style.visibility]="product.promo ? 'visible' : 'hidden'"
-      >
+
+      <div class="product__descrip" [style.visibility]="product.promo ? 'visible' : 'hidden'">
         Antes
         <span class="product__offer">S/. {{ product.price | number: ".2" }}</span>
       </div>
@@ -33,4 +31,3 @@
     </mat-card-content>
   </mat-card>
 </a>
-

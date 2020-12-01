@@ -28,8 +28,8 @@ import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
-
-
+import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @NgModule({
   declarations: [
     ShoppingCartComponent,
@@ -64,6 +64,8 @@ import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
     Ng2ImgMaxModule,
     MatDatepickerModule,
     QuantityDivModule,
+    LazyLoadImageModule,
+    MatProgressSpinnerModule
   ],
 })
 export class ShoppingCartModule {}

@@ -1,26 +1,23 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
-<div
-  class="ms-container w3-section"
-  style="position: relative"
-  *ngIf="product$ | async as product"
->
+<div class="ms-container w3-section" style="position: relative" *ngIf="product$ | async as product">
   <div>
     <a mat-flat-button routerLink="/main">Inicio</a> >
     <a mat-flat-button routerLink="/main/productos">Productos</a>
     <span>
       >
-      <a mat-flat-button (click)="navigate(product.category, null)">{{
+      <a mat-flat-button (click)="navigateOnlyCategory(product.category)">{{
         product.category
-      }}</a></span
-    >
-    <span *ngIf="searchSubCategory">
+      }}</a>
+    </span>
+    <span *ngIf="product.subcategory">
       >
-      <a
-        mat-flat-button
-        (click)="navigate(product.category, product.subcategory)"
-        >{{ product.subcategory }}</a
-      ></span
-    >
+      <a mat-flat-button (click)="navigateCategory(product.category, product.subcategory)">{{ product.subcategory }}</a>
+    </span>
+    <span *ngIf="product.subsubcategory">
+      >
+      <a mat-flat-button
+        (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">{{ product.subcategory }}</a>
+    </span>
   </div>
   <mat-card class="product">
     <mat-card-content>
@@ -28,29 +25,18 @@
         <div class="w3-col l8 m7">
           <div class="gallery">
             <div class="gallery__side">
-              <div
-                class="gallery__div border--primary w3-block"
-                [ngClass]="
+              <div class="gallery__div border--primary w3-block" [ngClass]="
                   img.ind == selectImage.ind ? 'gallery__div--select' : 'none'
-                "
-                *ngFor="let img of galleryImg"
-              >
-                <img
-                  [src]="img.photoURL"
-                  (click)="changeSelectImage(img)"
-                  class="gallery__div--image"
-                  alt=""
-                />
+                " *ngFor="let img of galleryImg">
+                <img [defaultImage]="defaultImage" [lazyLoad]="img.photoURL" [offset]="100"
+                  (click)="changeSelectImage(img)" class="gallery__div--image" alt="" />
               </div>
             </div>
-            <figure
-              #image
-              class="zoom"
-              (mousemove)="zoom($event)"
-              [style.background-image]="'url(' + selectImage.photoURL + ')'"
-            >
+            <figure #image class="zoom" (mousemove)="zoom($event)"
+              [style.background-image]="'url(' + selectImage.photoURL + ')'">
               <div style="background-color: white">
-                <img [src]="selectImage.photoURL" class="gallery__image" />
+                <img [defaultImage]="defaultImage" [lazyLoad]="selectImage.photoURL" [offset]="100"
+                  class="gallery__image" />
               </div>
             </figure>
           </div>
@@ -88,30 +74,11 @@
           </div>
           <div class="w3-section">
             <div>Paga con:</div>
-            <div
-              class="ms-flex w3-section"
-              style="justify-content: space-around"
-            >
-              <img
-                src="../../../assets/images/visa.png"
-                class="mini-img"
-                alt=""
-              />
-              <img
-                src="../../../assets/images/mastercad.png"
-                class="mini-img"
-                alt=""
-              />
-              <img
-                src="../../../assets/images/visa_electron.png"
-                class="mini-img"
-                alt=""
-              />
-              <img
-                src="../../../assets/images/american.png"
-                class="mini-img"
-                alt=""
-              />
+            <div class="ms-flex w3-section" style="justify-content: space-around">
+              <img src="../../../assets/images/visa.png" class="mini-img" alt="" />
+              <img src="../../../assets/images/mastercad.png" class="mini-img" alt="" />
+              <img src="../../../assets/images/visa_electron.png" class="mini-img" alt="" />
+              <img src="../../../assets/images/american.png" class="mini-img" alt="" />
             </div>
           </div>
           <p>Garantia: <strong>1 año</strong></p>
@@ -147,11 +114,7 @@
   </mat-card>
   <div class="w3-section">
     <h4 class="product__subtitle">Productos similares</h4>
-    <ngx-slick-carousel
-      class="carousel"
-      #slickModal="slick-carousel"
-      [config]="slideConfig2"
-    >
+    <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
       <div ngxSlickItem *ngFor="let slide of prods" class="slide">
         <div class="w3-padding">
           <app-product-div [product]="slide"></app-product-div>
@@ -163,11 +126,7 @@
     <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
     <div>
-      <mat-form-field
-        class="w3-margin-right w3-small"
-        style="width: 70%"
-        appearance="outline"
-      >
+      <mat-form-field class="w3-margin-right w3-small" style="width: 70%" appearance="outline">
         <mat-label>Escribe tu pregunta</mat-label>
         <input autocomplete="off" matInput placeholder="Escribe tu pregunta" />
       </mat-form-field>

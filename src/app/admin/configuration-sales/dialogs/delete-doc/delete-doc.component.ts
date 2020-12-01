@@ -23,7 +23,14 @@ export class DeleteDocComponent implements OnInit {
 
   save(){
     this.loading.next(true)
-    let ref= this.af.firestore.collection(`/db/aitec/config/generalConfig/${this.data.type}`).doc(this.data.id);
+    let ref;
+    if(this.data.type=='coupons'){
+      ref= this.af.firestore.collection(`/db/aitec/coupons`).doc(this.data.id);
+    }else{
+      
+      ref= this.af.firestore.collection(`/db/aitec/config/generalConfig/${this.data.type}`).doc(this.data.id);
+    }
+    
     
     let batch = this.af.firestore.batch();
 
@@ -32,6 +39,8 @@ export class DeleteDocComponent implements OnInit {
     batch.commit().then(() => {
       this.dialogref.close(true);
       this.loading.next(false)
+      console.log('finishs');
+      
     })
   }
 

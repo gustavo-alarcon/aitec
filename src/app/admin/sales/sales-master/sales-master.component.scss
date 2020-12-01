@@ -1,7 +1,7 @@
 .list-parent-container {
   padding: 16px;
   margin: 16px 0;
-  border-radius: 10px 10px 10px 10px;
+  border-radius: 10px 0px 0px 10px;
 }
 
 .list-container {
@@ -49,7 +49,7 @@
     justify-content: space-between;
   }
   .actions {
-    width: 100%;
+    width: 48%;
   }
 }
 
@@ -90,6 +90,7 @@
 .search {
   line-height: 17px;
   width: 100%;
+  margin-left: 16px;
 }
 
 @media (max-width: 601px) {

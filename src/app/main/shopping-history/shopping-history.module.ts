@@ -16,6 +16,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { ShoppingHistoryRoutingModule } from './shopping-history-routing.module';
 import { ShoppingHistoryComponent } from './shopping-history.component';
 
@@ -39,11 +40,10 @@ import { ShoppingHistoryComponent } from './shopping-history.component';
     MatCheckboxModule,
     FormsModule,
     ReactiveFormsModule,
-    //SatDatepickerModule, 
-    //SatNativeDateModule,
     NgxPaginationModule,
     MatTooltipModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatNativeDateModule
   ]
 })
 export class ShoppingHistoryModule { }

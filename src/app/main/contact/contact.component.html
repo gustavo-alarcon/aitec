@@ -1,7 +1,4 @@
-<mat-progress-bar
-  mode="indeterminate"
-  *ngIf="loadingAll$ | async"
-></mat-progress-bar>
+<mat-progress-bar mode="indeterminate" *ngIf="loadingAll$ | async"></mat-progress-bar>
 <div class="ms-container" *ngIf="init$ | async">
   <div class="w3-section" style="padding: 4em 0">
     <h2 class="title-section">Contáctanos</h2>
@@ -35,12 +32,7 @@
           </p>
         </div>
         <div class="w3-margin-bottom w3-margin-top contact__info">
-          <google-map
-            height="280px"
-            width="100%"
-            [center]="center"
-            [zoom]="zoom"
-          >
+          <google-map height="280px" width="100%" [center]="center" [zoom]="zoom">
             <map-marker [position]="center"></map-marker>
           </google-map>
         </div>
@@ -51,60 +43,29 @@
           <form [formGroup]="formGroup" class="w3-margin-top">
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Nombres / Apellidos</mat-label>
-              <input
-                autocomplete="off"
-                formControlName="name"
-                type="text"
-                matInput
-                placeholder="Nombres / Apellidos"
-              />
+              <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Nombres / Apellidos" />
               <mat-error>Campo requerido</mat-error>
             </mat-form-field>
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Correo</mat-label>
-              <input
-                autocomplete="off"
-                formControlName="email"
-                type="email"
-                matInput
-                placeholder="tucorreo@ejemplo.com"
-              />
+              <input autocomplete="off" formControlName="email" type="email" matInput
+                placeholder="tucorreo@ejemplo.com" />
             </mat-form-field>
 
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Teléfono</mat-label>
-              <input
-                autocomplete="off"
-                formControlName="phone"
-                type="tel"
-                matInput
-                placeholder="Teléfono"
-              />
+              <input autocomplete="off" formControlName="phone" type="tel" matInput placeholder="Teléfono" />
             </mat-form-field>
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Mensaje</mat-label>
-              <textarea
-                autocomplete="off"
-                formControlName="message"
-                type="tel"
-                matInput
-                placeholder="Escriba.."
-                rows="6"
-              ></textarea>
+              <textarea autocomplete="off" formControlName="message" matInput placeholder="Escriba.."
+                rows="6"></textarea>
             </mat-form-field>
           </form>
-          <mat-progress-bar
-            mode="indeterminate"
-            *ngIf="loading$ | async"
-          ></mat-progress-bar>
+          <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
           <div class="w3-center w3-margin-top">
-            <button
-              (click)="sendEmail()"
-              [disabled]="!formGroup.valid"
-              mat-flat-button
-              color="primary"
-              class="contact__button"
-            >
+            <button (click)="sendEmail()" [disabled]="!formGroup.valid" mat-flat-button color="primary"
+              class="contact__button">
               <span> Enviar</span>
             </button>
           </div>
@@ -113,4 +74,3 @@
     </div>
   </div>
 </div>
-

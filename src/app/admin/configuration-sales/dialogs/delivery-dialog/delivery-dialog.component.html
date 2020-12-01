@@ -64,15 +64,9 @@
   <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
     Cancelar
   </button>
-  <div *ngIf="data.edit">
-    <button mat-raised-button color="primary" (click)="editSubmit()" type="button"
-      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length">
-      Editar
-    </button>
-  </div>
-  <div *ngIf="!data.edit">
+  <div>
     <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
-      [disabled]="formGroup.status != 'VALID' || deliveryDistritos.length">
+      [disabled]="formGroup.status != 'VALID' || !deliveryDistritos.length">
       Guardar
     </button>
   </div>

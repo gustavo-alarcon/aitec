@@ -288,16 +288,9 @@
           </mat-card>
         </div>
         <div *ngIf="(view$|async) == 4" style="padding-top: 14vh">
-          <div class="w3-block w3-center">
-            <div class="lds-ring">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-            <p class="font--primary">
-              Espere, estamos procesando su compra
-            </p>
+          <div style="height: 100vh;display: flex;align-items: center;justify-content: center;">
+            <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+            </mat-progress-spinner>
           </div>
         </div>
       </div>
@@ -401,8 +394,8 @@
           <div *ngIf="(view$|async) == 2">
             <div class="w3-margin-bottom">
               <h4 class="resume__subtitle">Comentario adicional</h4>
-              <mat-form-field class="w3-block" appearance="outline">
-                <textarea autocomplete="off" type="tel" matInput placeholder="Escriba.." rows="3"></textarea>
+              <mat-form-field class="w3-block"  appearance="outline">
+                <textarea autocomplete="off" [formControl]="observation" type="tel" matInput placeholder="Escriba.." rows="3"></textarea>
               </mat-form-field>
               <p class="resume__small">*Puedes dejar un comentario adicional para tenerlo en cuenta al generar tu pedido
               </p>

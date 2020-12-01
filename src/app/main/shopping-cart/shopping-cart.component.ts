@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, startWith, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
+import { map, startWith, take, takeLast, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -23,57 +26,19 @@ export class ShoppingCartComponent implements OnInit {
   delivery$: Observable<number>;
 
   products: Array<any>;
-  total:number = 0
+  total: number = 0
   /*delivery*/
-  initDelivery$:Observable<any>
+  initDelivery$: Observable<any>
   formGroup: FormGroup;
   delivery: number = 1;
-  deliveryForm:FormControl = new FormControl(this.delivery)
+  deliveryForm: FormControl = new FormControl(this.delivery)
   latitud: number = -12.046301;
   longitud: number = -77.031027;
 
   center = { lat: -12.046301, lng: -77.031027 };
   zoom = 15;
 
-  places: Array<any> = [
-    {
-      departamento: 'Arequipa',
-      provincias: [
-        {
-          provincia: 'Arequipa',
-          distritos: [
-            { distrito: 'Paucarpata', delivery: 6 },
-            { distrito: 'Cayma', delivery: 6 },
-            { distrito: 'Cercado', delivery: 5 },
-            { distrito: 'Yanahuara', delivery: 7 },
-          ],
-        },
-        {
-          provincia: 'Cámana',
-          distritos: [
-            { distrito: 'Ocoña', delivery: 15 },
-            { distrito: 'Samuel Pastor', delivery: 16 },
-          ],
-        },
-      ],
-    },
-    {
-      departamento: 'Lima',
-      provincias: [
-        {
-          provincia: 'Lima',
-          distritos: [
-            { distrito: 'Breña', delivery: 20 },
-            { distrito: 'Comas', delivery: 26 },
-            { distrito: 'PUENTE PIEDRA', delivery: 25 },
-            { distrito: 'LOS OLIVOS', delivery: 27 },
-            { distrito: 'SURQUILLO', delivery: 27 },
-            { distrito: 'SAN JUAN DE LURIGANCHO', delivery: 27 },
-          ],
-        },
-      ],
-    },
-  ];
+  places: Array<any> = [];
 
   provincias: Array<any> = [];
   distritos: Array<any> = [];
@@ -82,10 +47,10 @@ export class ShoppingCartComponent implements OnInit {
   filteredProvincia$: Observable<any>;
   filteredDistrito$: Observable<any>;
 
-  provincias$:Observable<any>
-  distritos$:Observable<any>
+  provincias$: Observable<any>
+  distritos$: Observable<any>
 
-  chooseDelivery$:Observable<any>
+  chooseDelivery$: Observable<any>
   /*Payments*/
   cardForm: FormGroup;
   documentForm: FormGroup;
@@ -107,6 +72,8 @@ export class ShoppingCartComponent implements OnInit {
   months: Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   years: Array<number> = [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
 
+  observation: FormControl = new FormControl('')
+
   photosList: Array<any> = [];
   photos: {
     resizing$: {
@@ -114,17 +81,19 @@ export class ShoppingCartComponent implements OnInit {
     };
     data: File[];
   } = {
-    resizing$: {
-      photoURL: new BehaviorSubject<boolean>(false),
-    },
-    data: [],
-  };
+      resizing$: {
+        photoURL: new BehaviorSubject<boolean>(false),
+      },
+      data: [],
+    };
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private fb: FormBuilder,
-    private ng2ImgMax: Ng2ImgMaxService
-  ) {}
+    private ng2ImgMax: Ng2ImgMaxService,
+    private router: Router,
+    private dialog: MatDialog
+  ) { }
 
   ngOnInit(): void {
     this.delivery$ = this.dbs.delivery$
@@ -135,7 +104,7 @@ export class ShoppingCartComponent implements OnInit {
           let suma = [...ord]
             .map((el) => this.getPrice(el))
             .reduce((a, b) => a + b, 0);
-            this.total = suma + del;
+          this.total = suma + del;
           return suma + del;
         } else {
           return 0 + del;
@@ -169,9 +138,8 @@ export class ShoppingCartComponent implements OnInit {
 
     /*Delivery*/
     this.initDelivery$ = this.dbs.getDelivery().pipe(
-      tap(res=>{
-        console.log(res);
-        
+      tap(res => {
+        this.places = this.convertPlaces(res)
       })
     )
 
@@ -182,7 +150,7 @@ export class ShoppingCartComponent implements OnInit {
       direccion: [null],
       referencia: [null],
       coordenadas: [this.center],
-      store:[null]
+      store: [null]
     });
 
     this.formGroup.get('provincia').disable();
@@ -198,29 +166,29 @@ export class ShoppingCartComponent implements OnInit {
         })
       );
 
-      this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
-        startWith(''),
-        map(dept=>{
-          
-          
-          if(typeof dept === 'object'){
-            this.selectProvincias(dept)
-            
-          }
-          return true
-        })
-      )
+    this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
+      startWith(''),
+      map(dept => {
 
-      this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
-        startWith(''),
-        map(prov=>{
-          if(prov && typeof prov === 'object'){
-            this.selectDistritos(prov)
-            
-          }
-          return true
-        })
-      )
+
+        if (typeof dept === 'object') {
+          this.selectProvincias(dept)
+
+        }
+        return true
+      })
+    )
+
+    this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
+      startWith(''),
+      map(prov => {
+        if (prov && typeof prov === 'object') {
+          this.selectDistritos(prov)
+
+        }
+        return true
+      })
+    )
     this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
       startWith(''),
       map((value) => {
@@ -241,13 +209,13 @@ export class ShoppingCartComponent implements OnInit {
 
     this.chooseDelivery$ = this.deliveryForm.valueChanges.pipe(
       startWith(1),
-      tap(res=>{
+      tap(res => {
         console.log(res);
-        
-        if(this.formGroup.get('distrito').value){
+
+        if (this.formGroup.get('distrito').value) {
           if (res == 1) {
             this.dbs.delivery.next(this.formGroup.get('distrito').value.delivery);
-          }else{
+          } else {
             this.dbs.delivery.next(0);
           }
         }
@@ -278,41 +246,67 @@ export class ShoppingCartComponent implements OnInit {
   thirdView() {
     this.view.next(3);
   }
+
   finish() {
     this.view.next(4);
-    let info= {
-      departamento: this.formGroup.value['departamento']['departamento'],
-      provincia: this.formGroup.value['provincia']['provincia'],
-      distrito: this.formGroup.value['distrito']['distrito'],
-      direccion: this.formGroup.value['direccion'],
-      referencia: this.formGroup.value['referencia'],
-      coordenadas: this.center,
-      store:this.formGroup.value['store']
-    }
-    let newSale = {
-      id: '',
-      correlative: 0,
-      correlativeType: 'R',
-      document: this.document==1?'Boleta':'Factura',
-      documentInfo:this.documentForm.value,
-      payType: this.method,
-      payInfo:this.cardForm.value,
-      deliveryType: this.delivery==1?'Entrega en domicilio':'Recojo en tienda',
-      deliveryInfo: info,
-      requestDate: null,
-      createdAt: new Date(),
-      createdBy: null,
-      user: null,
-      requestedProducts: this.dbs.order,
-      status: 'Solicitado',
-      total: this.total,
-      deliveryPrice: this.formGroup.value['distrito']['delivery'],
-      voucher: [],
-      voucherChecked: false
-    }
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      console.log(user);
+      
+      let info = {
+        departamento: this.formGroup.value['departamento']['departamento'],
+        provincia: this.formGroup.value['provincia']['provincia'],
+        distrito: this.formGroup.value['distrito']['distrito'],
+        direccion: this.formGroup.value['direccion'],
+        referencia: this.formGroup.value['referencia'],
+        coordenadas: this.center,
+        store: this.formGroup.value['store']
+      }
+      let newSale = {
+        id: '',
+        correlative: 0,
+        correlativeType: 'R',
+        document: this.document == 1 ? 'Boleta' : 'Factura',
+        documentInfo: this.documentForm.value,
+        payType: this.method,
+        payInfo: this.cardForm.value,
+        deliveryType: this.delivery == 1 ? 'Entrega en domicilio' : 'Recojo en tienda',
+        deliveryInfo: info,
+        requestDate: null,
+        createdAt: new Date(),
+        createdBy: null,
+        user: user,
+        requestedProducts: this.dbs.order,
+        status: 'Solicitado',
+        total: this.total,
+        deliveryPrice: this.formGroup.value['distrito']['delivery'],
+        observation: this.observation.value,
+        voucher: [],
+        voucherChecked: false,
+        adviser: null,
+        coupon: null
+      }
 
-    console.log(newSale);
-    
+
+      console.log(newSale);
+      let phot=this.photos.data.length?this.photos:null
+
+      this.dbs.reduceStock(user, newSale, phot).then(() => {
+        this.view.next(1)
+        this.dbs.order = []
+        this.dbs.orderObs.next([])
+        let name = user.personData?user.personData.name + ' ' + user.personData['lastName']:user['name'] + ' ' + user['lastName']
+        this.dialog.open(SaleDialogComponent, {
+          data: {
+            name: name,
+            number: newSale.correlative,
+            email: user.email
+          }
+        })
+        this.router.navigate(['/main/mispedidos']);
+      })
+    })
+
+
   }
 
   getPrice(item) {
@@ -344,13 +338,13 @@ export class ShoppingCartComponent implements OnInit {
   selectProvincias(option) {
     this.provincias = option.provincias;
     this.formGroup.get('provincia').enable();
-    
+
   }
 
   selectDistritos(option) {
     this.distritos = option.distritos;
     this.formGroup.get('distrito').enable();
-    
+
   }
 
   selectDelivery(option) {
@@ -380,6 +374,37 @@ export class ShoppingCartComponent implements OnInit {
     }
   }
 
+  convertPlaces(array: Array<any>) {
+    let convert = array.map(el => {
+      el.distritos = el.distritos.map(dis => {
+        return {
+          distrito: dis.name,
+          province_id: dis.province_id,
+          delivery: el.delivery
+        }
+      })
+      return el
+    })
+
+    return convert.map((lo, ind, arr) => {
+      return {
+        departamento: lo.departamento.name,
+        provincias: arr.filter(li => li.provincia.department_id == lo.departamento.id).map((lu, i, dist) => {
+          return {
+            provincia: lu.provincia.name,
+            distritos: dist.map(d => {
+              return d.distritos
+            }).reduce((a, b) => a.concat(b), []).filter(la => la.province_id == lu.provincia.id)
+          }
+        }).filter((item, index, data) => {
+          return data.findIndex(i => i.provincia === item.provincia) === index;
+        })
+      }
+    }).filter((item, index, data) => {
+      return data.findIndex(i => i.departamento === item.departamento) === index;
+    })
+  }
+
   /*Payments*/
   chooseType(type) {
     this.cardForm.get('type').setValue(type);
@@ -399,8 +424,8 @@ export class ShoppingCartComponent implements OnInit {
             new File(
               [result],
               formControlName +
-                this.photosList.length +
-                result.name.match(/\..*$/)
+              this.photosList.length +
+              result.name.match(/\..*$/)
             )
           );
           reader.readAsDataURL(image[0]);

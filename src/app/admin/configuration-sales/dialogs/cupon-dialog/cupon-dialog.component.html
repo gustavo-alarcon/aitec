@@ -1,11 +1,7 @@
 <div mat-dialog-title>
-  <h2 *ngIf="!data.edit" style="font-size:1.2em; font-family: Montserrat; font-weight: 900;">
+  <h2 style="font-size:1em; font-family: Montserrat; font-weight: 900;">
     <mat-icon style="vertical-align:middle">add_circle</mat-icon>
-    Agregar Banner
-  </h2>
-  <h2 *ngIf="data.edit" style="font-size:1.2em; font-family: Montserrat; font-weight: 900;">
-    <mat-icon style="vertical-align:middle">edit</mat-icon>
-    Editar Banner
+    {{data.edit?'Editar':'Agregar'}} Cupón
   </h2>
   <mat-divider></mat-divider>
   <mat-progress-bar mode='indeterminate' *ngIf="loading$ | async"></mat-progress-bar>
@@ -17,40 +13,30 @@
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>Cupón</mat-label>
         <input autocomplete="off" formControlName="name" type="text" matInput />
-        <!--mat-error>
-            <span *ngIf="createForm.get('name').errors?.required"
-              >Campo requerido</span
-            >
-            <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
-              encuentra
-              repetido.</span>
-          </mat-error-->
+        <mat-hint>Sin espacios</mat-hint>
+        <mat-error>
+          <span *ngIf="createForm.get('name').errors?.required">Campo requerido</span>
+          <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentrarepetido.</span>
+        </mat-error>
       </mat-form-field>
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>Descuento (%)</mat-label>
         <input autocomplete="off" formControlName="discount" type="number" matInput placeholder="Descuento" />
         <span matSuffix>&nbsp;%</span>
-        <!--mat-error>
-            <span *ngIf="createForm.get('name').errors?.required"
-              >Campo requerido</span
-            >
-            <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
-              encuentra
-              repetido.</span>
-          </mat-error-->
+        <mat-error>Campo requerido</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha limite</mat-label>
-        <input readonly matInput [matDatepicker]="picker">
+
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>FECHA/PERIODO</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input readonly matStartDate formControlName="start" placeholder="Fecha Inicio">
+          <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+        </mat-date-range-input>
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
+        <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>
-      <!--mat-form-field class="content" appearance="outline">
-          <input readonly matInput placeholder="FECHA / PERIODO" 
-          formControlName="dateLimit" [satDatepicker]="picker">
-          <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
-          <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
-      </mat-form-field-->
+
+      <mat-date-range-picker #picker></mat-date-range-picker>
     </div>
     <div class="w3-col m6 l6 w3-padding">
       <div>
@@ -139,13 +125,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
-  <div *ngIf="data.edit">
-    <button mat-raised-button color="primary" (click)="editSubmit()" type="button"
-      [disabled]="createForm.status != 'VALID'">Editar</button>
-  </div>
-  <div *ngIf="!data.edit">
-    <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
-      [disabled]="createForm.status != 'VALID'">Guardar</button>
-  </div>
+  <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
+    [disabled]="createForm.status != 'VALID'">Guardar</button>
 
 </mat-dialog-actions>

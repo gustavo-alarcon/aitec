@@ -18,6 +18,8 @@ export class ShoppingListComponent implements OnInit {
     this.dataSource.paginator = paginator1;
   }
 
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
+
   constructor(
     private router: Router,
     private snackBar: MatSnackBar,
@@ -30,7 +32,7 @@ export class ShoppingListComponent implements OnInit {
 
   getPrice(item){
     if(item.product.promo){
-      return item.product.promoData.price 
+      return item.product.promoData.promoPrice 
     }else{
       return item.product.price
     }

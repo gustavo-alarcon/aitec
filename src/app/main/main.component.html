@@ -145,7 +145,7 @@
   <div style="min-height: 85vh">
     <div class="nav-categs-overlay" (click)="toggleMenu()" (mouseenter)="toggleMenu()"
       [style.display]="openedMenu ? 'block' : 'none'"></div>
-    <div style="padding-top: 16px;">
+    <div>
       <router-outlet (activate)="onActivate($event)"></router-outlet>
     </div>
   </div>

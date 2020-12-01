@@ -17,7 +17,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, from } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, from, forkJoin } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Recipe } from '../models/recipe.model';
@@ -392,7 +392,7 @@ export class DatabaseService {
         quantity: 1,
         promoPrice: 2449.90,
         offer: 5
-      }, 
+      },
       published: true,
       realStock: 8,
       sku: 'AITEC-000012'
@@ -461,22 +461,26 @@ export class DatabaseService {
       );
   }
 
-  saveAll(){
+  saveAll() {
     const batch = this.afs.firestore.batch();
 
-    this.products.forEach(el=>{
+    this.products.forEach(el => {
       let productRef = this.afs.firestore
-      .collection(`db/aitec/productsList`)
-      .doc(el.sku);
+        .collection(`db/aitec/productsList`)
+        .doc(el.sku);
       batch.update(productRef, {
-        priority:1
+        priceMin:el.price,
+        model:'modelo',
+        virtualStock:el.realStock,
+        guarantee:false,
+        colors:[]
       });
-      
+
     })
 
-    batch.commit().then(()=>{
+    batch.commit().then(() => {
       console.log('all');
-      
+
     })
   }
   getCurrentMonthOfViewDate(): { from: Date; to: Date } {
@@ -595,6 +599,55 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+
+  getStores() {
+    return this.afs
+      .collection(`/db/aitec/config/generalConfig/stores`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getCoupons() {
+    return this.afs
+      .collection(`/db/aitec/coupons`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getCouponsDoc(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/coupons`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
+
+  getAdvisers() {
+    return this.afs
+      .collection(`/db/aitec/config/generalConfig/adviser`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getAdvisersDoc(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/config/generalConfig/adviser`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
@@ -875,25 +928,7 @@ export class DatabaseService {
     );
   }
 
-  uploadPhotoProduct(id: string, file: File): Observable<string | number> {
-    const path = `/productsList/pictures/${id}-${file.name}`;
-
-    // Reference to storage bucket
-    const ref = this.storage.ref(path);
-
-    // The main task
-    let uploadingTask = this.storage.upload(path, file);
-
-    let snapshot$ = uploadingTask.percentageChanges();
-    let url$ = of('url!').pipe(
-      switchMap((res) => {
-        return <Observable<string>>ref.getDownloadURL();
-      })
-    );
-
-    let upload$ = concat(snapshot$, interval(1000).pipe(take(2)), url$);
-    return upload$;
-  }
+  
 
   deletePhotoProduct(path: string): Observable<any> {
     let st = this.storage.ref(path);
@@ -1137,7 +1172,7 @@ export class DatabaseService {
 
   getSalesUser(user: string): Observable<Sale[]> {
     return this.afs
-      .collection<Sale>(`/db/distoProductos/sales`, (ref) =>
+      .collection<Sale>(`/db/aitec/sales`, (ref) =>
         ref.where('user.uid', '==', user)
       )
       .valueChanges();
@@ -1274,11 +1309,15 @@ export class DatabaseService {
 
   //Sales
   getSales(date: { begin: Date; end: Date }): Observable<Sale[]> {
+    let real = {
+      begin: new Date(date.begin),
+      end: new Date(date.end)
+    }
     return this.afs
       .collection<Sale>(this.salesRef, (ref) =>
         ref
-          .where('createdAt', '<=', date.end)
-          .where('createdAt', '>=', date.begin)
+          .where('createdAt', '<=', real.end)
+          .where('createdAt', '>=', real.begin)
       )
       .valueChanges();
   }
@@ -1761,96 +1800,204 @@ export class DatabaseService {
 
   /*purchase*/
 
-
-  saveSale(user:User, obs, file, list) {
-
-    const saleCount = this.afs.firestore.collection(`/db/portugalCotizador/config/`).doc('generalConfig');
-    const saleRef = this.afs.firestore.collection(`/db/portugalCotizador/sales`).doc();
-    const emailRef = this.afs.firestore.collection(`/mail`).doc();
-    const emailRef2 = this.afs.firestore.collection(`/mail`).doc();
-
-    
-
-    
-    let newSale = {
-      id: saleRef.id,
-      correlative: 0,
-      correlativeType: 'R',
-      document: 'boleta',
-      user: user,
-      requestDate: null,
-      createdAt: new Date(),
-      createdBy: null,
-      requestedProducts: this.order,
-      status: 'Pedido',
-    }
-
-
-
-
+  reduceStock(user, newSale,phot) {
     return this.afs.firestore.runTransaction((transaction) => {
-      return transaction.get(saleCount).then((sfDoc) => {
-        if (!sfDoc.exists) {
-          transaction.set(saleCount, { salesCounter: 0 });
-        }
+      let promises = []
+      this.order.forEach((order, ind) => {
+        const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(order.product.sku);
 
-        //sales
-        ////generalCounter
-        let newCorr = 1
-        if (sfDoc.data().salesCounter) {
-          newCorr = sfDoc.data().salesCounter + 1;
-        }
+        promises.push(transaction.get(ref).then((prodDoc) => {
 
-        transaction.update(saleCount, { salesCounter: newCorr });
+          let newStock = prodDoc.data().realStock - order.quantity;
+          transaction.update(ref, { realStock: newStock });
 
-        newSale.correlative = newCorr
 
-        let message = {
-          to: list,
-          message: {
-            subject: 'Venta App Macanudo',
-            text: 'Se realizó un pedido, ver archivo adjunto',
-            attachments: [
-              {   // utf-8 string as an attachment
-                filename: 'Pedido.csv',
-                content: file
-              }
-            ]
-          },
-          template:{
-            name:'pedido',
-            data:{
-              user:user,
-              order:this.order,
-              correlative:'#R'+("000" + newCorr).slice(-4)
-            }
-          },
-          
-        }
+        }).catch((error) => {
+          console.log("Transaction failed: ", error);
 
-        let message2 = {
-          to: [user.email],
-          template:{
-            name:'pedidoUser',
-            data:{
-              order:this.order,
-              correlative:'#R'+("000" + newCorr).slice(-4)
-            }
-          }
-        }
 
-        newSale.correlative = newCorr
+        }));
 
-        transaction.set(saleRef, newSale);
 
-        transaction.set(emailRef, message);
-        transaction.set(emailRef2, message2);
+      })
+      return Promise.all(promises);
+    }).then(res => {
 
-      });
+
+      return this.saveSale(user,newSale, phot)
+
+      //localStorage.removeItem(this.dbs.uidUser)
+
+    }).catch(() => {
+      //this.snackBar.open('Error de conexión, no se completo la compra, intentelo de nuevo', 'cerrar')
+
 
     })
 
+  }
+
+  saveSale(user: User, newSale, phot?: any) {
+
+    const saleCount = this.afs.firestore.collection(`/db/aitec/config/`).doc('generalConfig');
+    const saleRef = this.afs.firestore.collection(`/db/aitec/sales`).doc();
+    const emailRef = this.afs.firestore.collection(`/mail`).doc();
+
+    newSale.id = saleRef.id
+
+    if (phot) {
+      let photos = [...phot.data.map(el => this.uploadPhotoVoucher(newSale.id, el))]
+
+      forkJoin(photos).pipe(
+        takeLast(1),
+      ).subscribe((res: string[]) => {
+        newSale.voucher = [...phot.data.map((el, i) => {
+          return {
+            voucherPhoto: res[i],
+            voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
+          }
+        })]
+        return this.afs.firestore.runTransaction((transaction) => {
+          return transaction.get(saleCount).then((sfDoc) => {
+            if (!sfDoc.exists) {
+              transaction.set(saleCount, { salesCounter: 0 });
+            }
+
+            //sales
+            ////generalCounter
+            let newCorr = 1
+            if (sfDoc.data().salesCounter) {
+              newCorr = sfDoc.data().salesCounter + 1;
+            }
+
+            transaction.update(saleCount, { salesCounter: newCorr });
+
+            newSale.correlative = newCorr
+
+            let message = {
+              to: [user.email],
+              template: {
+                name: 'pedidoUser',
+                data: {
+                  order: this.order,
+                  correlative: '#R' + ("000" + newCorr).slice(-4)
+                }
+              }
+            }
+
+            transaction.set(saleRef, newSale);
+
+            transaction.set(emailRef, message);
+
+          });
+
+        })
+
+      })
+    } else {
+      return this.afs.firestore.runTransaction((transaction) => {
+        return transaction.get(saleCount).then((sfDoc) => {
+          if (!sfDoc.exists) {
+            transaction.set(saleCount, { salesCounter: 0 });
+          }
+
+          //sales
+          ////generalCounter
+          let newCorr = 1
+          if (sfDoc.data().salesCounter) {
+            newCorr = sfDoc.data().salesCounter + 1;
+          }
+
+          transaction.update(saleCount, { salesCounter: newCorr });
+
+          newSale.correlative = newCorr
+
+
+          let message = {
+            to: ['mocharan@meraki-s.com'],
+            template: {
+              name: 'pedidoUser',
+              data: {
+                order: this.order,
+                correlative: '#R' + ("000" + newCorr).slice(-4)
+              }
+            }
+          }
+
+          transaction.set(saleRef, newSale);
+
+          transaction.set(emailRef, message);
+
+        });
+
+      })
+
+    }
 
   }
-  
+
+  //products
+
+  uploadPhotoProduct(id: string, file: File): Observable<string | number> {
+    const path = `/productsList/pictures/${id}-${file.name}`;
+
+    // Reference to storage bucket
+    const ref = this.storage.ref(path);
+
+    // The main task
+    let uploadingTask = this.storage.upload(path, file);
+
+    let snapshot$ = uploadingTask.percentageChanges();
+    let url$ = of('url!').pipe(
+      switchMap((res) => {
+        return <Observable<string>>ref.getDownloadURL();
+      })
+    );
+
+    let upload$ = concat(snapshot$, interval(1000).pipe(take(2)), url$);
+    return upload$;
+  }
+
+  createProduct(newProduct, phot: any){
+    const batch = this.afs.firestore.batch()
+    const productRef = this.afs.firestore.collection(this.productsListRef).doc(newProduct.sku);
+
+    let photos = [...phot.data.map(el => this.uploadPhotoProduct(newProduct.sku, el))]
+
+    return forkJoin(photos).pipe(
+      takeLast(1),
+    ).subscribe((res: string[]) => {
+      newProduct.gallery = [...phot.data.map((el, i) => res[i])]
+      newProduct.photoURL=res[0]
+
+      batch.set(productRef,newProduct)
+      batch.commit().then(()=>{
+        console.log('save');
+        
+        return true
+      })
+      
+    })
+
+    
+  }
+
+  getUserDisplayName(userId: string): Observable<string> {
+    return this.afs
+      .collection(`/users`)
+      .doc(userId)
+      .valueChanges()
+      .pipe(
+        take<User>(1),
+        map((user) => {
+          if (user.name && user.lastName) {
+            return user.name.split(" ")[0] + " " + user.lastName.split(" ")[0];
+          }
+          if (user.personData) {
+            return user.personData.name.split(" ")[0]+user.personData['lastName'].split(" ")[0];
+          }
+          return "Sin nombre";
+        })
+      );
+  }
+
 }

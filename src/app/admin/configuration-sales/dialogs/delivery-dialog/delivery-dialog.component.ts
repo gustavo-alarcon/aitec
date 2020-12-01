@@ -78,10 +78,11 @@ export class DeliveryDialogComponent implements OnInit {
       startWith(''),
       map(dept => {
         if (!this.data.edit) {
+          /*
           if (this.formGroup.get('provincia').value) {
             this.formGroup.get('provincia').setValue('')
             this.formGroup.get('distrito').disable()
-          }
+          }*/
 
           if (typeof dept === 'object') {
             this.selectProvincias(dept)
@@ -167,6 +168,11 @@ export class DeliveryDialogComponent implements OnInit {
 
     this.formGroup.get('distrito').setValue('')
 
+  }
+
+  removeProduct(item): void {
+    let index = this.deliveryDistritos.findIndex(el=>el.name==item.name);
+    this.deliveryDistritos.splice(index, 1);
   }
 
   onSubmitForm() {

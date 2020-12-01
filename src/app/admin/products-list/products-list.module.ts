@@ -13,20 +13,23 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
-import {MatChipsModule} from '@angular/material/chips';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import {MatTabsModule} from '@angular/material/tabs';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatRadioModule } from '@angular/material/radio';
 import { ProductsListRoutingModule } from './products-list-routing.module';
 import { ProductsListComponent } from './products-list.component';
+import { CreateEditProductComponent } from './create-edit-product/create-edit-product.component';
 
 
 @NgModule({
-  declarations: [ProductsListComponent],
+  declarations: [ProductsListComponent, CreateEditProductComponent],
   imports: [
     CommonModule,
     ProductsListRoutingModule,
@@ -50,7 +53,9 @@ import { ProductsListComponent } from './products-list.component';
     MatTabsModule,
     MatTooltipModule,
     LazyLoadImageModule,
-    MatCardModule
+    MatCardModule,
+    MatStepperModule,
+    MatRadioModule
   ]
 })
 export class ProductsListModule { }

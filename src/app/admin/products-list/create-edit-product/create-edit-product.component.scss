@@ -1,0 +1,22 @@
+.addImage{
+  border:1px dashed var(--primary-color);
+  min-height: 200px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1em;
+  border-radius: 5px;
+}
+
+.big-button{
+  min-width: 200px;
+}
+
+.serie{
+  height: 150px;
+  overflow-y: scroll;
+  border: 1px solid;
+    padding: 10px;
+}

@@ -8,12 +8,15 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./product-div.component.scss']
 })
 export class ProductDivComponent implements OnInit {
-  @Input() offer: boolean;
+  
   @Input() product: any
+
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
   constructor(
     private router: Router,
     private dbs: DatabaseService
   ) { }
+
 
   ngOnInit(): void {
     

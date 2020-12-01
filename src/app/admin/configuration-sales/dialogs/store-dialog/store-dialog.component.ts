@@ -48,18 +48,11 @@ export class StoreDialogComponent implements OnInit {
       departamento: [this.data.edit ? this.data.data.departamento : null, Validators.required],
       provincia: [this.data.edit ? this.data.data.provincia : null, Validators.required],
       distrito: [null],
-      delivery: [this.data.edit ? this.data.data.delivery : null, [Validators.required, Validators.min(0)]],
+      address: [this.data.edit ? this.data.data.address : null, Validators.required],
     });
 
-    if (this.data.edit) {
-      this.deliveryDistritos = this.data.data.distritos
-      this.formGroup.get('departamento').disable();
-      this.formGroup.get('provincia').disable();
-
-    } else {
-      this.formGroup.get('provincia').disable();
-      this.formGroup.get('distrito').disable();
-    }
+    this.formGroup.get('provincia').disable();
+    this.formGroup.get('distrito').disable();
 
     this.filteredDepartamento$ = this.formGroup
       .get('departamento')
@@ -77,10 +70,11 @@ export class StoreDialogComponent implements OnInit {
       startWith(''),
       map(dept => {
         if (!this.data.edit) {
+          /*
           if (this.formGroup.get('provincia').value) {
             this.formGroup.get('provincia').setValue('')
             this.formGroup.get('distrito').disable()
-          }
+          }*/
 
           if (typeof dept === 'object') {
             this.selectProvincias(dept)
@@ -155,19 +149,6 @@ export class StoreDialogComponent implements OnInit {
 
   }
 
-  selectDelivery(option) {
-    if (option == 'all') {
-      this.deliveryDistritos = this.distritos
-    } else {
-      if (!this.deliveryDistritos.find(el => el.id == option.id)) {
-        this.deliveryDistritos.push(option)
-      }
-    }
-
-    this.formGroup.get('distrito').setValue('')
-
-  }
-
   onSubmitForm() {
     this.formGroup.markAsPending();
     this.formGroup.disable()
@@ -176,11 +157,11 @@ export class StoreDialogComponent implements OnInit {
       id: this.data.edit ? this.data.data.id : '',
       departamento: this.formGroup.get('departamento').value,
       provincia: this.formGroup.get('provincia').value,
-      distritos: this.deliveryDistritos,
-      delivery: this.formGroup.get('delivery').value,
+      distrito: this.formGroup.get('distrito').value,
+      address: this.formGroup.get('address').value,
       createdAt: this.data.edit ? this.data.data.createdAt : new Date()
     }
-    console.log(newDelivery);
+
     if (this.data.edit) {
       this.edit(newDelivery)
     } else {
@@ -191,7 +172,7 @@ export class StoreDialogComponent implements OnInit {
 
   create(newCategory) {
     let productRef = this.afs.firestore
-      .collection(`/db/aitec/config/generalConfig/delivery`)
+      .collection(`/db/aitec/config/generalConfig/stores`)
       .doc();
 
     let batch = this.afs.firestore.batch();
@@ -203,7 +184,7 @@ export class StoreDialogComponent implements OnInit {
     batch.commit().then(() => {
       this.dialogRef.close(true);
       this.loading.next(false);
-      this.snackBar.open('Delivery creado', 'Cerrar', {
+      this.snackBar.open('Tienda creada', 'Cerrar', {
         duration: 6000,
       });
     });
@@ -211,8 +192,8 @@ export class StoreDialogComponent implements OnInit {
 
   edit(newCategory) {
     let productRef = this.afs.firestore
-      .collection(`/db/aitec/config/generalConfig/delivery`)
-      .doc();
+      .collection(`/db/aitec/config/generalConfig/stores`)
+      .doc(newCategory.id);
 
     let batch = this.afs.firestore.batch();
 
@@ -221,7 +202,7 @@ export class StoreDialogComponent implements OnInit {
     batch.commit().then(() => {
       this.dialogRef.close(true);
       this.loading.next(false);
-      this.snackBar.open('Delivery creado', 'Cerrar', {
+      this.snackBar.open('Cambios guardados', 'Cerrar', {
         duration: 6000,
       });
     });

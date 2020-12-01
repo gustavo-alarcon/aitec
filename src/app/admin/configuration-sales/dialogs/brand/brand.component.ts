@@ -48,8 +48,6 @@ export class BrandComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
-
     this.createForm = this.fb.group({
       photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
       name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]]

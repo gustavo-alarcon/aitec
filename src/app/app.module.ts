@@ -14,6 +14,7 @@ import {LazyLoadImageModule } from 'ng-lazyload-image';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import * as firebase from 'firebase';
 
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import * as firebase from 'firebase';
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [
+    //DatePipe,
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
   ],

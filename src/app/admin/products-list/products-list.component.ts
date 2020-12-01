@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable, combineLatest, iif, of, BehaviorSubject } from 'rxjs';
 import { startWith, tap, map, share, switchMap, take } from 'rxjs/operators';
 import { FormBuilder, FormControl } from '@angular/forms';
-//import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -15,6 +15,7 @@ import { MatPaginator } from '@angular/material/paginator';
 
 import { Product } from 'src/app/core/models/product.model';
 import { MatSort } from '@angular/material/sort';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-products-list',
@@ -54,7 +55,7 @@ export class ProductsListComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/minilogo.png";
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -69,7 +70,8 @@ export class ProductsListComponent implements OnInit {
     private dialog: MatDialog,
     public snackBar: MatSnackBar,
     private dbs: DatabaseService,
-    public auth: AuthService
+    public auth: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -191,7 +193,13 @@ export class ProductsListComponent implements OnInit {
   }
 
   onCreateEditItem(edit: boolean, product?: Product) {
-    this.dbs.saveAll()
+    if(edit){
+      this.router.navigate(['/admin/products/edit', product.id]);
+      
+    }else{
+      this.router.navigate(['/admin/products/create']);
+    }
+    
     /*
     let dialogRef: MatDialogRef<ProductCreateEditComponent>;
     if (edit == true) {

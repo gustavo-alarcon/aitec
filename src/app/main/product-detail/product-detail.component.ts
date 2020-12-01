@@ -44,13 +44,22 @@ export class ProductDetailComponent implements OnInit {
 
   @ViewChild("image") image: ElementRef;
 
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
+
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
     private renderer: Renderer2,
     private router: Router
-  ) {}
+  ) {
+    this.route.paramMap.subscribe(params => {
+      console.log(params.get('param'));
+      
+      
+      this.ngOnInit();
+  });
+  }
 
   ngOnInit(): void {
     this.productDiv = null
@@ -101,5 +110,23 @@ export class ProductDetailComponent implements OnInit {
       this.router.navigate(['/main/productos', category]);
     }
     
+  }
+
+  navigateOnlyCategory(category) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat]);
+  }
+
+  navigateCategory(category, subcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub]);
+  }
+
+  navigateSubCategory(category, subcategory, subsubcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    let subsub = subsubcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub, subsub]);
   }
 }

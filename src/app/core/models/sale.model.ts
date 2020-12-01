@@ -18,12 +18,12 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product/* | Package*/;
+  product: Product| Package;
   quantity: number;               
   //If "product" is a package, we will have to specify the chosen products
   //for each field in package.items. chosenOptions will contain the
   //chosen products in the same order as each field in package.items.
-  //chosenOptions?: Product[];
+  chosenOptions?: Product[];
 }
 
 export interface Sale {

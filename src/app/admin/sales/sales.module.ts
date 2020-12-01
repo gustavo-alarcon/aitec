@@ -9,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-//import { SatDatepickerModule, SatNativeDateModule } from 'saturn-datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { SalesMasterComponent } from './sales-master/sales-master.component';
 import { SalesDetailComponent } from './sales-detail/sales-detail.component';
@@ -21,12 +20,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { SalesPhotoDialogComponent } from './sales-photo-dialog/sales-photo-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
+import { SalesAddressDialogComponent } from './sales-address-dialog/sales-address-dialog.component';
 import {LazyLoadImageModule} from 'ng-lazyload-image';
-import { SalesEditPriceDialogComponent } from './sales-edit-price-dialog/sales-edit-price-dialog.component';
-
+import { MatNativeDateModule } from '@angular/material/core';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 
 
@@ -35,7 +36,8 @@ import { SalesEditPriceDialogComponent } from './sales-edit-price-dialog/sales-e
     SalesComponent,
     SalesMasterComponent,
     SalesDetailComponent,
-    SalesEditPriceDialogComponent
+    SalesPhotoDialogComponent,
+    SalesAddressDialogComponent
   ],
   imports: [
     CommonModule,
@@ -48,8 +50,6 @@ import { SalesEditPriceDialogComponent } from './sales-edit-price-dialog/sales-e
     MatDividerModule,
     ReactiveFormsModule,
     MatDatepickerModule,
-    //SatDatepickerModule, 
-    //SatNativeDateModule,
     MatRippleModule,
     NgxPaginationModule,
     MatCardModule,
@@ -60,14 +60,17 @@ import { SalesEditPriceDialogComponent } from './sales-edit-price-dialog/sales-e
     MatDialogModule,
     MatProgressBarModule,
     Ng2ImgMaxModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    MatNativeDateModule,
+    GoogleMapsModule
   ],
   providers: [
     DatePipe
   ],
   entryComponents: [
     ConfirmationDialogComponent,
-    SalesEditPriceDialogComponent
+    SalesPhotoDialogComponent,
+    SalesAddressDialogComponent
   ]
 })
 export class SalesModule { }

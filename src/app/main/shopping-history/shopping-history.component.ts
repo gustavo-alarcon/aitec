@@ -3,7 +3,7 @@ import { Observable, combineLatest, BehaviorSubject } from "rxjs";
 import { Sale } from "./../../core/models/sale.model";
 import { DatabaseService } from "src/app/core/services/database.service";
 import { AuthService } from "src/app/core/services/auth.service";
-import { FormControl } from "@angular/forms";
+import { FormControl, FormGroup } from "@angular/forms";
 import { Component, OnInit } from "@angular/core";
 @Component({
   selector: 'app-shopping-history',
@@ -11,7 +11,7 @@ import { Component, OnInit } from "@angular/core";
   styleUrls: ['./shopping-history.component.scss']
 })
 export class ShoppingHistoryComponent implements OnInit {
-  dateForm: FormControl;
+  dateForm: FormGroup;
   init$: Observable<Sale[]>;
   prueba$: Observable<any>;
   chooseSale: Sale;
@@ -33,28 +33,26 @@ export class ShoppingHistoryComponent implements OnInit {
     let endDate = new Date();
     endDate.setHours(23, 59, 59);
 
-    this.dateForm = new FormControl({
-      begin: beginDate,
-      end: endDate,
+    this.dateForm = new FormGroup({
+      start: new FormControl(beginDate),
+      end: new FormControl(endDate)
     });
 
     this.init$ = this.auth.user$.pipe(
       switchMap((user) => {
         return combineLatest(
           this.dbs.getSalesUser(user.uid),
-          this.dateForm.valueChanges.pipe(
-            startWith<{ begin: Date; end: Date }>({
-              begin: beginDate,
-              end: endDate,
-            }),
-            map(({ begin, end }) => {
-              begin.setHours(0, 0, 0, 0);
-              end.setHours(23, 59, 59);
-              return { begin, end };
-            })
+          this.dateForm.get('start').valueChanges.pipe(
+            startWith(beginDate),
+            map(begin => begin.setHours(0, 0, 0, 0))
+          ),
+          this.dateForm.get('end').valueChanges.pipe(
+            startWith(endDate),
+            map(end =>  end.setHours(23, 59, 59))
           )
         ).pipe(
-          map(([products, date]) => {
+          map(([products, startdate,enddate]) => {
+            let date = {begin:startdate,end:enddate}
             return products.filter((el) => {
               return this.getFilterTime(el["createdAt"], date);
             });
@@ -93,8 +91,8 @@ export class ShoppingHistoryComponent implements OnInit {
 
   getFilterTime(el, time) {
     let date = el.toMillis();
-    let begin = time.begin.getTime();
-    let end = time.end.getTime();
+    let begin = time.begin;
+    let end = time.end;
     return date >= begin && date <= end;
   }
 
@@ -145,5 +143,11 @@ export class ShoppingHistoryComponent implements OnInit {
     }
   }
 
-
+  getPrice(item) {
+    if (item.product.promo) {
+      return item.product.promoData.promoPrice * item.quantity;
+    } else {
+      return item.product.price * item.quantity;
+    }
+  }
 }

@@ -13,6 +13,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProductDivModule } from '../product-div/product-div.module';
 import { GalleryModule } from 'ng-gallery';
 import { SlickCarouselModule } from 'ngx-slick-carousel';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { ProductDetailRoutingModule } from './product-detail-routing.module';
 import { ProductDetailComponent } from './product-detail.component';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
@@ -36,7 +37,8 @@ import { QuantityDivModule } from '../quantity-div/quantity-div.module';
     ProductDivModule,
     GalleryModule,
     SlickCarouselModule,
-    QuantityDivModule
+    QuantityDivModule,
+    LazyLoadImageModule
   ]
 })
 export class ProductDetailModule { }

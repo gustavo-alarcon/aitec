@@ -1,5 +1,5 @@
 <div mat-dialog-title>
-  <h2 *ngIf="!data.edit" style="font-size: 1.2em; font-family: Montserrat; font-weight: 900">
+  <h2 *ngIf="!data.edit" style="font-size: 1em; font-family: Montserrat; font-weight: 900">
     <mat-icon style="vertical-align: middle">add_circle</mat-icon>
     {{ data.edit ? "Editar" : "Agregar" }} Asesor
   </h2>
@@ -11,38 +11,34 @@
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Nombres</mat-label>
       <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Nombres" />
-      <!--mat-error>
-        <span *ngIf="createForm.get('name').errors?.required"
-          >Campo requerido</span
-        >
-        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
-          encuentra
-          repetido.</span>
-      </mat-error-->
+      <mat-error>Campo requerido</mat-error>
     </mat-form-field>
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Apellidos</mat-label>
       <input autocomplete="off" formControlName="lastname" type="text" matInput placeholder="Apellidos" />
-      <!--mat-error>
-        <span *ngIf="createForm.get('name').errors?.required"
-          >Campo requerido</span
-        >
-        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
-          encuentra
-          repetido.</span>
-      </mat-error-->
+      <mat-error>Campo requerido</mat-error>
     </mat-form-field>
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Correo</mat-label>
       <input autocomplete="off" formControlName="email" type="text" matInput placeholder="Correo" />
-      <!--mat-error>
-        <span *ngIf="createForm.get('name').errors?.required"
+      <mat-error>
+        <span *ngIf="createForm.get('email').errors?.required"
           >Campo requerido</span
         >
-        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
+        <span *ngIf="createForm.get('email').errors?.email">Formato no válido</span>
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Código Único</mat-label>
+      <input autocomplete="off" formControlName="code" type="text" matInput placeholder="Código" />
+      <mat-error>
+        <span *ngIf="createForm.get('code').errors?.required"
+          >Campo requerido</span
+        >
+        <span *ngIf="createForm.get('code').errors?.nameRepeatedValidator">Este nombre ya se
           encuentra
           repetido.</span>
-      </mat-error-->
+      </mat-error>
     </mat-form-field>
   </form>
   <mat-divider></mat-divider>

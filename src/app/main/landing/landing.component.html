@@ -13,7 +13,7 @@
     </div>
     <h2 class="title-section">Ofertas</h2>
   </div>
-  <a routerLink="/main/productos" *ngFor="let pro of promo">
+  <a (click)="navigateBrand(pro)" *ngFor="let pro of promo">
     <img [src]="pro.photoURL" class="w3-block" alt="promo" />
   </a>
 

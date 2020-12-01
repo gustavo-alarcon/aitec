@@ -8,7 +8,8 @@ export interface User {
   };
 
   personData: naturalPerson | businessPerson;
-
+  name?:string;
+  lastName?:string;
   lastLogin?: Date;
   lastBrowser?: string[]
   fcmTokens?: {

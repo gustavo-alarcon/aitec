@@ -28,9 +28,7 @@
       <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Nombre" />
       <mat-error>
         <span *ngIf="createForm.get('name').errors?.required">Campo requerido</span>
-        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se
-          encuentra
-          repetido.</span>
+        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentra repetido.</span>
       </mat-error>
     </mat-form-field>
   </form>

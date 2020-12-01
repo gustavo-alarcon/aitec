@@ -1,7 +1,7 @@
 import { AngularFirestore } from '@angular/fire/firestore';
 import { startWith, map, take, takeLast, switchMap, filter } from 'rxjs/operators';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -38,12 +38,14 @@ export class CuponDialogComponent implements OnInit {
 
   ngOnInit() {
     this.createForm = this.fb.group({
-      discount: [this.data.edit ? this.data.data.discount : null, Validators.required],
-      name: [this.data.edit ? this.data.data.name : null],
+      discount: [this.data.edit ? this.data.data.discount : null, [Validators.required,Validators.min(0)]],
+      name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]],
       brand: [this.data.edit ? this.data.data.brand : null],
       category: [this.data.edit ? this.data.data.category : null],
-      dateLimit: [null],
-      product: [null]
+      start: [null, Validators.required],
+      end: [null, Validators.required],
+      product: [null],
+      redirectTo:[this.data.edit ? this.data.data.redirectTo : null, Validators.required]
     })
 
     this.products$ = combineLatest(
@@ -112,10 +114,6 @@ export class CuponDialogComponent implements OnInit {
     return staff ? staff['description'] : undefined;
   }
 
-  showEmail(user): string | null {
-    return user ? user.displayname : null;
-  }
-
   addProduct() {
     if (this.createForm.value['product']['id']) {
       this.products.push(this.createForm.value['product']);
@@ -137,53 +135,64 @@ export class CuponDialogComponent implements OnInit {
     this.createForm.disable()
     this.loading.next(true)
 
-    let newCoupon;
-    newCoupon = {
-      id: '',
+    if (this.data.edit) {
+      this.edit()
+    } else {
+      this.create()
+    }
+  }
+
+  create() {
+    let productRef = this.afs.firestore
+      .collection(`/db/aitec/coupons`)
+      .doc(this.createForm.get('name').value);
+
+    
+    const batch = this.afs.firestore.batch();
+
+    let newCoupon = {
+      id: this.createForm.get('name').value,
       name: this.createForm.get('name').value,
+      redirectTo: this.createForm.get('redirectTo').value,
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
       products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
-      dateLimit: this.createForm.get('dateLimit').value,
+      startDate: this.createForm.get('start').value,
+      endDate: this.createForm.get('end').value,
       createdAt: new Date()
     }
 
-    if (this.data.edit) {
-      this.edit(newCoupon)
-    } else {
-      this.create(newCoupon)
-    }
-  }
-
-  create(newCategory) {
-    let productRef = this.afs.firestore
-      .collection(`/db/aitec/coupons`)
-      .doc();
-
-    let batch = this.afs.firestore.batch();
-
-    newCategory.id = productRef.id;
-
-    batch.set(productRef, newCategory);
+    batch.set(productRef, newCoupon);
 
     batch.commit().then(() => {
       this.dialogRef.close(true);
       this.loading.next(false);
-      this.snackBar.open('Asesor creado', 'Cerrar', {
+      this.snackBar.open('Cupón creado', 'Cerrar', {
         duration: 6000,
       });
     });
   }
 
-  edit(newCategory) {
+  edit() {
     let productRef = this.afs.firestore
       .collection(`/db/aitec/coupons`)
       .doc(this.data.data.id);
 
     let batch = this.afs.firestore.batch();
 
-    batch.update(productRef, newCategory);
+    let newCoupon = {
+      name: this.createForm.get('name').value,
+      redirectTo: this.createForm.get('redirectTo').value,
+      discount: this.createForm.get('discount').value,
+      category: this.createForm.get('category').value,
+      brand: this.createForm.get('brand').value,
+      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
+      startDate: this.createForm.get('start').value,
+      endDate: this.createForm.get('end').value
+    }
+
+    batch.update(productRef, newCoupon);
 
     batch.commit().then(() => {
       this.dialogRef.close(true);
@@ -192,6 +201,25 @@ export class CuponDialogComponent implements OnInit {
         duration: 6000,
       });
     });
+  }
+
+  nameRepeatedValidator(data) {
+    return (control: AbstractControl): Observable<{ 'nameRepeatedValidator': boolean }> => {
+      const value = control.value.toUpperCase();
+      if (data.edit) {
+        if (data.data.name.toUpperCase() == value) {
+          return of(null)
+        }
+        else {
+          return this.dbs.getCouponsDoc().pipe(
+            map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
+        }
+      }
+      else {
+        return this.dbs.getCouponsDoc().pipe(
+          map(res => !!res.find(el => el.name.toUpperCase() == value) ? { nameRepeatedValidator: true } : null))
+      }
+    }
   }
 
 }
