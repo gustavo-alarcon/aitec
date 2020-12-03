@@ -11,7 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PlacesService } from 'src/app/core/services/places.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -24,7 +24,7 @@ export class CreateEditProductComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
-  init$:Observable<any>
+  init$: Observable<any>
 
   edit: boolean = false
   data: any = null
@@ -45,6 +45,8 @@ export class CreateEditProductComponent implements OnInit {
       },
       data: [],
     };
+
+  choosePicture: number = 0
 
   category$: Observable<string[]>
   brand$: Observable<any>
@@ -84,17 +86,18 @@ export class CreateEditProductComponent implements OnInit {
     private snackBar: MatSnackBar,
     private pl: PlacesService,
     private afs: AngularFirestore,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
 
     this.init$ = this.route.params.pipe(
-      switchMap(id=>{
-        if(id.id){
+      switchMap(id => {
+        if (id.id) {
           console.log('here');
           return this.dbs.getProduct(id.id).pipe(
-            map(prod=>{
+            map(prod => {
               console.log(prod);
               this.data = prod
               this.edit = true
@@ -102,38 +105,39 @@ export class CreateEditProductComponent implements OnInit {
                 description: prod.description,
                 sku: prod.sku,
                 category: prod.category,
-                priceMax: prod['priceMay']?prod['priceMay']:0,
-                weight:  prod['weight']?prod['weight']:0,
-                code: prod['code']?prod['code']:null,
+                priceMax: prod['priceMay'] ? prod['priceMay'] : 0,
+                weight: prod['weight'] ? prod['weight'] : 0,
+                code: prod['code'] ? prod['code'] : null,
                 priceMin: prod['priceMin']
               })
+              this.firstFormGroup.get('sku').disable()
 
               this.secondFormGroup.setValue({
                 brand: prod.brand,
-                model: prod['model']?prod['model']:null,
+                model: prod['model'] ? prod['model'] : null,
                 additionalDescription: prod.additionalDescription,
                 colors: null,
                 guarantee: prod['guarantee'],
-                timeguarantee: prod['timeguarantee']?prod['timeguarantee']:null
+                timeguarantee: prod['timeguarantee'] ? prod['timeguarantee'] : null
               })
-              
-              this.colorSelect=prod['colors']
+
+              this.colorSelect = prod['colors']
               this.photosList = prod['gallery']
 
-              if(prod['series']){
-                
-                this.warehouseList=prod['series']
+              if (prod['series']) {
+
+                this.warehouseList = prod['series']
                 this.dataSource.data = this.warehouseList
               }
 
               return 2
             })
           )
-        }else{
+        } else {
           return of(1)
         }
       }),
-      tap(()=>{
+      tap(() => {
         this.loading.next(false)
       })
     )
@@ -289,6 +293,9 @@ export class CreateEditProductComponent implements OnInit {
     this.photos.data.splice(ind, 1);
   }
 
+  selectPhoto(ind:number){
+    this.choosePicture = ind
+  }
   nameRepeatedValidator() {
     return (control: AbstractControl): Observable<{ 'nameRepeatedValidator': boolean }> => {
       const value = control.value.toUpperCase().trim();
@@ -309,11 +316,9 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   addSerie() {
-    let value = this.thirdFormGroup.get('series').value.split('-').map(el => Number(el))
-    for (let index = value[0]; index < value[1] + 1; index++) {
-      this.seriesList.push(index)
+    let value = this.thirdFormGroup.get('series').value
+    this.seriesList.push(value)
 
-    }
     this.thirdFormGroup.get('stock').setValue(this.seriesList.length)
     this.thirdFormGroup.get('series').setValue('')
 
@@ -328,89 +333,162 @@ export class CreateEditProductComponent implements OnInit {
     this.thirdFormGroup.markAsPristine();
     this.thirdFormGroup.markAsUntouched();
 
-    this.warehouseList.push({
-      warehouse: this.thirdFormGroup.get('warehouse').value,
-      stock: this.thirdFormGroup.get('stock').value,
-      series: this.seriesList
-    })
+    let ind = this.warehouseList.findIndex(el=>el.warehouse==this.thirdFormGroup.get('warehouse').value)
+    if(ind>=0){
+      this.warehouseList[ind]['stock'] += this.thirdFormGroup.get('stock').value
+      this.warehouseList[ind]['series'].concat(this.seriesList)
+    }else{
+      this.warehouseList.push({
+        warehouse: this.thirdFormGroup.get('warehouse').value,
+        stock: this.thirdFormGroup.get('stock').value,
+        series: this.seriesList
+      })
+    }
+    
     this.dataSource.data = this.warehouseList
 
     this.seriesList = []
     this.thirdFormGroup.reset()
   }
 
-  saveProduct(){
+  removeWarehouse(){
+
+  }
+
+  saveProduct() {
     this.loading.next(true)
     let cat = this.firstFormGroup.get('category').value.split(' >> ')
-    let stock = this.warehouseList.map(el=>el.stock).reduce((a,b)=>a+b,0)
+    let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
     let newProduct = {
       additionalDescription: this.secondFormGroup.get('additionalDescription').value,
       category: cat[0],
-      colors:this.colorSelect,
-      subcategory: cat.length>1?cat[1]:null,
-      subsubcategory: cat.length>2?cat[2]:null,
+      colors: this.colorSelect,
+      subcategory: cat.length > 1 ? cat[1] : null,
+      subsubcategory: cat.length > 2 ? cat[2] : null,
       brand: this.secondFormGroup.get('brand').value,
       createdAt: new Date(),
       createdBy: null,
       description: this.firstFormGroup.get('description').value,
       id: this.firstFormGroup.get('sku').value,
-      photoURL:'',
+      photoURL: '',
       gallery: [],
-      price:this.firstFormGroup.get('priceMin').value,
-      priceMin:this.firstFormGroup.get('priceMin').value,
-      priceMay:this.firstFormGroup.get('priceMax').value,
+      price: this.firstFormGroup.get('priceMin').value,
+      priceMin: this.firstFormGroup.get('priceMin').value,
+      priceMay: this.firstFormGroup.get('priceMax').value,
       priority: 1,
       promo: false,
       promoData: null,
       published: true,
       realStock: stock,
       virtualStock: stock,
-      warehouse:this.warehouseList.map(el=>el.warehouse),
+      warehouse: this.warehouseList.map(el => el.warehouse),
       sku: this.firstFormGroup.get('sku').value,
-      series:this.warehouseList,
-      weight:this.firstFormGroup.get('weight').value,
-      code:this.firstFormGroup.get('code').value,
-      model:this.secondFormGroup.get('model').value,
+      series: this.warehouseList,
+      weight: this.firstFormGroup.get('weight').value,
+      code: this.firstFormGroup.get('code').value,
+      model: this.secondFormGroup.get('model').value,
       guarantee: this.secondFormGroup.get('guarantee').value,
       timeguarantee: this.secondFormGroup.get('timeguarantee').value
     }
     console.log(newProduct);
-    console.log(this.photos.data);
-    
+
+
     this.createProduct(newProduct)
-    
+
   }
 
-  createProduct(newProduct){
+  createProduct(newProduct) {
     const batch = this.afs.firestore.batch()
     const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(newProduct.sku);
-
+    //const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouse`).doc(newProduct.sku);
     let photos = [...this.photos.data.map(el => this.dbs.uploadPhotoProduct(newProduct.sku, el))]
 
     forkJoin(photos).pipe(
       takeLast(1),
     ).subscribe((res: string[]) => {
       newProduct.gallery = [...this.photos.data.map((el, i) => res[i])]
-      newProduct.photoURL=res[0]
+      newProduct.photoURL = res[this.choosePicture]
 
-      batch.set(productRef,newProduct)
-      batch.commit().then(()=>{
-        console.log('here');
-        this.loading.next(false)
+      this.warehouseList.forEach((el, ind) => {
+        const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouse`).doc(newProduct.sku + '-' + ind);
+        batch.set(warehouseRef, {
+          product: newProduct.sku,
+          warehouse: el.warehouse,
+          stock: el.stock,
+          series: el.series
+        })
       })
-      
+
+      batch.set(productRef, newProduct)
+
+      batch.commit().then(() => {
+        this.loading.next(false)
+        this.snackBar.open('El nuevo producto fue creado satisfactoriamente', 'Aceptar', { duration: 5000 });
+        this.router.navigate(['/admin/products'])
+
+      })
+
     })
 
-    
+
+  }
+
+  editProduct() {
+    const batch = this.afs.firestore.batch()
+    console.log(this.photos.data);
+    console.log(this.data);
+    const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(this.data.sku);
+    let cat = this.firstFormGroup.get('category').value.split(' >> ')
+    let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
+    let newProduct = {
+      additionalDescription: this.secondFormGroup.get('additionalDescription').value,
+      category: cat[0],
+      colors: this.colorSelect,
+      subcategory: cat.length > 1 ? cat[1] : null,
+      subsubcategory: cat.length > 2 ? cat[2] : null,
+      brand: this.secondFormGroup.get('brand').value,
+      description: this.firstFormGroup.get('description').value,
+      price: this.firstFormGroup.get('priceMin').value,
+      priceMin: this.firstFormGroup.get('priceMin').value,
+      priceMay: this.firstFormGroup.get('priceMax').value,
+      realStock: stock,
+      virtualStock: stock,
+      warehouse: this.warehouseList.map(el => el.warehouse),
+      series: this.warehouseList,
+      weight: this.firstFormGroup.get('weight').value,
+      code: this.firstFormGroup.get('code').value,
+      model: this.secondFormGroup.get('model').value,
+      guarantee: this.secondFormGroup.get('guarantee').value,
+      timeguarantee: this.secondFormGroup.get('timeguarantee').value
+    }
+
+    this.warehouseList.forEach((el, ind) => {
+      const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouse`).doc(this.data.sku + '-' + (ind+1));
+      batch.set(warehouseRef, {
+        product: this.data.sku,
+        warehouse: el.warehouse,
+        stock: el.stock,
+        series: el.series
+      })
+    })
+
+    batch.update(productRef, newProduct)
+
+    batch.commit().then(() => {
+      this.loading.next(false)
+      this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+      this.router.navigate(['/admin/products'])
+
+    })
   }
 
   onKeydown(event) {
-    
+
     let permit =
       event.keyCode === 8 ||
       event.keyCode === 46 ||
       event.keyCode === 37 ||
-      event.keyCode === 39||
+      event.keyCode === 39 ||
       event.keyCode === 189;
     return permit ? true : !isNaN(Number(event.key));
   }

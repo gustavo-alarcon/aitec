@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap, switchMapTo, tap } from 'rxjs/operators';
+import { map, switchMap, switchMapTo, takeLast, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -54,8 +54,6 @@ export class ProductDetailComponent implements OnInit {
     private router: Router
   ) {
     this.route.paramMap.subscribe(params => {
-      console.log(params.get('param'));
-      
       
       this.ngOnInit();
   });
@@ -70,6 +68,7 @@ export class ProductDetailComponent implements OnInit {
           this.dbs.getProductsListValueChanges()
           ).pipe(
             map(([product,prods])=>{
+              
               this.prods = prods.filter(el=>el.category==product.category)
               return product
             })
@@ -129,4 +128,5 @@ export class ProductDetailComponent implements OnInit {
     let subsub = subsubcategory.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub, subsub]);
   }
+
 }
