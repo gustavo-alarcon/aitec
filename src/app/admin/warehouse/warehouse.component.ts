@@ -79,17 +79,15 @@ export class WarehouseComponent implements OnInit {
   }
 
   initObservables() {
-
     this.productsObservable$ = combineLatest(
-      this.promoFilterForm.valueChanges.pipe(startWith(false)),
+      this.dbs.getWarehouseListValueChanges(),
       this.dbs.getProductsListValueChanges()).pipe(
-        map(([promoFormValue, products]) => {
-          let prods = products.map(el=>{
-            
-            
+        map(([warehouse, products]) => {
+          
+          return warehouse.map(el=>{
+            el['product']=products.filter(li=>li.sku==el['product'])[0]
             return el
           })
-          return prods.filter(el => promoFormValue ? el.promo : true)
         }),
         tap(res => {
           this.productsTableDataSource.data = res

@@ -673,6 +673,15 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  getWarehouseListValueChanges(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(`/db/aitec/warehouse/`, (ref) =>
+        ref.orderBy('warehouse', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
   getProductsListCategoriesValueChanges(): Observable<any[]> {
     return this.getGeneralConfigDoc().pipe(
       map((res) => {

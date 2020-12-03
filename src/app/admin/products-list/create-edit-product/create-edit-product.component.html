@@ -1,10 +1,10 @@
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-<div class="w3-section ms-container" *ngIf="init$|async as edit">
+<div class="w3-section ms-container" *ngIf="init$|async as init">
 
   <h2 class="title">
     <mat-icon style="vertical-align: middle;">list_alt</mat-icon>
-    {{edit==1?'Crear':'Editar'}} producto
+    {{init==1?'Crear':'Editar'}} producto
   </h2>
   <mat-divider></mat-divider>
   
@@ -140,11 +140,11 @@
               <textarea matInput formControlName="additionalDescription" class="w3-block" rows="8" required></textarea>
               
             </mat-form-field-->
-            <textarea formControlName="additionalDescription" [ngxSummernote]="config" cols="20" rows="3" required></textarea>
+            <textarea formControlName="additionalDescription" [ngxSummernote]="config" cols="20" rows="8" required></textarea>
           </div>
 
         </div>
-        <div class="w3-row-padding">
+        <div class="w3-row-padding w3-margin-top">
           <div class="w3-col m6 l6">
             <mat-radio-group class="w3-block" color="primary" formControlName="guarantee">
               <mat-radio-button style="margin-right: 8px;" [value]="false">
@@ -174,10 +174,15 @@
       <div class="w3-margin-bottom w3-row-padding">
         <div class="w3-margin-bottom w3-col m6 l4" style="position: relative"
           *ngFor="let image of photosList; let ind = index">
-          <img class="w3-block" style="object-fit: contain;height: 180px;" [src]="image" alt="fotografía" />
+          <img class="w3-block"  style="object-fit: contain;height: 180px;" [src]="image" alt="fotografía" />
           <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
             <span class="ms-fill"></span>
-
+            <button type="button" mat-mini-fab color="accent" (click)="selectPhoto(ind)">
+              <mat-icon *ngIf="ind==choosePicture;else noSelect">radio_button_checked</mat-icon>
+              <ng-template #noSelect>
+                <mat-icon >radio_button_unchecked</mat-icon>
+              </ng-template>
+            </button>
             <button type="button" mat-mini-fab color="primary" (click)="eliminatedphoto(ind)">
               <mat-icon>delete</mat-icon>
             </button>
@@ -198,11 +203,14 @@
             (change)="addNewPhoto('photoURL', photoURL.files)" />
         </div>
       </div>
-      <div class="w3-center">
+      <div class="w3-center" *ngIf="!edit">
         <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
       </div>
+      <div class="w3-center w3-margin-top" *ngIf="edit">
+        <button mat-flat-button color="primary" (click)="editProduct()" class="big-button">Editar producto</button>
+      </div>
     </mat-step>
-    <mat-step>
+    <mat-step *ngIf="!edit">
       <form [formGroup]="thirdFormGroup">
         <ng-template matStepLabel>Distribución de stock en almacenes</ng-template>
         <div class="w3-row-padding">
@@ -294,7 +302,7 @@
         </table>
       </div>
       <div class="w3-center w3-margin-top">
-        <button mat-flat-button color="primary" (click)="saveProduct()" class="big-button">Guardar</button>
+        <button mat-flat-button color="primary" (click)="edit?editProduct():saveProduct()" class="big-button">Guardar</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>
