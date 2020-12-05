@@ -46,6 +46,7 @@ export class QuestionsService {
 
     questions.id=idQuestion;
       
+    //this.questionsCollection.add(questions);
 
     batch.set(questionsRef,questions);
 
