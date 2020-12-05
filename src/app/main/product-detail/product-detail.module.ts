@@ -17,9 +17,12 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { ProductDetailRoutingModule } from './product-detail-routing.module';
 import { ProductDetailComponent } from './product-detail.component';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
+import { QuestionsComponent } from './questions/questions.component';
 
 @NgModule({
-  declarations: [ProductDetailComponent],
+  declarations: [
+    ProductDetailComponent,
+    QuestionsComponent],
   imports: [
     CommonModule,
     ProductDetailRoutingModule,
@@ -38,7 +41,8 @@ import { QuantityDivModule } from '../quantity-div/quantity-div.module';
     GalleryModule,
     SlickCarouselModule,
     QuantityDivModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    
   ]
 })
 export class ProductDetailModule { }
