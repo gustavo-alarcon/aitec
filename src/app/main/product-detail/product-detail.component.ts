@@ -57,13 +57,10 @@ export class ProductDetailComponent implements OnInit {
     private router: Router
   ) {
     this.route.paramMap.subscribe(params => {
-<<<<<<< Updated upstream
-=======
       console.log(params.get('param'));
 
       console.log(params['id']);
       
->>>>>>> Stashed changes
       
       this.ngOnInit();
     });
