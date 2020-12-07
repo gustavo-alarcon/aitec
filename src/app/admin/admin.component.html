@@ -10,39 +10,6 @@
           max-width: 300px;
         ">
         <div>
-          <div *ngIf="auth.user$ | async as user; else iniciarSesion" class="user">
-            <div>
-              <img *ngIf="user.photoURL; else defaultPicture" [src]="user.photoURL"
-                class="user__image border--primary" />
-              <ng-template #defaultPicture>
-                <img class="user__image border--primary" src="../../assets/images/default-image.jpg" />
-              </ng-template>
-            </div>
-            <div *ngIf="user.name; else noName">
-              <div class="user__name">
-                {{ user.name.split(" ")[0] }}
-              </div>
-              <div class="user__surname">
-                {{ user.lastName1 }}
-              </div>
-            </div>
-            <ng-template #noName>
-              <div class="user__name">Usuario</div>
-            </ng-template>
-          </div>
-          <ng-template #iniciarSesion>
-            <div class="login w3-center">
-              <button mat-raised-button color="primary" (click)="login()">
-                <mat-icon style="margin-right: 5px">account_circle</mat-icon>
-                Iniciar Sesión
-              </button>
-            </div>
-          </ng-template>
-          <div style="padding-left: 24px; padding-right: 24px; margin-bottom: 16px">
-            <mat-divider></mat-divider>
-          </div>
-
-          <!-- <h2 class="menu__title font--primary">menu</h2> -->
           <div class="menu">
             <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="web">
               <mat-icon class="menu__icon">language</mat-icon>
@@ -56,24 +23,19 @@
               <mat-icon class="menu__icon">widgets</mat-icon>
               Lista de Productos
             </button>
-            <button mat-button class="w3-block menu__button" routerLink="warehouse" (click)="toggleSideMenu()">
-              <mat-icon class="menu__icon">corporate_fare</mat-icon>
-              Almacenes
-            </button>
             <button mat-button class="w3-block menu__button" routerLink="sales" (click)="toggleSideMenu()">
               <mat-icon class="menu__icon">assignment</mat-icon>
               Ventas
             </button>
-
-            <p class="w3-margin-bottom"></p>
-
-            <div class="w3-center">
-              <button *ngIf="auth.user$ | async" class="w3-margin-top" mat-raised-button color="primary"
-                (click)="auth.logout()">
-                <mat-icon style="margin-right: 5px">account_circle</mat-icon>
-                Cerrar Sesión
-              </button>
-            </div>
+            <button mat-button class="w3-block menu__button" routerLink="customers" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">group</mat-icon>
+              Clientes
+            </button>
+            <button mat-button class="w3-block menu__button" routerLink="warehouse" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">corporate_fare</mat-icon>
+              Almacenes
+            </button>
+            
           </div>
         </div>
 
@@ -105,10 +67,25 @@
           <mat-icon class="dark-icon">menu</mat-icon>
         </button>
         <a class="w3-margin-left w3-margin-right main__logo" routerLink="/web">
-          <img src="../../assets/images/logo-black.png" class="main__logoimage" alt="logo" />
+          <img src="../../assets/images/logo-white.png" class="main__logoimage" alt="logo" />
         </a>
         <span class="ms-fill"></span>
-
+        <ng-template #login>
+          <button mat-button routerLink="/main/login/signIn" class="menu-button">
+            <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+          </button>
+        </ng-template>
+        <div *ngIf="auth.user$ | async as user; else login">
+          <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+            <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
+            {{ getName(user) }}
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="logOut()">
+              <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
+            </button>
+          </mat-menu>
+        </div>
       </mat-toolbar>
       <div class="main__space">
         <router-outlet></router-outlet>

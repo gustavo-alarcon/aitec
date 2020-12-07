@@ -153,11 +153,6 @@ export class SalesDetailComponent implements OnInit {
                 new Array((<Package>formValue).totalItems)
             };
 
-            if (this.getTotalWeight() + this.giveProductWeight(product) > generalConfig.maxWeight) {
-              this.snackBar.open("Lo sentimos, exceso de peso.", "Aceptar")
-              this.searchProductControl.setValue("")
-              return productsList
-            } else {
 
               (<FormArray>this.productForm.get('productList')).insert(0,
                 product.product.package ?
@@ -181,55 +176,12 @@ export class SalesDetailComponent implements OnInit {
               return productsList.filter(el => !this.productForm.get('productList').value.find(
                 (product: SaleRequestedProducts) => product.product.id == el.id
               ))
-            }
+            
           }
         })
       )
 
 
-    this.weight$ = combineLatest(
-      (<Observable<[SaleRequestedProducts[], SaleRequestedProducts[]]>>(<FormArray>this.productForm.get('productList')).valueChanges
-        .pipe(startWith(this.productForm.get('productList').value), pairwise())),
-      this.dbs.getGeneralConfigDoc()
-    ).pipe(
-      filter(([[prev, curr], config]) => this.getTotalWeight() > config.maxWeight ? true : false),
-      map(([[prev, curr], config]) => {
-
-        let changedItemIndex = curr.findIndex(currEl => {
-          if (prev.find(prevEl => prevEl.product.id == currEl.product.id)) {
-            return (this.giveProductWeight(currEl) !=
-              this.giveProductWeight(prev.find(prevEl => prevEl.product.id == currEl.product.id)))
-          } else {
-            return false
-          }
-        });
-
-        console.log('again?');
-
-        let foundPreviousItem = prev.find((prevEl) => curr[changedItemIndex].product.id == prevEl.product.id);
-
-        if (!foundPreviousItem.product.package) {
-          this.snackBar.open("No puede aumentar la cantidad. Exceso de peso.", "Aceptar");
-          (<FormArray>this.productForm.get('productList'))
-            .controls[changedItemIndex].get('quantity').setValue(foundPreviousItem.quantity);
-        } else {
-          console.log(foundPreviousItem.chosenOptions)
-          console.log(curr[changedItemIndex].chosenOptions);
-          if (curr[changedItemIndex].chosenOptions == foundPreviousItem.chosenOptions) {
-            this.snackBar.open("No puede aumentar la cantidad. Exceso de peso.", "Aceptar");
-            (<FormArray>this.productForm.get('productList'))
-              .controls[changedItemIndex].get('quantity').setValue(foundPreviousItem.quantity);
-          }
-          else {
-            this.snackBar.open("No puede seleccionar producto. Exceso de peso.", "Aceptar");
-            (<FormArray>(<FormArray>this.productForm.get('productList'))
-              .controls[changedItemIndex].get('chosenOptions')).setValue(foundPreviousItem.chosenOptions);
-          }
-
-        }
-
-      })
-    )
   }
 
   onDeleteProduct(index: number) {
@@ -719,35 +671,13 @@ export class SalesDetailComponent implements OnInit {
     }
   }
 
-  giveProductWeight(item: SaleRequestedProducts): number {
-    if (!item.product.package) {
-      return (<Product>item.product).unit.weight * item.quantity;
-    } else {
-      return item.chosenOptions.map((opt, index) => {
-        //if it has a valid chosen product, we use the weight
-        if (opt) {
-          return opt.unit.weight;
-        }
-        //If it doesn't have a chosen product, we calculate the minimum
-        //of the respective options.
-        else {
-          return Math.min(
-            ...(<Package>item.product).items[index].productsOptions.map(prod => prod.unit.weight)
-          )
-        }
-      }).reduce((a, b) => a + b, 0) * item.quantity
-    }
-  }
-
+  
   getTotalPrice(): number {
     let items: SaleRequestedProducts[] = this.productForm.get('productList').value;
     return items.reduce((a, b) => a + this.giveProductPrice(b), 0)
   }
 
-  getTotalWeight(): number {
-    let items: SaleRequestedProducts[] = this.productForm.get('productList').value;
-    return items.reduce((a, b) => a + this.giveProductWeight(b), 0)
-  }
+  
 
   displayFn(input: Product) {
     if (!input) return '';

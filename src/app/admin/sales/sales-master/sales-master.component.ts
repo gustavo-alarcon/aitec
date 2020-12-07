@@ -309,8 +309,7 @@ console.log(this.getCurrentMonthOfViewDate());
             '-',
             prod.product.description,
             prod.quantity,
-            prod.product.unit.weight,
-            (prod.quantity * prod.product.unit.weight),
+            (prod.quantity),
             this.givePrice(prod).toFixed(2) //Soles
           ]
           table_xlsx.push(temp2);
@@ -322,8 +321,7 @@ console.log(this.getCurrentMonthOfViewDate());
                 prod.product.description,
                 el.description,
                 prod.quantity,
-                el.unit.weight,
-                (prod.quantity * el.unit.weight),
+                (prod.quantity),
                 this.givePrice(prod).toFixed(2)
               ]
               table_xlsx.push(temp2);

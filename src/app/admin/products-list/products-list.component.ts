@@ -36,7 +36,7 @@ export class ProductsListComponent implements OnInit {
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'category', 'price',
+    'index', 'photoURL', 'description', 'sku', 'category', 'pricemin','pricemay',
     'realStock', 'published', 'actions'
   ]
 
@@ -195,7 +195,7 @@ export class ProductsListComponent implements OnInit {
 
   onCreateEditItem(edit: boolean, product?: Product) {
     if(edit){
-      this.router.navigate(['/admin/products/edit', product.id]);
+      this.router.navigate(['/admin/products/edit', product.sku]);
       
     }else{
       this.router.navigate(['/admin/products/create']);

@@ -93,19 +93,30 @@
                 Categoria
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                {{ raw.category | titlecase }}
+                {{ raw.category | titlecase }}  
+                <span *ngIf="raw.subcategory">>>{{ raw.subcategory | titlecase }}</span>
+                <span *ngIf="raw.subsubcategory">>>{{ raw.subsubcategory | titlecase }}</span>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="price">
+            <ng-container matColumnDef="pricemin">
               <th mat-header-cell *matHeaderCellDef mat-sort-header class="ms-table__th w3-center w3-padding">
-                Precio
+                Precio Mayorista
               </th>
               <td style="padding: 0px 10px;min-width: 85px;" mat-cell *matCellDef="let raw">
-                S/.{{ raw.price | number:'.2' }}
+                S/.{{ raw.priceMin | number:'.2' }}
               </td>
             </ng-container>
 
+
+            <ng-container matColumnDef="pricemay">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header class="ms-table__th w3-center w3-padding">
+                Precio Minorista
+              </th>
+              <td style="padding: 0px 10px;min-width: 85px;" mat-cell *matCellDef="let raw">
+                S/.{{ raw.priceMay | number:'.2' }}
+              </td>
+            </ng-container>
 
             <ng-container matColumnDef="realStock">
               <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
