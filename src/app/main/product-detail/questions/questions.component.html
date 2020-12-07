@@ -1,0 +1,68 @@
+<div>
+  <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()">
+    <mat-form-field
+      class="w3-margin-right w3-small"
+      style="width: 70%"
+      appearance="outline"
+    >
+      <mat-label>Escribe tu pregunta</mat-label>
+      <input
+        autocomplete="off"
+        type="text"
+        matInput
+        placeholder="Escribe tu pregunta"
+        formControlName="question"
+        name="question"
+      />
+    </mat-form-field>
+
+    <button
+      type="submit"
+      [disabled]="!questionForm.valid"
+      mat-raised-button
+      color="primary"
+    >
+      Preguntar
+    </button>
+
+    <span
+      *ngIf="
+        frm.question.dirty &&
+        frm.question.touched &&
+        frm.question.errors &&
+        formQuestionSubmit
+      "
+      >la descripcion es obligatorio</span
+    >
+    <br />
+  </form>
+</div>
+
+<h3>Últimas realizadas</h3>
+<div *ngFor="let item of questions">
+  <div class="boder-question">
+    <span class="question"> {{ item.question }} </span>
+
+    <span class="answer">
+      <svg
+        class="ui-pdp-icon ui-pdp-questions__questions-list__answer-container__icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+      >
+        <path
+          fill="#000"
+          fill-opacity=".25"
+          fill-rule="evenodd"
+          d="M0 0h1v11h11v1H0z"
+        ></path>
+      </svg>
+
+      {{ item.answer }}
+      <small
+        >{{ item.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
+      </small>
+    </span>
+  </div>
+</div>

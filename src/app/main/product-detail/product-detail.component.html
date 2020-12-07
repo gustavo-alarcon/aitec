@@ -123,12 +123,7 @@
   <div class="w3-section">
     <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
-    <div>
-      <mat-form-field class="w3-margin-right w3-small" style="width: 70%" appearance="outline">
-        <mat-label>Escribe tu pregunta</mat-label>
-        <input autocomplete="off" matInput placeholder="Escribe tu pregunta" />
-      </mat-form-field>
-      <button mat-raised-button color="primary">Preguntar</button>
-    </div>
+    <app-questions [idProduct]="product.id"></app-questions>
+    
   </div>
 </div>
