@@ -4,8 +4,9 @@
 }
 
 .main__toolbar {
-  box-shadow: 0 4px 10px rgba(51, 51, 51, .1);
   position: fixed;
+  background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
+  color: white;
   top: 0;
   z-index: 150;
 }

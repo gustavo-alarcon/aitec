@@ -7,16 +7,24 @@ export interface Product {
   description: string;
   additionalDescription: string;
   sku: string;
-  category: string;   
-  price: number;      //Should this price be with IGV?
-  unit: Unit;       
+  category: string;  
+  subcategory?:string;
+  subsubcategory?:string;
+  guarantee:boolean;
+  timeguarantee:number;
+  weight:number;
+  code:string;
+  model:string;
+  colors:Array<Color>;
+  price?: number;      //Should this price be with IGV?
+  priceMin:number;
+  priceMay:number;       
   realStock: number;  //Real stock will be amounted here after accepting a product in the log sect
-  virtualStock?: number;  //To check the virtual we will use another collection
-  mermaStock: number;
-  sellMinimum: number;    //The minimum by which, we should top selling to the public
-  alertMinimum: number;   //Minimum by which one should get an alert to request more 
+  virtualStock: number;  //To check the virtual we will use another collection
+  //sellMinimum: number;    //The minimum by which, we should top selling to the public
+  //alertMinimum: number;   //Minimum by which one should get an alert to request more 
   photoURL: string;
-  photoPath: string;
+  gallery:Array<string>;
   promo: boolean;           //Indicates wheter there is a promo
   promoData?: PromoData;
   published?: boolean;
@@ -25,16 +33,34 @@ export interface Product {
   createdBy: User;
   editedAt: Date;
   editedBy: User;
-  subcategory?:string;
-  subsubcategory?:string;
   brand?:string;
-  purchaseNumber?: number;  //Número total de compras
+  purchaseNumber: number;  //Número total de compras
+  warehouse:Array<any>
 }
 
 interface PromoData {
-  quantity: 1;
+  quantity: number;
   promoPrice: number;
   offer?:number;
+}
+
+interface Gallery {
+  photoURL: string;
+  photoPath: string;
+}
+
+interface Color {
+  name: string;
+  color: string;
+  sku?:string;
+}
+
+export interface Brand {
+  id:string;
+  createdAt:Date;
+  name:string;
+  photoURL: string;
+  photoPath:string
 }
 
 export interface MermaTransfer {

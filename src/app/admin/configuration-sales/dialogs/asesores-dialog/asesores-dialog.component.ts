@@ -66,7 +66,8 @@ export class AsesoresDialogComponent implements OnInit {
       lastname: this.createForm.get('lastname').value,
       email: this.createForm.get('email').value,
       code: this.createForm.get('code').value,
-      createdAt: new Date()
+      createdAt: new Date(),
+      displayName: this.createForm.get('name').value + ' ' + this.createForm.get('lastname').value
     }
 
     batch.set(productRef, newDoc);
@@ -89,7 +90,8 @@ export class AsesoresDialogComponent implements OnInit {
       name: this.createForm.get('name').value,
       lastname: this.createForm.get('lastname').value,
       email: this.createForm.get('email').value,
-      code: this.createForm.get('code').value
+      code: this.createForm.get('code').value,
+      displayName: this.createForm.get('name').value + ' ' + this.createForm.get('lastname').value
     }
 
     let batch = this.afs.firestore.batch();

@@ -43,7 +43,7 @@
         </div>
         <div class="w3-col l4 m5">
           <div class="ms-flex ms-flex--center">
-            <span>100 vendidos</span>
+            <span>{{product.purchaseNumber}} vendidos</span>
             <span class="ms-fill"></span>
             <button mat-icon-button color="primary">
               <mat-icon>favorite_border</mat-icon>
@@ -52,7 +52,7 @@
           <h2 class="product__title">{{ product.description }}</h2>
           <div *ngIf="product.promo" class="product__promo ms-flex">
             <div style="width: fit-content">
-              Antes <strike>{{ product.price }}</strike>
+              Antes <strike>{{ product.priceMin }}</strike>
             </div>
             <div class="product__promo--discount">
               {{ product.promoData.offer }} % Dscto
@@ -65,7 +65,7 @@
               {{
                 product.promo
                   ? product.promoData.promoPrice
-                  : (product.price | number: ".2")
+                  : (product.priceMin | number: ".2")
               }}
             </span>
           </div>
@@ -81,7 +81,8 @@
               <img src="../../../assets/images/american.png" class="mini-img" alt="" />
             </div>
           </div>
-          <p>Garantia: <strong>1 año</strong></p>
+
+          <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
           <div class="w3-center">
             <app-quantity-div [product]="productDiv" size="md"></app-quantity-div>
           </div>
@@ -95,7 +96,7 @@
           <h4 class="product__subtitle">Descripción</h4>
           <div [innerHTML]="product.additionalDescription"></div>
         </div>
-       
+
         <div class="w3-section">
           <h4 class="product__subtitle">Calificaciones</h4>
           <div style="color: #f2c94c">

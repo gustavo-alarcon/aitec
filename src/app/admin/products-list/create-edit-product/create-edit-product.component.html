@@ -1,13 +1,17 @@
-
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-<div class="w3-section ms-container" *ngIf="init$|async as init">
+<div class="w3-section w3-padding ms-container" *ngIf="init$|async as init">
 
+ <div class="ms-flex ms-flex--center">
+   <button mat-icon-button color="primary" (click)="goBack()">
+     <mat-icon>arrow_back</mat-icon>
+   </button>
   <h2 class="title">
     <mat-icon style="vertical-align: middle;">list_alt</mat-icon>
     {{init==1?'Crear':'Editar'}} producto
   </h2>
+ </div>
   <mat-divider></mat-divider>
-  
+
   <mat-vertical-stepper class="w3-section" [linear]="true" #stepper>
     <mat-step [stepControl]="firstFormGroup">
       <form [formGroup]="firstFormGroup">
@@ -53,12 +57,16 @@
               <mat-label>Categoría >> Subcategoría >> Subcategoría</mat-label>
               <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text"
                 matInput>
-              <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete">
+              <mat-autocomplete #categoryAutocomplete="matAutocomplete">
 
                 <mat-option *ngFor="let category of category$ | async" [value]="category">
                   {{category}}
                 </mat-option>
               </mat-autocomplete>
+              <mat-error>
+                <span *ngIf="firstFormGroup.get('category').errors?.required">Campo requerido</span>
+                <span *ngIf="firstFormGroup.get('category').errors?.validateCategory">Dato no válido</span>
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -135,12 +143,7 @@
         </div>
         <div class="w3-row-padding">
           <div class="w3-col">
-            <!--mat-form-field class="w3-block" appearance="outline">
-              <mat-label>Descripción</mat-label>
-              <textarea matInput formControlName="additionalDescription" class="w3-block" rows="8" required></textarea>
-              
-            </mat-form-field-->
-            <textarea formControlName="additionalDescription" [ngxSummernote]="config" cols="20" rows="8" required></textarea>
+            <textarea formControlName="additionalDescription" [ngxSummernote]="config" rows="20" required></textarea>
           </div>
 
         </div>
@@ -155,7 +158,7 @@
               </mat-radio-button>
             </mat-radio-group>
           </div>
-          <div class="w3-col m6 l6">
+          <div class="w3-col m6 l6" *ngIf="guarantee$ | async">
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Tiempo de garantía</mat-label>
               <input matInput placeholder="Tiempo de garantía" autocomplete="off" formControlName="timeguarantee"
@@ -174,16 +177,16 @@
       <div class="w3-margin-bottom w3-row-padding">
         <div class="w3-margin-bottom w3-col m6 l4" style="position: relative"
           *ngFor="let image of photosList; let ind = index">
-          <img class="w3-block"  style="object-fit: contain;height: 180px;" [src]="image" alt="fotografía" />
+          <img class="w3-block" style="object-fit: contain;height: 180px;" [src]="image" alt="fotografía" />
           <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
             <span class="ms-fill"></span>
             <button type="button" mat-mini-fab color="accent" (click)="selectPhoto(ind)">
               <mat-icon *ngIf="ind==choosePicture;else noSelect">radio_button_checked</mat-icon>
               <ng-template #noSelect>
-                <mat-icon >radio_button_unchecked</mat-icon>
+                <mat-icon>radio_button_unchecked</mat-icon>
               </ng-template>
             </button>
-            <button type="button" mat-mini-fab color="primary" (click)="eliminatedphoto(ind)">
+            <button type="button" mat-mini-fab color="primary" style="margin-left:8px" (click)="eliminatedphoto(ind)">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -236,7 +239,7 @@
           <div class="w3-col m6 l6">
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Nros de serie</mat-label>
-              <input matInput formControlName="series" (keydown)="onKeydown($event)" (keyup.enter)="addSerie()" placeholder="1 - 10"
+              <input matInput formControlName="series" (keyup.enter)="addSerie()" placeholder="#####"
                 autocomplete="off">
               <mat-hint> Presione ENTER para agregar</mat-hint>
             </mat-form-field>
@@ -244,7 +247,7 @@
           <div class="w3-col m6 l6">
             <div *ngIf="seriesList.length" class="serie">
               <div *ngFor="let num of seriesList; let i=index" class="ms-flex ms-flex--center">
-                <div>Número de serie {{num}}</div>
+                <div>{{firstFormGroup.get('sku').value }}{{num}}</div>
                 <div class="ms-fill"></div>
                 <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(i)">remove_circle</mat-icon>
 
@@ -253,7 +256,7 @@
           </div>
         </div>
         <div class="w3-center w3-margin-top">
-          <button mat-flat-button color="primary" [disabled]="!thirdFormGroup.valid || seriesList.length==0"
+          <button mat-flat-button color="primary" type="button" [disabled]="!thirdFormGroup.valid || seriesList.length==0"
             (click)="addWarehouse()" class="big-button">Agregar</button>
         </div>
       </form>
@@ -280,7 +283,7 @@
           <ng-container class="w3-center" matColumnDef="serie">
             <th *matHeaderCellDef class="w3-center ms-table__th">Número de serie</th>
             <td mat-cell *matCellDef="let element" class="ms-table__td w3-right-align" style="padding: 0px 10px">
-              <span *ngFor="let num of element.series">Número de serie {{num}};</span>
+              <span *ngFor="let num of element.series">{{firstFormGroup.get('sku').value }}{{num}};</span>
             </td>
           </ng-container>
 
@@ -288,11 +291,11 @@
             <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center ms-table__th" style="width: 100px">
               Acciones
             </th>
-            <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
-              <button mat-icon-button color="primary">
+            <td mat-cell *matCellDef="let element;let i = index" class="ms-table__td w3-center">
+              <button mat-icon-button color="primary" (click)="editWarehouse(i)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="accent">
+              <button mat-icon-button color="accent" (click)="removeWarehouse(i) ">
                 <mat-icon>remove_circle</mat-icon>
               </button>
             </td>
@@ -302,7 +305,8 @@
         </table>
       </div>
       <div class="w3-center w3-margin-top">
-        <button mat-flat-button color="primary" (click)="edit?editProduct():saveProduct()" class="big-button">Guardar</button>
+        <button mat-flat-button color="primary" (click)="edit?editProduct():saveProduct()"
+          class="big-button">Guardar</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>
