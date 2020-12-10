@@ -21,11 +21,13 @@ import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-
 
 import { AdminComponent } from './admin.component';
 import { AdminRoutingModule } from './admin-routing-module';
+import { DeleteConfiDialogComponent } from './delete-confi-dialog/delete-confi-dialog.component';
 
 @NgModule({
   declarations: [
     AdminComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    DeleteConfiDialogComponent
   ],
   imports: [
     CommonModule,

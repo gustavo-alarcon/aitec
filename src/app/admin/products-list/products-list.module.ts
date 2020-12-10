@@ -23,6 +23,7 @@ import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NgxSummernoteModule } from 'ngx-summernote';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -60,6 +61,7 @@ import { ProductEditPromoComponent } from './product-edit-promo/product-edit-pro
     MatCardModule,
     MatStepperModule,
     MatRadioModule,
+    MatCheckboxModule,
     NgxSummernoteModule,
     HttpClientModule
   ]

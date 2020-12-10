@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { DeleteDocComponent } from '../dialogs/delete-doc/delete-doc.component';
+import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dialog.component';
 import { StoreDialogComponent } from '../dialogs/store-dialog/store-dialog.component';
 
@@ -74,12 +74,13 @@ export class DeliveryStoresComponent implements OnInit {
     })
   }
 
-  deleteDialog(id: string,type:string,title:string) {
-    this.dialog.open(DeleteDocComponent, {
+  deleteDialog(id: string, type: string, title: string) {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
         id: id,
         title: title,
-        type: type
+        type: type,
+        image: false
       }
     })
   }

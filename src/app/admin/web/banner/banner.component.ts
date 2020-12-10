@@ -7,8 +7,8 @@ import { map, shareReplay, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { CreateEditBannerComponent } from '../create-edit-banner/create-edit-banner.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { LandingService } from 'src/app/core/services/landing.service';
+import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 @Component({
   selector: 'app-banner',
   templateUrl: './banner.component.html',
@@ -99,12 +99,14 @@ export class BannerComponent implements OnInit {
     })
   }
 
-  deleteDialog(id: string) {
-    this.dialog.open(DeleteDialogComponent, {
+  deleteDialog(banner) {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
-        id:id,
+        id:banner.id,
         title:'Banner',
-        type:'banner'
+        type:'banner',
+        image:true,
+        path:banner.photoPath
       }
     })
   }

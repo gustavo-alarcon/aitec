@@ -6,7 +6,7 @@ import {
   DocumentReference,
   AngularFirestoreDocument,
 } from '@angular/fire/firestore';
-import { MermaTransfer, Product } from '../models/product.model';
+import { Brand, Product } from '../models/product.model';
 import {
   shareReplay,
   map,
@@ -231,7 +231,7 @@ export class DatabaseService {
 
   getCategoriesDoc(): Observable<any> {
     return this.afs
-      .collection(`/db/aitec/config/generalConfig/categories`, (ref) =>
+      .collection<Brand>(`/db/aitec/config/generalConfig/categories`, (ref) =>
         ref.orderBy('createdAt', 'desc')
       ).get().pipe(
         map((snap) => {
@@ -352,6 +352,13 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  getWarehouseSeriesValueChanges(id): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(`/db/aitec/warehouse/${id}/series`)
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
   getProductsListCategoriesValueChanges(): Observable<any[]> {
     return this.getGeneralConfigDoc().pipe(
       map((res) => {
@@ -385,28 +392,7 @@ export class DatabaseService {
     );
   }
 
-  editCategories(categories: string[]): firebase.default.firestore.WriteBatch {
-    let categoriesRef: AngularFirestoreDocument<GeneralConfig> = this
-      .generalConfigDoc;
-    let batch = this.afs.firestore.batch();
-    batch.set(categoriesRef.ref, { categories }, { merge: true });
-    return batch;
-  }
-
-  editUnits(
-    units: Unit[] | PackageUnit[],
-    packageUnit: boolean
-  ): firebase.default.firestore.WriteBatch {
-    let unitsRef: AngularFirestoreDocument<GeneralConfig> = this
-      .generalConfigDoc;
-    let batch = this.afs.firestore.batch();
-    batch.set(
-      unitsRef.ref,
-      packageUnit ? { packagesUnits: units } : { units },
-      { merge: true }
-    );
-    return batch;
-  }
+  
 /*
   createEditProduct(
     edit: boolean,
@@ -468,93 +454,6 @@ export class DatabaseService {
     }
   }*/
 
-  transferStock(
-    toMerma: boolean,
-    quantity: number,
-    observations: string,
-    product: Product,
-    user: User
-  ): firebase.default.firestore.WriteBatch {
-    let productRef: DocumentReference = this.afs.firestore
-      .collection(this.productsListRef)
-      .doc(product.id);
-    let transferHistoryRef: DocumentReference = this.afs.firestore
-      .collection(this.productsListRef + `/${product.id}/mermaTransfer`)
-      .doc();
-
-    let productData: {
-      realStock: firebase.default.firestore.FieldValue;
-      virtualStock: firebase.default.firestore.FieldValue;
-      mermaStock: firebase.default.firestore.FieldValue;
-    };
-    let mermaTransferData: MermaTransfer = {
-      date: new Date(),
-      id: transferHistoryRef.id,
-      productId: product.id,
-      quantity,
-      toMerma,
-      user,
-      observations,
-    };
-
-    let batch = this.afs.firestore.batch();
-
-    //To Merma
-    if (toMerma) {
-      productData = {
-        realStock: firebase.default.firestore.FieldValue.increment(
-          -1 * quantity
-        ),
-        virtualStock: firebase.default.firestore.FieldValue.increment(
-          -1 * quantity
-        ),
-        mermaStock: firebase.default.firestore.FieldValue.increment(quantity),
-      };
-    }
-    //To Stock
-    else {
-      productData = {
-        realStock: firebase.default.firestore.FieldValue.increment(quantity),
-        virtualStock: firebase.default.firestore.FieldValue.increment(quantity),
-        mermaStock: firebase.default.firestore.FieldValue.increment(
-          -1 * quantity
-        ),
-      };
-    }
-
-    batch.update(productRef, productData);
-    batch.set(transferHistoryRef, mermaTransferData);
-
-    return batch;
-  }
-
-  getMermaTransferHistory(id: string): Observable<MermaTransfer[]> {
-    return this.afs
-      .collection<MermaTransfer>(
-        this.productsListRef + `/${id}/mermaTransfer`,
-        (ref) => ref.orderBy('date', 'desc')
-      )
-      .valueChanges();
-  }
-
-  getMermaTransferHistoryDate(date: {
-    begin: Date;
-    end: Date;
-  }): Observable<MermaTransfer[]> {
-    let end = date.end;
-    end.setHours(23);
-    end.setMinutes(59);
-    end.setSeconds(59);
-
-    return this.afs
-      .collectionGroup<MermaTransfer>('mermaTransfer', (ref) =>
-        ref
-          .where('date', '<=', date.end)
-          .where('date', '>=', date.begin)
-          .orderBy('date', 'desc')
-      )
-      .valueChanges();
-  }
 
   publishProduct(
     published: boolean,
@@ -609,7 +508,7 @@ export class DatabaseService {
 
   
 
-  deletePhotoProduct(path: string): Observable<any> {
+  deletePhoto(path: string): Observable<any> {
     let st = this.storage.ref(path);
     return st.delete().pipe(takeLast(1));
   }
@@ -1631,8 +1530,8 @@ export class DatabaseService {
 
   //products
 
-  uploadPhotoProduct(sku:string,id: string, file: File): Observable<string | number> {
-    const path = `/productsList/${sku}/${id}-${file.name}`;
+  uploadPhotoProduct(id: string, file: File): Observable<string | number> {
+    const path = `/productsList/${id}/${file.name}`;
 
     // Reference to storage bucket
     const ref = this.storage.ref(path);
