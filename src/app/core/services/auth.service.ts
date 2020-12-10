@@ -10,10 +10,12 @@ import { switchMap, tap, shareReplay, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import { Platform } from '@angular/cdk/platform';
 
-//export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
-//export const facebookProvider = new firebase.default.auth.FacebookAuthProvider();
+// export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
+export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
+export const facebookProvider = new firebase.default.auth.FacebookAuthProvider();
 
 @Injectable({
   providedIn: 'root'
@@ -54,9 +56,9 @@ export class AuthService {
   private getUserObservable(): Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>{
     return this.afAuth.authState.pipe(
       switchMap(authUser => {
-        console.log(authUser)
+        // console.log(authUser)
         if(authUser){
-          console.log(authUser);
+          // console.log(authUser);
           return this.afs.collection<User>('users').doc(authUser.uid).get({source: "server"}).pipe(
             map(res => {
               if(res.exists){
@@ -108,10 +110,10 @@ export class AuthService {
 
     switch (type) {
       case 'facebook':
-        //provider = facebookProvider;
+        provider = facebookProvider;
         break;
       case 'google':
-        //provider = googleProvider
+        provider = googleProvider
         break;
     }
 
@@ -124,6 +126,8 @@ export class AuthService {
       return this.afAuth.signInWithPopup(provider)
         .then((cred)=> {
           console.log("signIn with desk")
+        }).catch(err => {
+          console.log(err)
         })
     }
   }
