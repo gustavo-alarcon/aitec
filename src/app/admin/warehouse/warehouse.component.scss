@@ -1,0 +1,21 @@
+.reveal {
+  display: inline-block;
+}
+
+.triangleTopLeft {
+  width: auto;
+  position: relative;
+}
+
+.promo {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  left: 0px;
+  z-index: 3;
+  background: #ef5350;
+  padding: 3px 7px;
+  color: white;
+  font-size: 0.7em;
+  letter-spacing: 0.2em;
+}

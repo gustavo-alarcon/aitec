@@ -1,0 +1,28 @@
+.contact {
+  &__title {
+    font-size: 1.1em;
+    font-weight: 600;
+    font-family: Raleway;
+  }
+  &__descrip {
+    font-family: Roboto;
+    color: #828282;
+  }
+  &__button {
+    width: 170px;
+  }
+  &__icon {
+    vertical-align: middle;
+  }
+  &__form {
+    padding: 35px;
+    border: 1px solid #e5e5e5;
+    box-sizing: border-box;
+    max-width: 450px;
+    margin: auto;
+  }
+  &__info{
+    padding: 5px 16px 5px 0px;
+  }
+}
+

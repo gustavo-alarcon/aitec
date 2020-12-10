@@ -18,7 +18,7 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product | Package;
+  product: Product| Package;
   quantity: number;               
   //If "product" is a package, we will have to specify the chosen products
   //for each field in package.items. chosenOptions will contain the
@@ -116,6 +116,13 @@ export interface Sale {
     finishedAt: Date,
     finishedBy: User,
     observation: string
+  }
+
+  rateData?: {
+    serviceRate: number,
+    productRate: number,
+    deliveryRate: number,
+    observation?: string,
   }
 
   createdAt: Date,

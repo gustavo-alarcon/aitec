@@ -1,0 +1,70 @@
+<div mat-dialog-title>
+  <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.2em">
+      <mat-icon style="vertical-align:middle" (click)="deb()">add_circle</mat-icon>
+      Vouchers
+  </h2>
+  <mat-progress-bar *ngIf="loading$ | async else divider" mode="indeterminate"></mat-progress-bar>
+  <ng-template #divider>
+    <mat-divider></mat-divider>
+  </ng-template>
+</div>
+<mat-dialog-content>
+  <div style="display:flex; flex-direction: column;">
+
+      <!-- Photo  -->
+      <div *ngFor="let group of photoFormArray.controls; index as i"
+        style="display:flex; flex-direction: column; 
+                align-items: center; margin-bottom: 16px; position: relative">
+
+          <button [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+            style="position: absolute; top:4px; right: 4px;"
+            color="warn" mat-icon-button (click)="deletePhoto(i)">
+              <mat-icon>delete</mat-icon>
+          </button>
+
+          
+
+          <img class="w3-card-4" (click)="photoURL.click()" 
+              *ngIf="group.get('photoURL').value!=null" style="width: 100%;"
+              [defaultImage]="defaultImage" [lazyLoad]="group.get('photoURL').value" 
+              [offset]="100" alt="fotografía">
+              
+          <img class="w3-card-4" (click)="photoURL.click()"
+              *ngIf="group.get('photoURL').value==null" style="width: 100%;"
+              [src]="noImage" alt="sin fotografía">
+
+          <div *ngIf="group.get('resizing').valueChanges | async" style="width:100%">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <span class="w3-small ms-color-11 ms-font-montserrat">
+              *comprimiendo
+            </span>
+          </div>
+
+          <input 
+            [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+            style="display: none" #photoURL type="file" accept='image/*' 
+            (change)="addNewPhoto(i, photoURL.files)"/>
+      </div>
+
+      <div 
+        style="width: 100%; display: flex; flex-direction: column;
+          align-items: center; padding: 0 0 16px 0;">
+        <button [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+          (click)="newPhoto.click()" mat-fab color="primary" type="button">
+          <mat-icon>add</mat-icon>
+        </button>
+
+        <input [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+          style="display: none" #newPhoto type="file" accept='image/*' 
+            (change)="addNewPhoto(photoFormArray.length, newPhoto.files)"/>
+      </div>
+
+  </div>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="accent" (click)="onSubmitForm()" type="button"
+      [disabled]="(loading$ | async) || !photoFormArray.length || data.data.status==saleStatusOptions.confirmedDocument">Guardar</button>
+</mat-dialog-actions>

@@ -1,0 +1,21 @@
+<div mat-dialog-title>
+  <div class="ms-flex">
+    <h2 style="font-weight: 600;font-size: 1em;">
+      Números de Serie
+    </h2>
+    <span class="ms-fill"></span>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+
+</div>
+<div mat-dialog-content>
+  <p>{{data.name | titlecase}}.</p>
+  <ul *ngIf="init$ | async as series">
+    <li *ngFor="let serie of series">
+      {{serie.serie}}
+    </li>
+  </ul>
+</div>

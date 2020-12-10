@@ -1,6 +1,6 @@
-
 // Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
+@import "./assets/css/animate.css";
+@import "./assets/css/w3.css";
 @import '~@angular/material/theming';
 // Plus imports for other components in your app.
 
@@ -12,26 +12,65 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$aitec-primary: mat-palette($mat-light-blue, 900);
+
+$mat-aitec-primary-palette: (
+  50: #ece7fd,
+  100: #cec3fa,
+  200: #ac9cf7,
+  300: #8673f6,
+  400: #6453f4,
+  500: #3635f1,
+  600: #1c31ea,
+  700: #0029e1,
+  800: #0024dc,
+  900: #0018d5,
+  A100: #c6cbff,
+  A200: #939dff,
+  A400: #606eff,
+  A700: #4757ff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+
+$aitec-primary: mat-palette($mat-aitec-primary-palette);
 $aitec-accent: mat-palette($mat-amber, 800);
 $aitec-warn: mat-palette($mat-red);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$aitec-theme: mat-light-theme((
-  color: (
-    primary: $aitec-primary,
-    accent: $aitec-accent,
-    warn: $aitec-warn,
+$aitec-theme: mat-light-theme(
+  (
+    color: (
+      primary: $aitec-primary,
+      accent: $aitec-accent,
+      warn: $aitec-warn,
+    ),
   )
-));
-$aitec-dark-theme: mat-dark-theme((
-  color: (
-    primary: $aitec-primary,
-    accent: $aitec-accent,
-    warn: $aitec-warn,
+);
+$aitec-dark-theme: mat-dark-theme(
+  (
+    color: (
+      primary: $aitec-primary,
+      accent: $aitec-accent,
+      warn: $aitec-warn,
+    ),
   )
-));
+);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
@@ -71,7 +110,7 @@ body {
 
 body {
   margin: 0;
-  font-family: Raleway, sans-serif;
+  font-family: Roboto, Raleway, sans-serif;
 }
 
 a {
@@ -79,7 +118,8 @@ a {
 }
 
 :root {
-  --primary-color: #01579b;
+  // --primary-color: #1c31ea;
+  --primary-color:#1c31ea;
   --accent-color: #ff8f00;
   --warn-color: #f44336;
   --forth-color: #f44336;
@@ -172,6 +212,10 @@ a {
   font-family: "Raleway", sans-serif !important;
 }
 
+.mat-icon{
+  vertical-align: middle;
+}
+
 /*Inputs*/
 
 .mat-dialog-actions {
@@ -258,7 +302,6 @@ a {
   }
 }
 
-
 .mat-form-field .mat-input-element {
   font-family: Raleway;
 }
@@ -314,7 +357,7 @@ img.ng-lazyloaded {
 .mat-raised-button,
 .mat-stroked-button,
 .mat-flat-button {
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .mat-flat-button.rounded {
@@ -330,12 +373,6 @@ img.ng-lazyloaded {
   font-family: "Raleway", sans-serif;
 }
 
-/*panel*/
-.mat-expansion-panel-header-title {
-  font-family: Poppins;
-  display: flex;
-  align-items: center;
-}
 
 .mat-expansion-panel-body {
   font-family: "Raleway", sans-serif;
@@ -377,7 +414,7 @@ img.ng-lazyloaded {
 }
 
 .ticket__total {
-  background: var(--primary-color);
+  background: #FF8A00;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 5px;
   font-size: 1.5em;
@@ -424,6 +461,10 @@ img.ng-lazyloaded {
   font-weight: 700;
 }
 
+.section__tab .mat-tab-label {
+  font-size: 1.3em;
+}
+
 /*tables*/
 
 .ms-table {
@@ -433,15 +474,17 @@ img.ng-lazyloaded {
 
 .ms-table__th {
   font-weight: 900;
+  color: #555555;
 }
 
 .ms-table__th,
 .ms-table__td {
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 .ms-table__td {
   font-weight: 500;
+  color: #828282;
 }
 
 .ms-table__td.mat-cell:first-of-type {
@@ -521,4 +564,133 @@ img.ng-lazyloaded {
 .mat-drawer-inner-container::-webkit-scrollbar-track:hover,
 .mat-drawer-inner-container::-webkit-scrollbar-track:active {
   background: #d4d4d4;
+}
+
+/*colums*/
+.ms-container {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+@media (min-width: 768px) {
+  .ms-container {
+    width: 750px;
+  }
+}
+@media (min-width: 992px) {
+  .ms-container {
+    width: 970px;
+  }
+}
+@media (min-width: 1200px){
+  .ms-container {
+    width: 1200px;
+}
+}
+
+
+.ms-content{
+  max-width:1400px;
+  margin: auto;
+  padding: 30px;
+}
+
+.ms-row {
+  margin-right: -8px;
+  margin-left: -8px;
+  padding: 0 !important;
+}
+
+@media (min-width: 480px) {
+  .col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .col-lg-4 {
+    flex: 0 0 33.33333333%;
+    max-width: 33.33333333%;
+  }
+}
+
+@media (min-width: 1366px) {
+  .col-xxl-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
+/*others*/
+.title-section {
+  position: relative;
+  font-family: Raleway;
+  font-weight: bold;
+  font-size: 2em;
+  width: fit-content;
+  margin: auto;
+  color: #2b2b2b;
+}
+.title-section::before,
+.title-section::after {
+  position: absolute;
+  content: "";
+  width: 40px;
+  background: black;
+  height: 3px;
+  bottom: 0.7em;
+}
+
+.title-section::before {
+  right: calc(100% + 20px);
+}
+
+.title-section::after {
+  left: calc(100% + 20px);
+}
+
+.map-container{
+  border-radius: 10px;
+  border: 2px solid;
+  border-color: var(--primary-color);
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #003e6e;
+}
+
+
+
+.slide.slick-list:focus {
+  outline: none!important;
+}
+
+.slick-arrow.slick-prev, .slick-arrow.slick-next {
+  height: 40px;
+    width: 40px;
+}
+.slick-arrow.slick-prev:before, .slick-arrow.slick-next:before{
+  color: var(--primary-color) !important;
+  font-size: 30px;
 }

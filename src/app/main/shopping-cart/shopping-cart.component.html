@@ -1,0 +1,421 @@
+<div class="store__container w3-section" style="position: relative">
+  <div>Inicio > Mi Carrito</div>
+  <div class="w3-margin-top div-content">
+    <div class="w3-container div-content__left">
+      <div *ngIf="(view$|async) != 4" class="ms-flex w3-margin-bottom w3-padding"
+        style="justify-content: space-between">
+        <button mat-raised-button color="primary" *ngIf="(view$|async) == 1; else firstButton">
+          <mat-icon>check_circle_outline</mat-icon>
+          Revisa tu orden
+        </button>
+        <ng-template #firstButton>
+          <button mat-button class="button--desactive" (click)="firstView()">
+            <mat-icon>check_circle_outline</mat-icon>
+            Revisa tu orden
+          </button>
+        </ng-template>
+        <button mat-raised-button color="primary" *ngIf="(view$|async) == 2; else secondButton">
+          <mat-icon>local_shipping</mat-icon>
+          Método de Entrega
+        </button>
+        <ng-template #secondButton>
+          <button mat-button class="button--desactive" (click)="secondView()">
+            <mat-icon>local_shipping</mat-icon>
+            Método de Entrega
+          </button>
+        </ng-template>
+        <button mat-raised-button color="primary" *ngIf="(view$|async) == 3; else thirdButton">
+          <mat-icon>request_page</mat-icon>
+          Método de Pago
+        </button>
+        <ng-template #thirdButton>
+          <button mat-button class="button--desactive" [disabled]="!deliveryForm.valid" (click)="thirdView()">
+            <mat-icon>request_page</mat-icon>
+            Método de Pago
+          </button>
+        </ng-template>
+
+      </div>
+      <div class="w3-margin-top div-content__scroll">
+        <div *ngIf="(view$|async) == 1">
+          <app-shopping-list></app-shopping-list>
+        </div>
+        <div *ngIf="(view$|async) == 2">
+          <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async">
+            <h4 class="delivery__title w3-center">
+              Por favor registra tus datos y verifícalos
+            </h4>
+            <mat-radio-group color="primary" [formControl]="deliveryForm">
+              <mat-radio-button [value]="1"> Entrega en domicilio </mat-radio-button>
+              <mat-radio-button class="w3-margin-left" [value]="2">
+                Recojo en tienda
+              </mat-radio-button>
+            </mat-radio-group>
+            <form [formGroup]="formGroup" class="w3-margin-top">
+              <mat-form-field class="w3-block" appearance="outline">
+                <mat-label>Departamento</mat-label>
+                <input type="text" placeholder="Departamento" matInput formControlName="departamento"
+                  [matAutocomplete]="autoD" />
+                <mat-autocomplete autoActiveFirstOption #autoD="matAutocomplete" [displayWith]="showDepartamento">
+                  <mat-option *ngFor="let option of filteredDepartamento$ | async" [value]="option">
+                    {{ option.departamento | titlecase }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+              </mat-form-field>
+              <mat-form-field class="w3-block" appearance="outline" *ngIf="provincias$|async">
+                <mat-label>Provincia</mat-label>
+                <input type="text" placeholder="Provincia" matInput formControlName="provincia"
+                  [matAutocomplete]="autoP" />
+                <mat-autocomplete autoActiveFirstOption #autoP="matAutocomplete" [displayWith]="showProvincia">
+                  <mat-option *ngFor="let option of filteredProvincia$ | async" [value]="option">
+                    {{ option.provincia | titlecase }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+              </mat-form-field>
+              <mat-form-field class="w3-block" appearance="outline" *ngIf="distritos$|async">
+                <mat-label>Distrito</mat-label>
+                <input type="text" placeholder="Distrito" matInput formControlName="distrito"
+                  [matAutocomplete]="autoX" />
+                <mat-autocomplete autoActiveFirstOption #autoX="matAutocomplete" [displayWith]="showDistrito">
+                  <mat-option *ngFor="let option of filteredDistrito$ | async" [value]="option"
+                    (click)="selectDelivery(option)">
+                    {{ option.distrito | titlecase }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+              </mat-form-field>
+              <div *ngIf="(chooseDelivery$|async) == 1">
+                <mat-form-field class="w3-block" appearance="outline">
+                  <mat-label>Dirección</mat-label>
+                  <input autocomplete="off" formControlName="direccion" matInput placeholder="Teléfono" />
+                </mat-form-field>
+
+                <mat-form-field class="w3-block" appearance="outline">
+                  <mat-label>Referencia</mat-label>
+                  <input autocomplete="off" formControlName="referencia" type="tel" matInput placeholder="Teléfono" />
+                </mat-form-field>
+                <div class="w3-margin-bottom w3-margin-top">
+                  <div style="display: flex; flex-wrap: wrap; justify-content: space-between">
+                    <div style="width: 80%">
+                      Especifica tu dirección en el mapa (Opcional)
+                    </div>
+                    <button mat-icon-button color="primary" (click)="findMe()">
+                      <mat-icon>gps_fixed</mat-icon>
+                    </button>
+                  </div>
+                  <br />
+                  <google-map height="280px" width="100%" (mapClick)="mapClicked($event)" [center]="center"
+                    [zoom]="zoom">
+                    <map-marker [position]="center"></map-marker>
+                  </google-map>
+                </div>
+              </div>
+              <div *ngIf="delivery == 2">
+                <div *ngIf="formGroup.get('distrito').value">
+                  <mat-selection-list #shoes [multiple]="false">
+                    <div mat-subheader>Tiendas</div>
+                    <mat-list-option [value]="1">
+                      <mat-icon mat-list-icon>location_on</mat-icon>
+                      <div mat-line>
+                        P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
+                        de la plaza cayma)
+                      </div>
+                    </mat-list-option>
+                    <mat-list-option [value]="2">
+                      <mat-icon mat-list-icon>location_on</mat-icon>
+                      <div mat-line>
+                        P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
+                        de la plaza cayma)
+                      </div>
+                    </mat-list-option>
+                  </mat-selection-list>
+                </div>
+              </div>
+            </form>
+          </mat-card>
+
+        </div>
+        <div *ngIf="(view$|async) == 3">
+          <mat-card class="w3-block delivery">
+            <div class="w3-margin-bottom">
+              <h4 class="delivery__title">
+                Elige el método de pago
+              </h4>
+              <mat-form-field class="w3-block" appearance="outline">
+                <mat-label>Opciones de pago</mat-label>
+                <mat-select [(ngModel)]="method">
+                  <mat-option *ngFor="let pay of payments" [value]="pay">
+                    {{pay.name}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div *ngIf="method.value==3 || method.value==4">
+                <div class="w3-margin-bottom">
+                  <strong>{{method.account}}</strong>
+                </div>
+                <div class="w3-margin-bottom">
+                  <div class="w3-margin-bottom" style="position: relative"
+                    *ngFor="let image of photosList; let ind = index">
+                    <img class="voucher" style="object-fit: cover" [src]="image.img" alt="fotografía" />
+                    <div class="ms-flex w3-block" style="position: absolute; top: 0">
+                      <span class="ms-fill"></span>
+                      <button type="button" *ngIf="!image.show" mat-icon-button (click)="image.show = true">
+                        <mat-icon>zoom_in</mat-icon>
+                      </button>
+                      <button type="button" *ngIf="image.show" mat-icon-button (click)="image.show = false">
+                        <mat-icon>zoom_out</mat-icon>
+                      </button>
+                      <button type="button" mat-icon-button (click)="eliminatedphoto(ind)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                    <div style="text-align: center; border: 1px solid silver" *ngIf="image.show">
+                      <div class="ms-flex w3-block">
+                        <span class="ms-fill"></span>
+                        <button mat-icon-button (click)="image.show = false">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                      <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
+                    </div>
+                  </div>
+
+                  <div class="voucher" (click)="photoURL.click()">
+                    Agregar foto de voucher de pago
+                  </div>
+                  <mat-hint>*Campo requerido</mat-hint>
+
+                  <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%" mode="indeterminate">
+                  </mat-progress-bar>
+                  <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
+                    style="width: 100%">*comprimiendo</span>
+                  <input style="display: none" #photoURL type="file" accept="image/*"
+                    (change)="addNewPhoto('photoURL', photoURL.files)" />
+                </div>
+              </div>
+              <div *ngIf="method.value==2">
+                <form [formGroup]="cardForm" class="w3-margin-top">
+                  <div>Elige el tipo de tarjeta:</div>
+                  <div class="w3-center w3-section">
+                    <button mat-button (click)="chooseType('visa')"
+                      [style.background-color]="cardForm.get('type').value =='visa'?'#E0E0E0':''">
+                      <img src="../../../../assets/images/visa.png" class="mini-img" alt="">
+                    </button>
+                    <button mat-button (click)="chooseType('mastercard')"
+                      [style.background-color]="cardForm.get('type').value =='mastercard'?'#E0E0E0':''">
+                      <img src="../../../../assets/images/mastercad.png" class="mini-img" alt="">
+                    </button>
+                    <button mat-button (click)="chooseType('visa_electron')"
+                      [style.background-color]="cardForm.get('type').value =='visa_electron'?'#E0E0E0':''">
+                      <img src="../../../../assets/images/visa_electron.png" class="mini-img" alt="">
+                    </button>
+                    <button mat-button (click)="chooseType('america express')"
+                      [style.background-color]="cardForm.get('type').value =='america express'?'#E0E0E0':''">
+                      <img src="../../../../assets/images/american.png" class="mini-img" alt="">
+                    </button>
+                  </div>
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>Nro de tarjeta</mat-label>
+                    <input autocomplete="off" formControlName="numero" type="tel" matInput
+                      placeholder="Nro de tarjeta*" />
+                    <mat-error>Campo requerido</mat-error>
+                  </mat-form-field>
+
+                  <div class="ms-flex" style="justify-content:space-between">
+                    <div style="width:40%">Fecha de Caducidad:</div>
+                    <mat-form-field style="width:25%" appearance="outline">
+                      <mat-label>Mes</mat-label>
+                      <mat-select formControlName="month">
+                        <mat-option *ngFor="let pay of months" [value]="pay">
+                          {{pay}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field style="width:30%" appearance="outline">
+                      <mat-label>Año</mat-label>
+                      <mat-select formControlName="year">
+                        <mat-option *ngFor="let pay of years" [value]="pay">
+                          {{pay}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>CVV</mat-label>
+                    <input autocomplete="off" formControlName="numero" type="number" matInput placeholder="CVV" />
+                    <mat-error>Campo requerido</mat-error>
+                  </mat-form-field>
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>Titular de la tarjeta</mat-label>
+                    <input autocomplete="off" formControlName="titular" type="tel" matInput
+                      placeholder="Titular de la tarjeta" />
+                    <mat-error>Campo requerido</mat-error>
+                  </mat-form-field>
+                </form>
+              </div>
+            </div>
+            <div class="w3-margin-top">
+              <h4 class="delivery__title">
+                Elija el tipo de comprobante y verifique sus datos
+              </h4>
+              <mat-radio-group color="primary" [(ngModel)]="document">
+                <mat-radio-button [value]="1"> Boleta </mat-radio-button>
+                <mat-radio-button class="w3-margin-left" [value]="2">
+                  Factura
+                </mat-radio-button>
+              </mat-radio-group>
+              <form [formGroup]="documentForm" class="w3-margin-top">
+                <mat-form-field class="w3-block" appearance="outline">
+                  <mat-label>{{document==1?'DNI':'RUC'}}</mat-label>
+                  <input autocomplete="off" formControlName="document" type="text" matInput placeholder="DNI/RUC" />
+                  <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+                <mat-form-field class="w3-block" appearance="outline">
+                  <mat-label>{{document==1?'Nombre':'Razon Social'}}</mat-label>
+                  <input autocomplete="off" formControlName="name" type="text" matInput />
+                  <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+                <mat-form-field class="w3-block" *ngIf="document==2" appearance="outline">
+                  <mat-label>Direccion Fiscal</mat-label>
+                  <input autocomplete="off" formControlName="address" type="text" matInput />
+                </mat-form-field>
+
+
+              </form>
+            </div>
+          </mat-card>
+        </div>
+        <div *ngIf="(view$|async) == 4" style="padding-top: 14vh">
+          <div style="height: 100vh;display: flex;align-items: center;justify-content: center;">
+            <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+            </mat-progress-spinner>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="div-content__rigth">
+      <div class="w3-padding">
+        <div class="resume">
+          <h2 class="resume__title">Resumen de pedido</h2>
+          <div *ngIf="(view$|async) == 2">
+            <div class="resume__divider"></div>
+            <div class="resume__list w3-section">
+              <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px">
+                <div style="width: 20%">Cant.</div>
+                <div style="width: 55%">Descripción</div>
+                <div style="width: 25%">Precio</div>
+              </div>
+              <div *ngFor="let prod of products" style="display: flex; flex-wrap: wrap; align-items: center">
+                <div style="width: 20%" class="w3-center">
+                  {{prod.quantity | number:'2.'}}
+                </div>
+                <div style="width: 55%">
+                  {{prod.product.description}}
+                </div>
+                <div style="width: 25%">
+                  S/. {{getPrice(prod) | number:'.2'}}
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <div class="resume__descrip w3-section">
+            <div class="ms-flex ms-flex--center">
+              <span>Subtotal</span>
+              <span class="ms-fill"></span>
+              <span>{{ subtotal$ | async | number: ".2" }}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Cargos adicionales</span>
+              <span class="ms-fill"></span>
+              <span>0.00</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Descuento promocional</span>
+              <span class="ms-fill"></span>
+              <span>{{ discount$ | async | number: ".2" }}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>IGV</span>
+              <span class="ms-fill"></span>
+              <span>{{ igv$ | async | number: ".2" }}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Delivery</span>
+              <span class="ms-fill"></span>
+              <span>{{delivery$ | async | number: ".2"}}</span>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <div *ngIf="(view$|async) != 1">
+            <div style="display: flex; margin-top: 20px;justify-content: space-between;">
+              <div><strong>Total a pagar:</strong></div>
+              <div class="ticket__total">
+                S/. {{ sum$ | async | number: ".2" }}
+              </div>
+            </div>
+          </div>
+          <div *ngIf="(view$|async) == 1">
+            <p class="resume__small">*El costo del delivery se agregará despues de registrar el método de entrega</p>
+            <div class="w3-margin-bottom">
+              <h4 class="resume__subtitle">Tengo un código de descuento</h4>
+              <div class="email-form background-color w3-margin-top">
+                <input matInput type="text" autocomplete="off" class="email-form__input" style="border: none" />
+
+                <button mat-button class="email-form__button">
+                  <mat-icon>refresh</mat-icon>
+                </button>
+              </div>
+              <p class="resume__small">*El código de descuento es único y solo es válido para UN uso</p>
+            </div>
+            <div class="w3-margin-bottom">
+              <h4 class="resume__subtitle">Selecciona un asesor</h4>
+              
+              <mat-form-field style="margin-bottom: 8px;" class="w3-block"  appearance="outline">
+                <mat-label>Asesor Virtual</mat-label>
+                <input autocomplete="off" [formControl]="adviserForm" [matAutocomplete]="adviserAutocomplete" type="text"
+                  matInput>
+                <mat-autocomplete #adviserAutocomplete="matAutocomplete" [displayWith]="showAdviser">
+  
+                  <mat-option *ngFor="let adviser of advisers$ | async" [value]="adviser">
+                    {{adviser.displayName}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <p class="resume__small">*El Nombre o correo de tu asesor ayudará a que podamos hacer mejor seguimiento a
+                tu pedido</p>
+            </div>
+            <div class="resume__title w3-section">Total: S/. {{ sum$ | async | number: ".2" }}</div>
+            <div class="w3-center w3-margin-bottom">
+              <button mat-raised-button (click)="secondView()" color="primary" class="resume__button">Continuar</button>
+            </div>
+            <p class="resume__small">*En el siguiente paso se procederá a generar la orden de compra y podrá confirmar
+              el Pago.</p>
+          </div>
+          <div *ngIf="(view$|async) == 2">
+            <div class="w3-margin-bottom">
+              <h4 class="resume__subtitle">Comentario adicional</h4>
+              <mat-form-field class="w3-block"  appearance="outline">
+                <textarea autocomplete="off" [formControl]="observation" type="tel" matInput placeholder="Escriba.." rows="3"></textarea>
+              </mat-form-field>
+              <p class="resume__small">*Puedes dejar un comentario adicional para tenerlo en cuenta al generar tu pedido
+              </p>
+            </div>
+            <div class="w3-center w3-margin-bottom">
+              <button mat-raised-button (click)="thirdView()" [disabled]="!deliveryForm.valid" color="primary" class="resume__button">Generar orden de
+                pedido</button>
+            </div>
+            <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
+          </div>
+          <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
+            <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
+              Compra</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

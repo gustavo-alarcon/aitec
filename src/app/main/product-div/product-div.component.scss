@@ -1,0 +1,74 @@
+.product {
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  position: relative;
+  cursor: pointer;
+  &__star {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #ff8a00;
+    padding: 8px;
+    &--icon {
+      height: 36px;
+      width: 36px;
+      font-size: 36px;
+    }
+  }
+  &__image {
+    height: 100%;
+    min-height: 250px;
+    max-height: 250px;
+    object-fit: contain;
+
+  }
+  &__title {
+    font-family: Montserrat;
+    font-size: 1em;
+    height: 3em;
+    overflow: hidden;
+    color: #2b2b2b;
+  }
+  &__descrip {
+    font-family: Roboto;
+    font-size: 0.8em;
+    color: #828282;
+  }
+  &__offer {
+    color: #eb5757;
+    text-decoration: line-through;
+  }
+  &__price {
+    font-family: Roboto;
+    font-weight: 500;
+    color: var(--primary-color);
+    &--number{
+      font-size: 1.3em;
+    }
+  }
+  &__discount {
+    background-color: #ff8a00;
+    color: white;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    padding: 8px 5px 20px;
+    display: flex;
+    font-family: Roboto;
+    clip-path: polygon(100% 0, 100% 68%, 51% 100%, 0 68%, 0 0);
+    &--number {
+      font-weight: 600;
+      font-size: 1.4em;
+      letter-spacing: -0.05em;
+    }
+    &--percent {
+      font-size: 0.6em;
+      padding-top: 0.6em;
+      color: #f2f2f2;
+      padding-left: 0.3em;
+      text-align: left;
+      line-height: 1.2em;
+    }
+  }
+}

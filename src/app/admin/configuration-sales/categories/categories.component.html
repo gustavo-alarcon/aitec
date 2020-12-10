@@ -1,0 +1,52 @@
+<div class="w3-section">
+  <button mat-raised-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
+    <span>Agregar</span>
+    <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
+  </button>
+
+  <mat-accordion *ngIf="init$|async as categories" multi>
+    <mat-expansion-panel *ngFor="let cat of categories; let ind = index" (opened)="panelOpenState[ind] = true"
+      (closed)="panelOpenState[ind] = false" hideToggle>
+      <mat-expansion-panel-header>
+        <div class="ms-flex w3-block" style="justify-content: space-between; align-items: center">
+          <div>{{ cat.category }}</div>
+          <div class="ms-flex panel-icons">
+            <button mat-icon-button (click)="openDialog(true,cat)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button>
+              <mat-icon *ngIf="panelOpenState[ind]">keyboard_arrow_up</mat-icon>
+              <mat-icon *ngIf="!panelOpenState[ind]">keyboard_arrow_down</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deleteDialog(cat.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+
+      <div class="nav-categs-detail__body w3-padding">
+        <div class="nav-categs-detail__body-content">
+          <article class="nav-categs-detail__categ" *ngFor="let sub of cat.subcategories">
+            <h4 style="font-size: 1em; font-weight: 500;">
+              {{ sub.name | titlecase }}
+            </h4>
+            <div class="footer-list">
+              <ul>
+                <li *ngFor="let s of sub.categories">
+                  {{ s | titlecase }}
+                </li>
+              </ul>
+            </div>
+          </article>
+        </div>
+        <div class="nav-categs-detail__body-aside" *ngIf="cat.brands.length">
+          <h4 class="categories__subtitle">Marcas</h4>
+          <div *ngFor="let brand of cat.brands">
+            {{brand.name}}
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

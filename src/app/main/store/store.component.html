@@ -1,0 +1,145 @@
+<div class="store__container w3-section">
+  <div class="ms-flex ms-flex--center" style="justify-content: space-between">
+    <div>
+      <a mat-flat-button routerLink="/main">Inicio</a> >
+      <a mat-flat-button routerLink="/main/productos">Productos</a>
+      <span *ngIf="searchCategory">
+        >
+        <a mat-flat-button (click)="navigateOnlyCategory(searchCategory)">
+          {{searchCategory | titlecase}}
+        </a>
+      </span>
+      <span *ngIf="searchSubCategory">
+        >
+        <a mat-flat-button (click)="navigateCategory(searchCategory, searchSubCategory)">
+          {{ searchSubCategory | titlecase}}
+        </a></span>
+      <span *ngIf="searchSubSubCategory">
+        >
+        <a mat-flat-button (click)="navigateSubCategory(searchCategory, searchSubCategory,searchSubSubCategory)">
+          {{ searchSubSubCategory | titlecase}}
+        </a></span>
+      <span *ngIf="search">
+        > Búsqueda: <strong>{{ search | titlecase}}</strong>
+      </span>
+      <span *ngIf="searchPromo">
+        > Promociones
+      </span>
+      <span *ngIf="searchBrand">
+        > Marca: <strong>{{ searchBrand | titlecase}}</strong>
+      </span>
+    </div>
+
+    <mat-form-field appearance="outline" class="store__search">
+      <mat-label>Busca en los resultados</mat-label>
+      <input matInput placeholder="Busca en los resultados" autocomplete="off" [formControl]="searchForm" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+  <div class="w3-row-padding ms-row">
+    <div class="w3-col l3 m3 w3-hide-small w3-hide-medium">
+      <div style="padding: 8px 0" *ngIf="category$|async as categories">
+        <mat-nav-list>
+          <mat-list-item  style="border-bottom: 1px solid #c4c4c4">
+            <a matLine [routerLink]="['/main/productos', { promo: true }]">Promociones</a>
+
+          </mat-list-item>
+          <mat-list-item *ngFor="let cat of categories"  style="border-bottom: 1px solid #c4c4c4">
+            <a matLine href="...">{{ cat.category }}</a>
+            <button mat-icon-button (click)="showInfo(cat)">
+              <mat-icon>navigate_next</mat-icon>
+           </button>
+          </mat-list-item>
+
+        </mat-nav-list>
+      </div>
+    </div>
+    <!--div class="categories animated" [ngClass]="{ fadeOut: !openedMenu }"
+        [style.display]="firstOpening ? 'block' : 'none'">
+        <div style="display: flex">
+          <nav class="categories__nav">
+            <ul class="categories__list">
+              <li class="categories__item" (click)="navigatePromo()" (mouseenter)="closeSection()">
+                <div class="categories__item--name">Promociones</div>
+              </li>
+              <li class="categories__item" (mouseenter)="closeSection()">
+                <div class="categories__item--name">Destacados</div>
+              </li>
+              <li class="categories__item" *ngFor="let cat of listCategories" (mouseenter)="openSection(cat)">
+                <div class="categories__item--name">
+                  <div>{{ cat.category }}</div>
+                  <span class="ms-fill"></span>
+                  <mat-icon>keyboard_arrow_right</mat-icon>
+                </div>
+              </li>
+            </ul>
+          </nav>
+          <div class="categories__section" #megaMenu>
+            <div *ngIf="selectCategory">
+              <h2 class="categories__title">
+                {{ selectCategory.category | titlecase }}
+              </h2>
+              <div class="nav-categs-detail__body w3-padding">
+                <div class="nav-categs-detail__body-content">
+                  <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
+                    <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
+                      {{ sub.name | titlecase }}
+                    </h4>
+                    <div class="footer-list">
+                      <ul>
+                        <li *ngFor="let s of sub.categories">
+                          <a mat-button
+                            (click)="navigateSubCategory(selectCategory.category,sub.name,s)">{{ s | titlecase }}</a>
+                        </li>
+                      </ul>
+                    </div>
+                  </article>
+                </div>
+                <div class="nav-categs-detail__body-aside" *ngIf="selectCategory.brands.length">
+                  <h4 class="categories__subtitle">Marcas Oficiales</h4>
+                  <div class="w3-row-padding">
+                    <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
+                      <img [src]="brand.photoURL" (click)="navigateBrand(brand.name)"
+                        class="w3-block w3-margin-bottom mat-elevation-z2" alt="" />
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div-->
+    <div class="store__section w3-col l9">
+      <div class="w3-margin-top">
+        <div class="w3-row ms-row" style="min-height: 80vh" *ngIf="products$ | async">
+          <div *ngFor="let product of products | paginate: config" class="w3-col col-lg-4 col-sm-6 w3-margin-bottom">
+            <div class="w3-padding">
+              <app-product-div [product]="product" [offer]="false"></app-product-div>
+            </div>
+          </div>
+        </div>
+        <pagination-template #p="paginationApi" [id]="config.id" (pageChange)="config.currentPage = $event" maxSize="6"
+          autoHide="true" class="paginator">
+          <div class="ms-flex ms-flex--center">
+            <button mat-button class="paginator__button" (click)="p.previous()" [disabled]="p.isFirstPage()">
+              <mat-icon>keyboard_arrow_left</mat-icon>
+            </button>
+
+            <div *ngFor="let page of p.pages" [class.paginator__current]="p.getCurrent() === page.value">
+              <a (click)="p.setCurrent(page.value)" *ngIf="p.getCurrent() !== page.value" class="paginator__number">
+                <span>{{ page.label }}</span>
+              </a>
+              <div *ngIf="p.getCurrent() === page.value">
+                <span>{{ page.label }}</span>
+              </div>
+            </div>
+            <button mat-button class="paginator__button" (click)="p.next()" [disabled]="p.isLastPage()">
+              <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
+          </div>
+        </pagination-template>
+      </div>
+    </div>
+  </div>
+</div>

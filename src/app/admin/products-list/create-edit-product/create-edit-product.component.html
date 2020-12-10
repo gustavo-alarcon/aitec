@@ -1,0 +1,335 @@
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<div class="w3-section w3-padding ms-container" *ngIf="init$|async as init">
+
+  <div class="ms-flex ms-flex--center">
+    <button mat-icon-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2 class="title">
+      <mat-icon style="vertical-align: middle;">list_alt</mat-icon>
+      {{init==1?'Crear':'Editar'}} producto
+    </h2>
+  </div>
+  <mat-divider></mat-divider>
+
+  <mat-vertical-stepper class="w3-section" [linear]="true" #stepper>
+    <mat-step [stepControl]="firstFormGroup">
+      <form [formGroup]="firstFormGroup">
+        <ng-template matStepLabel>Datos generales del producto</ng-template>
+        <div class="w3-row-padding">
+          <div class="w3-col m6 l6">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Nombre del producto</mat-label>
+              <input matInput placeholder="Nombre" autocomplete="off" formControlName="description" required>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m6 l6">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Código de existencia</mat-label>
+              <input matInput autocomplete="off" formControlName="code" required>
+              <mat-error>
+                <span *ngIf="firstFormGroup.get('code').errors?.required">Campo requerido</span>
+                <span *ngIf="firstFormGroup.get('code').errors?.nameRepeatedValidator">Este nombre ya se encuentra
+                  repetido.</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-row-padding">
+          <div class="w3-col">
+
+            <mat-form-field style="margin-bottom: 8px; display:block" appearance="outline">
+              <mat-label>Categoría >> Subcategoría >> Subcategoría</mat-label>
+              <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text"
+                matInput>
+              <mat-autocomplete #categoryAutocomplete="matAutocomplete">
+
+                <mat-option *ngFor="let category of category$ | async" [value]="category">
+                  {{category}}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error>
+                <span *ngIf="firstFormGroup.get('category').errors?.required">Campo requerido</span>
+                <span *ngIf="firstFormGroup.get('category').errors?.validateCategory">Dato no válido</span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-row-padding">
+          <div class="w3-col m4 l4">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Costo</mat-label>
+              <input matInput formControlName="cost" autocomplete="off" placeholder="00.00" type="number" required>
+              <span matPrefix>S/. &nbsp;</span>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m4 l4">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Precio de venta mayorista</mat-label>
+              <input matInput formControlName="priceMax" autocomplete="off" placeholder="00.00" type="number" required>
+              <span matPrefix>S/. &nbsp;</span>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m4 l4">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Precio de venta minorista</mat-label>
+              <input matInput formControlName="priceMin" autocomplete="off" placeholder="00.00" type="number" required>
+              <span matPrefix>S/. &nbsp;</span>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-center">
+          <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="secondFormGroup">
+      <form [formGroup]="secondFormGroup">
+        <ng-template matStepLabel>Detalles del producto</ng-template>
+        <div class="w3-row-padding">
+          <div class="w3-col m4 l4">
+            <mat-form-field style="margin-bottom: 8px; display:block" appearance="outline">
+              <mat-label>Marca</mat-label>
+              <input autocomplete="off" formControlName="brand" [matAutocomplete]="brandAutocomplete" type="text"
+                matInput>
+              <mat-autocomplete autoActiveFirstOption #brandAutocomplete="matAutocomplete" [displayWith]="showBrand">
+                <mat-option *ngFor="let brand of brand$ | async" [value]="brand">
+                  {{brand.name}}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m4 l4">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Modelo</mat-label>
+              <input matInput placeholder="Modelo" autocomplete="off" formControlName="model" required>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m4 l4">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Peso del producto</mat-label>
+              <input matInput placeholder="Peso" autocomplete="off" type="number" formControlName="weight" required>
+              <span matSuffix>KG</span>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-row-padding">
+          <div class="w3-col">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Colores Disponibles</mat-label>
+              <mat-chip-list #chipList>
+                <div *ngFor="let color of colorSelect; let i = index">
+                  <mat-chip [selectable]="true" [removable]="true" (removed)="remove(i)" *ngIf="color">
+                    <mat-icon [style.color]="color.color" style="margin-right: 8px;">brightness_1</mat-icon>
+                    {{color.name}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                  </mat-chip>
+                </div>
+
+                <input #colorInput [matAutocomplete]="autoColor" [matChipInputFor]="chipList"
+                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="true"
+                  (matChipInputTokenEnd)="add($event)" formControlName="colors" placeholder="Escriba.."
+                  autocomplete="off">
+              </mat-chip-list>
+              <mat-autocomplete autoActiveFirstOption #autoColor="matAutocomplete" (optionSelected)="selected($event)">
+                <mat-option *ngFor="let color of filteredColor$ | async;" [value]="color">
+                  <mat-icon [style.color]="color.color">brightness_1</mat-icon> {{color.name}}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox>
+          </div>
+        </div>
+        <div class="w3-row-padding w3-margin-top">
+          <div class="w3-col">
+            <textarea formControlName="additionalDescription" [ngxSummernote]="config" rows="20" required></textarea>
+          </div>
+
+        </div>
+        <div class="w3-row-padding w3-margin-top">
+          <div class="w3-col m6 l6">
+            <mat-radio-group class="w3-block" color="primary" formControlName="guarantee">
+              <mat-radio-button style="margin-right: 8px;" [value]="false">
+                No tiene garantia
+              </mat-radio-button>
+              <mat-radio-button [value]="true">
+                Garantia
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <div class="w3-col m6 l6" *ngIf="guarantee$ | async">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Tiempo de garantía</mat-label>
+              <input matInput placeholder="Tiempo de garantía" autocomplete="off" formControlName="timeguarantee"
+                type="number">
+              <span matSuffix>meses</span>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-center">
+          <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="itemsFormArray">
+      <ng-template matStepLabel>Imágenes</ng-template>
+      <ng-container *ngIf="totalItems$ | async"></ng-container>
+      <div class="grid-item" *ngFor="let group of itemsFormArray.controls; let i = index">
+        <div class="w3-row">
+          <div class="w3-col m3 l3">
+            <mat-icon [style.color]="colorSelect[i].color">brightness_1</mat-icon> {{colorSelect[i].name}}
+          </div>
+          <div class="w3-col m6 l6">
+            <mat-form-field appearance="outline">
+              <mat-label>SKU</mat-label>
+              <input type="text" matInput autocomplete="off" [formControl]="group"  />
+            </mat-form-field>
+          </div>
+
+        </div>
+        <div class="w3-margin-bottom w3-row-padding">
+          <div class="w3-margin-bottom w3-col s2 m4 l2" style="position: relative"
+            *ngFor="let image of filterPhotos(i); let f=index" >
+            <img (click)="selectPhoto(image.ind)"  class="w3-block"
+              style="object-fit: contain;height: 150px;" [src]="image.img" alt="fotografía" />
+            <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
+              <span class="ms-fill"></span>
+              <button type="button" mat-mini-fab color="primary" style="margin-left:8px" (click)="eliminatedphoto(i,f,image)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="image.ind==choosePicture" class="cover w3-block w3-center">
+              PORTADA
+            </div>
+          </div>
+          <div class="w3-margin-bottom w3-col s2 m4 l2">
+            <div class="addImage border--primary w3-center" (click)="photoURL.click()">
+              <div>
+                <mat-icon>add_photo_alternate</mat-icon> <br>
+                Agregar imagen
+              </div>
+            </div>
+            <mat-progress-bar *ngIf="photos[i].resizing$ | async" style="width: 100%" mode="indeterminate">
+            </mat-progress-bar>
+            <span *ngIf="photos[i].resizing$| async" class="w3-small ms-color-11 ms-font-montserrat"
+              style="width: 100%">*comprimiendo</span>
+            <input style="display: none" #photoURL type="file" accept="image/*"
+              (change)="addNewPhoto('photoURL', photoURL.files,i)" />
+          </div>
+        </div>
+      </div>
+
+      <div class="w3-center" *ngIf="!edit">
+        <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
+      </div>
+      <div class="w3-center w3-margin-top" *ngIf="edit">
+        <button mat-flat-button color="primary" (click)="editProduct()" class="big-button">Editar producto</button>
+      </div>
+    </mat-step>
+    <mat-step *ngIf="!edit">
+      <form [formGroup]="thirdFormGroup">
+        <ng-template matStepLabel>Distribución de stock en almacenes</ng-template>
+        <div class="w3-row-padding">
+          <div class="w3-col m6 l6">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Almacen</mat-label>
+              <mat-select formControlName="warehouse">
+                <mat-option value="Almacén 1">Almacén 1</mat-option>
+                <mat-option value="Almacén 2">Almacén 2</mat-option>
+                <mat-option value="Almacén 3">Almacén 3</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m6 l6" *ngIf="skuArray | async as skus">
+            <mat-form-field class="w3-block"  appearance="outline">
+              <mat-label> SKU</mat-label>
+              <mat-select formControlName="sku">
+                <mat-option *ngFor="let sku of skus" [value]="sku">
+                  {{sku}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="w3-row-padding">
+          <div class="w3-col m6 l6">
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Nros de serie</mat-label>
+              <input matInput formControlName="series" (keyup.enter)="addSerie()" placeholder="#####"
+                autocomplete="off">
+              <mat-hint> Presione ENTER para agregar</mat-hint>
+            </mat-form-field>
+            <mat-form-field class="w3-block" appearance="outline">
+              <mat-label>Stock</mat-label>
+              <input readonly matInput placeholder="Stock" type="number" autocomplete="off" formControlName="stock"
+                required>
+            </mat-form-field>
+          </div>
+          <div class="w3-col m6 l6">
+            <div *ngIf="seriesList.length" class="serie">
+              <div *ngFor="let num of seriesList; let i=index" class="ms-flex ms-flex--center">
+                <div>{{num}}</div>
+                <div class="ms-fill"></div>
+                <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(i)">remove_circle</mat-icon>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w3-center w3-margin-top">
+          <button mat-flat-button color="primary" type="button"
+            [disabled]="!thirdFormGroup.valid || seriesList.length==0" (click)="addWarehouse()"
+            class="big-button">Agregar</button>
+        </div>
+      </form>
+      <mat-divider class="w3-section" color='primary'></mat-divider>
+      <div *ngIf="dataSource.data.length>0">
+        <h4 style="font-size: 1em;font-weight: 600;">Resumen de ingreso</h4>
+        <table mat-table [dataSource]="dataSource" class="ms-table">
+          <ng-container class="w3-center" matColumnDef="warehouse">
+            <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 150px">
+              Almacén
+            </th>
+            <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="padding: 0px 10px">
+              {{element["warehouse"]}}
+            </td>
+          </ng-container>
+
+          <ng-container class="w3-center" matColumnDef="stock">
+            <th *matHeaderCellDef class="w3-center ms-table__th">Stock</th>
+            <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="padding: 0px 10px">
+              {{ element["stock"] }}
+            </td>
+          </ng-container>
+
+          <ng-container class="w3-center" matColumnDef="serie">
+            <th *matHeaderCellDef class="w3-center ms-table__th">Número de serie</th>
+            <td mat-cell *matCellDef="let element" class="ms-table__td w3-right-align" style="padding: 0px 10px">
+              <span *ngFor="let num of element.series">{{num}}; </span>
+            </td>
+          </ng-container>
+
+          <ng-container class="w3-center" matColumnDef="actions" sticky>
+            <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center ms-table__th" style="width: 100px">
+              Acciones
+            </th>
+            <td mat-cell *matCellDef="let element;let i = index" class="ms-table__td w3-center">
+              <button mat-icon-button color="primary" (click)="editWarehouse(i)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="removeWarehouse(i) ">
+                <mat-icon>remove_circle</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+      <div class="w3-center w3-margin-top">
+        <button mat-flat-button color="primary" (click)="edit?editProduct():saveProduct()"
+          class="big-button">Guardar</button>
+      </div>
+    </mat-step>
+  </mat-vertical-stepper>
+</div>

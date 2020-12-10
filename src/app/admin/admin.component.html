@@ -1,1 +1,95 @@
-<p>admin works!</p>
+<div class="animated fadeIn delay-4 slower">
+  <!-- <ng-container *ngIf="user$ | async"> </ng-container> -->
+  <mat-sidenav-container style="height: 100vh">
+    <mat-sidenav mode="over" #sideMenu [(opened)]="openedMenu">
+      <div style="
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          justify-content: space-between;
+          max-width: 300px;
+        ">
+        <div>
+          <div class="menu">
+            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="web">
+              <mat-icon class="menu__icon">language</mat-icon>
+              Web
+            </button>
+            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="sale-configuration">
+              <mat-icon class="menu__icon">build</mat-icon>
+              Conf. Ventas
+            </button>
+            <button mat-button class="w3-block menu__button" routerLink="products" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">widgets</mat-icon>
+              Lista de Productos
+            </button>
+            <button mat-button class="w3-block menu__button" routerLink="sales" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">assignment</mat-icon>
+              Ventas
+            </button>
+            <button mat-button class="w3-block menu__button" routerLink="customers" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">group</mat-icon>
+              Clientes
+            </button>
+            <button mat-button class="w3-block menu__button" routerLink="warehouse" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">corporate_fare</mat-icon>
+              Almacenes
+            </button>
+            
+          </div>
+        </div>
+
+        <div class="meraki animate fadeInRight">
+          <div style="text-align: center">
+            Desarrollado por
+            <a href="https://meraki-s.com" target="_blank">
+              <img src="../../assets/images/negativo.png" class="meraki__logo" alt="meraki solutions logo" />
+            </a>
+          </div>
+          <div style="
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              width: 100%;
+              font-size: small;
+            ">
+            <p>
+              {{ version }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </mat-sidenav>
+    <mat-sidenav-content cdkScrollable>
+      <mat-toolbar class="main__toolbar">
+        <button mat-icon-button (click)="toggleSideMenu()">
+          <mat-icon class="dark-icon">menu</mat-icon>
+        </button>
+        <a class="w3-margin-left w3-margin-right main__logo" routerLink="/web">
+          <img src="../../assets/images/logo-white.png" class="main__logoimage" alt="logo" />
+        </a>
+        <span class="ms-fill"></span>
+        <ng-template #login>
+          <button mat-button routerLink="/main/login/signIn" class="menu-button">
+            <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+          </button>
+        </ng-template>
+        <div *ngIf="auth.user$ | async as user; else login">
+          <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+            <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
+            {{ getName(user) }}
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="logOut()">
+              <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
+            </button>
+          </mat-menu>
+        </div>
+      </mat-toolbar>
+      <div class="main__space">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

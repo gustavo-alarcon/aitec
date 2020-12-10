@@ -1,0 +1,27 @@
+.delivery {
+  padding: 35px;
+  border: 1px solid #e5e5e5;
+  box-sizing: border-box;
+  max-width: 500px;
+  margin: auto;
+  &__title {
+    font-size: 1.1em;
+    font-weight: 700;
+    font-family: Raleway;
+  }
+}
+
+.voucher {
+  border: 1px solid #4f4f4f;
+  box-sizing: border-box;
+  border-radius: 5px;
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-img{
+  height: 40px;
+}

@@ -1,33 +1,34 @@
 export interface User {
-  uid: string;
+  uid?: string;
   email: string;
-  dni?: number;
-  phone?: string;
-  photoURL?: string;
-  name?: string;
-  lastName1?: string;
-  lastName2?: string;
-  completeName?: string;
-  displayName?: string;
-  token?: string;
-  admin?: boolean;
-  seller?: boolean;
-  logistic?: boolean;
-  accountant?: boolean;
-  role?: string;
-  lastLogin?: Date;
-  contact?: {
+  location?: {
     address: string;
-    district: {
-      delivery: number;
-      name: string;
-    };
-    coord: {
-      lat: number;
-      lng: number;
-    };
     reference: string;
-    phone: number;
-  },
-  salesCount?: number
+    coord: { lat: number; lng: number };
+  };
+
+  personData: naturalPerson | businessPerson;
+  name?:string;
+  lastName?:string;
+  lastLogin?: Date;
+  lastBrowser?: string[]
+  fcmTokens?: {
+    [token: string]: true
+  }
+}
+interface naturalPerson {
+  type:"natural";
+  name: string;
+  lastName: string;
+  dni: number;
+  phone: string;
+}
+
+interface businessPerson {
+  type:"jurídica";
+  name: string;         //Social reason
+  ruc: number;
+  address: string;
+  phone: string;
+  contactPerson: string;
 }

@@ -10,7 +10,11 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import {LazyLoadImageModule } from 'ng-lazyload-image';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import * as firebase from 'firebase';
 
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -23,8 +27,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     BrowserAnimationsModule,
     AngularFireModule.initializeApp(environment.firebaseConfig, "aitec-ecommerce"),
     MatSnackBarModule,
+    LazyLoadImageModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [
+    //DatePipe,
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
   ],

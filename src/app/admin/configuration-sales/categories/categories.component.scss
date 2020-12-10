@@ -1,0 +1,27 @@
+.nav-categs-detail{
+  &__body{
+    max-height: 550px;
+    overflow-y: auto;
+    &-content {
+      column-count: 3;
+      column-gap: 36px;
+      column-width: 192px;
+      overflow: hidden;
+      float: left;
+      max-width: 648px;
+      width: 65%;
+  }
+  &-aside {
+    width: 192px;
+    float: left;
+    margin-left: 36px;
+}
+  }
+  &__categ{
+    width: 192px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    margin-bottom: 24px;
+  }
+  
+}

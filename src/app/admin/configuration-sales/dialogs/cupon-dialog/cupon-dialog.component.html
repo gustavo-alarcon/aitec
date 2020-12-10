@@ -1,0 +1,94 @@
+<div mat-dialog-title>
+  <h2 style="font-size:1em; font-family: Montserrat; font-weight: 900;">
+    <mat-icon style="vertical-align:middle">add_circle</mat-icon>
+    {{data.edit?'Editar':'Agregar'}} Cupón
+  </h2>
+  <mat-divider></mat-divider>
+  <mat-progress-bar mode='indeterminate' *ngIf="loading$ | async"></mat-progress-bar>
+</div>
+<mat-dialog-content style="width: 800px; max-width: 80vw;">
+  <form [formGroup]="createForm" class="w3-row">
+    <div class="w3-col m6 l6 w3-padding">
+
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Cupón</mat-label>
+        <input autocomplete="off" formControlName="name" type="text" matInput />
+        <mat-hint>Sin espacios</mat-hint>
+        <mat-error>
+          <span *ngIf="createForm.get('name').errors?.required">Campo requerido</span>
+          <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentrarepetido.</span>
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Descuento (%)</mat-label>
+        <input autocomplete="off" formControlName="discount" type="number" matInput placeholder="Descuento" />
+        <span matSuffix>&nbsp;%</span>
+        <mat-error>Campo requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>FECHA/PERIODO</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input readonly matStartDate formControlName="start" placeholder="Fecha Inicio">
+          <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </div>
+    <div class="w3-col m6 l6 w3-padding">
+      <div>
+        <label>Descuento a:</label>
+        <mat-radio-group class="example-radio-group" color="primary" formControlName="redirectTo">
+          <mat-radio-button *ngFor="let season of redirects" [value]="season">
+            {{season}}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <hr>
+
+      <div *ngIf="createForm.get('redirectTo').value=='Categoría/subcategoría'">
+
+        <mat-form-field *ngIf="category$ | async as categories" style="margin-bottom: 8px; display:block"
+          appearance="outline">
+          <mat-label>Categorías</mat-label>
+          <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text"
+            matInput>
+          <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete">
+
+            <mat-option *ngFor="let category of categories" [value]="category">
+              {{category}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="createForm.get('redirectTo').value=='Marca'">
+
+        <mat-form-field *ngIf="brand$ | async as brands" style="margin-bottom: 8px; display:block" appearance="outline">
+          <mat-label>Marcas</mat-label>
+          <input autocomplete="off" formControlName="brand" [matAutocomplete]="brandAutocomplete" type="text" matInput>
+          <mat-autocomplete autoActiveFirstOption #brandAutocomplete="matAutocomplete">
+
+            <mat-option *ngFor="let brand of brands" [value]="brand">
+              {{brand}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+      </div>
+    </div>
+
+
+
+  </form>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
+    [disabled]="createForm.status != 'VALID'">Guardar</button>
+
+</mat-dialog-actions>

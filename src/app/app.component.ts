@@ -1,10 +1,14 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { filter, switchMap, take, tap } from 'rxjs/operators';
 import { GeneralConfig } from './core/models/generalConfig.model';
+import { AuthService } from './core/services/auth.service';
 import { DatabaseService } from './core/services/database.service';
 import { ThemeService } from './core/services/theme.service';
+import { PushService } from './core/services/push.service';
+import { User } from './core/models/user.model';
+
 
 @Component({
   selector: 'app-root',
@@ -14,11 +18,15 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent {
   title = 'aitec';
   version$: Observable<GeneralConfig>
+  user$: Observable<User>
+  push$: Observable<any>
 
   constructor(
     public themeService: ThemeService,
     private dbs: DatabaseService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private auth: AuthService,
+    public push: PushService
   ){}
 
   ngOnInit(){
@@ -29,6 +37,13 @@ export class AppComponent {
           this.snackBar.open("Versión incorrecta")
         }
       }),
+    )
+    this.push$ = this.auth.user$.pipe(
+      filter(user => !!user),
+      take(1),
+      switchMap(user => {
+        return this.push.getPermission(user)
+      })
     )
   }
 }
