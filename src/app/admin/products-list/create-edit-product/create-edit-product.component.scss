@@ -1,22 +1,29 @@
-.addImage{
-  border:1px dashed var(--primary-color);
-  min-height: 200px;
+.addImage {
+  border: 1px dashed var(--primary-color);
   color: var(--primary-color);
   display: flex;
+  min-height: 145px;
+  max-height: 160px;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   font-size: 1em;
   border-radius: 5px;
 }
 
-.big-button{
+.big-button {
   min-width: 200px;
 }
 
-.serie{
+.serie {
   height: 150px;
   overflow-y: scroll;
   border: 1px solid;
-    padding: 10px;
+  padding: 10px;
+}
+
+.cover {
+  position: absolute;
+  bottom: 0;
+  background-color: #82ff9e;
+  color: white;
 }

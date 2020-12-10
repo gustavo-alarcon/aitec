@@ -39,7 +39,7 @@
                 <button mat-icon-button color="primary" (click)="editDialog('carousel', true, image)">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="primary" style="margin-left: 10px" (click)="deleteBDialog(image.id)">
+                <button mat-icon-button color="primary" style="margin-left: 10px" (click)="deleteBDialog(image)">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -168,7 +168,7 @@
                   <button class="w3-small" mat-menu-item (click)="openTestimony(true, element)">
                     <mat-icon>edit</mat-icon> Editar
                   </button>
-                  <button class="w3-small" mat-menu-item (click)="deleteDialog(element.id)">
+                  <button class="w3-small" mat-menu-item (click)="deleteDialog(element)">
                     <mat-icon>delete</mat-icon> Borrar
                   </button>
                 </mat-menu>

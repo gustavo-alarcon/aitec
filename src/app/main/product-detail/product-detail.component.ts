@@ -87,8 +87,8 @@ export class ProductDetailComponent implements OnInit {
         this.colorSelected = res.colors[0]
         this.loading.next(false)
 
-        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el } })
-        this.selectImage = this.galleryImg[0]
+        this.galleryImg = res.products[0].gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
+        this.selectImage = this.galleryImg[res.indCover]
 
       })
     );

@@ -49,43 +49,6 @@
       </div>
       <hr>
 
-      <div *ngIf="createForm.get('redirectTo').value=='Producto'">
-        <h2 style="font-size:1em; font-weight:600">
-          <mat-icon style="vertical-align:middle">format_list_bulleted</mat-icon> Lista de Productos
-        </h2>
-        <hr>
-        <mat-form-field *ngIf="products$ | async as products" style="margin-bottom: 8px; display:block"
-          appearance="outline">
-          <mat-label>Productos</mat-label>
-          <input autocomplete="off" formControlName="product" [matAutocomplete]="productAutocomplete" type="text"
-            (keyup.enter)="addProduct()" matInput>
-          <mat-autocomplete autoActiveFirstOption #productAutocomplete="matAutocomplete" [displayWith]="showSelected">
-            <mat-option *ngFor="let product of products" [value]="product" (click)="addProduct()"
-              (keyup.enter)="addProduct()">
-              {{product['description']}}
-            </mat-option>
-          </mat-autocomplete>
-          <mat-hint>
-            Presione ENTER para agregar
-          </mat-hint>
-        </mat-form-field>
-
-
-        <div class="w3-section">
-          <ng-container *ngFor="let item of products">
-            <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display:flex; align-items: center">
-              <span>{{item['description']}}</span>
-              <button mat-icon-button (click)="removeProduct(item)" type="button">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </ng-container>
-        </div>
-        <div *ngIf="!products.length" class="w3-center">
-          <p style="font-size:14px">Agregue un producto a la lista</p>
-        </div>
-      </div>
-
       <div *ngIf="createForm.get('redirectTo').value=='Categoría/subcategoría'">
 
         <mat-form-field *ngIf="category$ | async as categories" style="margin-bottom: 8px; display:block"

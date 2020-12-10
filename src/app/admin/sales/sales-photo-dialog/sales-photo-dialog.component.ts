@@ -134,7 +134,7 @@ export class SalesPhotoDialogComponent implements OnInit {
             })
           )
         ),
-        ...deletedPhotos.map(el => this.dbs.deletePhotoProduct(el.voucherPath))
+        ...deletedPhotos.map(el => this.dbs.deletePhoto(el.voucherPath))
       ).pipe(
         switchMap((res) => {
           photos = this.photoFormArray.value.map(el => ({

@@ -124,8 +124,7 @@ export class WarehouseComponent implements OnInit {
     this.dialog.open(ListDialogComponent, {
       data: {
         name: row.product.description,
-        sku: row.skuProduct,
-        series: row.series
+        id: row.id
       }
     })
   }

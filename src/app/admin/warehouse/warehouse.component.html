@@ -46,8 +46,8 @@
                 Imagen referencial
               </th>
               <td mat-cell *matCellDef="let raw" class="w3-center ms-flex ms-flex--center" style="padding: 10px">
-                <a href="{{ raw.product.photoURL }}" target="_blank" *ngIf="raw.product.photoURL; else defaultPicture">
-                  <img [defaultImage]="defaultImage" [lazyLoad]="raw.product.photoURL" [offset]="100"
+                <a href="{{ raw.product.gallery[raw.product.indCover].photoURL }}" target="_blank" *ngIf="raw.product.gallery[raw.product.indCover].photoURL; else defaultPicture">
+                  <img [defaultImage]="defaultImage" [lazyLoad]="raw.product.gallery[raw.product.indCover].photoURL" [offset]="100"
                         style="object-fit: contain; width: 90px; height: 90px" />
                 </a>
                 <ng-template #defaultPicture>

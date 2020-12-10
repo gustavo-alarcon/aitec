@@ -10,14 +10,14 @@
         <div>OFF</div>
       </div>
     </div>
-    <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="product.photoURL" [offset]="100"
+    <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="product.gallery[product.indCover].photoURL" [offset]="100"
       class="product__image" alt="" />
     <mat-card-content>
       <h4 class="product__title w3-margin-top">{{ product.description }}</h4>
 
       <div class="product__descrip" [style.visibility]="product.promo ? 'visible' : 'hidden'">
         Antes
-        <span class="product__offer">S/. {{ product.price | number: ".2" }}</span>
+        <span class="product__offer">S/. {{ product.priceMin | number: ".2" }}</span>
       </div>
       <div class="product__price">
         <span *ngIf="product.promo">Ahora</span>
@@ -25,7 +25,7 @@
           S/. {{ product.promoData.promoPrice | number: ".2" }}
         </span>
         <span class="product__price--number" *ngIf="!product.promo">
-          S/. {{ product.price | number: ".2" }}
+          S/. {{ product.priceMin | number: ".2" }}
         </span>
       </div>
     </mat-card-content>

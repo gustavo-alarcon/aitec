@@ -12,8 +12,8 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase/app';
 import { Platform } from '@angular/cdk/platform';
 
-export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
-export const facebookProvider = new firebase.default.auth.FacebookAuthProvider();
+//export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
+//export const facebookProvider = new firebase.default.auth.FacebookAuthProvider();
 
 @Injectable({
   providedIn: 'root'
@@ -108,10 +108,10 @@ export class AuthService {
 
     switch (type) {
       case 'facebook':
-        provider = facebookProvider;
+        //provider = facebookProvider;
         break;
       case 'google':
-        provider = googleProvider
+        //provider = googleProvider
         break;
     }
 

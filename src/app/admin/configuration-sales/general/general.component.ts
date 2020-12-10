@@ -5,9 +5,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { AsesoresDialogComponent } from '../dialogs/asesores-dialog/asesores-dialog.component';
 import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.component';
-import { DeleteDocComponent } from '../dialogs/delete-doc/delete-doc.component';
 
 @Component({
   selector: 'app-general',
@@ -27,7 +27,7 @@ export class GeneralComponent implements OnInit {
   initCoupon$: Observable<any>
 
   dataAdviserSource = new MatTableDataSource();
-  displayedAdviserColumns: string[] = ['index', 'code','name', 'lastname', 'email', 'actions'];
+  displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'actions'];
 
   @ViewChild('adviserPaginator', { static: false }) set content2(
     paginator2: MatPaginator
@@ -73,12 +73,13 @@ export class GeneralComponent implements OnInit {
     })
   }
 
-  deleteDialog(id: string,type:string,title:string) {
-    this.dialog.open(DeleteDocComponent, {
+  deleteDialog(id: string, type: string, title: string) {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
         id: id,
         title: title,
-        type: type
+        type: type,
+        image: false
       }
     })
   }

@@ -11,10 +11,10 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { CreatEditTestimonyComponent } from '../creat-edit-testimony/creat-edit-testimony.component';
 import { CreateEditBannerComponent } from '../create-edit-banner/create-edit-banner.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { DeleteDialogComponent } from '../delete-dialog/delete-dialog.component';
 import { LandingService } from 'src/app/core/services/landing.service';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { AngularFireStorage } from '@angular/fire/storage';
+import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 
 @Component({
   selector: 'app-landing',
@@ -163,22 +163,26 @@ export class LandingComponent implements OnInit {
     });
   }
 
-  deleteBDialog(id: string) {
-    this.dialog.open(DeleteDialogComponent, {
+  deleteBDialog(banner) {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
-        id: id,
+        id: banner.id,
         title: 'Banner',
-        type: 'banner'
+        type: 'banner',
+        image: true,
+        path: banner.photoPath
       }
     })
   }
 
-  deleteDialog(id: string) {
-    this.dialog.open(DeleteDialogComponent, {
+  deleteDialog(testimony) {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
-        id: id,
+        id: testimony.id,
         title: 'Testimonio',
-        type: 'testi'
+        type: 'testi',
+        image: true,
+        path: testimony.photoPath
       }
     })
   }

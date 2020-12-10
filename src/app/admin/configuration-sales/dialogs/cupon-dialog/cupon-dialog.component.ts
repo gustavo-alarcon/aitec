@@ -14,16 +14,14 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class CuponDialogComponent implements OnInit {
 
-  redirects: Array<string> = ['Toda la compra', 'Categoría/subcategoría', 'Marca', 'Productos']
+  redirects: Array<string> = ['Toda la compra', 'Categoría/subcategoría', 'Marca']
   category$: Observable<string[]>
-  products$: Observable<any>
   brand$: Observable<any>
 
   loading = new BehaviorSubject<boolean>(false)
   loading$ = this.loading.asObservable()
 
   subcategories: Array<any> = []
-  products: Array<any> = []
 
   createForm: FormGroup
 
@@ -44,28 +42,8 @@ export class CuponDialogComponent implements OnInit {
       category: [this.data.edit ? this.data.data.category : null],
       start: [null, Validators.required],
       end: [null, Validators.required],
-      product: [null],
       redirectTo:[this.data.edit ? this.data.data.redirectTo : null, Validators.required]
     })
-
-    this.products$ = combineLatest(
-      this.createForm.get('product').valueChanges.pipe(
-        startWith<any>(''),
-        filter((input) => input !== null)
-      ),
-      this.dbs.getProductsList()
-    ).pipe(
-      
-      map(([value,products]) => {
-        return value
-          ? products.filter(
-            (option) =>
-              option['description'].toLowerCase().includes(value) ||
-              option['sku'].toLowerCase().includes(value)
-          )
-          : [];
-      })
-    )
 
     this.category$ = combineLatest(
       this.createForm.get('category').valueChanges.pipe(
@@ -114,21 +92,6 @@ export class CuponDialogComponent implements OnInit {
     return staff ? staff['description'] : undefined;
   }
 
-  addProduct() {
-    if (this.createForm.value['product']['id']) {
-      this.products.push(this.createForm.value['product']);
-      this.createForm.get('product').setValue('');
-    } else {
-      this.snackBar.open("Debe seleccionar un producto", "Cerrar", {
-        duration: 6000
-      })
-    }
-  }
-
-  removeProduct(item): void {
-    let index = this.products.indexOf(item);
-    this.products.splice(index, 1);
-  }
 
   onSubmitForm() {
     this.createForm.markAsPending();
@@ -157,10 +120,10 @@ export class CuponDialogComponent implements OnInit {
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
-      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
       startDate: this.createForm.get('start').value,
       endDate: this.createForm.get('end').value,
-      createdAt: new Date()
+      createdAt: new Date(),
+      count:0
     }
 
     batch.set(productRef, newCoupon);
@@ -187,7 +150,6 @@ export class CuponDialogComponent implements OnInit {
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
-      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
       startDate: this.createForm.get('start').value,
       endDate: this.createForm.get('end').value
     }

@@ -3,8 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { CreateEditCategoriesComponent } from '../dialogs/create-edit-categories/create-edit-categories.component';
-import { DeleteDocComponent } from '../dialogs/delete-doc/delete-doc.component';
 
 @Component({
   selector: 'app-categories',
@@ -44,11 +44,12 @@ export class CategoriesComponent implements OnInit {
   }
 
   deleteDialog(id: string) {
-    this.dialog.open(DeleteDocComponent, {
+    this.dialog.open(DeleteConfiDialogComponent, {
       data: {
         id:id,
         title:'Categoría',
-        type:'categories'
+        type:'categories',
+        image:false
       }
     })
   }
