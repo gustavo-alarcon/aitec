@@ -41,7 +41,7 @@ export class SignInComponent implements OnInit {
       if(userData){
         switch(userData.type){
           case "registered":
-            this.snackbar.open("Bienvenido...", "Aceptar")
+            this.snackbar.open("Bienvenido!", "Aceptar")
             this.router.navigateByUrl('/main')
             break;
           case "unregistered":
@@ -78,8 +78,8 @@ export class SignInComponent implements OnInit {
 
   signInProvider(type: "facebook"|"google") {
     this.auth.signIn(type).then(res => {
-      //this.snackbar.open('¡Bienvenido!', 'Cerrar');
-      //this.router.navigateByUrl('/main');
+      this.snackbar.open('¡Bienvenido!', 'Cerrar');
+      this.router.navigateByUrl('/main');
 
     })
     .catch(error => {
