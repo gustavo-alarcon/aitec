@@ -26,6 +26,8 @@ export class CreateEditProductComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
+  loadSave: boolean = false
+
   init$: Observable<any>
 
   edit: boolean = false
@@ -40,6 +42,7 @@ export class CreateEditProductComponent implements OnInit {
     resizing$: Observable<boolean>;
     data: File[];
   }> = []
+  deletePhotos: Array<any> = []
 
   choosePicture: number = 0
 
@@ -100,69 +103,12 @@ export class CreateEditProductComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.init$ = this.route.params.pipe(
-      switchMap(id => {
-        if (id.id) {
-          this.edit = true
-          console.log('here');
-          return this.dbs.getProduct(id.id).pipe(
-            map(prod => {
-              console.log(prod);
-              this.data = prod
-              this.edit = true
-              this.firstFormGroup.setValue({
-                description: prod.description,
-                category: null,
-                priceMax: prod.priceMay,
-                cost: prod.cost,
-                code: prod.sku,
-                priceMin: prod.priceMin
-              })
-
-              this.secondFormGroup.setValue({
-                brand: prod.brand,
-                model: prod.model ? prod.model : null,
-                additionalDescription: prod.additionalDescription,
-                colors: null,
-                weight: prod.weight,
-                guarantee: prod.guarantee,
-                timeguarantee: prod.guarantee ? prod.timeguarantee : null,
-                noColors: prod.noColor
-              })
-
-              this.secondFormGroup.get('guarantee').setValue(prod.guarantee)
-              this.colorSelect = prod.colors
-              console.log(prod.skuArray);
-
-              prod.skuArray.forEach((sk, i) => {
-                this.itemsFormArray.push(new FormControl(sk, [Validators.required], [this.skuRepeatedValidator(i)]));
-
-                this.photos.push({
-                  resizing$: of(false),
-                  data: []
-                })
-              })
-              //this.photosList = prod.gallery
-              this.choosePicture = prod.indCover
-              return 2
-            })
-          )
-        } else {
-          return of(1)
-        }
-      }),
-      tap(() => {
-        this.loading.next(false)
-
-      })
-    )
-
     this.itemsFormArray = this.fb.array([])
 
     this.firstFormGroup = this.fb.group({
       description: [null, Validators.required],
       code: [null, [Validators.required], [this.nameRepeatedValidator()]],
-      category: [null, [Validators.required]],
+      category: [null, [Validators.required], [this.validateCategory()]],
       priceMax: [null, [Validators.required, Validators.min(0)]],
       cost: [null, [Validators.required, Validators.min(0)]],
       priceMin: [null, [Validators.required, Validators.min(0)]]
@@ -185,6 +131,81 @@ export class CreateEditProductComponent implements OnInit {
       stock: [null],
       series: [null]
     })
+
+    this.init$ = combineLatest(
+      this.route.params,
+      this.dbs.getCategories()
+    ).pipe(
+      switchMap(([id, categories]) => {
+        let fil = categories.map(el => {
+          let first = [el['category']]
+          let subs = el['subcategories'].map(lo => {
+            let sub = [el['category'] + ' >> ' + lo.name]
+            if (lo.categories.length) {
+              let secs = lo.categories.map(sec => {
+                return el['category'] + ' >> ' + lo.name + ' >> ' + sec
+              })
+              return sub.concat(secs)
+            } else {
+              return sub
+            }
+
+          })
+          return first.concat(subs).reduce((a, b) => a.concat(b), [])
+        }).reduce((a, b) => a.concat(b), [])
+        this.categories = fil
+        if (id.id) {
+          this.edit = true
+          return this.dbs.getProduct(id.id).pipe(
+            map(prod => {
+              this.data = prod
+              this.edit = true
+              this.firstFormGroup.setValue({
+                description: prod.description,
+                category: this.getCategory(prod),
+                priceMax: prod.priceMay,
+                cost: prod.cost,
+                code: prod.sku,
+                priceMin: prod.priceMin
+              })
+
+              this.secondFormGroup.setValue({
+                brand: prod.brand,
+                model: prod.model ? prod.model : null,
+                additionalDescription: prod.additionalDescription,
+                colors: null,
+                weight: prod.weight,
+                guarantee: prod.guarantee,
+                timeguarantee: prod.guarantee ? prod.timeguarantee : null,
+                noColors: prod.noColor
+              })
+
+              this.secondFormGroup.get('guarantee').setValue(prod.guarantee)
+              this.colorSelect = prod.colors
+              this.colorCount.next(prod.colors.length)
+
+              this.photosList = prod.gallery.map((gal, g) => {
+                return {
+                  img: gal.photoURL,
+                  sku: prod.skuArray.indexOf(gal.sku),
+                  ind: g
+                }
+              })
+
+              this.choosePicture = prod.indCover
+              this.skuList = prod.skuArray
+              return 2
+            })
+          )
+        } else {
+          return of(1)
+        }
+      }),
+      tap(() => {
+        this.loading.next(false)
+
+      })
+    )
 
 
     this.category$ = combineLatest(
@@ -212,14 +233,7 @@ export class CreateEditProductComponent implements OnInit {
           })
           return first.concat(subs).reduce((a, b) => a.concat(b), [])
         }).reduce((a, b) => a.concat(b), [])
-        this.categories = fil
         return fil.filter(el => value ? el.toLowerCase().includes(value.toLowerCase()) : true)
-      }),
-      tap(() => {
-        if (this.edit) {
-          this.firstFormGroup.get('category').setValue(this.getCategory(this.data))
-        }
-
       })
     )
 
@@ -239,7 +253,7 @@ export class CreateEditProductComponent implements OnInit {
     this.filteredColor$ = this.secondFormGroup.get('colors').valueChanges.pipe(
       startWith<any>(''),
       map(col => {
-        let value = typeof col == 'object' ? col.name : col
+        let value = col ? typeof col == 'object' ? col.name : col : ''
         return this.pl.color.sort((a, b) => a.name.localeCompare(b.name))
           .filter(el => col ? el.name.toLowerCase().includes(value.toLowerCase()) : true)
       })
@@ -252,7 +266,7 @@ export class CreateEditProductComponent implements OnInit {
         if (total > leng) {
           let number = total - leng
           for (let i = 0; i < number; i++) {
-            this.itemsFormArray.push(new FormControl('', [Validators.required], [this.skuRepeatedValidator(i)]));
+            this.itemsFormArray.push(new FormControl(this.edit ? this.data.skuArray[i] : '', [Validators.required], [this.skuRepeatedValidator(i)]));
 
             this.photos.push({
               resizing$: of(false),
@@ -285,6 +299,7 @@ export class CreateEditProductComponent implements OnInit {
     this.skuArray = this.itemsFormArray.valueChanges.pipe(
       tap(res => {
         this.skuList = res
+
         if (res.length == 1) {
           this.thirdFormGroup.get('sku').setValue(res[0])
           this.thirdFormGroup.get('sku').disable()
@@ -359,10 +374,9 @@ export class CreateEditProductComponent implements OnInit {
 
   selected(event: MatAutocompleteSelectedEvent): void {
     let val = event.option.value
-    console.log(val);
 
     if (this.colorSelect.findIndex(el => el.name == val.name) > -1) {
-      this.snackBar.open("Categoría Repetida", "Cerrar", {
+      this.snackBar.open("Color repetido", "Cerrar", {
         duration: 6000
       })
 
@@ -385,12 +399,13 @@ export class CreateEditProductComponent implements OnInit {
         (result) => {
           let d = new Date();
           let n = d.getTime();
+
+          let name = formControlName + n +
+            result.name.match(/\..*$/)
           this.photos[ind].data.push(
             new File(
               [result],
-              this.photosList.length + '-' +
-              formControlName + n +
-              result.name.match(/\..*$/)
+              name
             )
           );
           reader.readAsDataURL(image[0]);
@@ -398,7 +413,7 @@ export class CreateEditProductComponent implements OnInit {
             this.photosList.push({
               img: reader.result,
               sku: ind,
-              ind: this.photosList.length
+              name: name
             });
             this.photos[ind].resizing$ = of(false);
           };
@@ -414,24 +429,37 @@ export class CreateEditProductComponent implements OnInit {
     return this.photosList.filter(el => el.sku == i)
   }
 
-  eliminatedphoto(id, f, ind) {
-    let indx = this.photosList.findIndex(el => el.img == ind.img)
-    this.photosList.splice(indx, 1);
+  eliminatedphoto(id, f, imag) {
+
     if (!this.edit) {
       this.photos[id].data.splice(f, 1);
     } else {
-      let inx = this.photosList.length - ind - 1
-      this.photos[id].data.splice(inx, 1);
+      let inx = this.filterPhotos(id).filter(el => el.img.includes('data')).findIndex(el => el.img == imag.img)
+
+      if (inx >= 0) {
+        this.photos[id].data.splice(inx, 1);
+      }
+
+      this.deletePhotos.push(imag.img)
     }
 
     if (this.choosePicture >= this.photosList.length) {
 
       this.choosePicture = this.photosList.length - 1
     }
+
+    let indx = this.photosList.findIndex(el => el.img == imag.img)
+    this.photosList.splice(indx, 1);
   }
 
-  selectPhoto(ind: number) {
-    this.choosePicture = ind
+  selectPhoto(img) {
+    let inx = this.photosList.findIndex(el => el.img == img.img)
+    this.choosePicture = inx
+  }
+
+  isSelected(img) {
+    let inx = this.photosList.findIndex(el => el.img == img.img)
+    return inx == this.choosePicture
   }
 
   nameRepeatedValidator() {
@@ -553,6 +581,7 @@ export class CreateEditProductComponent implements OnInit {
 
   saveProduct() {
     this.loading.next(true)
+    this.loadSave = true
     let cat = this.firstFormGroup.get('category').value.split(' >> ')
     let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
 
@@ -599,12 +628,11 @@ export class CreateEditProductComponent implements OnInit {
 
   createProduct(newProduct: Product) {
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
-    let namesPhotos = phots.map(lo => lo.name)
 
-    let skuPhotos = this.photosList.map(pho => {
+    let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
       return {
         sku: this.skuList[pho.sku],
-        name: namesPhotos.filter(im => Number(im.split('-')[0]) == pho.ind)[0]
+        name: pho['name']
       }
     })
 
@@ -666,6 +694,7 @@ export class CreateEditProductComponent implements OnInit {
 
         batch.commit().then(() => {
           this.loading.next(false)
+          this.loadSave = false
           this.snackBar.open('El nuevo producto fue creado satisfactoriamente', 'Aceptar', { duration: 5000 });
           this.router.navigate(['/admin/products'])
 
@@ -676,67 +705,22 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   editProduct() {
-    //const batch = this.afs.firestore.batch()
-    /*
-    this.auth.user$.pipe(take(1)).subscribe(user => {
-      const batch = this.afs.firestore.batch()
-      const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(this.data.id);
-      let cat = this.firstFormGroup.get('category').value.split(' >> ')
-      let newProduct = {
-        additionalDescription: this.secondFormGroup.get('additionalDescription').value,
-        category: cat[0],
-        colors: this.colorSelect,
-        subcategory: cat.length > 1 ? cat[1] : null,
-        subsubcategory: cat.length > 2 ? cat[2] : null,
-        brand: this.secondFormGroup.get('brand').value,
-        description: this.firstFormGroup.get('description').value,
-        price: this.firstFormGroup.get('priceMin').value,
-        priceMin: this.firstFormGroup.get('priceMin').value,
-        priceMay: this.firstFormGroup.get('priceMax').value,
-        weight: this.firstFormGroup.get('weight').value,
-        code: this.firstFormGroup.get('code').value,
-        model: this.secondFormGroup.get('model').value,
-        guarantee: this.secondFormGroup.get('guarantee').value,
-        timeguarantee: this.secondFormGroup.get('timeguarantee').value,
-        gallery: this.photosList.filter(el => !el.includes('data:')),
-        photoURL: this.photosList[this.choosePicture],
-        editedBy: user,
-        editedAt: new Date()
+    
+
+    let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
+
+    let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
+      return {
+        sku: this.skuList[pho.sku],
+        name: pho['name']
       }
-
-      if (this.photos.data.length) {
-        let photos = [...this.photos.data.map(el => this.dbs.uploadPhotoProduct(this.data.id, this.data.id, el))]
-        forkJoin(photos).pipe(
-          takeLast(1),
-        ).subscribe((res: string[]) => {
-          let newPhotos = [...this.photos.data.map((el, i) => res[i])]
-          newProduct.gallery = newProduct.gallery.concat(newPhotos)
-
-          newProduct.photoURL = newProduct.gallery[this.choosePicture]
-
-
-          batch.update(productRef, newProduct)
-
-          batch.commit().then(() => {
-            this.loading.next(false)
-            this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
-            this.router.navigate(['/admin/products'])
-
-          })
-
-        })
-      }
-
-
-
-
     })
 
+    let deleteP = this.data.gallery.filter(gal => this.deletePhotos.includes(gal.photoURL))
 
-    
-    const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(this.data.sku);
+    let originP = this.data.gallery.filter(gal => !this.deletePhotos.includes(gal.photoURL))
+
     let cat = this.firstFormGroup.get('category').value.split(' >> ')
-    let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
     let newProduct = {
       additionalDescription: this.secondFormGroup.get('additionalDescription').value,
       category: cat[0],
@@ -745,34 +729,112 @@ export class CreateEditProductComponent implements OnInit {
       subsubcategory: cat.length > 2 ? cat[2] : null,
       brand: this.secondFormGroup.get('brand').value,
       description: this.firstFormGroup.get('description').value,
-      price: this.firstFormGroup.get('priceMin').value,
+      cost: this.firstFormGroup.get('cost').value,
       priceMin: this.firstFormGroup.get('priceMin').value,
       priceMay: this.firstFormGroup.get('priceMax').value,
-      weight: this.firstFormGroup.get('weight').value,
-      code: this.firstFormGroup.get('code').value,
+      weight: this.secondFormGroup.get('weight').value,
+      sku: this.firstFormGroup.get('code').value,
       model: this.secondFormGroup.get('model').value,
       guarantee: this.secondFormGroup.get('guarantee').value,
-      timeguarantee: this.secondFormGroup.get('timeguarantee').value
+      timeguarantee: this.secondFormGroup.get('timeguarantee').value,
+      gallery: originP,
+      indCover: this.choosePicture
     }
 
-    this.warehouseList.forEach((el, ind) => {
-      const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouse`).doc(this.data.sku + '-' + (ind+1));
-      batch.set(warehouseRef, {
-        product: this.data.sku,
-        warehouse: el.warehouse,
-        stock: el.stock,
-        series: el.series
+    let oldP = {
+      additionalDescription: this.data.additionalDescription,
+      category: this.data.category,
+      colors: this.data.colors,
+      subcategory: this.data.subcategory,
+      subsubcategory: this.data.subsubcategory,
+      brand: this.data.brand,
+      description: this.data.description,
+      cost: this.data.cost,
+      priceMin: this.data.priceMin,
+      priceMay: this.data.priceMay,
+      weight: this.data.weight,
+      sku: this.data.sku,
+      model: this.data.model,
+      guarantee: this.data.guarantee,
+      timeguarantee: this.data.timeguarantee,
+      gallery: this.data.gallery,
+      indCover: this.data.indCover
+    }
+
+    let change = JSON.stringify(newProduct) === JSON.stringify(oldP)
+
+    if (!change) {
+      this.loadSave = true
+      const batch = this.afs.firestore.batch()
+      const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(this.data.id);
+      this.auth.user$.pipe(take(1)).subscribe(user => {
+        newProduct['editedBy'] = user
+        newProduct['editedAt'] = new Date()
+        if (phots.length) {
+          let photos = [...phots.map(el => this.dbs.uploadPhotoProduct(newProduct.sku, el))]
+          forkJoin(photos).pipe(
+            takeLast(1),
+          ).subscribe((res: string[]) => {
+            let newPhotos = [...skuPhotos.map((el, i) => {
+              return {
+                photoURL: res[i],
+                photoPath: `/productsList/${newProduct.sku}/${el.name}`,
+                sku: el.sku
+              }
+            })]
+
+            newProduct.gallery = newProduct.gallery.concat(newPhotos)
+
+            if (deleteP.length > 0) {
+              let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
+              forkJoin(phot$).subscribe(res => {
+                batch.update(productRef, newProduct)
+
+                batch.commit().then(() => {
+                  this.loading.next(false)
+                  this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+                  this.router.navigate(['/admin/products'])
+                  this.loadSave = false
+                })
+              })
+            } else {
+              batch.update(productRef, newProduct)
+
+              batch.commit().then(() => {
+                this.loading.next(false)
+                this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+                this.router.navigate(['/admin/products'])
+                this.loadSave = false
+              })
+            }
+          })
+        } else {
+          if (deleteP.length > 0) {
+            let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
+            forkJoin(phot$).subscribe(res => {
+              batch.update(productRef, newProduct)
+
+              batch.commit().then(() => {
+                this.loading.next(false)
+                this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+                this.router.navigate(['/admin/products'])
+                this.loadSave = false
+              })
+            })
+          } else {
+            batch.update(productRef, newProduct)
+
+            batch.commit().then(() => {
+              this.loading.next(false)
+              this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+              this.router.navigate(['/admin/products'])
+              this.loadSave = false
+            })
+          }
+        }
       })
-    })
+    }
 
-    batch.update(productRef, newProduct)
-
-    batch.commit().then(() => {
-      this.loading.next(false)
-      this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
-      this.router.navigate(['/admin/products'])
-
-    })*/
   }
 
   onKeydown(event) {

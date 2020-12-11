@@ -1,5 +1,6 @@
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-<div class="w3-section w3-padding ms-container" *ngIf="init$|async as init">
+<ng-container *ngIf="init$|async as init"></ng-container>
+<div class="w3-section w3-padding ms-container" >
 
   <div class="ms-flex ms-flex--center">
     <button mat-icon-button color="primary" (click)="goBack()">
@@ -7,7 +8,7 @@
     </button>
     <h2 class="title">
       <mat-icon style="vertical-align: middle;">list_alt</mat-icon>
-      {{init==1?'Crear':'Editar'}} producto
+      {{!edit?'Crear':'Editar'}} producto
     </h2>
   </div>
   <mat-divider></mat-divider>
@@ -137,7 +138,7 @@
                 </mat-option>
               </mat-autocomplete>
             </mat-form-field>
-            <mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox>
+            <!--mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox-->
           </div>
         </div>
         <div class="w3-row-padding w3-margin-top">
@@ -190,7 +191,7 @@
         <div class="w3-margin-bottom w3-row-padding">
           <div class="w3-margin-bottom w3-col s2 m4 l2" style="position: relative"
             *ngFor="let image of filterPhotos(i); let f=index" >
-            <img (click)="selectPhoto(image.ind)"  class="w3-block"
+            <img (click)="selectPhoto(image)"  class="w3-block"
               style="object-fit: contain;height: 150px;" [src]="image.img" alt="fotografía" />
             <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
               <span class="ms-fill"></span>
@@ -198,7 +199,7 @@
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
-            <div *ngIf="image.ind==choosePicture" class="cover w3-block w3-center">
+            <div *ngIf="isSelected(image)" class="cover w3-block w3-center">
               PORTADA
             </div>
           </div>
@@ -223,7 +224,7 @@
         <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
       </div>
       <div class="w3-center w3-margin-top" *ngIf="edit">
-        <button mat-flat-button color="primary" (click)="editProduct()" class="big-button">Editar producto</button>
+        <button mat-flat-button color="primary" [disabled]="loadSave" (click)="editProduct()" class="big-button">Editar producto</button>
       </div>
     </mat-step>
     <mat-step *ngIf="!edit">
@@ -326,10 +327,13 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
       </div>
+      
       <div class="w3-center w3-margin-top">
-        <button mat-flat-button color="primary" (click)="edit?editProduct():saveProduct()"
+        <button mat-flat-button color="primary" [disabled]="loadSave || !warehouseList.length" (click)="saveProduct()"
           class="big-button">Guardar</button>
       </div>
     </mat-step>
   </mat-vertical-stepper>
+  <mat-progress-bar mode="indeterminate" *ngIf="loadSave"></mat-progress-bar>
+  
 </div>

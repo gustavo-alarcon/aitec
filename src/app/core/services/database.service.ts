@@ -492,21 +492,6 @@ export class DatabaseService {
     return batch;
   }
 
-  /*deleteProduct(
-    product: Product
-  ): Observable<firebase.default.firestore.WriteBatch> {
-    let productRef: DocumentReference = this.afs.firestore
-      .collection(this.productsListRef)
-      .doc(product.id);
-    let batch = this.afs.firestore.batch();
-    batch.delete(productRef);
-    return this.deletePhotoProduct(product.photoPath).pipe(
-      takeLast(1),
-      mapTo(batch)
-    );
-  }*/
-
-  
 
   deletePhoto(path: string): Observable<any> {
     let st = this.storage.ref(path);

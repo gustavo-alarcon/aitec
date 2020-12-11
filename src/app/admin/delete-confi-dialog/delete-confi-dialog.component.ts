@@ -22,7 +22,7 @@ export class DeleteConfiDialogComponent implements OnInit {
 
   ngOnInit() {
     console.log(this.data.path);
-    
+
   }
 
   save() {
@@ -34,7 +34,6 @@ export class DeleteConfiDialogComponent implements OnInit {
 
       ref = this.af.firestore.collection(`/db/aitec/config/generalConfig/${this.data.type}`).doc(this.data.id);
     }
-
 
     const batch = this.af.firestore.batch();
     if (this.data.image) {
@@ -49,14 +48,12 @@ export class DeleteConfiDialogComponent implements OnInit {
       })
     } else {
       batch.delete(ref)
-
       batch.commit().then(() => {
         this.dialogref.close(true);
         this.loading.next(false)
 
       })
     }
-
 
   }
 }
