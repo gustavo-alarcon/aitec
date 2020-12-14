@@ -1,4 +1,5 @@
 <div class="w3-section">
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
   <button mat-raised-button (click)="openDialog(false,null)" color="primary">
     <span>Agregar</span>
     <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
@@ -6,14 +7,14 @@
   <div class="w3-margin-top ms-flex w3-margin-bottom" *ngIf="init$|async as carousel">
     <div *ngFor="let image of carousel" class="banner__category">
       <img [defaultImage]="defaultImage" [lazyLoad]="image.photoURL" [offset]="100" class="banner__image">
-      <p><strong>{{image.name | titlecase}}</strong></p>
+      <div><strong>{{image.name | titlecase}}</strong></div>
       <div class="ms-flex w3-margin-top">
         <span class="ms-fill"></span>
         <div>
           <button mat-icon-button color="primary" (click)="openDialog(true,image)">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button color="primary" style="margin-left: 10px;" (click)="deleteDialog(image)">
+          <button mat-icon-button color="primary" (click)="deleteDialog(image)">
             <mat-icon>delete</mat-icon>
           </button>
         </div>

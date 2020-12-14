@@ -2,7 +2,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, forkJoin } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
+import { map, take, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -13,8 +14,13 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class DeleteProductComponent implements OnInit {
 
-  loading = new BehaviorSubject<boolean>(false);
+  loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
+
+  warehouseList: Array<any> = []
+  seriesList: Array<any> = []
+
+  init$: Observable<any>
 
   constructor(
     private dialogref: MatDialogRef<DeleteProductComponent>,
@@ -25,6 +31,18 @@ export class DeleteProductComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.init$ = combineLatest(
+      this.dbs.getWarehouseByProduct(this.data.id),
+      this.dbs.getSeriesByProduct(this.data.id)
+    ).pipe(
+      map(([warehouses, series]) => {
+        this.warehouseList = warehouses.map(el => el.id)
+        this.seriesList = series
+      }),
+      tap(() => {
+        this.loading.next(false)
+      })
+    )
 
   }
 
@@ -37,7 +55,16 @@ export class DeleteProductComponent implements OnInit {
     let phot$ = this.data.gallery.map(el => this.dbs.deletePhoto(el.photoPath))
     forkJoin(phot$).subscribe(res => {
       batch.delete(ref)
+      this.seriesList.forEach(ser => {
+        const sref = this.af.firestore.collection(`/db/aitec/warehouse/${ser['idWarehouse']}/series`).doc(ser['id']);
+        batch.delete(sref)
+      })
 
+      this.warehouseList.forEach(wh => {
+        const whref = this.af.firestore.collection(`/db/aitec/warehouse`).doc(wh);
+        batch.delete(whref)
+      })
+      
       batch.commit().then(() => {
         this.dialogref.close(true);
         this.loading.next(false)
