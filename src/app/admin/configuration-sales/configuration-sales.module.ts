@@ -38,7 +38,6 @@ import { BrandComponent } from './dialogs/brand/brand.component';
 import { GeneralComponent } from './general/general.component';
 import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/create-edit-categories.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
-import { DeleteDocComponent } from './dialogs/delete-doc/delete-doc.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
 import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
 
@@ -53,7 +52,6 @@ import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dial
     GeneralComponent,
     CreateEditCategoriesComponent,
     BrandsViewComponent,
-    DeleteDocComponent,
     CuponDialogComponent,
     AsesoresDialogComponent
   ],

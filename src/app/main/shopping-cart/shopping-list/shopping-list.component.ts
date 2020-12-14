@@ -34,7 +34,7 @@ export class ShoppingListComponent implements OnInit {
     if(item.product.promo){
       return item.product.promoData.promoPrice 
     }else{
-      return item.product.price
+      return item.product.priceMin
     }
   }
 

@@ -13,7 +13,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./store.component.scss'],
 })
 export class StoreComponent implements OnInit {
-  
+
   category$: Observable<any>;
   config: PaginationInstance = {
     id: 'custom',
@@ -31,9 +31,9 @@ export class StoreComponent implements OnInit {
   searchSubCategory: string;
   searchSubSubCategory: string;
 
-  search:string;
-  searchPromo:string;
-  searchBrand:string;
+  search: string;
+  searchPromo: string;
+  searchBrand: string;
 
 
   constructor(
@@ -41,7 +41,7 @@ export class StoreComponent implements OnInit {
     private route: ActivatedRoute,
     public auth: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.category$ = this.dbs.getCategories()
@@ -52,24 +52,27 @@ export class StoreComponent implements OnInit {
       this.route.queryParams,
       this.dbs.getProductsListValueChanges()
     ).pipe(
-      map(([word, id, param,products]) => {
-        let prods = products.filter(el=>el.published)
-        let cat=''
+      map(([word, id, param, products]) => {
+        let state = 'nada'
+        let prods = products.filter(el => el.published)
+        let cat = ''
         let sub = ''
-        let subsub=''
+        let subsub = ''
 
         let frag = null
         let promo = false
         let brand = null
-        
+
         if (param.search) {
           this.search = param.search;
           frag = param.search.toLowerCase()
+          state = 'frag'
         }
 
         if (param.brand) {
           this.searchBrand = param.brand;
           brand = param.brand.toLowerCase()
+          state = 'brand'
         }
 
         if (param.promo) {
@@ -80,39 +83,26 @@ export class StoreComponent implements OnInit {
         if (id.id) {
           cat = id.id.split('-').join(' ')
           this.searchCategory = cat;
+          state = 'cat'
         }
         if (id.cat) {
           sub = id.cat.split('-').join(' ')
           this.searchSubCategory = sub;
+          state = 'sub'
         }
         if (id.sub) {
           subsub = id.sub.split('-').join(' ')
           this.searchSubSubCategory = subsub;
+          state = 'subsub'
         }
 
-        if(promo){
+        if (promo) {
           return prods.filter((el) => el.promo)
-        }else{
-          return prods
-          .filter((el) =>
-            el.description.toLowerCase().includes(word.toLowerCase())
-          )
-          .filter((el) =>
-            brand?el.brand.toLowerCase().includes(brand):true
-          )
-          .filter((el) => (cat ? el.category.toLowerCase() == cat.toLowerCase() : true))
-          .filter((el) => (sub ? el.subcategory.toLowerCase() == sub.toLowerCase() : true))
-          .filter((el) => (subsub ? el.subsubcategory.toLowerCase() == subsub.toLowerCase() : true))
-          .filter((el) =>
-            frag
-              ? el['description'].toLowerCase().includes(frag) ||
-                el['sku'].toLowerCase().includes(frag) ||
-                el['category'].toLowerCase().includes(frag) ||
-                el['subcategory'].toLowerCase().includes(frag)
-              : true
-          );
+        } else {
+
+          return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag)
         }
-        
+
       }),
       tap((res) => {
         this.products = res;
@@ -120,6 +110,41 @@ export class StoreComponent implements OnInit {
     );
   }
 
+  filterProduct(state, prod, brand, cat, sub, subsub, word, frag) {
+    switch (state) {
+      case 'brand':
+        return prod.filter(el => el.brand.toLowerCase().includes(brand))
+        break;
+      case 'frag':
+        return prod.filter((el) =>
+          frag
+            ? el['description'].toLowerCase().includes(frag) ||
+            el['sku'].toLowerCase().includes(frag) ||
+            el['category'].toLowerCase().includes(frag) ||
+            el['subcategory'].toLowerCase().includes(frag)
+            : true
+        );
+        break;
+      case 'cat':
+        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
+        break;
+      case 'sub':
+        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
+          .filter(el => el.subcategory.toLowerCase() == sub.toLowerCase())
+        break;
+      case 'subsub':
+        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
+          .filter(el => el.subcategory.toLowerCase() == sub.toLowerCase())
+          .filter(el => el.subsubcategory.toLowerCase() == subsub.toLowerCase())
+        break;
+      default:
+        return prod.filter((el) =>
+          word ? el.description.toLowerCase().includes(word.toLowerCase()) : true
+        )
+        break;
+    }
+  }
+  
   navigateOnlyCategory(category) {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);
@@ -138,8 +163,8 @@ export class StoreComponent implements OnInit {
     this.router.navigate(['/main/productos', cat, sub, subsub]);
   }
 
-  showInfo(link){
+  showInfo(link) {
     console.log(link);
-    
+
   }
 }

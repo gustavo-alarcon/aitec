@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from "@angular/router";
+import { Product } from 'src/app/core/models/product.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
@@ -9,7 +10,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class ProductDivComponent implements OnInit {
   
-  @Input() product: any
+  @Input() product: Product
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
   constructor(

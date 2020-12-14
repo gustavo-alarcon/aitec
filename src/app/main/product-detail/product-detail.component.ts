@@ -15,37 +15,40 @@ export class ProductDetailComponent implements OnInit {
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
-  productDiv:any
-  prods:Array<any> = []
-  galleryImg:Array<any>
-  selectImage:any
-  slideConfig2 = {"slidesToShow": 4, "slidesToScroll": 1,
-  "autoplay": false,
-  responsive: [
-    {
-      breakpoint: 1360,
-      settings: {
-        slidesToShow: 3
+  productDiv: any
+  prods: Array<any> = []
+  galleryImg: Array<any>
+  selectImage: any
+  slideConfig2 = {
+    "slidesToShow": 4, "slidesToScroll": 1,
+    "autoplay": false,
+    responsive: [
+      {
+        breakpoint: 1360,
+        settings: {
+          slidesToShow: 3
+        }
+      },
+      {
+        breakpoint: 780,
+        settings: {
+          slidesToShow: 2
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1
+        }
       }
-    },
-    {
-      breakpoint: 780,
-      settings: {
-        slidesToShow: 2
-      }
-    },
-    {
-      breakpoint: 480,
-      settings: {
-        slidesToShow: 1
-      }
-    }
-  ]};
+    ]
+  };
 
   @ViewChild("image") image: ElementRef;
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
 
+  colorSelected: any = null
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
@@ -54,13 +57,20 @@ export class ProductDetailComponent implements OnInit {
     private router: Router
   ) {
     this.route.paramMap.subscribe(params => {
+<<<<<<< HEAD
 
+=======
+>>>>>>> dc00663a2e896c510e29826d068ee2d66cf9fc7b
       console.log(params.get('param'));
 
       console.log(params['id']);
       
+<<<<<<< HEAD
+=======
+      
+>>>>>>> dc00663a2e896c510e29826d068ee2d66cf9fc7b
       this.ngOnInit();
-  });
+    });
   }
 
   ngOnInit(): void {
@@ -71,53 +81,50 @@ export class ProductDetailComponent implements OnInit {
           this.dbs.getProduct(param.id),
 
           this.dbs.getProductsListValueChanges()
-          ).pipe(
-            map(([product,prods])=>{
-              
-              this.prods = prods.filter(el=>el.category==product.category)
-              //console.log(product);
-              return product
-            })
-          )
+        ).pipe(
+          map(([product, prods]) => {
+
+            this.prods = prods.filter(el => el.category == product.category)
+            return product
+          })
+        )
       }),
-
-      
-
-      tap(res=>{
+      tap(res => {
         this.productDiv = res
+        this.colorSelected = res.colors[0]
         this.loading.next(false)
-        
-        this.galleryImg = res.gallery.map((el,i)=>{return {ind:i+1,photoURL:el}})
-        this.selectImage = this.galleryImg[0]
-       
+
+        this.galleryImg = res.products[0].gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
+        this.selectImage = this.galleryImg[res.indCover]
+
       })
     );
 
   }
-  
-  changeSelectImage(image){
+
+  changeSelectImage(image) {
     this.selectImage = image
   }
 
-  zoom(e){
+  zoom(e) {
     var zoomer = e.currentTarget;
     let offsetX = e.offsetX
-    let offsetY = e.offsetY 
+    let offsetY = e.offsetY
 
-    let x = offsetX/zoomer.offsetWidth*100
-    let y = offsetY/zoomer.offsetHeight*100
-    this.renderer.setStyle(this.image.nativeElement,'background-position', x + '% ' + y + '%')
+    let x = offsetX / zoomer.offsetWidth * 100
+    let y = offsetY / zoomer.offsetHeight * 100
+    this.renderer.setStyle(this.image.nativeElement, 'background-position', x + '% ' + y + '%')
   }
 
   navigate(category, subcategory) {
-    if(subcategory){
+    if (subcategory) {
       this.router.navigate(['/main/productos', category], {
         queryParams: { sub: subcategory },
       });
-    }else{
+    } else {
       this.router.navigate(['/main/productos', category]);
     }
-    
+
   }
 
   navigateOnlyCategory(category) {

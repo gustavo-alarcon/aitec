@@ -27,6 +27,10 @@ export class ShoppingCartComponent implements OnInit {
 
   products: Array<any>;
   total: number = 0
+
+  adviserForm: FormControl = new FormControl('')
+  advisers$: Observable<any>;
+
   /*delivery*/
   initDelivery$: Observable<any>
   formGroup: FormGroup;
@@ -63,7 +67,7 @@ export class ShoppingCartComponent implements OnInit {
   } = { name: '', value: 0 };
 
   payments: Array<any> = [
-    { name: 'Efectivo', value: 1 },
+    { name: 'Pago contraentrega', value: 1 },
     { name: 'Tarjetas credito/debito', value: 2 },
     { name: 'Trasferencias', value: 3, account: 'BCP: 215-020-221122456' },
     { name: 'Yape', value: 4, account: 'Número: 987784562' },
@@ -115,7 +119,7 @@ export class ShoppingCartComponent implements OnInit {
     this.subtotal$ = this.dbs.orderObs$.pipe(
       map((ord) => {
         return [...ord]
-          .map((el) => el.quantity * el.product.price * 0.82)
+          .map((el) => el.quantity * el.product.priceMin * 0.82)
           .reduce((a, b) => a + b, 0);
       })
     );
@@ -123,7 +127,7 @@ export class ShoppingCartComponent implements OnInit {
     this.igv$ = this.dbs.orderObs$.pipe(
       map((ord) => {
         return [...ord]
-          .map((el) => el.quantity * el.product.price * 0.18)
+          .map((el) => el.quantity * el.product.priceMin * 0.18)
           .reduce((a, b) => a + b, 0);
       })
     );
@@ -133,6 +137,23 @@ export class ShoppingCartComponent implements OnInit {
         return [...ord]
           .map((el) => this.getDiscount(el))
           .reduce((a, b) => a + b, 0);
+      })
+    );
+
+    this.advisers$ = combineLatest(
+      this.adviserForm.valueChanges.pipe(
+        startWith(''),
+      ),
+      this.dbs.getAdvisers()
+    ).pipe(
+      
+      map(([value,advisers]) => {
+        console.log(advisers);
+        
+        let filt = typeof value == 'object'?value.displayName:value
+        return advisers.filter((el) =>
+          value ? el['displayName'].toLowerCase().includes(filt.toLowerCase()) : true
+        );
       })
     );
 
@@ -313,16 +334,20 @@ export class ShoppingCartComponent implements OnInit {
     if (item.product.promo) {
       return item.product.promoData.promoPrice * item.quantity;
     } else {
-      return item.product.price * item.quantity;
+      return item.product.priceMin * item.quantity;
     }
   }
 
   getDiscount(item) {
     let promoPrice = this.getPrice(item);
-    let realPrice = item.quantity * item.product.price;
+    let realPrice = item.quantity * item.product.priceMin;
     return realPrice - promoPrice;
   }
 
+  showAdviser(staff): string | undefined {
+    return staff ? staff['displayName'] : undefined;
+  }
+  
   /*Delivery*/
 
   showDepartamento(staff): string | undefined {

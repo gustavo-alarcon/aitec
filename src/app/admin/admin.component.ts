@@ -28,4 +28,17 @@ export class AdminComponent implements OnInit {
   }
 
   login(){}
+
+  getName(user) {
+    let name;
+    let lastName;
+    if (user.personData) {
+      name = user.personData.name.split(' ')[0]
+      lastName = user.personData.lastName.split(' ')[0]
+    } else {
+      name = user.name.split(' ')[0]
+      lastName = user.lastName.split(' ')[0]
+    }
+    return name + ' ' + lastName
+  }
 }

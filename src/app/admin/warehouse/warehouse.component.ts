@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -10,6 +11,7 @@ import { map, startWith, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ListDialogComponent } from './list-dialog/list-dialog.component';
 
 @Component({
   selector: 'app-warehouse',
@@ -25,11 +27,12 @@ export class WarehouseComponent implements OnInit {
   categoryForm: FormControl;
   itemsFilterForm: FormControl;
   promoFilterForm: FormControl;
+  warehouseForm: FormControl = new FormControl('');
 
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'warehouse','category', 'virtualStock',
+    'index', 'photoURL', 'description', 'sku', 'warehouse', 'category', 'virtualStock',
     'realStock', 'list', 'actions'
   ]
 
@@ -64,7 +67,8 @@ export class WarehouseComponent implements OnInit {
     public snackBar: MatSnackBar,
     private dbs: DatabaseService,
     public auth: AuthService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -81,12 +85,17 @@ export class WarehouseComponent implements OnInit {
   initObservables() {
     this.productsObservable$ = combineLatest(
       this.dbs.getWarehouseListValueChanges(),
-      this.dbs.getProductsListValueChanges()).pipe(
-        map(([warehouse, products]) => {
-          
-          return warehouse.map(el=>{
-            el['product']=products.filter(li=>li.sku==el['product'])[0]
+      this.dbs.getProductsListValueChanges(),
+      this.warehouseForm.valueChanges.pipe(
+        startWith('Todos')
+      )).pipe(
+        map(([warehouse, products, filt]) => {
+
+          return warehouse.map(el => {
+            el['product'] = products.filter(li => li.sku == el['skuProduct'])[0]
             return el
+          }).filter(ol => {
+            return filt != 'Todos' ? ol.warehouse == filt : true
           })
         }),
         tap(res => {
@@ -101,7 +110,7 @@ export class WarehouseComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.productsTableDataSource.filter = filterValue.trim().toLowerCase();
-    
+
     if (this.productsTableDataSource.paginator) {
       this.productsTableDataSource.paginator.firstPage();
     }
@@ -109,6 +118,15 @@ export class WarehouseComponent implements OnInit {
 
   showCategory(category: any): string | null {
     return category ? category.name : null
+  }
+
+  openDialog(row) {
+    this.dialog.open(ListDialogComponent, {
+      data: {
+        name: row.product.description,
+        id: row.id
+      }
+    })
   }
 
 

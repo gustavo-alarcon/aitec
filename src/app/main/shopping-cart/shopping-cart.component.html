@@ -29,7 +29,7 @@
           Método de Pago
         </button>
         <ng-template #thirdButton>
-          <button mat-button class="button--desactive" (click)="thirdView()">
+          <button mat-button class="button--desactive" [disabled]="!deliveryForm.valid" (click)="thirdView()">
             <mat-icon>request_page</mat-icon>
             Método de Pago
           </button>
@@ -373,13 +373,17 @@
             </div>
             <div class="w3-margin-bottom">
               <h4 class="resume__subtitle">Selecciona un asesor</h4>
-              <mat-form-field class="w3-block" appearance="outline">
+              
+              <mat-form-field style="margin-bottom: 8px;" class="w3-block"  appearance="outline">
                 <mat-label>Asesor Virtual</mat-label>
-                <mat-select>
-                  <mat-option value="asesor 1">Asesor 1</mat-option>
-                  <mat-option value="asesor 2">Asesor 2</mat-option>
-                  <mat-option value="asesor 3">Asesor 3</mat-option>
-                </mat-select>
+                <input autocomplete="off" [formControl]="adviserForm" [matAutocomplete]="adviserAutocomplete" type="text"
+                  matInput>
+                <mat-autocomplete #adviserAutocomplete="matAutocomplete" [displayWith]="showAdviser">
+  
+                  <mat-option *ngFor="let adviser of advisers$ | async" [value]="adviser">
+                    {{adviser.displayName}}
+                  </mat-option>
+                </mat-autocomplete>
               </mat-form-field>
               <p class="resume__small">*El Nombre o correo de tu asesor ayudará a que podamos hacer mejor seguimiento a
                 tu pedido</p>
@@ -401,7 +405,7 @@
               </p>
             </div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button (click)="thirdView()" color="primary" class="resume__button">Generar orden de
+              <button mat-raised-button (click)="thirdView()" [disabled]="!deliveryForm.valid" color="primary" class="resume__button">Generar orden de
                 pedido</button>
             </div>
             <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>

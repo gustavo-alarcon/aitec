@@ -28,7 +28,33 @@
       color: white;
     }
   }
+
+  &__section{
+    width: calc(100% - 270px);
+    overflow: hidden;
+    padding: 25px;
+    background-color: white;
+    visibility: hidden;
+    color: #2B2B2B;
+    & img{
+      border: 1px solid #ddd;
+    }
+  }
+  &__title{
+    font-family: Raleway;
+    color: #2B2B2B;
+    border-bottom: 2px solid var(--primary-color);
+    font-weight: 600;
+    font-size: 1.4em;
+    padding-bottom: 8px;
+  }
+  &__subtitle{
+    color: var(--primary-color);
+    font-size:1.1em;
+    cursor: pointer;
+  }
 }
+
 
 .store__search {
   width: 250px;
