@@ -19,6 +19,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
+
 @NgModule({
   declarations: [MainComponent, RateDialogComponent],
   imports: [
@@ -39,7 +41,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatSnackBarModule,
     MatTooltipModule,
     MatMenuModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    LazyLoadImageModule
   ],
   entryComponents: [RateDialogComponent],
 })

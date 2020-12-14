@@ -65,41 +65,6 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
-
-  public products = [
-    {
-      additionalDescription: 'Laptop Asus Vivobook 15 F512da Ryzen5 8gbram 512gbssd Vega 8',
-      alertMinimum: 0,
-      category: "PCs y laptops",
-      subcategory: 'Laptops',
-      subsubcategory: 'Laptop1',
-      brand: {name:'Asus',photoURL:null},
-      createdAt: null,
-      description: 'Laptop Asus Vivobook 15 F512da Ryzen5 8gbram 512gbssd Vega 8',
-      id: '',
-      photoPath: null,
-      photoURL:
-        'https://http2.mlstatic.com/laptop-asus-vivobook-15-f512da-ryzen5-8gbram-512gbssd-vega-8-D_NQ_NP_899841-MPE42614169971_072020-O.webp',
-      gallery: [
-        'https://http2.mlstatic.com/laptop-asus-vivobook-15-f512da-ryzen5-8gbram-512gbssd-vega-8-D_NQ_NP_899841-MPE42614169971_072020-O.webp',
-        'https://http2.mlstatic.com/laptop-asus-vivobook-15-f512da-ryzen5-8gbram-512gbssd-vega-8-D_NQ_NP_843375-MPE43506889729_092020-O.webp',
-        'https://http2.mlstatic.com/laptop-asus-vivobook-15-f512da-ryzen5-8gbram-512gbssd-vega-8-D_NQ_NP_834858-MPE42614175882_072020-O.webp',
-        'https://http2.mlstatic.com/laptop-asus-vivobook-15-f512da-ryzen5-8gbram-512gbssd-vega-8-D_NQ_NP_801753-MPE42614214209_072020-O.webp'
-      ],
-      price: 4305,
-      priority: 1,
-      promo: true,
-      promoData: {
-        quantity: 1,
-        promoPrice: 2969,
-        offer: 31
-      },
-      published: true,
-      realStock: 20,
-      sku: 'AITEC-000001',
-    }
-  ];
-
   constructor(
     private afs: AngularFirestore,
     private storage: AngularFireStorage,
@@ -115,6 +80,7 @@ export class DatabaseService {
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
+
   generalConfigDoc = this.afs
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
@@ -358,6 +324,22 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
+
+  getWarehouseByProduct(id){
+    return this.afs
+    .collection<Product>(`/db/aitec/warehouse/`, (ref) =>
+      ref.where('idProduct','==', id)
+    )
+    .valueChanges()
+    .pipe(shareReplay(1));
+  }
+
+  getSeriesByProduct(id){
+    return this.afs
+    .collectionGroup('series', (ref) =>ref.where('idProduct', '==', id))
+    .valueChanges();
+  }
+
 
   getProductsListCategoriesValueChanges(): Observable<any[]> {
     return this.getGeneralConfigDoc().pipe(

@@ -35,6 +35,9 @@ export class MainComponent implements OnInit {
 
   init$: Observable<any>
   footer: any
+
+  defaultImage = "../../assets/images/icono-aitec-01.png";
+
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -99,8 +102,8 @@ export class MainComponent implements OnInit {
       ),
       this.dbs.getProductsList()
     ).pipe(
-     
-      map(([value,products]) => {
+
+      map(([value, products]) => {
         return value.length
           ? products.filter(
             (option) =>
@@ -116,6 +119,7 @@ export class MainComponent implements OnInit {
   logOut() {
     this.auth.logout();
   }
+
   toggleMenu() {
     this.openedMenu = !this.openedMenu;
     this.firstOpening = !this.firstOpening;
@@ -197,13 +201,12 @@ export class MainComponent implements OnInit {
 
   openSection(title) {
     this.selectCategory = title
-    console.log(this.selectCategory);
 
-    this.renderer.setStyle(this.menu.nativeElement, "visibility", 'visible');
+    this.renderer.setStyle(this.menu.nativeElement, "display", 'block');
   }
 
   closeSection() {
     this.selectCategory = null
-    this.renderer.setStyle(this.menu.nativeElement, "visibility", 'hidden');
+    this.renderer.setStyle(this.menu.nativeElement, "display", 'none');
   }
 }

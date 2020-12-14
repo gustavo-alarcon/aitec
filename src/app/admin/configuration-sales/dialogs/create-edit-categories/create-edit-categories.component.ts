@@ -51,14 +51,13 @@ export class CreateEditCategoriesComponent implements OnInit {
 
     this.brand$ = combineLatest(
       this.brandForm.valueChanges.pipe(
-        startWith<any>(''),
-        map(el => typeof el == 'object' ? el['name'] : el)
+        startWith<any>('')
       ),
       this.dbs.getBrands()
     ).pipe(
       map(([value, brands]) => {
-
-        return brands.filter(el => value ? el['name'].toLowerCase().includes(value.toLowerCase()) : true)
+        let val = typeof value == 'object' ? value['name'] : value
+        return brands.filter(el => val ? el['name'].toLowerCase().includes(val.toLowerCase()) : true)
       })
     )
 
@@ -84,6 +83,8 @@ export class CreateEditCategoriesComponent implements OnInit {
 
         totalItems: [this.data.data.subcategories.length],
       });
+
+      this.selectBrand = this.data.data.brands
     } else {
       this.packageForm = this.fb.group({
         category: this.fb.control(null, {
@@ -99,7 +100,6 @@ export class CreateEditCategoriesComponent implements OnInit {
 
   initObservables() {
     this.totalItems$ = this.packageForm.get('totalItems').valueChanges.pipe(
-      //startWith<number>(this.packageForm.get('totalItems').value),
       tap((total) => {
         let leng = this.itemsFormArray.length
 
@@ -127,8 +127,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   }
 
   onSelectProduct(formGroup: FormGroup) {
-    console.log(formGroup);
-
+   
     let product = formGroup.get('sub').value;
 
     if (product) {
@@ -149,10 +148,18 @@ export class CreateEditCategoriesComponent implements OnInit {
   }
 
 
-  addProduct() {
-    if (this.brandForm.value['id']) {
-      this.selectBrand.push(this.brandForm.value);
-      this.brandForm.setValue(null);
+  addBrand(brand) {
+
+    if (brand['id']) {
+      let inx = this.selectBrand.findIndex(sel => sel['id'] == brand['id'])
+      if (inx == -1) {
+        this.selectBrand.push(brand);
+      } else {
+        this.snackBar.open("La marca ya se encuentra en la lista", "Cerrar", {
+          duration: 6000
+        })
+      }
+      this.brandForm.setValue('');
     } else {
       this.snackBar.open("Debe seleccionar un producto", "Cerrar", {
         duration: 6000
@@ -176,7 +183,6 @@ export class CreateEditCategoriesComponent implements OnInit {
       name: el.get('name').value,
       categories: el.get('categories').value,
     }));
-    console.log(subs);
 
     let newCategory = {
       id: this.data.edit ? this.data.data.id : '',

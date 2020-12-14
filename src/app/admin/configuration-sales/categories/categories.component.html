@@ -1,4 +1,5 @@
 <div class="w3-section">
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
   <button mat-raised-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
     <span>Agregar</span>
     <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>

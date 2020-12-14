@@ -106,30 +106,38 @@
           <div class="categories__section" #megaMenu>
             <div *ngIf="selectCategory">
               <h2 class="categories__title">
-                {{ selectCategory.category | titlecase }}
+                {{ selectCategory.category}}
               </h2>
-              <div class="nav-categs-detail__body w3-padding">
-                <div class="nav-categs-detail__body-content">
-                  <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
-                    <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
-                      {{ sub.name | titlecase }}
-                    </h4>
-                    <div class="footer-list">
-                      <ul>
-                        <li *ngFor="let s of sub.categories">
-                          <a mat-button
-                            (click)="navigateSubCategory(selectCategory.category,sub.name,s)">{{ s | titlecase }}</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </article>
+              <div class="nav-categs-detail__body w3-row-padding">
+                <div class="w3-col m9 l9">
+                  <div class="nav-categs-detail__body-content">
+                    <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
+                      <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
+                        {{ sub.name | titlecase}}
+                      </h4>
+                      <div>
+                        <ul style="padding-inline-start: 1em;">
+                          <li class="categories__link" *ngFor="let s of sub.categories"
+                            (click)="navigateSubCategory(selectCategory.category,sub.name,s)">
+                            {{ s }}
+                          </li>
+                        </ul>
+                      </div>
+                    </article>
+                  </div>
                 </div>
-                <div class="nav-categs-detail__body-aside" *ngIf="selectCategory.brands.length">
+                <div class="w3-col m3 l3" *ngIf="selectCategory.brands.length">
                   <h4 class="categories__subtitle">Marcas Oficiales</h4>
                   <div class="w3-row-padding">
                     <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
-                      <img [src]="brand.photoURL" (click)="navigateBrand(brand.name)"
-                        class="w3-block w3-margin-bottom mat-elevation-z2" alt="" />
+                      <div class="w3-block w3-margin-bottom categories__brand mat-elevation-z2">
+                        <div class=" categories__brand--image">
+
+                          <img [defaultImage]="defaultImage" [lazyLoad]="brand.photoURL" [offset]="100"
+                            (click)="navigateBrand(brand.name)" alt="brand.name" />
+                        </div>
+                      </div>
+
 
                     </div>
                   </div>

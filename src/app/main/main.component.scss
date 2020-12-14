@@ -2,7 +2,7 @@
   background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
   color: white;
   padding: 0 16px;
-  &__row{
+  &__row {
     max-width: 1500px;
     padding: 8px 16px 0px;
     margin: auto;
@@ -21,7 +21,7 @@
   min-width: 100px;
   width: 45%;
   padding-left: 15px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 14px;
   font-weight: 300;
 
@@ -33,7 +33,7 @@
     &::placeholder {
       color: #aeaeae;
     }
-    &:focus{
+    &:focus {
       outline: none;
     }
   }
@@ -54,7 +54,7 @@
 }
 
 .menu-button {
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: "Montserrat", sans-serif !important;
   font-weight: 300 !important;
 }
 
@@ -107,7 +107,7 @@
   &__input {
     margin: 5px 0;
     width: 100%;
-    &:focus{
+    &:focus {
       outline: none;
     }
   }
@@ -129,7 +129,7 @@
   text-decoration: none;
 }
 
-.main__space{
+.main__space {
   padding-top: 64px;
   padding-bottom: 32px;
 }
@@ -170,7 +170,7 @@
     height: 36px;
     margin-bottom: 0;
     padding: 0px 24px 0px 36px;
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
     font-weight: 400;
     color: #ffffff;
     font-size: 14px;
@@ -178,7 +178,7 @@
     cursor: pointer;
     transition: all 0.5s ease-in-out;
     &:hover {
-      background-color: #3483FA;
+      background-color: #3483fa;
       color: white;
     }
     &--name {
@@ -195,36 +195,74 @@
       }
     }
   }
-  &__section{
+  &__section {
     width: calc(100% - 270px);
     overflow: hidden;
     padding: 25px;
     background-color: white;
-    visibility: hidden;
-    color: #2B2B2B;
-    & img{
+    display: none;
+    color: #2b2b2b;
+    & img {
       border: 1px solid #ddd;
+      width: 100%;height: 100%;object-fit: contain;
     }
   }
-  &__title{
+  &__title {
     font-family: Raleway;
-    color: #2B2B2B;
+    color: #2b2b2b;
     border-bottom: 2px solid var(--primary-color);
     font-weight: 600;
     font-size: 1.4em;
     padding-bottom: 8px;
   }
-  &__subtitle{
+  &__subtitle {
     color: var(--primary-color);
-    font-size:1.1em;
+    font-size: 1em;
+    font-weight: 600;
     cursor: pointer;
+    padding-bottom: 0.4375rem;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    border-bottom: 0.0625rem solid #BBBBBB;
+    overflow: hidden;
+  }
+  &__link{
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 400;
+    display: block;
+    white-space: nowrap;
+    width: 100%;
+    text-overflow: ellipsis;
+    line-height: 1.25rem;
+    text-decoration: none;
+    overflow: hidden;
+    &:hover{
+      font-weight: 600;
+    }
+  }
+  &__brand {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    &--image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
   }
 }
 
 .nav-categs-overlay {
   position: absolute;
   left: 0;
-  opacity: .3;
+  opacity: 0.3;
   background-color: #333;
   width: 100%;
   height: 100%;
@@ -234,35 +272,24 @@
   z-index: 900;
 }
 
-.nav-categs-detail{
-  &__body{
+.nav-categs-detail {
+  &__body {
     max-height: 550px;
     overflow-y: auto;
+
     &-content {
-      column-count: 3;
-      column-gap: 36px;
-      column-width: 192px;
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-template-rows: auto auto auto;
+      grid-auto-flow: column;
+      column-gap: 10px;
       overflow: hidden;
-      float: left;
-      max-width: 648px;
-      width: 65%;
+    }
   }
-  &-aside {
-    width: 192px;
-    float: left;
-    margin-left: 36px;
-}
-  }
-  &__categ{
-    width: 192px;
+  &__categ {
     display: inline-block;
     text-overflow: ellipsis;
     margin-bottom: 24px;
+    padding: 1.5rem 2rem 0;
   }
-  
-}
-
-.nav-categs-detail__body:after, .nav-categs-detail__body:before {
-    display: table;
-    content: "";
 }
