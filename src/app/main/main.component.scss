@@ -24,8 +24,8 @@
   display: flex;
   font-family: "Montserrat", sans-serif;
   font-size: 14px;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: 10px;
+  margin-bottom: 30px;
   width: 50%;
   background: white;
   border: 1px solid red;
@@ -45,7 +45,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   border: 1px solid red;
-  padding: 20px;
+  padding: 10px;
 }
 .contactanos{
   padding-left: 200px;
@@ -65,12 +65,18 @@
 
 .menu{
   position: absolute;
-  top: 120px;
+  top: 80px;
   left: 20px;
   width: 250px;
   border: 1px solid green;
 }
-
+.menu button{
+  display: inline;
+}
+.menu-button {
+  font-family: "Montserrat", sans-serif !important;
+  font-weight: 200 !important;
+}
 
 .social__button {
   border: 1px solid white;
@@ -228,12 +234,6 @@
     margin-bottom: 24px;
     padding: 1.5rem 2rem 0;
   }
-}
-
-
-.menu-button {
-  font-family: "Montserrat", sans-serif !important;
-  font-weight: 300 !important;
 }
 
 .footer {
