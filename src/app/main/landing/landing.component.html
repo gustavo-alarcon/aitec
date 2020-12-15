@@ -13,9 +13,13 @@
     </div>
     <h2 class="title-section">Ofertas</h2>
   </div>
-  <a (click)="navigateBrand(pro)" *ngFor="let pro of promo">
-    <img [src]="pro.photoURL" class="w3-block" alt="promo" />
-  </a>
+
+  <div class="img-oferta">
+    <a (click)="navigateBrand(pro)" *ngFor="let pro of promo;  let i = index">
+      <img [src]="pro.photoURL" class="w3-block-{{i}}" alt="promo" />
+    </a>
+  </div>
+  
 
 
   <div class="w3-section ms-container">
