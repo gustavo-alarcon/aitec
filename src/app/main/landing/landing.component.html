@@ -1,21 +1,26 @@
 <div *ngIf="init$ | async;else loader">
-  <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
-    <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-      <a (click)="navigateBrand(ban)">
-        <img [src]="ban.photoURL" class="w3-block" alt="" />
-      </a>
-    </div>
+    
+    <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
+      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+        <a (click)="navigateBrand(ban)">
+          <img [src]="ban.photoURL" class="w3-block-banner" alt="" />
+        </a>
+      </div>      
+    </ngx-slick-carousel>
 
-  </ngx-slick-carousel>
   <div class="w3-padding w3-center">
     <div class="font--primary">
       <mat-icon fontSet="material-icons-outlined" class="section__icon">offline_bolt</mat-icon>
     </div>
     <h2 class="title-section">Ofertas</h2>
   </div>
-  <a (click)="navigateBrand(pro)" *ngFor="let pro of promo">
-    <img [src]="pro.photoURL" class="w3-block" alt="promo" />
-  </a>
+
+  <div class="img-oferta">
+    <a (click)="navigateBrand(pro)" *ngFor="let pro of promo;  let i = index">
+      <img [src]="pro.photoURL" class="w3-block-{{i}}" alt="promo" />
+    </a>
+  </div>
+  
 
 
   <div class="w3-section ms-container">
