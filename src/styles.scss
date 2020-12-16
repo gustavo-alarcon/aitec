@@ -688,9 +688,19 @@ img.ng-lazyloaded {
 
 .slick-arrow.slick-prev, .slick-arrow.slick-next {
   height: 40px;
-    width: 40px;
+  width: 40px;
+  
 }
 .slick-arrow.slick-prev:before, .slick-arrow.slick-next:before{
   color: var(--primary-color) !important;
   font-size: 30px;
+
+}
+
+.slick-arrow.slick-prev{
+  margin-right: -100px;
+}
+
+.slick-arrow.slick-next{
+  margin-left: -100px;
 }
