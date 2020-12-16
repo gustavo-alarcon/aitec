@@ -21,7 +21,7 @@ export class DeleteConfiDialogComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data.path);
+    console.log(this.data);
 
   }
 
