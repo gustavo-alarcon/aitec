@@ -691,10 +691,10 @@ img.ng-lazyloaded {
 
 }
 
-.slick-arrow.slick-prev{
-  margin-right: -100px;
+.slick-arrow.slick-prev:before{
+  margin-right: -50px;
 }
 
-.slick-arrow.slick-next{
-  margin-left: -100px;
+.slick-arrow.slick-next:before{
+  margin-left: -50px;
 }
