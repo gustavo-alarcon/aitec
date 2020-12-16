@@ -39,77 +39,36 @@
   <div class="w3-row-padding ms-row">
     <div class="w3-col l3 m3 w3-hide-small w3-hide-medium">
       <div style="padding: 8px 0" *ngIf="category$|async as categories">
-        <mat-nav-list>
-          <mat-list-item  style="border-bottom: 1px solid #c4c4c4">
-            <a matLine [routerLink]="['/main/productos', { promo: true }]">Promociones</a>
-
-          </mat-list-item>
-          <mat-list-item *ngFor="let cat of categories"  style="border-bottom: 1px solid #c4c4c4">
-            <a matLine href="...">{{ cat.category }}</a>
-            <button mat-icon-button (click)="showInfo(cat)">
-              <mat-icon>navigate_next</mat-icon>
-           </button>
-          </mat-list-item>
-
-        </mat-nav-list>
+        <mat-card class="filtro">
+          <div style="padding: 8px 0">
+            <div class="filtro__link ms-flex ms-flex--center">
+              Promociones
+            </div>
+            <mat-expansion-panel *ngFor="let cat of categories" class="filtro__panel" >
+              <mat-expansion-panel-header>
+                <mat-panel-title> {{ cat.category }} </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div *ngFor="let sub of cat.subcategories">
+                <mat-expansion-panel *ngIf="sub.categories.length;else simple" class="filtro__panel" >
+                  <mat-expansion-panel-header>
+                    <mat-panel-title> <span (click)="navigateCategory(cat.category, sub.name)">{{ sub.name }}</span> </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div *ngFor="let subcat of sub.categories" class="filtro__sub">
+                    {{ subcat | titlecase }}
+                  </div>
+                </mat-expansion-panel>
+                <ng-template #simple>
+                  <div class="filtro__link ms-flex ms-flex--center" (click)="navigateCategory(cat.category, sub.name)">
+                    {{ sub.name }}
+                  </div>
+                </ng-template>
+              </div>
+              
+            </mat-expansion-panel>
+          </div>
+        </mat-card>
       </div>
     </div>
-    <!--div class="categories animated" [ngClass]="{ fadeOut: !openedMenu }"
-        [style.display]="firstOpening ? 'block' : 'none'">
-        <div style="display: flex">
-          <nav class="categories__nav">
-            <ul class="categories__list">
-              <li class="categories__item" (click)="navigatePromo()" (mouseenter)="closeSection()">
-                <div class="categories__item--name">Promociones</div>
-              </li>
-              <li class="categories__item" (mouseenter)="closeSection()">
-                <div class="categories__item--name">Destacados</div>
-              </li>
-              <li class="categories__item" *ngFor="let cat of listCategories" (mouseenter)="openSection(cat)">
-                <div class="categories__item--name">
-                  <div>{{ cat.category }}</div>
-                  <span class="ms-fill"></span>
-                  <mat-icon>keyboard_arrow_right</mat-icon>
-                </div>
-              </li>
-            </ul>
-          </nav>
-          <div class="categories__section" #megaMenu>
-            <div *ngIf="selectCategory">
-              <h2 class="categories__title">
-                {{ selectCategory.category | titlecase }}
-              </h2>
-              <div class="nav-categs-detail__body w3-padding">
-                <div class="nav-categs-detail__body-content">
-                  <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
-                    <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
-                      {{ sub.name | titlecase }}
-                    </h4>
-                    <div class="footer-list">
-                      <ul>
-                        <li *ngFor="let s of sub.categories">
-                          <a mat-button
-                            (click)="navigateSubCategory(selectCategory.category,sub.name,s)">{{ s | titlecase }}</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </article>
-                </div>
-                <div class="nav-categs-detail__body-aside" *ngIf="selectCategory.brands.length">
-                  <h4 class="categories__subtitle">Marcas Oficiales</h4>
-                  <div class="w3-row-padding">
-                    <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
-                      <img [src]="brand.photoURL" (click)="navigateBrand(brand.name)"
-                        class="w3-block w3-margin-bottom mat-elevation-z2" alt="" />
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div-->
     <div class="store__section w3-col l9">
       <div class="w3-margin-top">
         <div class="w3-row ms-row" style="min-height: 80vh" *ngIf="products$ | async">

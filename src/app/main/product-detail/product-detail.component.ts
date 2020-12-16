@@ -57,11 +57,6 @@ export class ProductDetailComponent implements OnInit {
     private router: Router
   ) {
     this.route.paramMap.subscribe(params => {
-      console.log(params.get('param'));
-
-      console.log(params['id']);
-      
-      
       this.ngOnInit();
     });
   }
@@ -87,7 +82,7 @@ export class ProductDetailComponent implements OnInit {
         this.colorSelected = res.colors[0]
         this.loading.next(false)
 
-        this.galleryImg = res.products[0].gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
+        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
         this.selectImage = this.galleryImg[res.indCover]
 
       })

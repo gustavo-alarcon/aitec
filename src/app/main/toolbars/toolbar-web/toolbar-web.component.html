@@ -1,0 +1,150 @@
+<div class="main-toolbar">
+  <div class="main-toolbar__row">
+    <div class="ms-flex ms-flex--center w3-padding">
+      <a class="main-toolbar__logo w3-margin-right" routerLink="/main">
+        <img src="../../../../assets/images/logo-white.png" class="main-toolbar__logoimage" alt="logo" />
+      </a>
+      <div class="search-form background-color w3-margin-left mat-elevation-z2">
+        <input matInput type="text" [formControl]="searchForm" placeholder="Buscar productos, marcas y más..."
+          autocomplete="off" [matAutocomplete]="autoProduct" class="search-form__input" (keyup.enter)="navigate()"
+          style="border: none" />
+        <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="showSelectedUser" [panelWidth]="450">
+          <mat-option *ngFor="let option of filteredProducts$ | async" [value]="option"
+            (click)="navigateProduct(option)" (onSelectionChange)="navigateProduct(option)">
+            <span>{{ option["description"] | titlecase }}</span>
+          </mat-option>
+        </mat-autocomplete>
+        <button mat-icon-button color="primary" [style.visibility]="(search$ | async) ? 'visible' : 'hidden'"
+          (click)="clearInput()">
+          <mat-icon style="font-size: 18px">close</mat-icon>
+        </button>
+        <button mat-button (click)="navigate()" class="search-form__button">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+      <span class="ms-fill"></span>
+      <div class="ms-flex">
+        <a [href]="info.social.whatsapp" target="_blank" mat-icon-button class="social__button">
+          <img src="../../assets/images/whatsapp.png" alt="" />
+        </a>
+        <a [href]="info.social.facebook" target="_blank" mat-icon-button class="social__button">
+          <img src="../../assets/images/facebook.png" alt="" />
+        </a>
+
+        <a [href]="info.social.instagram" target="_blank" mat-icon-button class="social__button">
+          <img src="../../assets/images/logotipo-de-instagram.png" alt="" />
+        </a>
+      </div>
+    </div>
+
+    <div class="ms-flex ms-flex--center w3-padding">
+      <div>
+        <button mat-button (click)="toggleMenu()" class="menu-button">
+          <mat-icon>menu</mat-icon>
+          CATEGORÍAS
+        </button>|
+        <button mat-button routerLink="/main" class="menu-button">INICIO</button>|
+        <button mat-button routerLink="/main/contactanos" class="menu-button">
+          CONTACTÁNOS
+        </button>
+      </div>
+      <span class="ms-fill"></span>
+      <ng-template #login>
+        <button mat-button routerLink="/main/login/signIn" class="menu-button">
+          <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+        </button>
+      </ng-template>
+      <div *ngIf="auth.user$ | async as user; else login">
+        <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+          <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
+          {{ getName(user) }}
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="logOut()">
+            <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
+          </button>
+          <button mat-menu-item disabled>
+            <mat-icon>receipt</mat-icon>
+            <span>Mis pedidos</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>favorite</mat-icon>
+            <span>Mis favoritos</span>
+          </button>
+        </mat-menu>
+        <button mat-button routerLink="/main/carrito" matTooltip="Carrito">
+          <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
+            shopping_cart</mat-icon>
+        </button>
+        <button mat-button matTooltip="Notificaciones">
+          <mat-icon matBadge="5" matBadgeColor="warn">notifications_none</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="categories animated" [ngClass]="{ fadeOut: !openedMenu }"
+      [style.display]="firstOpening ? 'block' : 'none'">
+      <div style="display: flex">
+        <nav class="categories__nav">
+          <ul class="categories__list">
+            <li class="categories__item" (click)="navigatePromo()" (mouseenter)="closeSection()">
+              <div class="categories__item--name">Promociones</div>
+            </li>
+            <li class="categories__item" (mouseenter)="closeSection()">
+              <div class="categories__item--name">Destacados</div>
+            </li>
+            <li class="categories__item" *ngFor="let cat of listCategories" (mouseenter)="openSection(cat)">
+              <div class="categories__item--name">
+                <div>{{ cat.category }}</div>
+                <span class="ms-fill"></span>
+                <mat-icon>keyboard_arrow_right</mat-icon>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <div class="categories__section" #megaMenu>
+          <div *ngIf="selectCategory">
+            <h2 class="categories__title">
+              {{ selectCategory.category}}
+            </h2>
+            <div class="nav-categs-detail__body w3-row-padding">
+              <div class="w3-col m9 l9">
+                <div class="nav-categs-detail__body-content">
+                  <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
+                    <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
+                      {{ sub.name | titlecase}}
+                    </h4>
+                    <div>
+                      <ul style="padding-inline-start: 1em;">
+                        <li class="categories__link" *ngFor="let s of sub.categories"
+                          (click)="navigateSubCategory(selectCategory.category,sub.name,s)">
+                          {{ s }}
+                        </li>
+                      </ul>
+                    </div>
+                  </article>
+                </div>
+              </div>
+              <div class="w3-col m3 l3" *ngIf="selectCategory.brands.length">
+                <h4 class="categories__subtitle">Marcas Oficiales</h4>
+                <div class="w3-row-padding">
+                  <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
+                    <div class="w3-block w3-margin-bottom categories__brand mat-elevation-z2">
+                      <div class=" categories__brand--image">
+
+                        <img [defaultImage]="defaultImage" [lazyLoad]="brand.photoURL" [offset]="100"
+                          (click)="navigateBrand(brand.name)" alt="brand.name" />
+                      </div>
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

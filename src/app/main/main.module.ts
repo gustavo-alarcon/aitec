@@ -20,9 +20,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
-
+import { ToolbarWebComponent } from './toolbars/toolbar-web/toolbar-web.component';
+import { ToolbarMobileComponent } from './toolbars/toolbar-mobile/toolbar-mobile.component';
+import { MatExpansionModule } from '@angular/material/expansion';
 @NgModule({
-  declarations: [MainComponent, RateDialogComponent],
+  declarations: [MainComponent, RateDialogComponent, ToolbarWebComponent, ToolbarMobileComponent],
   imports: [
     CommonModule,
     MainRoutingModule,
@@ -42,7 +44,8 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
     MatTooltipModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    MatExpansionModule
   ],
   entryComponents: [RateDialogComponent],
 })

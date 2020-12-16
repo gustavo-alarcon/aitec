@@ -1,0 +1,93 @@
+<div class="main__toolbar ">
+  <div class="ms-flex ms-flex--center w3-padding">
+    <button mat-icon-button (click)="openSide()">
+      <mat-icon class="dark-icon">menu</mat-icon>
+    </button>
+    <a class="main__logo" routerLink="/web">
+      <img src="../../../../assets/images/logo-white.png" class="main__logoimage" alt="logo" />
+    </a>
+    <span class="ms-fill"></span>
+    <button mat-icon-button class="search-button" (click)="toggleSearch()">
+      <mat-icon>{{openedSearch ? 'close' : 'search'}}</mat-icon>
+    </button>
+    <div class="search-div background-color" [style.display]="openedSearch ? 'block' : 'none'">
+      <mat-form-field appearance="outline" class="w3-small" style="font-size: 1rem; width: 100%">
+        <mat-label>Buscar</mat-label>
+        <input matInput type="text" [formControl]="searchForm" placeholder="Buscar productos, marcas y más..."
+          autocomplete="off" [matAutocomplete]="autoProduct" class="search-form__input" (keyup.enter)="navigate()"
+          style="border: none" />
+        <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="showSelectedUser">
+          <mat-option *ngFor="let option of filteredProducts$ | async" [value]="option"
+            (click)="navigateProduct(option)" (onSelectionChange)="navigateProduct(option)">
+            <span>{{ option["description"] | titlecase }}</span>
+          </mat-option>
+        </mat-autocomplete>
+        <button mat-icon-button matSuffix>
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+    <div *ngIf="auth.user$ | async as user; else iniciarSesion2" class="ms-flex">
+      <button mat-icon-button [matMenuTriggerFor]="beforeMenu">
+        <mat-icon>person</mat-icon>
+      </button>
+      <mat-menu #beforeMenu="matMenu">
+        <button mat-menu-item (click)="logOut()">
+          <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
+        </button>
+        <button mat-menu-item disabled>
+          <mat-icon>receipt</mat-icon>
+          <span>Mis pedidos</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>favorite</mat-icon>
+          <span>Mis favoritos</span>
+        </button>
+      </mat-menu>
+
+      <button mat-icon-button routerLink="/main/carrito">
+        <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
+          shopping_cart</mat-icon>
+      </button>
+    </div>
+    <ng-template #iniciarSesion2>
+      <button mat-button routerLink="/main/login/signIn" class="menu-button">
+        <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+      </button>
+    </ng-template>
+  </div>
+
+</div>
+<div>
+  <div class="backgroundSide" [ngClass]="{'backgroundSide--open': openSideNav, 'backgroundSide--close': !openSideNav}">
+    <button mat-icon-button (click)="openSide()">
+      <mat-icon >close</mat-icon>
+    </button>
+  </div>
+  <div class="categoryMenu" [style.left]="openSideNav?'0': 'calc(-100% + 4rem)'">
+    <div class="filtro__link ms-flex ms-flex--center">
+      Promociones
+    </div>
+    <mat-expansion-panel style="border-radius: 0;" *ngFor="let cat of categories" class="filtro__panel" >
+      <mat-expansion-panel-header>
+        <mat-panel-title> {{ cat.category }} </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div *ngFor="let sub of cat.subcategories">
+        <mat-expansion-panel *ngIf="sub.categories.length;else simple" style="border-radius: 0;" class="filtro__panel" >
+          <mat-expansion-panel-header>
+            <mat-panel-title> <span (click)="navigateCategory(cat.category, sub.name)">{{ sub.name }}</span> </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div *ngFor="let subcat of sub.categories" class="filtro__sub">
+            {{ subcat | titlecase }}
+          </div>
+        </mat-expansion-panel>
+        <ng-template #simple>
+          <div class="filtro__link ms-flex ms-flex--center" (click)="navigateCategory(cat.category, sub.name)">
+            {{ sub.name }}
+          </div>
+        </ng-template>
+      </div>
+      
+    </mat-expansion-panel>
+  </div>
+</div>
