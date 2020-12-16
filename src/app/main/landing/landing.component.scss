@@ -65,19 +65,27 @@
 
 .w3-block-0{
   width: 50%;
-  height: 320px;
+  height: 25vw;
 }
 
 .w3-block-1{
   width: 25%;
-  height: 320px;
+  height: 25vw;
 
 }
 
 .w3-block-2{
   width: 25%;
-  height: 320px;
+  height: 25vw;
 
+}
+.w3-block-banner{
+  width: 100%;
+  height: 25vw;
+}
+
+.container-carousel{
+  margin: 30px;
 }
 
 // QUERY
@@ -85,16 +93,22 @@
 
   .w3-block-0{
     width: 100%;
-    height: 200px;
+    height: 40vw;
   }
   .w3-block-1{
     width: 50%;
-    height: 200px;  
+    height: 40vw;  
   }  
   .w3-block-2{
     width: 50%;
-    height: 200px;
-  
+    height: 40vw;
+  }
+  .w3-block-banner{
+    width: 100%;
+    height: 40vw;
+  }
+  .title-section{
+    font-size: 1.2em;
   }
 }
 
