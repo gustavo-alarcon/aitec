@@ -1,7 +1,7 @@
 // Custom Theming for Angular Material
 @import "./assets/css/animate.css";
 @import "./assets/css/w3.css";
-@import '~@angular/material/theming';
+@import "~@angular/material/theming";
 // Plus imports for other components in your app.
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -45,7 +45,6 @@ $mat-aitec-primary-palette: (
     A700: #000000,
   ),
 );
-
 
 $aitec-primary: mat-palette($mat-aitec-primary-palette);
 $aitec-accent: mat-palette($mat-amber, 800);
@@ -119,7 +118,7 @@ a {
 
 :root {
   // --primary-color: #1c31ea;
-  --primary-color:#1c31ea;
+  --primary-color: #1c31ea;
   --accent-color: #ff8f00;
   --warn-color: #f44336;
   --forth-color: #f44336;
@@ -212,7 +211,7 @@ a {
   font-family: "Raleway", sans-serif !important;
 }
 
-.mat-icon{
+.mat-icon {
   vertical-align: middle;
 }
 
@@ -294,11 +293,8 @@ a {
     width: 100%;
   }
 
-  .mat-expansion-panel-body {
-    padding: 0 16px 16px !important;
-  }
   .mat-expansion-panel-header {
-    padding: 0 16px !important;
+    padding: 0 16px;
   }
 }
 
@@ -373,7 +369,6 @@ img.ng-lazyloaded {
   font-family: "Raleway", sans-serif;
 }
 
-
 .mat-expansion-panel-body {
   font-family: "Raleway", sans-serif;
 }
@@ -414,7 +409,7 @@ img.ng-lazyloaded {
 }
 
 .ticket__total {
-  background: #FF8A00;
+  background: #ff8a00;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 5px;
   font-size: 1.5em;
@@ -458,7 +453,7 @@ img.ng-lazyloaded {
 .mat-expansion-panel-header {
   background-color: transparent;
   font-family: Raleway;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .section__tab .mat-tab-label {
@@ -583,15 +578,14 @@ img.ng-lazyloaded {
     width: 970px;
   }
 }
-@media (min-width: 1200px){
+@media (min-width: 1200px) {
   .ms-container {
     width: 1200px;
-}
+  }
 }
 
-
-.ms-content{
-  max-width:1400px;
+.ms-content {
+  max-width: 1400px;
   margin: auto;
   padding: 30px;
 }
@@ -651,7 +645,7 @@ img.ng-lazyloaded {
   left: calc(100% + 20px);
 }
 
-.map-container{
+.map-container {
   border-radius: 10px;
   border: 2px solid;
   border-color: var(--primary-color);
@@ -680,18 +674,18 @@ img.ng-lazyloaded {
   background: #003e6e;
 }
 
-
-
 .slide.slick-list:focus {
-  outline: none!important;
+  outline: none !important;
 }
 
-.slick-arrow.slick-prev, .slick-arrow.slick-next {
+.slick-arrow.slick-prev,
+.slick-arrow.slick-next {
   height: 40px;
   width: 40px;
   
 }
-.slick-arrow.slick-prev:before, .slick-arrow.slick-next:before{
+.slick-arrow.slick-prev:before,
+.slick-arrow.slick-next:before {
   color: var(--primary-color) !important;
   font-size: 30px;
 

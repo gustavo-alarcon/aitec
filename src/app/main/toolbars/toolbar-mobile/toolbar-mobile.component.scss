@@ -1,0 +1,268 @@
+.main__sidenav {
+  //background: white;
+  width: 300px;
+}
+
+.main__toolbar {
+  background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
+  color: white;
+}
+
+.main__logo {
+  margin-right: 10px;
+}
+
+.main__logomovil {
+  max-width: 200px;
+  padding: 7px 0;
+  height: 56px;
+}
+
+.main__logoimage {
+  max-height: 60px;
+}
+
+.login {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-weight: 900;
+  font-size: 1.1em;
+  padding: 28px 10px 20px;
+  position: relative;
+  justify-content: center;
+}
+
+.user {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-weight: 900;
+  font-size: 1.1em;
+  padding: 28px 40px 20px;
+  position: relative;
+  justify-content: left;
+}
+
+.user__name {
+  width: 60%;
+  text-align: left;
+  font-size: x-large;
+}
+
+.user__surname {
+  width: 60%;
+  text-align: left;
+  font-size: small;
+  font-weight: normal;
+}
+
+.user__image {
+  border-width: 3px;
+  border-style: solid;
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.menu {
+  min-height: 51vh;
+  max-width: fit-content;
+}
+
+.menu__title {
+  font-weight: 900;
+  font-size: 1.2em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-left: 20px;
+}
+
+.menu__button {
+  text-align: left;
+  border-radius: 0px 0px 0px 0px;
+  padding: 5px 10px 5px 40px;
+  font-size: 1em;
+  letter-spacing: 0.05em;
+  //color: #2B2B2B;
+}
+
+.menu__icon {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.meraki {
+  width: 300px;
+  padding: 25px 0 0 0;
+  position: relative;
+}
+
+.meraki__logo {
+  width: 80px;
+}
+
+.main__space {
+  padding-top: 64px;
+}
+
+@media (max-width: 601px) {
+  .main__logoimage {
+    max-height: 50px;
+  }
+
+  .main__space {
+    padding-top: 56px;
+  }
+}
+
+@media (max-width: 355px) {
+  .main__logoimage {
+    max-height: 40px;
+  }
+}
+
+.search-form {
+  display: flex;
+  border-radius: 4px;
+  font-size: 1em;
+  padding-left: 15px;
+  border: 1px solid #01579b;
+
+  &__input {
+    margin: 5px 0;
+  }
+
+  &__button {
+    border-radius: 0 4px 4px 0;
+    min-width: 40px !important;
+    padding: 0 !important;
+  }
+}
+.search-form__input:focus {
+  outline: none;
+}
+
+.search-button {
+  display: none;
+}
+
+.search-div {
+  position: absolute;
+  left: 0;
+  top: 57px;
+  width: 100vw;
+  padding: 10px 16px 0;
+  transition: display 1s linear 1s;
+  z-index: 10;
+  color: black;
+}
+
+@media (min-width: 602px) {
+  .search-form__input {
+    width: 150px;
+  }
+
+  .search-div {
+    display: none;
+  }
+}
+
+@media (max-width: 719px) {
+  .search-form {
+    display: none;
+  }
+
+  .search-button {
+    display: block;
+  }
+}
+
+@media (min-width: 992px) {
+  .search-form__input {
+    width: 250px;
+  }
+}
+
+.backgroundSide {
+  display: flex;
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  left: -100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out 0s, left 0s linear 0.2s;
+  justify-content: flex-end;
+  align-items: flex-start;
+  color: white;
+}
+
+.backgroundSide--close {
+  left: -100%;
+  opacity: 0;
+}
+
+.backgroundSide--open {
+  opacity: 1;
+  left: 0;
+  transition: opacity 0.2s ease-in-out 0s, left 0s linear 0s;
+}
+
+.categoryMenu {
+  position: fixed;
+  z-index: 110;
+  width: calc(100% - 4rem);
+  overflow-y: auto;
+  background: white;
+  top: 0;
+  bottom: 0;
+  left: calc(-100% + 4rem);
+  transition: all 0.2s ease-in-out;
+}
+
+.filtro {
+  &__panel {
+    box-shadow: none;
+  }
+
+  &__link {
+    height: 48px;
+    border-bottom: 1px solid #c4c4c4;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0px 16px 0 10px;
+    background: white;
+  }
+
+  &__sub {
+    padding: 10px 0;
+    border-bottom-color: #ffffff;
+  }
+
+  &__panel .mat-expansion-panel-header {
+    padding: 0px 10px;
+    border-bottom: 1px solid #c4c4c4;
+    border-radius: 0;
+    font-weight: 500;
+  }
+
+  &__panel .mat-expansion-panel-header.mat-expanded {
+    /* height: 64px; */
+    border-left: 4px solid  #1c31ea;
+  }
+
+  &__scroll {
+    max-height: 28em;
+    overflow: auto;
+  }
+}
+
+::ng-deep .filtro__panel .mat-expansion-panel-content .mat-expansion-panel-body {
+  padding: 0 0 0 24px;
+  background-color: #f5f5f5;
+}

@@ -168,7 +168,7 @@ export class LandingComponent implements OnInit {
       data: {
         id: banner.id,
         title: 'Banner',
-        type: 'banner',
+        type: 'banners',
         image: true,
         path: banner.photoPath
       }
