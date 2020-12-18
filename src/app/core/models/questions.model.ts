@@ -9,4 +9,5 @@ export interface Questions{
   answerAt:Date;
   createdAt: Date,
   createdBy: User,
+  idProduct:string;
 }

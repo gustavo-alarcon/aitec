@@ -1,0 +1,68 @@
+
+<mat-card class="product">
+  <mat-card-content>
+    <div>
+      <div *ngIf="product.purchaseNumber > 1;else new">{{product.purchaseNumber}} vendidos</div>
+      <ng-template #new> <span>Nuevo</span> </ng-template>
+      <h2 class="product__title">{{ product.description }}</h2>
+      <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
+        <div ngxSlickItem *ngFor="let slide of product.gallery" class="slide">
+          <img [defaultImage]="defaultImage" [lazyLoad]="slide.photoURL" [offset]="100" class="gallery__image" alt="gallery-img" />
+        </div>
+      </ngx-slick-carousel>
+      <div *ngIf="product.promo" class="product__promo ms-flex">
+        <div style="width: fit-content">
+          Antes <strike>{{ product.priceMin }}</strike>
+        </div>
+        <div class="product__promo--discount">
+          {{ product.promoData.offer }} % Dscto
+        </div>
+      </div>
+      <div class="product__price w3-section">
+        <span *ngIf="product.promo">Ahora</span>
+        <span class="product__price--number">
+          S/.
+          {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
+        </span>
+      </div>
+      <div class="w3-section">
+        <div>Paga con:</div>
+        <div class="ms-flex w3-section" style="justify-content: space-around">
+          <img src="../../../assets/images/visa.png" class="mini-img" alt="" />
+          <img src="../../../assets/images/mastercad.png" class="mini-img" alt="" />
+          <img src="../../../assets/images/visa_electron.png" class="mini-img" alt="" />
+          <img src="../../../assets/images/american.png" class="mini-img" alt="" />
+        </div>
+      </div>
+
+      <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
+      <div class="product__stock">
+        {{ product.virtualStock }} Unidades disponibles
+      </div>
+      <div class="w3-center w3-margin-top">
+        <app-quantity-div [product]="product" size="md"></app-quantity-div>
+        <button mat-button class="w3-margin-top" color="primary"> Agregar a favoritos <mat-icon>favorite_border</mat-icon> </button>
+      </div>
+      <div class="w3-section">
+        <p style="font-size: 1em">
+          Marca: <strong>{{ product.brand.name }}</strong>
+        </p>
+        <div class="w3-section">
+          <h4 class="product__subtitle">Descripción</h4>
+          <div [innerHTML]="product.additionalDescription"></div>
+        </div>
+    
+        <div class="w3-section">
+          <h4 class="product__subtitle">Calificaciones</h4>
+          <div style="color: #f2c94c">
+            <mat-icon>star</mat-icon>
+            <mat-icon>star</mat-icon>
+            <mat-icon>star</mat-icon>
+            <mat-icon>star</mat-icon>
+            <mat-icon>star_half</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

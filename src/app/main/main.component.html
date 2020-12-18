@@ -1,8 +1,8 @@
 <div *ngIf="init$ | async as info; else loader">
-  <div class="w3-hide-small" >
+  <div class="w3-hide-small w3-hide-medium" >
     <app-toolbar-web [listCategories]="listCategories" [info]="info"></app-toolbar-web>
   </div>
-  <div class="w3-hide-large w3-hide-medium">
+  <div class="w3-hide-large">
     <app-toolbar-mobile [categories]="listCategories"></app-toolbar-mobile>
   </div>
   

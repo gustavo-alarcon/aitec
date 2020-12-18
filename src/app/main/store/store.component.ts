@@ -17,11 +17,11 @@ export class StoreComponent implements OnInit {
   category$: Observable<any>;
   config: PaginationInstance = {
     id: 'custom',
-    itemsPerPage: 9,
+    itemsPerPage: 12,
     currentPage: 1,
   };
 
-  products: Array<any>;
+  products: Array<any> = [];
   products$: Observable<any>;
   searchForm: FormControl = new FormControl('');
 
@@ -144,7 +144,7 @@ export class StoreComponent implements OnInit {
         break;
     }
   }
-  
+
   navigateOnlyCategory(category) {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);

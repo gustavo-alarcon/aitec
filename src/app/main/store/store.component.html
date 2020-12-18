@@ -1,4 +1,4 @@
-<div class="store__container w3-section">
+<div class="ms-container w3-section">
   <div class="ms-flex ms-flex--center" style="justify-content: space-between">
     <div>
       <a mat-flat-button routerLink="/main">Inicio</a> >
@@ -53,7 +53,8 @@
                   <mat-expansion-panel-header>
                     <mat-panel-title> <span (click)="navigateCategory(cat.category, sub.name)">{{ sub.name }}</span> </mat-panel-title>
                   </mat-expansion-panel-header>
-                  <div *ngFor="let subcat of sub.categories" class="filtro__sub">
+                  <div *ngFor="let subcat of sub.categories" class="filtro__sub"
+                  (click)="navigateSubCategory(cat.category, sub.name,subcat)">
                     {{ subcat | titlecase }}
                   </div>
                 </mat-expansion-panel>
@@ -72,13 +73,13 @@
     <div class="store__section w3-col l9">
       <div class="w3-margin-top">
         <div class="w3-row ms-row" style="min-height: 80vh" *ngIf="products$ | async">
-          <div *ngFor="let product of products | paginate: config" class="w3-col col-lg-4 col-sm-6 w3-margin-bottom">
-            <div class="w3-padding">
+          <div *ngFor="let product of products | paginate: config" class="w3-col col-sm-4 col-xs-6  w3-margin-bottom">
+            <div style="padding:0 8px">
               <app-product-div [product]="product" [offer]="false"></app-product-div>
             </div>
           </div>
         </div>
-        <pagination-template #p="paginationApi" [id]="config.id" (pageChange)="config.currentPage = $event" maxSize="6"
+        <pagination-template *ngIf="products.length>12" #p="paginationApi" [id]="config.id" (pageChange)="config.currentPage = $event" maxSize="6"
           autoHide="true" class="paginator">
           <div class="ms-flex ms-flex--center">
             <button mat-button class="paginator__button" (click)="p.previous()" [disabled]="p.isFirstPage()">

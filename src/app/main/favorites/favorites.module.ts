@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -11,25 +12,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProductDivModule } from '../product-div/product-div.module';
-import { GalleryModule } from 'ng-gallery';
-import { SlickCarouselModule } from 'ngx-slick-carousel';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
-import { ProductDetailRoutingModule } from './product-detail-routing.module';
-import { ProductDetailComponent } from './product-detail.component';
-import { QuantityDivModule } from '../quantity-div/quantity-div.module';
-import { QuestionsComponent } from './questions/questions.component';
-import { WebViewComponent } from './web-view/web-view.component';
-import { MobileViewComponent } from './mobile-view/mobile-view.component';
-import { MatSelectModule } from '@angular/material/select';
+
+
+import { FavoritesRoutingModule } from './favorites-routing.module';
+import { FavoritesComponent } from './favorites.component';
+
+
 @NgModule({
-  declarations: [
-    ProductDetailComponent,
-    QuestionsComponent,
-    WebViewComponent,
-    MobileViewComponent],
+  declarations: [FavoritesComponent],
   imports: [
     CommonModule,
-    ProductDetailRoutingModule,
+    FavoritesRoutingModule,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
@@ -42,11 +36,7 @@ import { MatSelectModule } from '@angular/material/select';
     ReactiveFormsModule,
     MatProgressBarModule,
     ProductDivModule,
-    GalleryModule,
-    SlickCarouselModule,
-    QuantityDivModule,
-    LazyLoadImageModule,
-    MatSelectModule
+    LazyLoadImageModule
   ]
 })
-export class ProductDetailModule { }
+export class FavoritesModule { }
