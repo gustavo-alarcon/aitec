@@ -1,7 +1,6 @@
 .product {
   border: 1px solid #e0e0e0;
   box-sizing: border-box;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   position: relative;
   cursor: pointer;
   &__star {
@@ -18,10 +17,9 @@
   }
   &__image {
     height: 100%;
-    min-height: 250px;
-    max-height: 250px;
+    min-height: 220px;
+    max-height: 220px;
     object-fit: contain;
-
   }
   &__title {
     font-family: Montserrat;
@@ -43,7 +41,7 @@
     font-family: Roboto;
     font-weight: 500;
     color: var(--primary-color);
-    &--number{
+    &--number {
       font-size: 1.3em;
     }
   }
@@ -69,6 +67,27 @@
       padding-left: 0.3em;
       text-align: left;
       line-height: 1.2em;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .product {
+    &__star {
+      &--icon {
+        height: 24px;
+        width: 24px;
+        font-size: 24px;
+      }
+    }
+    &__image {
+      min-height: 150px;
+      max-height: 150px;
+      object-fit: contain;
+      margin-bottom: 0px !important;
+    }
+    &__title {
+      height: 3em;
     }
   }
 }

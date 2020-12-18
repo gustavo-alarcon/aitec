@@ -14,7 +14,8 @@ export interface User {
   lastBrowser?: string[]
   fcmTokens?: {
     [token: string]: true
-  }
+  };
+  favorites?:string[]
 }
 interface naturalPerson {
   type:"natural";

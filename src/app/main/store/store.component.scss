@@ -69,14 +69,16 @@
     border-bottom: 1px solid #c4c4c4;
     cursor: pointer;
     font-weight: 500;
+    padding: 0px 16px 0 10px;
   }
 
   &__sub{
     padding: 10px 0;
+    cursor: pointer;
   }
 
   &__panel .mat-expansion-panel-header {
-    padding: 0px 10px 0px 0px;
+    padding: 0px 10px;
     border-bottom: 1px solid #c4c4c4;
     border-radius: 0;
   }
