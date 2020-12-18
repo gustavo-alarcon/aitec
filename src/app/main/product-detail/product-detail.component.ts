@@ -17,8 +17,6 @@ export class ProductDetailComponent implements OnInit {
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
-  galleryImg: Array<any>
-  selectImage: any
   slideConfig2 = {
     "slidesToShow": 4, "slidesToScroll": 1,
     "autoplay": false,
@@ -30,15 +28,9 @@ export class ProductDetailComponent implements OnInit {
         }
       },
       {
-        breakpoint: 780,
-        settings: {
-          slidesToShow: 2
-        }
-      },
-      {
         breakpoint: 480,
         settings: {
-          slidesToShow: 1
+          slidesToShow: 2
         }
       }
     ]
@@ -53,7 +45,6 @@ export class ProductDetailComponent implements OnInit {
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
-    private renderer: Renderer2,
     private router: Router
   ) {
     this.route.paramMap.subscribe(params => {
@@ -78,31 +69,13 @@ export class ProductDetailComponent implements OnInit {
         )
       }),
       tap(res => {
-        this.productDiv = res
-        this.colorSelected = res.colors[0]
         this.loading.next(false)
-
-        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
-        this.selectImage = this.galleryImg[res.indCover]
 
       })
     );
 
   }
 
-  changeSelectImage(image) {
-    this.selectImage = image
-  }
-
-  zoom(e) {
-    var zoomer = e.currentTarget;
-    let offsetX = e.offsetX
-    let offsetY = e.offsetY
-
-    let x = offsetX / zoomer.offsetWidth * 100
-    let y = offsetY / zoomer.offsetHeight * 100
-    this.renderer.setStyle(this.image.nativeElement, 'background-position', x + '% ' + y + '%')
-  }
 
   navigate(category, subcategory) {
     if (subcategory) {
