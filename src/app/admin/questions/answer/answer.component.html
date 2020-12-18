@@ -1,57 +1,128 @@
-
 <div class="w3-section ms-container">
   <div>
     <h2 class="title">
-      <div class="containerMobile">
-        <button mat-icon-button *ngIf="detail$ | async" (click)="back()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-      </div>
       <mat-icon>chat</mat-icon>
       Preguntas
     </h2>
+
     <mat-divider></mat-divider>
 
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource">
-    
-        <!-- Position Column -->
-        <ng-container matColumnDef="position">
-          <th mat-header-cell *matHeaderCellDef> imagen </th>
-          <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-        </ng-container>
-    
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef> descripcion </th>
-          <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-        </ng-container>
-    
-        <!-- Weight Column -->
-        <ng-container matColumnDef="weight">
-          <th mat-header-cell *matHeaderCellDef> Pregunta </th>
-          <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-        </ng-container>
-    
-        <!-- Symbol Column -->
-        <ng-container matColumnDef="symbol">
-          <th mat-header-cell *matHeaderCellDef> Respuesta </th>
-          <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-        </ng-container>
-
-        <!-- Symbol Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actiones </th>
-          <td mat-cell *matCellDef="let element"> {{element.actions}} </td>
-        </ng-container>
-    
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    <div class="actionsContainer" style="margin: 16px">
+      <mat-form-field appearance="fill">
+        <mat-label>Seleccione </mat-label>
+        <mat-select>
+          <mat-option *ngFor="let food of foods" [value]="food.value">
+            {{ food.viewValue }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
 
     
+    <div style="margin-top: 20px" *ngFor="let product of productsList"  >
+
+      <mat-accordion  >
+        <mat-expansion-panel hideToggle class="titulo-expansion-panel">
+          <mat-expansion-panel-header class="title-product">
+            <div class="title-product">
+              <mat-panel-title>
+                <img
+                  [src]="product.img"
+                  alt=""
+                  class="img-product"
+                />
+                <h3 class="name-product">{{product.description}}</h3>
+                <h4 class="price-product">S/ {{product.price}}</h4>
+                <p class="stock-product"> {{product.stock}} unidades Disponibles</p>
+              </mat-panel-title>
+            </div>
+          </mat-expansion-panel-header>
+          
+        </mat-expansion-panel>
+        
+        <mat-expansion-panel
+          (opened)="panelOpenState = true"
+          (closed)="panelOpenState = false"
+          class="answer-body"
+        >
+        
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <p class="name-email">Roberto perez (Robertoperez@gmail.com)</p>
+            </mat-panel-title>
+            <mat-panel-description>
+              <h4 class="questions">
+                Pregunta lorem ipsum ? 
+              </h4>
+
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                aria-label="Example icon-button with a menu"
+                class="btn-delete"
+                (click)="deleteQuestion()"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </mat-panel-description>
+            
+          </mat-expansion-panel-header>
+          <div class="answer-body">
+            <p class="title-answer">
+              <span class="answer-question">Pregunta lorem ipsum ? </span>
+              hace 2 horas
+            </p>
+
+            <ng-container>
+              <form [formGroup]="answerForm" (ngSubmit)="saveAnswer()">
+                <input
+                  autocomplete="off"
+                  type="text"
+                  matInput
+                  placeholder="Escribe tu Respuesta"
+                  formControlName="answer"
+                  name="answer"
+                  class="input-answer"
+                />
+
+                <button
+                  type="submit"
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="!answerForm.valid"
+                  class="answer-button"
+                >
+                  Responder
+                </button>
+                <!-- <span
+                  *ngIf="
+                    frm.question.dirty &&
+                    frm.question.touched &&
+                    frm.question.errors "
+                  >la descripcion es obligatorio</span> -->
+              </form>
+            </ng-container>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+      <h1> Obtener Productos</h1>
+      <div *ngIf="dbs.getCoupons() | async as products">
+        <ul *ngFor="let item of products">
+          <li>{{item}}</li>
+          <li>hola</li>
+        </ul>
+      </div>
+
   </div>
 </div>
+
+
