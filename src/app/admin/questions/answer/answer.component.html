@@ -19,7 +19,7 @@
     </div>
 
     
-    <div style="margin-top: 20px" *ngFor="let product of productsList"  >
+    <div style="margin-top: 20px" *ngFor="let product of productsWithQuestions"  >
 
       <mat-accordion  >
         <mat-expansion-panel hideToggle class="titulo-expansion-panel">
@@ -27,13 +27,13 @@
             <div class="title-product">
               <mat-panel-title>
                 <img
-                  [src]="product.img"
+                  [src]="product['photoURL']"
                   alt=""
                   class="img-product"
                 />
-                <h3 class="name-product">{{product.description}}</h3>
-                <h4 class="price-product">S/ {{product.price}}</h4>
-                <p class="stock-product"> {{product.stock}} unidades Disponibles</p>
+                <h3 class="name-product">{{product['name']}}</h3>
+                <h4 class="price-product">S/ {{product['price']}}</h4>
+                <p class="stock-product"> {{product['stock']}} unidades disponibles</p>
               </mat-panel-title>
             </div>
           </mat-expansion-panel-header>
@@ -44,15 +44,18 @@
           (opened)="panelOpenState = true"
           (closed)="panelOpenState = false"
           class="answer-body"
+
+          *ngFor="let question of product['questions']"
+
         >
         
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <p class="name-email">Roberto perez (Robertoperez@gmail.com)</p>
+              <p class="name-email"> {{question.createdBy.personData.name}}   {{question.createdBy.personData.lastName}}( {{question.createdBy.email}})</p>
             </mat-panel-title>
             <mat-panel-description>
               <h4 class="questions">
-                Pregunta lorem ipsum ? 
+                {{question.question}}
               </h4>
 
               <button
@@ -60,12 +63,14 @@
                 [matMenuTriggerFor]="menu"
                 aria-label="Example icon-button with a menu"
                 class="btn-delete"
-                (click)="deleteQuestion()"
+                
               >
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item>
+                <button mat-menu-item
+                (click)="deleteQuestion(question.idProduct,question.id)"
+                >
                   <mat-icon>delete</mat-icon>
                   <span>Eliminar</span>
                 </button>
@@ -75,22 +80,25 @@
           </mat-expansion-panel-header>
           <div class="answer-body">
             <p class="title-answer">
-              <span class="answer-question">Pregunta lorem ipsum ? </span>
-              hace 2 horas
-            </p>
-
+              <span class="answer-question"> {{question.question}} </span> {{ question.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
+            </p> 
+              
+            
             <ng-container>
               <form [formGroup]="answerForm" (ngSubmit)="saveAnswer()">
                 <input
-                  autocomplete="off"
-                  type="text"
-                  matInput
-                  placeholder="Escribe tu Respuesta"
-                  formControlName="answer"
-                  name="answer"
-                  class="input-answer"
+                autocomplete="off"
+                type="text"
+                matInput
+                placeholder="Escribe tu Respuesta"
+                formControlName="answer"
+                name="answer"
+                value="{{question.id}}"
+                class="input-answer"
                 />
-
+                <!-- <input [(ngModel)]="question.answer"  name="answer1" id="answer1"/>
+                 {{question.answer |json }}
+                 {{question.id |json }} -->
                 <button
                   type="submit"
                   mat-raised-button
@@ -114,13 +122,13 @@
 
     </div>
 
-      <h1> Obtener Productos</h1>
-      <div *ngIf="dbs.getCoupons() | async as products">
-        <ul *ngFor="let item of products">
-          <li>{{item}}</li>
+       <h1> Obtener Productos</h1>
+      <!-- <div *ngIf="dbs.getQuestionsByProduct() | async as products"> -->
+        <ul *ngFor="let item of view">
+          <li>{{item |json}}</li>
           <li>hola</li>
         </ul>
-      </div>
+      <!-- </div> -->
 
   </div>
 </div>

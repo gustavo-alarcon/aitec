@@ -61,7 +61,7 @@ export class QuestionsService {
 
 
   }
-
+  //get all products with questions
   getQuestionsByProduct() {
     return combineLatest(
       this.getAllQuestions(),
@@ -73,6 +73,7 @@ export class QuestionsService {
             photoURL: product.gallery[product.indCover].photoURL,
             name: product.description,
             stock: product.realStock,
+            price:product.cost,
             id: product.id,
             questions:questions.filter(question=>question.idProduct ==product.id)
           }
@@ -82,7 +83,7 @@ export class QuestionsService {
       })
     )
   }
-
+   //get all questions  with product
   getProductsByQuestion() {
     return combineLatest(
       this.getAllQuestions(),
@@ -104,11 +105,11 @@ export class QuestionsService {
       })
     )
   }
-
+   // get all questions
   getAllQuestions() {
     return this.afs.collectionGroup<Questions>('questions').valueChanges();
   }
-
+  //get all product have quetions
   getProductsWithQuestions() {
     return this.afs.collection<Product>(`db/aitec/productsList`, (ref) =>
       ref.orderBy("questions", "asc")
@@ -124,6 +125,36 @@ export class QuestionsService {
       .doc<Product>(`db/aitec/productsList/${id}`)
       .valueChanges()
       .pipe(take(1));
+  }
+
+  deleteQuestionById(idProduct:string,idQuestion:string){
+
+    
+      //const productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(product.id);
+      const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProduct}/questions`).doc(idQuestion);
+      const batch = this.afs.firestore.batch();
+
+      /* questions.id = questionsRef.id;
+      questions.idProduct = idProducto
+
+      let countQuestions = product.questions ? product.questions : 0
+      countQuestions++ */
+      //this.questionsCollection.add(questions);
+
+      batch.delete(questionsRef);
+
+      /* batch.update(productRef, {
+        questions: countQuestions
+      })
+      batch.set(questionsRef, questions);
+ */
+      batch.commit().then(
+        ref => {
+
+        }
+      );
+    
+
   }
 
 }

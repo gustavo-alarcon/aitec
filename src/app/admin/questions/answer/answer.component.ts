@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+import { QuestionsService } from '../../../core/services/questions.service';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-answer',
@@ -40,9 +42,18 @@ export class AnswerComponent implements OnInit {
 ];
 
   
+productos$: Observable<any>
+productos: Array<any>
+
+view :  Observable<any[]>;
+
+loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
+
+public productsWithQuestions:any;
 
   constructor(   
-     public dbs: DatabaseService,
+     public dbs: QuestionsService,
      private formbuilder:FormBuilder,
   ) { 
   this.answerForm = this.formbuilder.group({
@@ -51,7 +62,26 @@ export class AnswerComponent implements OnInit {
 }
 
   ngOnInit(): void {
-   
+
+    console.log("============= producto ============")
+
+    this.dbs.getQuestionsByProduct().subscribe(
+      (product:any) =>      
+        {
+                    
+          this.productsWithQuestions =  product;
+          console.log(this.productsWithQuestions);
+          
+          //const preueba= this.answerForm.controls['answer'].setValue(product.questions);
+          /* const prueba= product.body.data;
+          this.loading.next(false)
+        this.answerForm.controls['answer'].setValue(question.answer)
+
+          console.log(prueba); */
+          
+        }
+
+    ); 
   }
   
   get frm(){    
@@ -65,11 +95,20 @@ export class AnswerComponent implements OnInit {
 
     this.answerForm.reset();
 
+    var elementos = document.getElementsByName("answer1");
+    var elemento1 = document.getElementById('answer1')
+    console.log('Answer : ',elementos);
+    console.log('Answer1 : ',elemento1);
+
   }
 
-  deleteQuestion(){
+  deleteQuestion(idProduct:string,idQuestion:string){
 
     console.log("pregunta eliminado");
+    console.log('idProduct : ',idProduct);
+    console.log('idQuestion : ',idQuestion);
+
+    this.dbs.deleteQuestionById(idProduct,idQuestion);
 
   }
 
