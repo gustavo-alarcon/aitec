@@ -1,21 +1,37 @@
 <div class="w3-section ms-container">
   <div>
     <h2 class="title">
-      <mat-icon>chat</mat-icon>
+      <mat-icon>question_answer</mat-icon>
       Preguntas
     </h2>
 
     <mat-divider></mat-divider>
 
+    
+
     <div class="actionsContainer" style="margin: 16px">
-      <mat-form-field appearance="fill">
-        <mat-label>Seleccione </mat-label>
-        <mat-select>
-          <mat-option *ngFor="let food of foods" [value]="food.value">
-            {{ food.viewValue }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+
+      <div class="container-date">
+        <mat-form-field style="max-width: 250px;" appearance="outline">
+          <mat-label>FECHA/PERIODO</mat-label>
+          <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
+            <input readonly matStartDate formControlName="start" placeholder="Fecha Inicio">
+            <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Seleccione </mat-label>
+          <mat-select>
+            <mat-option *ngFor="let date of dateTime" [value]="date.value">
+              {{ date.date }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>      
+
     </div>
 
     
@@ -85,50 +101,34 @@
               
             
             <ng-container>
-              <form [formGroup]="answerForm" (ngSubmit)="saveAnswer()">
-                <input
-                autocomplete="off"
+              <form (ngSubmit)="saveAnswer(question.idProduct,question.id)">
+
+                <input 
                 type="text"
-                matInput
-                placeholder="Escribe tu Respuesta"
-                formControlName="answer"
-                name="answer"
-                value="{{question.id}}"
+                [ngModel]="question.answer" 
+                (ngModelChange)="saveAnswerChange($event)"
                 class="input-answer"
-                />
-                <!-- <input [(ngModel)]="question.answer"  name="answer1" id="answer1"/>
-                 {{question.answer |json }}
-                 {{question.id |json }} -->
-                <button
+                name="answer"/>
+                
+                  <button
                   type="submit"
                   mat-raised-button
                   color="primary"
-                  [disabled]="!answerForm.valid"
+                 
                   class="answer-button"
                 >
                   Responder
                 </button>
-                <!-- <span
-                  *ngIf="
-                    frm.question.dirty &&
-                    frm.question.touched &&
-                    frm.question.errors "
-                  >la descripcion es obligatorio</span> -->
               </form>
             </ng-container>
+
           </div>
         </mat-expansion-panel>
       </mat-accordion>
 
     </div>
 
-       <h1> Obtener Productos</h1>
-      <!-- <div *ngIf="dbs.getQuestionsByProduct() | async as products"> -->
-        <ul *ngFor="let item of view">
-          <li>{{item |json}}</li>
-          <li>hola</li>
-        </ul>
-      <!-- </div> -->
+    
 
   </div>
 </div>

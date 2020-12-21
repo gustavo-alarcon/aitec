@@ -9,6 +9,7 @@ import {MatFormFieldModule } from '@angular/material/form-field';
 import {MatDatepickerModule } from '@angular/material/datepicker';
 import {MatSelectModule } from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatNativeDateModule } from '@angular/material/core';
 
 
 
@@ -30,7 +31,8 @@ import { AnswerComponent } from './answer/answer.component';
     MatDatepickerModule,
     MatSelectModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatNativeDateModule
   ]
 })
 export class QuestionsModule { }

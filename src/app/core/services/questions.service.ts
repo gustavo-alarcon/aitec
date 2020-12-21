@@ -36,7 +36,7 @@ export class QuestionsService {
 
   saveQuestion(idProducto: string, questions: Questions) {
 
-    this.getProduct(idProducto).subscribe(product => {
+    this.getProduct(idProducto).subscribe(product => {  
       const productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(product.id);
       const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProducto}/questions`).doc();
       const batch = this.afs.firestore.batch();
@@ -62,7 +62,7 @@ export class QuestionsService {
 
   }
   //get all products with questions
-  getQuestionsByProduct() {
+  getQuestionsByProduct() { 
     return combineLatest(
       this.getAllQuestions(),
       this.getProductsWithQuestions()
@@ -95,6 +95,7 @@ export class QuestionsService {
             photoURL: product.gallery[product.indCover].photoURL,
             name: product.description,
             stock: product.realStock,
+            price:product.cost,
             id: product.id
           }
         })
@@ -126,34 +127,43 @@ export class QuestionsService {
       .valueChanges()
       .pipe(take(1));
   }
+  getQuestionById(idProduct:string,idQuestion:string):Observable<Questions>{
+    return this.afs.doc<Questions>(`db/aitec/productsList/${idProduct}/questions/${idQuestion}`)
+    .valueChanges()
+    .pipe(take(1));    
+  }
 
   deleteQuestionById(idProduct:string,idQuestion:string){
-
     
-      //const productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(product.id);
       const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProduct}/questions`).doc(idQuestion);
       const batch = this.afs.firestore.batch();
 
-      /* questions.id = questionsRef.id;
-      questions.idProduct = idProducto
-
-      let countQuestions = product.questions ? product.questions : 0
-      countQuestions++ */
-      //this.questionsCollection.add(questions);
-
       batch.delete(questionsRef);
 
-      /* batch.update(productRef, {
-        questions: countQuestions
-      })
-      batch.set(questionsRef, questions);
- */
       batch.commit().then(
         ref => {
 
         }
-      );
+      );    
+
+  }
+
+  updateQuestionById(idProduct:string,idQuestion:string,answer:string){
+
     
+
+    const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProduct}/questions`).doc(idQuestion);
+    const batch = this.afs.firestore.batch();
+
+    batch.delete(questionsRef);
+
+    batch.commit().then(
+      ref => {
+
+      }
+    );   
+
+   
 
   }
 
