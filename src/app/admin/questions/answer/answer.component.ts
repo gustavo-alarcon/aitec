@@ -3,8 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { QuestionsService } from '../../../core/services/questions.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-answer',
@@ -30,6 +31,9 @@ export class AnswerComponent implements OnInit {
   answerTemp:string;
   productsWithQuestions:any;
 
+  init$: Observable<any[]>;
+
+
   constructor(   
      public dbs: QuestionsService,
      public afs: AngularFirestore,
@@ -50,25 +54,53 @@ export class AnswerComponent implements OnInit {
       start: new FormControl(beginDate),
       end: new FormControl(endDate)
     });
+     
+   this.init$ = combineLatest(
+        this.dbs.getAllQuestions(),
+        this.dbs.getProductsWithQuestions(),
+        this.dateForm.get('start').valueChanges.pipe(
+          startWith(beginDate),
+          map(begin => begin.setHours(0, 0, 0, 0))
+        ),
+        this.dateForm.get('end').valueChanges.pipe(
+          startWith(endDate),
+          map(end =>  end?end.setHours(23, 59, 59):null)
+        )
+      ).pipe(
+        map(([questions, products, startdate,enddate]) => {
+          let prods = products.map(product => {
+            return {
+              photoURL: product.gallery[product.indCover].photoURL,
+              name: product.description,
+              stock: product.realStock,
+              price:product.cost,
+              id: product.id
+            }
+          })
+          let date = {begin:startdate,end:enddate}
 
+          return questions.map(question => {
+            question['product'] = prods.filter(product => product.id == question.idProduct )
+            return question;
+          }).
+          filter(questions=>this.getFilterTime(questions["createdAt"],date))
+             
+        })
+      )
+    
+    }
 
-    this.dbs.getQuestionsByProduct().subscribe(
-      (product:any) =>      
-        {
-                    
-          this.productsWithQuestions =  product;
-          
-        }
-
-    ); 
+  getFilterTime(el, time) {
+    let date = el.toMillis();
+    let begin = time.begin;
+    let end = time.end;
+    return date >= begin && date <= end;
   }
-
   
   saveAnswerChange(valor:string){
    this.answerTemp=valor;
 
   }
-
   
   saveAnswer(idProduct:string,idQuestion:string){
 

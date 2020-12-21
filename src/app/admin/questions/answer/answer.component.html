@@ -34,22 +34,25 @@
 
     </div>
 
-    
-    <div style="margin-top: 20px" *ngFor="let product of productsWithQuestions"  >
+
+    <div *ngIf="init$ | async as sales">
+   
+    <div style="margin-top: 20px" *ngFor="let question of sales"  >
 
       <mat-accordion  >
-        <mat-expansion-panel hideToggle class="titulo-expansion-panel">
+
+        <mat-expansion-panel hideToggle class="titulo-expansion-panel" *ngFor="let product of question['product']" >
           <mat-expansion-panel-header class="title-product">
             <div class="title-product">
               <mat-panel-title>
                 <img
-                  [src]="product['photoURL']"
+                  [src]="product.photoURL"
                   alt=""
                   class="img-product"
                 />
-                <h3 class="name-product">{{product['name']}}</h3>
-                <h4 class="price-product">S/ {{product['price']}}</h4>
-                <p class="stock-product"> {{product['stock']}} unidades disponibles</p>
+                <h3 class="name-product">{{product.name}}</h3>
+                <h4 class="price-product">S/ {{product.price}}</h4>
+                <p class="stock-product"> {{question.productstock}} unidades disponibles</p>
               </mat-panel-title>
             </div>
           </mat-expansion-panel-header>
@@ -59,9 +62,7 @@
         <mat-expansion-panel
           (opened)="panelOpenState = true"
           (closed)="panelOpenState = false"
-          class="answer-body"
-
-          *ngFor="let question of product['questions']"
+          class="answer-body"        
 
         >
         
@@ -128,6 +129,9 @@
 
     </div>
 
+
+
+  </div>
     
 
   </div>
