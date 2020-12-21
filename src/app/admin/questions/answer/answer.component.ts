@@ -1,4 +1,3 @@
-import { Questions } from './../../../core/models/questions.model';
 import { Component, OnInit } from '@angular/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
