@@ -77,4 +77,38 @@
 .other-question{
   color: #1C31EA;
   margin-left: 50px;
+  font-size: 1.3rem;
+  align-items: center;
+}
+@media only screen and (max-width: 768px) {
+
+  .header-question{
+    display: block;
+  }
+  .img-product{
+    height: 40px;
+    width: 70px;
+    padding-left: 2px;
+  }
+  .name-product{
+    font-weight: bold;
+    margin: 10px;
+  }
+
+  .price-product{
+    display: inline;
+    margin: 0;
+    padding-left: 2px;
+    padding-right: 10px;
+  }
+  .stock-product{
+    display: inline;
+    margin: 0;
+  }
+
+  .other-question{
+    color: #1C31EA;
+    font-size: 1rem;
+    margin-left: 20px;
+  }
 }
