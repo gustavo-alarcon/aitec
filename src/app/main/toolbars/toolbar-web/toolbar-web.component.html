@@ -71,6 +71,10 @@
             <mat-icon>favorite</mat-icon>
             <span>Mis favoritos</span>
           </button>
+          <button mat-menu-item routerLink="/main/preguntas" >
+            <mat-icon>question_answer</mat-icon>
+            <span>Mis Preguntas</span>
+          </button>
         </mat-menu>
         <button mat-button routerLink="/main/carrito" matTooltip="Carrito">
           <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">

@@ -21,16 +21,7 @@
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Seleccione </mat-label>
-          <mat-select>
-            <mat-option *ngFor="let date of dateTime" [value]="date.value">
-              {{ date.date }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>      
+  
 
     </div>
 

@@ -60,7 +60,8 @@
       </svg>
 
       {{ item.answer }}
-      <small
+
+      <small *ngIf="item.answerAt"
         >{{ item.answerAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
       </small>
     </span>

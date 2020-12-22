@@ -75,6 +75,7 @@ export class QuestionsService {
             stock: product.realStock,
             price:product.cost,
             id: product.id,
+            sku:product.sku,
             questions:questions.filter(question=>question.idProduct ==product.id)
           }
         })
@@ -84,15 +85,10 @@ export class QuestionsService {
     )
   }
    //get all questions  with product
- 
 
   /*
-  && this.getFilterTime(question.createdAt,date)
-             return products.filter((el) => {
-              return this.getFilterTime(el["createdAt"], date);
-            });
 
-            getProductsByQuestion() {
+  getProductsByQuestion() {
     return combineLatest(
       this.getAllQuestions(),
       this.getProductsWithQuestions()
@@ -113,11 +109,24 @@ export class QuestionsService {
         })
       })
     )
-  } */
+  } 
+  */
+
    // get all questions
   getAllQuestions(): Observable<Questions[]> {
     return this.afs.collectionGroup<Questions>('questions').valueChanges();
   }
+  getQuestionsByUser(email:string): Observable<Questions[]> {
+    return this.afs.collectionGroup<Questions>('questions', (ref) =>
+    ref.where("createdBy.email", "==",email)
+  ).get().pipe(
+    map((snap) => {
+      return snap.docs.map((el) => <Questions>el.data());
+    })
+  );
+  }
+
+
   //get all product have quetions
   getProductsWithQuestions(): Observable<Product[]> {
     return this.afs.collection<Product>(`db/aitec/productsList`, (ref) =>

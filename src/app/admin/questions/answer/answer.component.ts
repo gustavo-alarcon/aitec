@@ -17,12 +17,6 @@ export class AnswerComponent implements OnInit {
   
   now: Date = new Date();
   
-  dateTime: DateTime[] = [
-    {value: '1', date: 'hace 15 dias'},
-    {value: '2', date: 'hace 30 dias'},
-    {value: '3', date: 'hace 60 meses'}
-  ];
-
   dateForm: FormGroup;
   view = new BehaviorSubject<number>(1);
   view$ = this.view.asObservable();
@@ -134,8 +128,3 @@ export class AnswerComponent implements OnInit {
 
 }
 
-
-interface DateTime {
-  value: string;
-  date: string;
-}
