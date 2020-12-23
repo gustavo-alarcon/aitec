@@ -51,6 +51,10 @@ const routes: Routes = [
       {
         path: 'favoritos',
         loadChildren: () => import('./favorites/favorites.module').then(mod => mod.FavoritesModule)
+      },
+      {
+        path: 'preguntas',
+        loadChildren: () => import('./questions/questions.module').then(mod => mod.QuestionsModule)
       }
     ]
   }

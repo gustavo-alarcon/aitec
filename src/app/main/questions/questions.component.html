@@ -1,0 +1,75 @@
+<div class="ms-container w3-section w3-padding">
+  <div>Inicio > Mi Preguntas</div>
+  <h3 class="title2">Mis Preguntas</h3>
+  <div class="">
+    <div class="container-date">
+      <mat-form-field
+        style="max-width: 250px"
+        appearance="outline"
+        class="date-filter"
+      >
+        <mat-label>FECHA/PERIODO</mat-label>
+        <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
+          <input
+            readonly
+            matStartDate
+            formControlName="start"
+            placeholder="Fecha Inicio"
+          />
+          <input
+            readonly
+            matEndDate
+            formControlName="end"
+            placeholder="Fecha Final"
+          />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+      <!-- <div *ngIf="authService.user$ | async as user; ">
+          {{user | json}}
+    </div> -->
+      <div *ngIf="init$ | async as questions">
+        <div class="container-questions" *ngFor="let question of questions">
+          <div class="questions" 
+          *ngFor="let product of question['product']"
+          >
+            <div
+              class="header-question"
+              
+            >
+              <img
+                [src]="product.photoURL"
+                [alt]="product.name"
+                class="img-product"
+              />
+              <h4 class="name-product">{{ product.name }}</h4>
+              <h4 class="price-product">S/ {{ product.price }}</h4>
+              <p class="stock-product">
+                {{ product.stock }} unidades disponibles
+              </p>
+            </div>
+            <hr class="hr" />
+            <div class="body-question">
+              <h4 class="question">
+                <mat-icon>mode_comment</mat-icon> {{ question.question }}
+              </h4>
+              <p class="answer">
+                <mat-icon>mode_comment</mat-icon> {{ question.answer }}
+              </p>
+            </div>
+            <hr class="hr" />
+            <div class="footer-question">
+              <button class="btn-shopping" [routerLink]="'/main/producto/'+product.sku">
+                <mat-icon>shopping_cart</mat-icon> agregar al carrito
+              </button>
+              <a class="other-question"  [routerLink]="'/main/producto/'+product.sku">Hacer otra pregunta</a>
+             
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
