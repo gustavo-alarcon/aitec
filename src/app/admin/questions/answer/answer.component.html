@@ -56,10 +56,12 @@
           class="answer-body"        
 
         >
-        
+   
+         
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <p class="name-email"> {{question.createdBy.personData.name}}   {{question.createdBy.personData.lastName}}( {{question.createdBy.email}})</p>
+              <p class="name-email" *ngIf="question.createdBy.name">{{question.createdBy.name}}   {{question.createdBy.lastName}} ( {{question.createdBy.email}})</p>
+              <p class="name-email" *ngIf="question.createdBy.personData != null">{{question.createdBy.personData.name}}  {{question.createdBy.personData.lastName}} ( {{question.createdBy.email}})</p>
             </mat-panel-title>
             <mat-panel-description>
               <h4 class="questions">
@@ -87,8 +89,9 @@
             
           </mat-expansion-panel-header>
           <div class="answer-body">
-            <p class="title-answer">
-              <span class="answer-question"> {{question.question}} </span> {{ question.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
+            <p class="title-answer" *ngIf="question.createdAt" >
+              <span class="answer-question"> {{question.question}} </span>
+               {{ question.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
             </p> 
               
             
