@@ -1,4 +1,4 @@
-<div class="store__container w3-section" style="position: relative">
+<!--div class="store__container w3-section" style="position: relative">
   <div>Inicio > Mi Carrito</div>
   <div class="w3-margin-top div-content">
     <div class="w3-container div-content__left">
@@ -38,7 +38,12 @@
       </div>
       <div class="w3-margin-top div-content__scroll">
         <div *ngIf="(view$|async) == 1">
-          <app-shopping-list></app-shopping-list>
+          <div class="w3-hide-small">
+            <app-shopping-list></app-shopping-list>
+          </div>
+          <div class="w3-hide-large w3-hide-medium">
+            <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
+          </div>
         </div>
         <div *ngIf="(view$|async) == 2">
           <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async">
@@ -414,8 +419,107 @@
             <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
               Compra</button>
           </div>
+          no no no no no
+          jo jo jo jo
         </div>
       </div>
     </div>
   </div>
+</div-->
+
+<div class="store__container w3-section">
+  <div style="padding:16px 0">
+    <a class="bradcumb" routerLink="/main">Inicio</a> >
+    <a class="bradcumb" routerLink="/main/carrito">Mi Carrito</a>
+  </div>
+  <mat-horizontal-stepper [@.disabled]="true" labelPosition="bottom" #stepper>
+    <mat-step label="Revisa tu orden" state="check_circle_outline">
+      <div class="w3-row">
+        <div class="w3-col l8 col-md-7">
+          <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
+        </div>
+        <div class="w3-col l4 col-md-5">
+          <div class="resume">
+            <h2 class="resume__title">Resumen de pedido</h2>
+            <div class="resume__divider"></div>
+            <div class="resume__descrip w3-section">
+              <div class="ms-flex ms-flex--center">
+                <span>Subtotal</span>
+                <span class="ms-fill"></span>
+                <span>{{ subtotal$ | async | number: ".2" }}</span>
+              </div>
+              <div class="ms-flex ms-flex--center">
+                <span>Cargos adicionales</span>
+                <span class="ms-fill"></span>
+                <span>0.00</span>
+              </div>
+              <div class="ms-flex ms-flex--center">
+                <span>Descuento promocional</span>
+                <span class="ms-fill"></span>
+                <span>{{ discount$ | async | number: ".2" }}</span>
+              </div>
+              <div class="ms-flex ms-flex--center">
+                <span>IGV</span>
+                <span class="ms-fill"></span>
+                <span>{{ igv$ | async | number: ".2" }}</span>
+              </div>
+              <div class="ms-flex ms-flex--center">
+                <span>Delivery</span>
+                <span class="ms-fill"></span>
+                <span>{{delivery$ | async | number: ".2"}}</span>
+              </div>
+            </div>
+            <div class="resume__divider"></div>
+            <p class="resume__small">*El costo del delivery se agregará despues de registrar el método de entrega</p>
+            <div class="w3-margin-bottom">
+              <h4 class="resume__subtitle">Tengo un código de descuento</h4>
+              <div class="email-form background-color w3-margin-top">
+                <input matInput type="text" autocomplete="off" class="email-form__input" style="border: none" />
+
+                <button mat-button class="email-form__button">
+                  <mat-icon>refresh</mat-icon>
+                </button>
+              </div>
+              <p class="resume__small">*El código de descuento es único y solo es válido para UN uso</p>
+            </div>
+            <div class="w3-margin-bottom">
+              <h4 class="resume__subtitle">Selecciona un asesor</h4>
+
+              <mat-form-field style="margin-bottom: 8px;" class="w3-block" appearance="outline">
+                <mat-label>Asesor Virtual</mat-label>
+                <input autocomplete="off" [formControl]="adviserForm" [matAutocomplete]="adviserAutocomplete"
+                  type="text" matInput>
+                <mat-autocomplete #adviserAutocomplete="matAutocomplete" [displayWith]="showAdviser">
+
+                  <mat-option *ngFor="let adviser of advisers$ | async" [value]="adviser">
+                    {{adviser.displayName}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+              <p class="resume__small">*El Nombre o correo de tu asesor ayudará a que podamos hacer mejor seguimiento a
+                tu pedido</p>
+            </div>
+            <div class="resume__title w3-section">Total: S/. {{ sum$ | async | number: ".2" }}</div>
+            <div class="w3-center w3-margin-bottom">
+              <button mat-raised-button (click)="secondView()" color="primary" class="resume__button">Continuar</button>
+            </div>
+            <p class="resume__small">*En el siguiente paso se procederá a generar la orden de compra y podrá confirmar
+              el Pago.</p>
+
+          </div>
+        </div>
+      </div>
+
+    </mat-step>
+    <mat-step label="Método de Entrega" state="local_shipping">
+      <app-delivery></app-delivery>
+    </mat-step>
+    <mat-step label="Método de Pago" state="request_page">
+      <app-payment-method></app-payment-method>
+      <!--div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="stepper.reset()">Reset</button>
+      </div-->
+    </mat-step>
+  </mat-horizontal-stepper>
 </div>

@@ -1,0 +1,17 @@
+.prod-small{
+  display:none;
+}
+
+.prod-big{
+  display:block;
+}
+
+@media(max-width:600px){
+  .prod-big{
+    display: none;
+  }
+  .prod-small{
+    display:block;
+  }
+}
+

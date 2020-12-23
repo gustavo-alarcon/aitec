@@ -1,31 +1,32 @@
 <div class="ms-container w3-section">
   <div class="ms-flex ms-flex--center" style="justify-content: space-between">
-    <div>
-      <a mat-flat-button routerLink="/main">Inicio</a> >
-      <a mat-flat-button routerLink="/main/productos">Productos</a>
+    <div style="padding:16px 0">
+      <a class="bradcumb" routerLink="/main">Inicio</a> >
+      <a class="bradcumb" routerLink="/main/productos">Productos</a>
       <span *ngIf="searchCategory">
         >
-        <a mat-flat-button (click)="navigateOnlyCategory(searchCategory)">
+        <span class="bradcumb" (click)="navigateOnlyCategory(searchCategory)">
           {{searchCategory | titlecase}}
-        </a>
+        </span>
       </span>
       <span *ngIf="searchSubCategory">
         >
-        <a mat-flat-button (click)="navigateCategory(searchCategory, searchSubCategory)">
+        <span class="bradcumb" (click)="navigateCategory(searchCategory, searchSubCategory)">
           {{ searchSubCategory | titlecase}}
-        </a></span>
+        </span>
+      </span>
       <span *ngIf="searchSubSubCategory">
         >
-        <a mat-flat-button (click)="navigateSubCategory(searchCategory, searchSubCategory,searchSubSubCategory)">
+        <span class="bradcumb" (click)="navigateSubCategory(searchCategory, searchSubCategory,searchSubSubCategory)">
           {{ searchSubSubCategory | titlecase}}
-        </a></span>
-      <span *ngIf="search">
+        </span></span>
+      <span class="bradcumb" *ngIf="search">
         > Búsqueda: <strong>{{ search | titlecase}}</strong>
       </span>
-      <span *ngIf="searchPromo">
+      <span class="bradcumb" *ngIf="searchPromo">
         > Promociones
       </span>
-      <span *ngIf="searchBrand">
+      <span class="bradcumb" *ngIf="searchBrand">
         > Marca: <strong>{{ searchBrand | titlecase}}</strong>
       </span>
     </div>

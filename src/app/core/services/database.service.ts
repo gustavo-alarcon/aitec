@@ -38,14 +38,16 @@ export class DatabaseService {
   public order: {
     product: any;
     quantity: number;
-    chosenOptions?: Product[];
+    chosenProduct: any;
+    color: boolean;
   }[] = [];
 
   public orderObs = new BehaviorSubject<
     {
       product: any;
       quantity: number;
-      chosenOptions?: Product[];
+      chosenProduct: any;
+      color: boolean;
     }[]
   >([]);
   public orderObs$ = this.orderObs.asObservable();
@@ -291,6 +293,19 @@ export class DatabaseService {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
         ref.orderBy('priority', 'desc')
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  }
+
+  getLastProducts(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.orderBy('createdAt', 'desc')
       )
       .get()
       .pipe(

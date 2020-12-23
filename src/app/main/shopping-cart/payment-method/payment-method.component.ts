@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -20,17 +20,19 @@ export class PaymentMethodComponent implements OnInit {
     name: string;
     value: number;
     account?: string;
-  } = {name:'',value:0}
+  } = { name: '', value: 0 };
 
   payments: Array<any> = [
-    { name: 'Efectivo', value: 1 },
+    { name: 'Pago contraentrega', value: 1 },
     { name: 'Tarjetas credito/debito', value: 2 },
     { name: 'Trasferencias', value: 3, account: 'BCP: 215-020-221122456' },
     { name: 'Yape', value: 4, account: 'Número: 987784562' },
   ];
 
-  months:Array<number>=[1,2,3,4,5,6,7,8,9,10,11,12]
-  years:Array<number>=[2020,2021,2022,2023,2024,2025,2026,2027,2028]
+  months: Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  years: Array<number> = [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
+
+  observation: FormControl = new FormControl('')
 
   photosList: Array<any> = [];
   photos: {
@@ -39,17 +41,21 @@ export class PaymentMethodComponent implements OnInit {
     };
     data: File[];
   } = {
-    resizing$: {
-      photoURL: new BehaviorSubject<boolean>(false),
-    },
-    data: [],
-  };
+      resizing$: {
+        photoURL: new BehaviorSubject<boolean>(false),
+      },
+      data: [],
+    };
 
-  constructor(private fb: FormBuilder, private ng2ImgMax: Ng2ImgMaxService,private dbs: DatabaseService) {}
+  constructor(
+    private fb: FormBuilder,
+    private ng2ImgMax: Ng2ImgMaxService,
+    public dbs: DatabaseService
+  ) { }
 
   ngOnInit(): void {
     this.cardForm = this.fb.group({
-      type:[null],
+      type: [null],
       numero: [null],
       month: [null],
       year: [null],
@@ -61,11 +67,11 @@ export class PaymentMethodComponent implements OnInit {
       name: [null],
       address: [null],
     });
-    
+
   }
 
-  chooseType(type){
-    this.cardForm.get('type').setValue(type)
+  chooseType(type) {
+    this.cardForm.get('type').setValue(type);
   }
 
   addNewPhoto(formControlName: string, image: File[]) {
@@ -82,8 +88,8 @@ export class PaymentMethodComponent implements OnInit {
             new File(
               [result],
               formControlName +
-                this.photosList.length +
-                result.name.match(/\..*$/)
+              this.photosList.length +
+              result.name.match(/\..*$/)
             )
           );
           reader.readAsDataURL(image[0]);
@@ -106,4 +112,13 @@ export class PaymentMethodComponent implements OnInit {
     this.photosList.splice(ind, 1);
     this.photos.data.splice(ind, 1);
   }
+
+  getPrice(item) {
+    if (item.product.promo) {
+      return item.product.promoData.promoPrice * item.quantity;
+    } else {
+      return item.product.priceMin * item.quantity;
+    }
+  }
+
 }

@@ -6,6 +6,7 @@
 .main__toolbar {
   background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
   color: white;
+  padding: 8px 0;
 }
 
 .main__logo {
@@ -118,31 +119,41 @@
   }
 }
 
-@media (max-width: 355px) {
+@media (max-width: 390px) {
   .main__logoimage {
     max-height: 40px;
   }
 }
 
+
 .search-form {
   display: flex;
-  border-radius: 4px;
-  font-size: 1em;
+  min-width: 100px;
+  width: 45%;
   padding-left: 15px;
-  border: 1px solid #01579b;
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
 
   &__input {
-    margin: 5px 0;
+    width: 100%;
+    margin-top: 0;
+    color: #828282;
+
+    &::placeholder {
+      color: #aeaeae;
+    }
+    &:focus {
+      outline: none;
+    }
   }
 
   &__button {
-    border-radius: 0 4px 4px 0;
-    min-width: 40px !important;
+    max-width: 45px;
+    width: 100%;
     padding: 0 !important;
+    color: #cbcbcb;
   }
-}
-.search-form__input:focus {
-  outline: none;
 }
 
 .search-button {
@@ -161,9 +172,6 @@
 }
 
 @media (min-width: 602px) {
-  .search-form__input {
-    width: 150px;
-  }
 
   .search-div {
     display: none;

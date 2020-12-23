@@ -1,7 +1,7 @@
-<div class="ms-container w3-section w3-padding" *ngIf="products$|async as products">
+<div class="ms-container w3-section w3-padding" >
   <h2 class="title2">Mis favoritos </h2>
-  <div *ngFor="let product of products" class="w3-col l3 col-sm-4 col-xs-6  w3-margin-bottom">
-    <div style="padding:0 8px">
+  <div *ngIf="products$|async as products" class="w3-row w3-margin-top w3-padding" >
+    <div *ngFor="let product of products" class="w3-col l3 col-sm-4 col-xs-6  w3-margin-bottom" style="padding:0 8px">
       <app-product-div [product]="product" [offer]="false"></app-product-div>
     </div>
   </div>

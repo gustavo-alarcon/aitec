@@ -1,0 +1,79 @@
+.product {
+  width: 100%;
+  padding: 12px;
+
+  &__image {
+    width: 20%;
+    object-fit: contain;
+    height: 100%;
+  }
+
+  &__name {
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    word-break: break-word;
+    color: #737373;
+    overflow: hidden;
+    height: 2.5rem;
+  }
+
+
+  &__etiquet {
+    font-size: 0.7em;
+    color: #b2b2b2;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 100%;
+    text-transform: uppercase;
+  }
+
+  &__price {
+    font-size: 1em;
+    font-weight: 500;
+  }
+
+  &__discount {
+    font-size: 0.9em;
+    font-weight: 300;
+    color: red;
+  }
+
+}
+
+.shoppButton {
+  width: 100%;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.nofound {
+  border: 1px solid #ef5350;
+  color: #ef5350;
+  font-size: 0.9em;
+  border-radius: 5px;
+}
+
+
+
+@media(max-width: 600px) {
+  .product {
+    padding: 12px 0;
+
+    &__image {
+      width: 30%;
+    }
+  }
+}
+
+.paginator{
+  &__button{
+    padding: 0;
+    min-width: 32px;
+  }
+
+  &__number{
+    padding: 2px 7px;
+  }
+}

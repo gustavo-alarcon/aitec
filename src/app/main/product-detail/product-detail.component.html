@@ -1,32 +1,34 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
-<div class="ms-container w3-section" style="position: relative" *ngIf="product$ | async as product">
-  <div>
-    <a mat-flat-button routerLink="/main">Inicio</a> >
-    <a mat-flat-button routerLink="/main/productos">Productos</a>
-    <span>
-      >
-      <a mat-flat-button (click)="navigateOnlyCategory(product.category)">{{
-        product.category
-      }}</a>
+<div class="ms-container w3-section" style="position: relative;" *ngIf="product$ | async as product">
+  <div style="padding:16px 0">
+    <a class="bradcumb" routerLink="/main">Inicio</a> >
+    <a class="bradcumb" routerLink="/main/productos">Productos</a>
+    >
+    <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
+      {{product.category}}
     </span>
     <span *ngIf="product.subcategory">
       >
-      <a mat-flat-button (click)="navigateCategory(product.category, product.subcategory)">{{ product.subcategory }}</a>
+      <span class="bradcumb" (click)="navigateCategory(product.category, product.subcategory)">
+        {{ product.subcategory}}
+      </span>
     </span>
     <span *ngIf="product.subsubcategory">
       >
-      <a mat-flat-button
-        (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">{{ product.subcategory }}</a>
+      <span class="bradcumb"
+        (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">
+        {{product.subcategory }}
+      </span>
     </span>
   </div>
-  <div class="w3-hide-small w3-hide-medium">
+  <ng-template #big>
     <app-web-view [product]="product"></app-web-view>
-  </div>
+  </ng-template>
 
-  <div class="w3-hide-large">
+  <div *ngIf="isSmall;else big">
     <app-mobile-view [product]="product"></app-mobile-view>
   </div>
-  
+
   <div class="w3-section">
     <h4 class="product__subtitle">Productos similares</h4>
     <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
@@ -41,6 +43,6 @@
     <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
     <app-questions [idProduct]="product.id"></app-questions>
-    
+
   </div>
 </div>
