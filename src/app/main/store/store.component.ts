@@ -17,11 +17,11 @@ export class StoreComponent implements OnInit {
   category$: Observable<any>;
   config: PaginationInstance = {
     id: 'custom',
-    itemsPerPage: 9,
+    itemsPerPage: 12,
     currentPage: 1,
   };
 
-  products: Array<any>;
+  products: Array<any> = [];
   products$: Observable<any>;
   searchForm: FormControl = new FormControl('');
 
@@ -41,7 +41,11 @@ export class StoreComponent implements OnInit {
     private route: ActivatedRoute,
     public auth: AuthService,
     private router: Router
-  ) { }
+  ) {
+    this.route.paramMap.subscribe(params => {
+      this.ngOnInit();
+    });
+  }
 
   ngOnInit(): void {
     this.category$ = this.dbs.getCategories()
@@ -63,6 +67,9 @@ export class StoreComponent implements OnInit {
         let promo = false
         let brand = null
 
+        let listProd = []
+        console.log(param.productos);
+        
         if (param.search) {
           this.search = param.search;
           frag = param.search.toLowerCase()
@@ -78,6 +85,11 @@ export class StoreComponent implements OnInit {
         if (param.promo) {
           this.searchPromo = param.promo;
           promo = true
+        }
+
+        if (param.productos) {
+          listProd = param.productos.split('-')
+          state = 'productos'
         }
 
         if (id.id) {
@@ -100,7 +112,7 @@ export class StoreComponent implements OnInit {
           return prods.filter((el) => el.promo)
         } else {
 
-          return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag)
+          return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag, listProd)
         }
 
       }),
@@ -110,7 +122,7 @@ export class StoreComponent implements OnInit {
     );
   }
 
-  filterProduct(state, prod, brand, cat, sub, subsub, word, frag) {
+  filterProduct(state, prod, brand, cat, sub, subsub, word, frag, listProd) {
     switch (state) {
       case 'brand':
         return prod.filter(el => el.brand.toLowerCase().includes(brand))
@@ -137,6 +149,13 @@ export class StoreComponent implements OnInit {
           .filter(el => el.subcategory.toLowerCase() == sub.toLowerCase())
           .filter(el => el.subsubcategory.toLowerCase() == subsub.toLowerCase())
         break;
+
+      case 'productos':
+        console.log('here');
+        console.log(listProd);
+        
+        return prod.filter(el => listProd.includes(el.id))
+        break;
       default:
         return prod.filter((el) =>
           word ? el.description.toLowerCase().includes(word.toLowerCase()) : true
@@ -144,7 +163,7 @@ export class StoreComponent implements OnInit {
         break;
     }
   }
-  
+
   navigateOnlyCategory(category) {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);

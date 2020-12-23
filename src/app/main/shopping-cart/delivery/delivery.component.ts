@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, startWith, tap } from 'rxjs/operators';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { LocationDialogComponent } from '../location-dialog/location-dialog.component';
 
 @Component({
   selector: 'app-delivery',
@@ -10,53 +13,17 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./delivery.component.scss'],
 })
 export class DeliveryComponent implements OnInit {
+  initDelivery$: Observable<any>
   formGroup: FormGroup;
   delivery: number = 1;
+  deliveryForm: FormControl = new FormControl(this.delivery)
   latitud: number = -12.046301;
   longitud: number = -77.031027;
 
   center = { lat: -12.046301, lng: -77.031027 };
   zoom = 15;
 
-  places: Array<any> = [
-    {
-      departamento: 'Arequipa',
-      provincias: [
-        {
-          provincia: 'Arequipa',
-          distritos: [
-            { distrito: 'Paucarpata', delivery: 6 },
-            { distrito: 'Cayma', delivery: 6 },
-            { distrito: 'Cercado', delivery: 5 },
-            { distrito: 'Yanahuara', delivery: 7 },
-          ],
-        },
-        {
-          provincia: 'Cámana',
-          distritos: [
-            { distrito: 'Ocoña', delivery: 15 },
-            { distrito: 'Samuel Pastor', delivery: 16 },
-          ],
-        },
-      ],
-    },
-    {
-      departamento: 'Lima',
-      provincias: [
-        {
-          provincia: 'Lima',
-          distritos: [
-            { distrito: 'Breña', delivery: 20 },
-            { distrito: 'Comas', delivery: 26 },
-            { distrito: 'PUENTE PIEDRA', delivery: 25 },
-            { distrito: 'LOS OLIVOS', delivery: 27 },
-            { distrito: 'SURQUILLO', delivery: 27 },
-            { distrito: 'SAN JUAN DE LURIGANCHO', delivery: 27 },
-          ],
-        },
-      ],
-    },
-  ];
+  places: Array<any> = [];
 
   provincias: Array<any> = [];
   distritos: Array<any> = [];
@@ -65,23 +32,34 @@ export class DeliveryComponent implements OnInit {
   filteredProvincia$: Observable<any>;
   filteredDistrito$: Observable<any>;
 
-  constructor(private fb: FormBuilder, private dbs: DatabaseService) {}
+  provincias$: Observable<any>
+  distritos$: Observable<any>
+
+  chooseDelivery$: Observable<any>
+
+  view = new BehaviorSubject<number>(1);
+  view$ = this.view.asObservable();
+  viewBol:boolean = true
+
+  constructor(
+    private fb: FormBuilder, 
+    private dialog: MatDialog,
+    public dbs: DatabaseService,
+    public auth: AuthService
+    ) { }
 
   ngOnInit(): void {
-    let guardado = localStorage.getItem('aitec-delivery');
+    this.initDelivery$ = this.dbs.getDelivery().pipe(
+      tap(res => {
+        this.places = this.convertPlaces(res)
+      })
+    )
+
     this.formGroup = this.fb.group({
       departamento: [null],
       provincia: [null],
-      distrito: [null],
-      direccion: [null],
-      referencia: [null],
-      coordenadas: [null],
+      distrito: [null]
     });
-    if (guardado) {
-      let option = JSON.parse(guardado);
-      this.delivery = option.option;
-      this.formGroup.setValue(option.info);
-    }
 
     this.formGroup.get('provincia').disable();
     this.formGroup.get('distrito').disable();
@@ -96,6 +74,29 @@ export class DeliveryComponent implements OnInit {
         })
       );
 
+    this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
+      startWith(''),
+      map(dept => {
+
+
+        if (typeof dept === 'object') {
+          this.selectProvincias(dept)
+
+        }
+        return true
+      })
+    )
+
+    this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
+      startWith(''),
+      map(prov => {
+        if (prov && typeof prov === 'object') {
+          this.selectDistritos(prov)
+
+        }
+        return true
+      })
+    )
     this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
       startWith(''),
       map((value) => {
@@ -113,17 +114,25 @@ export class DeliveryComponent implements OnInit {
         );
       })
     );
+
+    this.chooseDelivery$ = this.deliveryForm.valueChanges.pipe(
+      startWith(1),
+      tap(res => {
+        console.log(res);
+
+        if (this.formGroup.get('distrito').value) {
+          if (res == 1) {
+            this.dbs.delivery.next(this.formGroup.get('distrito').value.delivery);
+          } else {
+            this.dbs.delivery.next(0);
+          }
+        }
+      }))
   }
 
-  ngOnDestroy() {
-    console.log('delivery');
-    let option = {
-      option: this.delivery,
-      info: this.formGroup.value,
-    };
-    localStorage.setItem('aitec-delivery', JSON.stringify(option));
+  change(){
+    this.viewBol = !this.viewBol
   }
-
   showDepartamento(staff): string | undefined {
     return staff ? staff['departamento'] : undefined;
   }
@@ -135,13 +144,15 @@ export class DeliveryComponent implements OnInit {
   }
 
   selectProvincias(option) {
-    this.formGroup.get('provincia').enable();
     this.provincias = option.provincias;
+    this.formGroup.get('provincia').enable();
+
   }
 
   selectDistritos(option) {
-    this.formGroup.get('distrito').enable();
     this.distritos = option.distritos;
+    this.formGroup.get('distrito').enable();
+
   }
 
   selectDelivery(option) {
@@ -149,6 +160,10 @@ export class DeliveryComponent implements OnInit {
     if (this.delivery == 1) {
       this.dbs.delivery.next(option.delivery);
     }
+  }
+
+  mapClicked(event: google.maps.MouseEvent) {
+    this.center = event.latLng.toJSON();
   }
 
   findMe() {
@@ -166,4 +181,53 @@ export class DeliveryComponent implements OnInit {
       );
     }
   }
+
+  convertPlaces(array: Array<any>) {
+    let convert = array.map(el => {
+      el.distritos = el.distritos.map(dis => {
+        return {
+          distrito: dis.name,
+          province_id: dis.province_id,
+          delivery: el.delivery
+        }
+      })
+      return el
+    })
+
+    return convert.map((lo, ind, arr) => {
+      return {
+        departamento: lo.departamento.name,
+        provincias: arr.filter(li => li.provincia.department_id == lo.departamento.id).map((lu, i, dist) => {
+          return {
+            provincia: lu.provincia.name,
+            distritos: dist.map(d => {
+              return d.distritos
+            }).reduce((a, b) => a.concat(b), []).filter(la => la.province_id == lu.provincia.id)
+          }
+        }).filter((item, index, data) => {
+          return data.findIndex(i => i.provincia === item.provincia) === index;
+        })
+      }
+    }).filter((item, index, data) => {
+      return data.findIndex(i => i.departamento === item.departamento) === index;
+    })
+  }
+
+  openMap(user, edit) {
+    this.dialog.open(LocationDialogComponent, {
+      data: {
+        user: user,
+        edit: edit
+      }
+    })
+  }
+
+  getPrice(item) {
+    if (item.product.promo) {
+      return item.product.promoData.promoPrice * item.quantity;
+    } else {
+      return item.product.priceMin * item.quantity;
+    }
+  }
+
 }

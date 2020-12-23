@@ -63,13 +63,17 @@
           <button mat-menu-item (click)="logOut()">
             <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
           </button>
-          <button mat-menu-item disabled>
+          <button mat-menu-item routerLink="/main/mispedidos" >
             <mat-icon>receipt</mat-icon>
             <span>Mis pedidos</span>
           </button>
-          <button mat-menu-item>
+          <button mat-menu-item routerLink="/main/favoritos">
             <mat-icon>favorite</mat-icon>
             <span>Mis favoritos</span>
+          </button>
+          <button mat-menu-item routerLink="/main/preguntas" >
+            <mat-icon>question_answer</mat-icon>
+            <span>Mis Preguntas</span>
           </button>
         </mat-menu>
         <button mat-button routerLink="/main/carrito" matTooltip="Carrito">

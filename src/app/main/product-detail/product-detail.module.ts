@@ -18,11 +18,19 @@ import { ProductDetailRoutingModule } from './product-detail-routing.module';
 import { ProductDetailComponent } from './product-detail.component';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { QuestionsComponent } from './questions/questions.component';
+import { WebViewComponent } from './web-view/web-view.component';
+import { MobileViewComponent } from './mobile-view/mobile-view.component';
+import { MatSelectModule } from '@angular/material/select';
+import { LayoutModule } from '@angular/cdk/layout';
+import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.component';
 
 @NgModule({
   declarations: [
     ProductDetailComponent,
-    QuestionsComponent],
+    QuestionsComponent,
+    WebViewComponent,
+    MobileViewComponent,
+    NoLoginDialogComponent],
   imports: [
     CommonModule,
     ProductDetailRoutingModule,
@@ -42,7 +50,8 @@ import { QuestionsComponent } from './questions/questions.component';
     SlickCarouselModule,
     QuantityDivModule,
     LazyLoadImageModule,
-    
+    MatSelectModule,
+    LayoutModule
   ]
 })
 export class ProductDetailModule { }

@@ -1,57 +1,131 @@
-
 <div class="w3-section ms-container">
   <div>
     <h2 class="title">
-      <div class="containerMobile">
-        <button mat-icon-button *ngIf="detail$ | async" (click)="back()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-      </div>
-      <mat-icon>chat</mat-icon>
+      <mat-icon>question_answer</mat-icon>
       Preguntas
     </h2>
+
     <mat-divider></mat-divider>
 
-    <div class="mat-elevation-z8">
-      <table mat-table [dataSource]="dataSource">
     
-        <!-- Position Column -->
-        <ng-container matColumnDef="position">
-          <th mat-header-cell *matHeaderCellDef> imagen </th>
-          <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-        </ng-container>
-    
-        <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef> descripcion </th>
-          <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-        </ng-container>
-    
-        <!-- Weight Column -->
-        <ng-container matColumnDef="weight">
-          <th mat-header-cell *matHeaderCellDef> Pregunta </th>
-          <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-        </ng-container>
-    
-        <!-- Symbol Column -->
-        <ng-container matColumnDef="symbol">
-          <th mat-header-cell *matHeaderCellDef> Respuesta </th>
-          <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-        </ng-container>
 
-        <!-- Symbol Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef> Actiones </th>
-          <td mat-cell *matCellDef="let element"> {{element.actions}} </td>
-        </ng-container>
-    
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    <div class="actionsContainer" style="margin: 16px">
+
+      <div class="container-date">
+        <mat-form-field style="max-width: 250px;" appearance="outline">
+          <mat-label>FECHA/PERIODO</mat-label>
+          <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
+            <input readonly matStartDate formControlName="start" placeholder="Fecha Inicio">
+            <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+  
+
     </div>
 
+
+    <div *ngIf="init$ | async as sales">
+   
+    <div style="margin-top: 20px" *ngFor="let question of sales"  >
+
+      <mat-accordion  >
+
+        <mat-expansion-panel hideToggle class="titulo-expansion-panel" *ngFor="let product of question['product']" >
+          <mat-expansion-panel-header class="title-product">
+            <div class="title-product">
+              <mat-panel-title>
+                <img
+                  [src]="product.photoURL"
+                  alt=""
+                  class="img-product"
+                />
+                <h3 class="name-product">{{product.name}}</h3>
+                <h4 class="price-product">S/ {{product.price}}</h4>
+                <p class="stock-product"> {{question.productstock}} unidades disponibles</p>
+              </mat-panel-title>
+            </div>
+          </mat-expansion-panel-header>
+          
+        </mat-expansion-panel>
+        
+        <mat-expansion-panel
+          (opened)="panelOpenState = true"
+          (closed)="panelOpenState = false"
+          class="answer-body"        
+
+        >
+        
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <p class="name-email"> {{question.createdBy.personData.name}}   {{question.createdBy.personData.lastName}}( {{question.createdBy.email}})</p>
+            </mat-panel-title>
+            <mat-panel-description>
+              <h4 class="questions">
+                {{question.question}}
+              </h4>
+
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                aria-label="Example icon-button with a menu"
+                class="btn-delete"
+                
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item
+                (click)="deleteQuestion(question.idProduct,question.id)"
+                >
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </mat-panel-description>
+            
+          </mat-expansion-panel-header>
+          <div class="answer-body">
+            <p class="title-answer">
+              <span class="answer-question"> {{question.question}} </span> {{ question.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
+            </p> 
+              
+            
+            <ng-container>
+              <form (ngSubmit)="saveAnswer(question.idProduct,question.id)">
+
+                <input 
+                type="text"
+                [ngModel]="question.answer" 
+                (ngModelChange)="saveAnswerChange($event)"
+                class="input-answer"
+                name="answer"/>
+                
+                  <button
+                  type="submit"
+                  mat-raised-button
+                  color="primary"
+                 
+                  class="answer-button"
+                >
+                  Responder
+                </button>
+              </form>
+            </ng-container>
+
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    </div>
+
+
+
+  </div>
     
+
   </div>
 </div>
+
+

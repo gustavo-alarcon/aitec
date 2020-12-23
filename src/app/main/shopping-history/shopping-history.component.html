@@ -10,9 +10,8 @@
       </mat-date-range-input>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
-
-
     </mat-form-field>
+
     <div *ngIf="init$ | async as sales">
       <div class="w3-hide-small w3-hide-medium" style="display: flex;">
         <div style="width: 70%">

@@ -1,0 +1,119 @@
+<mat-card class="product">
+  <mat-card-content>
+    <div class="w3-row w3-padding">
+      <div class="w3-col l8" *ngIf="changeColor$ | async">
+        <div class="gallery">
+          <div class="gallery__side">
+            <div class="gallery__div border--primary w3-block" *ngFor="let img of galleryImg"
+              [ngClass]="img.ind == selectImage.ind ? 'gallery__div--select' : 'none'">
+              <img [defaultImage]="defaultImage" [lazyLoad]="img.photoURL" [offset]="100"
+                (click)="changeSelectImage(img)" class="gallery__div--image" alt="" />
+            </div>
+          </div>
+          <figure #image class="zoom" (mousemove)="zoom($event)"
+            [style.background-image]="'url(' + selectImage.photoURL + ')'">
+            <div style="background-color: white">
+              <img [defaultImage]="defaultImage" [lazyLoad]="selectImage.photoURL" [offset]="100"
+                class="gallery__image" />
+            </div>
+          </figure>
+        </div>
+      </div>
+      <div class="w3-col l4">
+        <div class="ms-flex ms-flex--center">
+          <span *ngIf="product.purchaseNumber > 1;else new">{{product.purchaseNumber}} vendidos</span>
+          <ng-template #new> <span>Nuevo</span> </ng-template>
+          <span class="ms-fill"></span>
+          <div *ngIf="favorite$|async as fav">
+            <button *ngIf="fav==-1;else include" [disabled]="loadingFav$ | async" (click)="addFavorites()"
+              mat-icon-button color="primary">
+              <mat-icon>favorite_border</mat-icon>
+            </button>
+            <ng-template #include>
+              <button mat-icon-button color="primary" [disabled]="loadingFav$ | async" (click)="removeFavorites()">
+                <mat-icon>favorite</mat-icon>
+              </button>
+            </ng-template>
+          </div>
+
+        </div>
+        <h2 class="product__title">{{ product.description }}</h2>
+        <div *ngIf="product.promo" class="product__promo ms-flex">
+          <div style="width: fit-content">
+            Antes <strike>{{ product.priceMin }}</strike>
+          </div>
+          <div class="product__promo--discount">
+            {{ product.promoData.offer }} % Dscto
+          </div>
+        </div>
+        <div class="product__price w3-section">
+          <span *ngIf="product.promo">Ahora</span>
+          <span class="product__price--number">
+            S/.
+            {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
+          </span>
+        </div>
+        <mat-form-field>
+          <mat-label>Colores</mat-label>
+          <mat-select [formControl]="selected" [(value)]="productSelected" disableRipple>
+            <mat-select-trigger>
+              <mat-icon [style.color]="productSelected.color.color">brightness_1</mat-icon>
+              {{productSelected.color.name}}
+            </mat-select-trigger>
+            <mat-option *ngFor="let prod of product.products" [value]="prod">
+              <mat-icon [style.color]="prod.color.color">brightness_1</mat-icon> {{prod.color.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="product__stock">
+          {{ productSelected.stock }} Unidades disponibles
+        </div>
+        <div class="w3-section">
+          <div>Paga con:</div>
+          <div class="ms-flex w3-section" style="justify-content: space-around">
+            <img src="../../../../assets/images/visa.png" class="mini-img" alt="" />
+            <img src="../../../../assets/images/mastercad.png" class="mini-img" alt="" />
+            <img src="../../../../assets/images/visa_electron.png" class="mini-img" alt="" />
+            <img src="../../../../assets/images/american.png" class="mini-img" alt="" />
+          </div>
+        </div>
+
+        <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
+        <div class="w3-center">
+          <div *ngIf="auth.user$ | async; else loginbutton">
+            <app-quantity-div [product]="product" [chosen]="productSelected" [color]="product.products.length > 1"
+              size="md"></app-quantity-div>
+          </div>
+          <ng-template #loginbutton>
+            <button mat-flat-button color="primary" class="product__add" (click)="login()"
+              [style.visibility]="product['realStock'] > 0 ? 'visible' : 'hidden'">
+              <mat-icon>shopping_cart</mat-icon>
+              <span> Agregar al Carrito</span>
+            </button>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+    <div class="w3-section w3-padding">
+      <p style="font-size: 1.2em">
+        Marca: <strong>{{ product.brand.name }}</strong>
+      </p>
+      <div class="w3-section">
+        <h4 class="product__subtitle">Descripción</h4>
+        <div [innerHTML]="product.additionalDescription"></div>
+      </div>
+
+      <div class="w3-section">
+        <h4 class="product__subtitle">Calificaciones</h4>
+        <div style="color: #f2c94c">
+          <mat-icon>star</mat-icon>
+          <mat-icon>star</mat-icon>
+          <mat-icon>star</mat-icon>
+          <mat-icon>star</mat-icon>
+          <mat-icon>star_half</mat-icon>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

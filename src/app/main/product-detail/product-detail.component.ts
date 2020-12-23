@@ -1,9 +1,11 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap, switchMapTo, takeLast, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Observer } from 'rxjs';
+import { map, switchMap, switchMapTo, take, takeLast, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-product-detail',
@@ -14,11 +16,10 @@ export class ProductDetailComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
+  isSmall = false
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
-  galleryImg: Array<any>
-  selectImage: any
   slideConfig2 = {
     "slidesToShow": 4, "slidesToScroll": 1,
     "autoplay": false,
@@ -30,36 +31,31 @@ export class ProductDetailComponent implements OnInit {
         }
       },
       {
-        breakpoint: 780,
-        settings: {
-          slidesToShow: 2
-        }
-      },
-      {
         breakpoint: 480,
         settings: {
-          slidesToShow: 1
+          slidesToShow: 2,
+          arrows:false
         }
       }
     ]
   };
+
+  isSmall$: Observer<any>
 
   @ViewChild("image") image: ElementRef;
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   colorSelected: any = null
+  count:number = 1
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
-    private renderer: Renderer2,
-    private router: Router
-  ) {
-    this.route.paramMap.subscribe(params => {
-      this.ngOnInit();
-    });
-  }
+    private router: Router,
+    public breakpointObserver: BreakpointObserver,
+    private afs: AngularFirestore
+  ) {}
 
   ngOnInit(): void {
     this.productDiv = null
@@ -78,30 +74,37 @@ export class ProductDetailComponent implements OnInit {
         )
       }),
       tap(res => {
-        this.productDiv = res
-        this.colorSelected = res.colors[0]
+        if(this.count==1){
+          this.searchNumber(res)
+        }       
         this.loading.next(false)
-
-        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
-        this.selectImage = this.galleryImg[res.indCover]
-
       })
     );
+    this.breakpointObserver.observe(['(min-width: 750px)'])
+      .subscribe((state: BreakpointState) => {
+        if (state.matches) {
+          this.isSmall = false
+        } else {
+          this.isSmall = true
+        }
+      });
+
 
   }
 
-  changeSelectImage(image) {
-    this.selectImage = image
-  }
+  searchNumber(product){
+    this.afs.firestore.runTransaction((transaction) => {
+      const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(product.id);
 
-  zoom(e) {
-    var zoomer = e.currentTarget;
-    let offsetX = e.offsetX
-    let offsetY = e.offsetY
+      return transaction.get(ref).then((doc) => {
+        let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
+        searchNumber++
+        transaction.update(ref, { searchNumber: searchNumber });
+      });
+    }).then(() => {
+      this.count++
 
-    let x = offsetX / zoomer.offsetWidth * 100
-    let y = offsetY / zoomer.offsetHeight * 100
-    this.renderer.setStyle(this.image.nativeElement, 'background-position', x + '% ' + y + '%')
+    })
   }
 
   navigate(category, subcategory) {

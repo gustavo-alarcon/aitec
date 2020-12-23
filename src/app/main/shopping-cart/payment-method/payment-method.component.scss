@@ -1,6 +1,5 @@
 .delivery {
-  padding: 35px;
-  border: 1px solid #e5e5e5;
+  box-shadow: none;
   box-sizing: border-box;
   max-width: 500px;
   margin: auto;
@@ -10,6 +9,14 @@
     font-family: Raleway;
   }
 }
+
+@media(min-width:780px){
+  .delivery {
+    padding: 35px;
+    border: 1px solid #e5e5e5;
+  }
+}
+
 
 .voucher {
   border: 1px solid #4f4f4f;

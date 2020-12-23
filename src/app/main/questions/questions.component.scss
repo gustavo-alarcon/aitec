@@ -1,0 +1,114 @@
+
+.container-date{
+  display: inline;
+  padding: 5px;
+}
+.hr{
+  margin: 20px;
+}
+
+ .date-filter{
+  margin-right: 50px;
+}
+.container-questions{
+  margin: 20px;
+}
+.questions{
+  padding: 8px;
+  border-radius: 5px;
+  box-shadow: -1px 2px 3px 4px #ccc;
+
+}
+.header-question{
+  display: flex;
+  margin: 20px;  
+  margin-bottom: 10px;
+
+}
+.img-product{
+  height: 40px;
+  width: 70px;
+  padding-left: 20px;
+}
+.name-product{
+  font-weight: bold;
+  margin: 10px;
+}
+.price-product{
+  text-align: center;
+  color: #215B90;
+  font-weight: bold;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+.stock-product{
+  text-align: center;
+  color: #828282;
+}
+
+.body-question{
+  margin: 20px;  
+}
+.question{
+  margin: 10px;
+  color: #215B90;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.answer{
+  color: #828282;
+  margin: 10px;
+
+}
+
+.footer-question{
+  display: flex;
+  margin: 20px;  
+
+}
+.btn-shopping{
+  background: #1C31EA;
+  color: white;
+  width: 300px;
+  height: 50px;
+  border: none;
+  border-radius: 5px;
+}
+.other-question{
+  color: #1C31EA;
+  margin-left: 50px;
+  font-size: 1.3rem;
+  align-items: center;
+}
+@media only screen and (max-width: 768px) {
+
+  .header-question{
+    display: block;
+  }
+  .img-product{
+    height: 40px;
+    width: 70px;
+    padding-left: 2px;
+  }
+  .name-product{
+    font-weight: bold;
+    margin: 10px;
+  }
+
+  .price-product{
+    display: inline;
+    margin: 0;
+    padding-left: 2px;
+    padding-right: 10px;
+  }
+  .stock-product{
+    display: inline;
+    margin: 0;
+  }
+
+  .other-question{
+    color: #1C31EA;
+    font-size: 1rem;
+    margin-left: 20px;
+  }
+}
