@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,17 +20,22 @@ import { MatRadioModule } from '@angular/material/radio';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatListModule } from '@angular/material/list';
+import { Ng2ImgMaxModule } from 'ng2-img-max';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatStepperModule } from '@angular/material/stepper';
+
 import { ShoppingCartRoutingModule } from './shopping-cart-routing.module';
 import { ShoppingCartComponent } from './shopping-cart.component';
 import { ShoppingListComponent } from './shopping-list/shopping-list.component';
 import { DeliveryComponent } from './delivery/delivery.component';
 import { PaymentMethodComponent } from './payment-method/payment-method.component';
-import { Ng2ImgMaxModule } from 'ng2-img-max';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
-import { LazyLoadImageModule } from 'ng-lazyload-image';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ShoppingListMobileComponent } from './shopping-list-mobile/shopping-list-mobile.component';
+import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 @NgModule({
   declarations: [
     ShoppingCartComponent,
@@ -37,6 +43,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     DeliveryComponent,
     PaymentMethodComponent,
     SaleDialogComponent,
+    ShoppingListMobileComponent,
+    LocationDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -65,7 +73,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatDatepickerModule,
     QuantityDivModule,
     LazyLoadImageModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    NgxPaginationModule,
+    MatStepperModule
   ],
 })
-export class ShoppingCartModule {}
+export class ShoppingCartModule { }

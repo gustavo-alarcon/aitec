@@ -1,7 +1,8 @@
 import { Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map, startWith, take, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -27,13 +28,22 @@ export class WebViewComponent implements OnInit {
 
   favorite$: Observable<any>
 
+  loadingFav = new BehaviorSubject<boolean>(false);
+  loadingFav$ = this.loadingFav.asObservable();
+
   constructor(
-    private auth: AuthService,
+    public auth: AuthService,
     private afs: AngularFirestore,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
+    console.log('web');
+    
+  }
+
+  ngOnChanges(){
     this.selected.setValue(this.product.products[0])
     this.changeColor$ = this.selected.valueChanges.pipe(
       startWith(this.product.products[0]),
@@ -46,8 +56,8 @@ export class WebViewComponent implements OnInit {
 
     this.favorite$ = this.auth.user$.pipe(
       map(user => {
-        if (user.favorites) {
-          let ind = user.favorites.indexOf(this.product.id)
+        if (user) {  
+          let ind = user.favorites?user.favorites.indexOf(this.product.id):-1
           return ind == 0 ? ind + 2 : ind
         } else {
           return -1
@@ -72,6 +82,7 @@ export class WebViewComponent implements OnInit {
   }
 
   addFavorites() {
+    this.loadingFav.next(true)
     this.auth.user$.pipe(take(1)).subscribe(user => {
       const batch = this.afs.firestore.batch()
       let ref = this.afs.firestore.collection(`/users`).doc(user.uid);
@@ -83,12 +94,37 @@ export class WebViewComponent implements OnInit {
 
       batch.commit().then(() => {
         console.log('save');
-
+        this.loadingFav.next(false)
+        this.snackBar.open('Agregado a favoritos', 'Cerrar', {
+          duration: 6000,
+        });
       })
     })
   }
 
   removeFavorites() {
+    this.loadingFav.next(true)
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      const batch = this.afs.firestore.batch()
+      let ref = this.afs.firestore.collection(`/users`).doc(user.uid);
+      let exist = user.favorites
+      let ind = exist.indexOf(this.product.id)
+      exist.splice(ind,1)
+      batch.update(ref, {
+        favorites: exist
+      })
+
+      batch.commit().then(() => {
+        this.loadingFav.next(false)
+        this.snackBar.open('Desagregado a favoritos', 'Cerrar', {
+          duration: 6000,
+        });
+
+      })
+    })
+  }
+
+  login(){
 
   }
 

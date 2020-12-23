@@ -8,7 +8,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LandingService } from 'src/app/core/services/landing.service';
-
 @Component({
   selector: 'app-toolbar-web',
   templateUrl: './toolbar-web.component.html',
@@ -17,7 +16,7 @@ import { LandingService } from 'src/app/core/services/landing.service';
 export class ToolbarWebComponent implements OnInit {
 
   @Input() listCategories: Array<any>
-  @Input() info:any
+  @Input() info: any
   openedMenu: boolean = false
   firstOpening: boolean = false;
 
@@ -32,7 +31,7 @@ export class ToolbarWebComponent implements OnInit {
   } = null
 
   @ViewChild("megaMenu") menu: ElementRef;
- 
+
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -116,7 +115,7 @@ export class ToolbarWebComponent implements OnInit {
 
   navigateProduct(product) {
     this.router.navigate(['/main/producto', product['sku']]);
-    this.clearInput();
+      this.clearInput();
   }
 
   navigateOnlyCategory(category) {

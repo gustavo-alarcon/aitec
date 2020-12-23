@@ -109,6 +109,7 @@ export class QuestionsService {
   getAllQuestions() {
     return this.afs.collectionGroup<Questions>('questions').valueChanges();
   }
+
   //get all product have quetions
   getProductsWithQuestions() {
     return this.afs.collection<Product>(`db/aitec/productsList`, (ref) =>

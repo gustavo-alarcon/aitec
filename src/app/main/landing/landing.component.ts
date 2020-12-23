@@ -15,7 +15,7 @@ export class LandingComponent implements OnInit {
 
   slideConfig = {
     "dots": true, "slidesToShow": 1, "slidesToScroll": 1, "autoplay": true,
-    "autoplaySpeed": 5000, "lazyLoad": 'ondemand',
+    "autoplaySpeed": 5000, "lazyLoad": 'ondemand', "arrows": false
   };
   slides = [];
   slideConfig2 = {
@@ -38,7 +38,8 @@ export class LandingComponent implements OnInit {
       {
         breakpoint: 480,
         settings: {
-          slidesToShow: 1
+          slidesToShow: 1,
+          arrows: false
         }
       }
     ]
@@ -58,15 +59,18 @@ export class LandingComponent implements OnInit {
       {
         breakpoint: 780,
         settings: {
-          slidesToShow: 1
+          slidesToShow: 1,
+          arrows: false
         }
       }
     ]
   };
 
   init$: Observable<any>
-  products$:Observable<any>
-  listproducts: Array<any>
+  products$: Observable<any>
+  listproducts: Array<any> = []
+  lastProducts: Array<any> = []
+  offersProducts: Array<any> = []
   offers: Array<any>
 
   banners: Array<any> = []
@@ -84,13 +88,14 @@ export class LandingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    
-    this.products$=this.dbs.getProductsListValueChanges().pipe(
-      map(prods=>prods.filter(el=>el.published)),
-      tap(res=>{
-        this.listproducts = res.filter(el => !el.promo).slice(0, 4)
 
+    this.products$ = this.dbs.getLastProducts().pipe(
+      map(prods => prods.filter(el => el.published)),
+      tap(res => {
+        this.listproducts = res.filter(el => !el.promo).filter(el => el.searchNumber).sort((a, b) => b.searchNumber - a.searchNumber).slice(0, 4)
+        this.lastProducts = res.slice(0, 4)
         this.offers = res.filter(el => el.promo)
+        this.offersProducts = this.offers.slice(0, 4)
       })
     )
 
@@ -149,6 +154,13 @@ export class LandingComponent implements OnInit {
         });
         break;
       case 'Producto':
+        if (banner.products.length > 1) {
+          this.router.navigate(['/main/productos'], {
+            queryParams: { productos: banner.products.map(el => el.id).join('-') },
+          });
+        } else {
+          this.router.navigate(['/main/producto', banner.products[0]['id']]);
+        }
         break;
       default:
         break;

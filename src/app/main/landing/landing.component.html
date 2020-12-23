@@ -59,11 +59,11 @@
         <h2 class="title-section">Nuestros Productos</h2>
       </div>
       <mat-tab-group class="section__tab w3-margin-top" mat-align-tabs="center" color="primary">
-        <mat-tab label="Los más buscados">
+        <mat-tab label="Los más buscados" *ngIf="listproducts.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of listproducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
@@ -75,11 +75,11 @@
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Últimos productos">
+        <mat-tab label="Últimos productos" *ngIf="lastProducts.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of lastProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
@@ -91,11 +91,11 @@
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Ofertas">
+        <mat-tab label="Ofertas" *ngIf="offersProducts.length">
           <div class="w3-padding w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of offersProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>

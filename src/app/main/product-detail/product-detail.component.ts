@@ -1,9 +1,11 @@
 import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap, switchMapTo, takeLast, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Observer } from 'rxjs';
+import { map, switchMap, switchMapTo, take, takeLast, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-product-detail',
@@ -14,6 +16,7 @@ export class ProductDetailComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
+  isSmall = false
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
@@ -30,27 +33,29 @@ export class ProductDetailComponent implements OnInit {
       {
         breakpoint: 480,
         settings: {
-          slidesToShow: 2
+          slidesToShow: 2,
+          arrows:false
         }
       }
     ]
   };
+
+  isSmall$: Observer<any>
 
   @ViewChild("image") image: ElementRef;
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   colorSelected: any = null
+  count:number = 1
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
-    private router: Router
-  ) {
-    this.route.paramMap.subscribe(params => {
-      this.ngOnInit();
-    });
-  }
+    private router: Router,
+    public breakpointObserver: BreakpointObserver,
+    private afs: AngularFirestore
+  ) {}
 
   ngOnInit(): void {
     this.productDiv = null
@@ -69,13 +74,38 @@ export class ProductDetailComponent implements OnInit {
         )
       }),
       tap(res => {
+        if(this.count==1){
+          this.searchNumber(res)
+        }       
         this.loading.next(false)
-
       })
     );
+    this.breakpointObserver.observe(['(min-width: 750px)'])
+      .subscribe((state: BreakpointState) => {
+        if (state.matches) {
+          this.isSmall = false
+        } else {
+          this.isSmall = true
+        }
+      });
+
 
   }
 
+  searchNumber(product){
+    this.afs.firestore.runTransaction((transaction) => {
+      const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(product.id);
+
+      return transaction.get(ref).then((doc) => {
+        let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
+        searchNumber++
+        transaction.update(ref, { searchNumber: searchNumber });
+      });
+    }).then(() => {
+      this.count++
+
+    })
+  }
 
   navigate(category, subcategory) {
     if (subcategory) {

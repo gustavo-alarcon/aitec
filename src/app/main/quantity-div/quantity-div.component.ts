@@ -12,24 +12,28 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class QuantityDivComponent implements OnInit {
   @Input() product: any;
+  @Input() chosen: any;
+  @Input() color: boolean;
   @Input() size: string;
   quantity$: Observable<number>;
 
   quantityForm = new FormControl(null);
-  constructor(public dbs: DatabaseService, private snackBar: MatSnackBar) {}
+  constructor(
+    public dbs: DatabaseService, 
+    private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
 
+  }
+
+  ngOnChanges() {
     this.quantity$ = this.dbs.orderObs$.pipe(
       map((order) => {
-        
-        let index = order.findIndex(
-          (el) => el['product']['sku'] == this.product['sku']
-        );
+        let index = order.length? order.findIndex(el => el['chosenProduct']['sku'] == this.chosen['sku']):-1
         if (index >= 0) {
           let orderProduct = order[index];
           return orderProduct['quantity'];
-        }else{
+        } else {
           return null
         }
       }),
@@ -42,9 +46,12 @@ export class QuantityDivComponent implements OnInit {
   }
 
   add(item) {
+
     let newproduct = {
       product: item,
       quantity: 1,
+      chosenProduct: this.chosen,
+      color: this.color
     };
     this.dbs.order.push(newproduct);
     this.dbs.orderObs.next(this.dbs.order);
@@ -53,7 +60,7 @@ export class QuantityDivComponent implements OnInit {
 
   increase(item) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == item['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
 
     this.dbs.order[index]['quantity']++;
@@ -63,7 +70,7 @@ export class QuantityDivComponent implements OnInit {
 
   decrease(item) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == item['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
     this.dbs.order[index]['quantity']--;
     this.dbs.orderObs.next(this.dbs.order);
@@ -79,15 +86,15 @@ export class QuantityDivComponent implements OnInit {
 
   changeQuantity(number) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == this.product['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
     if (number == 0 || isNaN(number)) {
       this.dbs.order[index]['quantity'] = 1;
     } else {
       if (number >= this.product['realStock']) {
-        this.dbs.order[index]['quantity'] = this.product['realStock'];
+        this.dbs.order[index]['quantity'] = this.chosen['stock'];
         this.snackBar.open(
-          'Stock disponible del producto:' + this.product['realStock'],
+          'Stock disponible del producto:' + this.chosen['stock'],
           'Aceptar',
           {
             duration: 6000,

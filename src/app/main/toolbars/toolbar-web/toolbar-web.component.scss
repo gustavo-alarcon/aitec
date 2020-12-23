@@ -45,6 +45,7 @@
     color: #cbcbcb;
   }
 }
+
 .social__button {
   border: 1px solid white;
   margin: 0 0.5em;
@@ -56,77 +57,6 @@
 .menu-button {
   font-family: "Montserrat", sans-serif !important;
   font-weight: 300 !important;
-}
-
-.footer {
-  background-color: #f1f1f1;
-
-  &__section {
-    padding: 3% 5%;
-  }
-  &__logo {
-    width: 200px;
-  }
-  &__title {
-    text-transform: uppercase;
-    position: relative;
-    padding-bottom: 5px;
-    font-size: 1.2em;
-    font-weight: 500;
-
-    &::before {
-      content: "";
-      height: 2px;
-      width: 80px;
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      background: black;
-    }
-  }
-  &__buton-social {
-    background: black;
-    margin: 0 0.5em;
-  }
-  &__meraki {
-    width: 95px;
-  }
-}
-
-.footer__buton-social img {
-  width: 18px;
-}
-
-.email-form {
-  display: flex;
-  max-width: 290px;
-  margin: auto;
-  font-size: 1em;
-  padding-left: 15px;
-
-  &__input {
-    margin: 5px 0;
-    width: 100%;
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__button {
-    border-radius: 0;
-    min-width: 85px !important;
-    padding: 0 10px !important;
-    background-color: black;
-    color: white;
-  }
-}
-.footer-list ul {
-  list-style: none;
-  padding-inline-start: 0;
-}
-
-.footer-list a {
-  text-decoration: none;
 }
 
 .main__space {

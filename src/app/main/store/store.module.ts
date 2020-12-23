@@ -16,7 +16,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ProductDivModule } from '../product-div/product-div.module';
 import { MatExpansionModule } from '@angular/material/expansion';
-import {MatListModule} from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
+
 @NgModule({
   declarations: [StoreComponent],
   imports: [

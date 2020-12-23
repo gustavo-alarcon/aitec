@@ -1,5 +1,5 @@
 <div class="main__toolbar ">
-  <div class="ms-flex ms-flex--center w3-padding">
+  <div class="ms-flex ms-flex--center">
     <button mat-icon-button (click)="openSide()">
       <mat-icon class="dark-icon">menu</mat-icon>
     </button>
@@ -10,6 +10,24 @@
     <button mat-icon-button class="search-button" (click)="toggleSearch()">
       <mat-icon>{{openedSearch ? 'close' : 'search'}}</mat-icon>
     </button>
+    <div class="search-form background-color w3-margin-left mat-elevation-z2">
+      <input matInput type="text" [formControl]="searchForm" placeholder="Buscar productos, marcas y más..."
+        autocomplete="off" [matAutocomplete]="autoProduct" class="search-form__input" (keyup.enter)="navigate()"
+        style="border: none" />
+      <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="showSelectedUser" [panelWidth]="450">
+        <mat-option *ngFor="let option of filteredProducts$ | async" [value]="option"
+          (click)="navigateProduct(option)" (onSelectionChange)="navigateProduct(option)">
+          <span>{{ option["description"] | titlecase }}</span>
+        </mat-option>
+      </mat-autocomplete>
+      <button mat-icon-button color="primary" [style.visibility]="(search$ | async) ? 'visible' : 'hidden'"
+        (click)="clearInput()">
+        <mat-icon style="font-size: 18px">close</mat-icon>
+      </button>
+      <button mat-button (click)="navigate()" class="search-form__button">
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
     <div class="search-div background-color" [style.display]="openedSearch ? 'block' : 'none'">
       <mat-form-field appearance="outline" class="w3-small" style="font-size: 1rem; width: 100%">
         <mat-label>Buscar</mat-label>
@@ -35,11 +53,11 @@
         <button mat-menu-item (click)="logOut()">
           <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
         </button>
-        <button mat-menu-item disabled>
+        <button mat-menu-item routerLink="/main/mispedidos" >
           <mat-icon>receipt</mat-icon>
           <span>Mis pedidos</span>
         </button>
-        <button mat-menu-item>
+        <button mat-menu-item routerLink="/main/favoritos">
           <mat-icon>favorite</mat-icon>
           <span>Mis favoritos</span>
         </button>
