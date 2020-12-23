@@ -4,7 +4,8 @@ import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms'
 import { QuestionsService } from '../../../core/services/questions.service';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, take } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-answer',
@@ -30,7 +31,9 @@ export class AnswerComponent implements OnInit {
   constructor(   
      public dbs: QuestionsService,
      public afs: AngularFirestore,
-     private db:DatabaseService
+     private db:DatabaseService,
+     private authService:AuthService,
+
   ) { 
   
 }
@@ -115,10 +118,48 @@ export class AnswerComponent implements OnInit {
           );  
            
         }
-
     );
 
+   // this.sendEmail();
+
   }
+
+  sendEmail(){
+
+    this.authService.user$.pipe(
+      take(1)
+    ).subscribe(
+      user =>{
+
+      const emailRef = this.afs.firestore.collection(`/mail`).doc();
+      const batch = this.afs.firestore.batch();
+
+      console.log(user);
+
+        let message = {
+          to: `${user.email}`,
+          message: {
+            subject: 'Hola ' +  `${user.personData.name}`,
+            html: `
+
+             hola
+            `
+          },
+        };
+
+       
+       
+      batch.set(emailRef, message);
+
+      batch.commit().then(() => {
+
+       });
+      } 
+    )
+
+  }
+
+
   deleteQuestion(idProduct:string,idQuestion:string){
 
     this.dbs.deleteQuestionById(idProduct,idQuestion);

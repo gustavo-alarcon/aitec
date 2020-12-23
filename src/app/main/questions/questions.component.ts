@@ -5,6 +5,7 @@ import { DatabaseService } from '../../core/services/database.service';
 import { AuthService } from '../../core/services/auth.service';
 import { take, startWith, map, switchMap, shareReplay } from 'rxjs/operators';
 import { QuestionsService } from '../../core/services/questions.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-questions',
@@ -27,6 +28,7 @@ export class QuestionsComponent implements OnInit ,OnDestroy{
      private db:DatabaseService,
      public authService:AuthService,
      public dbs: QuestionsService,
+     public afs: AngularFirestore,
 
     ) { }
 
@@ -92,6 +94,7 @@ export class QuestionsComponent implements OnInit ,OnDestroy{
     //this.init.unsubscribe();
 
   }
+  
 
   getFilterTime(el, time) {
     let date = el.toMillis();
