@@ -3,7 +3,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { DatabaseService } from '../../core/services/database.service';
 import { AuthService } from '../../core/services/auth.service';
-import { take, startWith, map, switchMap, shareReplay } from 'rxjs/operators';
+import { take, startWith, map } from 'rxjs/operators';
 import { QuestionsService } from '../../core/services/questions.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 

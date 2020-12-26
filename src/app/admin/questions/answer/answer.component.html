@@ -24,7 +24,9 @@
   
 
     </div>
-
+     <!-- <div *ngIf="authService.user$ | async as user; ">
+          {{user | json}}
+    </div> -->
 
     <div *ngIf="init$ | async as sales">
    
@@ -55,8 +57,7 @@
           (closed)="panelOpenState = false"
           class="answer-body"        
 
-        >
-   
+        >  
          
           <mat-expansion-panel-header>
             <mat-panel-title>
