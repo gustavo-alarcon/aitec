@@ -21,10 +21,13 @@
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
-  
+        
+        
 
-    </div>
-
+      </div>
+     <!-- <div *ngIf="authService.user$ | async as user; ">
+          {{user | json}}
+    </div> -->
 
     <div *ngIf="init$ | async as sales">
    
@@ -55,12 +58,11 @@
           (closed)="panelOpenState = false"
           class="answer-body"        
 
-        >
-   
+        >  
          
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <p class="name-email" *ngIf="question.createdBy.name">{{question.createdBy.name}}   {{question.createdBy.lastName}} ( {{question.createdBy.email}})</p>
+              <p class="name-email"  *ngIf="question.createdBy.name">{{question.createdBy.name}}   {{question.createdBy.lastName}} ( {{question.createdBy.email}})</p>
               <p class="name-email" *ngIf="question.createdBy.personData != null">{{question.createdBy.personData.name}}  {{question.createdBy.personData.lastName}} ( {{question.createdBy.email}})</p>
             </mat-panel-title>
             <mat-panel-description>
@@ -96,7 +98,7 @@
               
             
             <ng-container>
-              <form (ngSubmit)="saveAnswer(question.idProduct,question.id)">
+              <form (ngSubmit)="saveAnswer(question.idProduct,question.id,question.createdBy)">
 
                 <input 
                 type="text"

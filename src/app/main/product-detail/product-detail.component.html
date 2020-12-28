@@ -1,5 +1,6 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
 <div class="ms-container w3-section" style="position: relative;" *ngIf="product$ | async as product">
+ 
   <div style="padding:16px 0">
     <a class="bradcumb" routerLink="/main">Inicio</a> >
     <a class="bradcumb" routerLink="/main/productos">Productos</a>
@@ -42,7 +43,7 @@
   <div class="w3-section">
     <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
-    <app-questions [idProduct]="product.id"></app-questions>
+    <app-questions [idProduct]="product.id" [nameProduct]="product.description" ></app-questions>
 
   </div>
 </div>

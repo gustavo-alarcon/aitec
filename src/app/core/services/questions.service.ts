@@ -114,11 +114,12 @@ export class QuestionsService {
 
    // get all questions
   getAllQuestions(): Observable<Questions[]> {
-    return this.afs.collectionGroup<Questions>('questions').valueChanges();
+    return this.afs.collectionGroup<Questions>('questions',(ref) =>
+    ref.orderBy('createdAt', 'desc')).valueChanges();
   }
   getQuestionsByUser(email:string): Observable<Questions[]> {
     return this.afs.collectionGroup<Questions>('questions', (ref) =>
-    ref.where("createdBy.email", "==",email)
+    ref.where("createdBy.email", "==",email).orderBy('createdAt', 'desc')
   ).get().pipe(
     map((snap) => {
       return snap.docs.map((el) => <Questions>el.data());
@@ -165,9 +166,7 @@ export class QuestionsService {
 
   }
 
-  updateQuestionById(idProduct:string,idQuestion:string,answer:string){
-
-    
+  updateQuestionById(idProduct:string,idQuestion:string,answer:string){ 
 
     const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProduct}/questions`).doc(idQuestion);
     const batch = this.afs.firestore.batch();
