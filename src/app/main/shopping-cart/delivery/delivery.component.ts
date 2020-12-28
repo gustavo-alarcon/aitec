@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { EventEmitter } from 'events';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -13,6 +14,10 @@ import { LocationDialogComponent } from '../location-dialog/location-dialog.comp
   styleUrls: ['./delivery.component.scss'],
 })
 export class DeliveryComponent implements OnInit {
+
+  @Input() resumen: any
+  @Output() submittedForm = new EventEmitter();
+
   initDelivery$: Observable<any>
   formGroup: FormGroup;
   delivery: number = 1;
@@ -49,6 +54,8 @@ export class DeliveryComponent implements OnInit {
     ) { }
 
   ngOnInit(): void {
+    console.log(this.resumen);
+    
     this.initDelivery$ = this.dbs.getDelivery().pipe(
       tap(res => {
         this.places = this.convertPlaces(res)
@@ -228,6 +235,10 @@ export class DeliveryComponent implements OnInit {
     } else {
       return item.product.priceMin * item.quantity;
     }
+  }
+
+  sendInfo(){
+    this.submittedForm.emit(this.formGroup.value)
   }
 
 }

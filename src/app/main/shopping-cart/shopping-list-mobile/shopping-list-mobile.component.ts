@@ -33,7 +33,7 @@ export class ShoppingListMobileComponent implements OnInit {
 
 
   delete(item) {
-    let index = this.dbs.order.findIndex(el => el['product']['sku'] == item['sku'])
+    let index = this.dbs.order.findIndex(el => el['chosenProduct']['sku'] == item['sku'])
     this.dbs.order.splice(index, 1)
 
     this.dbs.orderObs.next(this.dbs.order)

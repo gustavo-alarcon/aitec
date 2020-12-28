@@ -1,7 +1,8 @@
 <mat-card class="product">
   <mat-card-content>
     <div class="w3-row w3-padding">
-      <div class="w3-col l8" *ngIf="changeColor$ | async">
+      <ng-container *ngIf="changeColor$ | async"></ng-container>
+      <div class="w3-col l8 big">
         <div class="gallery">
           <div class="gallery__side">
             <div class="gallery__div border--primary w3-block" *ngFor="let img of galleryImg"
@@ -38,7 +39,15 @@
 
         </div>
         <h2 class="product__title">{{ product.description }}</h2>
-        <div *ngIf="product.promo" class="product__promo ms-flex">
+        <div class="small">
+          <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
+            <div ngxSlickItem *ngFor="let slide of galleryImg" class="slide">
+              <img [defaultImage]="defaultImage" [lazyLoad]="slide.photoURL" [offset]="100" class="gallery__image"
+                alt="gallery-img" />
+            </div>
+          </ngx-slick-carousel>
+        </div>
+        <div *ngIf="product.promo" class=" big product__promo ms-flex">
           <div style="width: fit-content">
             Antes <strike>{{ product.priceMin }}</strike>
           </div>
@@ -46,14 +55,14 @@
             {{ product.promoData.offer }} % Dscto
           </div>
         </div>
-        <div class="product__price w3-section">
+        <div class="product__price w3-section big">
           <span *ngIf="product.promo">Ahora</span>
           <span class="product__price--number">
             S/.
             {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
           </span>
         </div>
-        <mat-form-field>
+        <mat-form-field class="product__select">
           <mat-label>Colores</mat-label>
           <mat-select [formControl]="selected" [(value)]="productSelected" disableRipple>
             <mat-select-trigger>
@@ -65,7 +74,23 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-
+        <div class="small">
+          <div *ngIf="product.promo" class="product__promo ms-flex">
+            <div style="width: fit-content">
+              Antes <strike>{{ product.priceMin }}</strike>
+            </div>
+            <div class="product__promo--discount">
+              {{ product.promoData.offer }} % Dscto
+            </div>
+          </div>
+          <div class="product__price w3-section">
+            <span *ngIf="product.promo">Ahora</span>
+            <span class="product__price--number">
+              S/.
+              {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
+            </span>
+          </div>
+        </div>
         <div class="product__stock">
           {{ productSelected.stock }} Unidades disponibles
         </div>
