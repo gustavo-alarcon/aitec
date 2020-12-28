@@ -95,6 +95,7 @@ export class ToolbarMobileComponent implements OnInit {
     this.openedSearch = !this.openedSearch;
   }
 
+
   navigate() {
     let name = this.searchForm.value;
     if (name.length > 1) {
@@ -105,4 +106,40 @@ export class ToolbarMobileComponent implements OnInit {
     }
   }
 
+  navigatePromo() {
+    this.router.navigate(['/main/productos'], {
+      queryParams: { promo: true },
+    });
+  }
+
+  navigateProduct(product) {
+    this.router.navigate(['/main/producto', product['sku']]);
+      this.clearInput();
+  }
+
+  navigateOnlyCategory(category) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat]);
+  }
+
+  navigateCategory(category, subcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub]);
+    this.openSide()
+  }
+
+  navigateSubCategory(category, subcategory, subsubcategory) {
+    let cat = category.split(' ').join('-').toLowerCase()
+    let sub = subcategory.split(' ').join('-').toLowerCase()
+    let subsub = subsubcategory.split(' ').join('-').toLowerCase()
+    this.router.navigate(['/main/productos', cat, sub, subsub]);
+    this.openSide()
+  }
+
+  navigateBrand(name) {
+    this.router.navigate(['/main/productos'], {
+      queryParams: { brand: name },
+    });
+  }
 }

@@ -23,7 +23,7 @@ import { MobileViewComponent } from './mobile-view/mobile-view.component';
 import { MatSelectModule } from '@angular/material/select';
 import { LayoutModule } from '@angular/cdk/layout';
 import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.component';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @NgModule({
   declarations: [
     ProductDetailComponent,
@@ -51,7 +51,8 @@ import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.compon
     QuantityDivModule,
     LazyLoadImageModule,
     MatSelectModule,
-    LayoutModule
+    LayoutModule,
+    MatProgressSpinnerModule
   ]
 })
 export class ProductDetailModule { }

@@ -13,7 +13,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
   styleUrls: ['./product-detail.component.scss'],
 })
 export class ProductDetailComponent implements OnInit {
-  loading = new BehaviorSubject<boolean>(true);
+  loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
   isSmall = false
@@ -34,7 +34,7 @@ export class ProductDetailComponent implements OnInit {
         breakpoint: 480,
         settings: {
           slidesToShow: 2,
-          arrows:false
+          arrows: false
         }
       }
     ]
@@ -47,7 +47,7 @@ export class ProductDetailComponent implements OnInit {
   defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   colorSelected: any = null
-  count:number = 1
+  count: number = 1
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
@@ -55,18 +55,19 @@ export class ProductDetailComponent implements OnInit {
     private router: Router,
     public breakpointObserver: BreakpointObserver,
     private afs: AngularFirestore
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.productDiv = null
-    this.product$ = this.route.params.pipe(
-      switchMap((param) => {
-        return combineLatest(
-          this.dbs.getProduct(param.id),
-
-          this.dbs.getProductsListValueChanges()
-        ).pipe(
-          map(([product, prods]) => {
+    this.product$ = combineLatest(
+      this.route.params,
+      this.dbs.getProductsList()
+    ).pipe(
+      switchMap(([param,prods]) => {
+        window.scroll(0, 0);
+        this.loading.next(true)
+        return this.dbs.getProduct(param.id).pipe(
+          map(product => {
 
             this.prods = prods.filter(el => el.category == product.category)
             return product
@@ -75,25 +76,19 @@ export class ProductDetailComponent implements OnInit {
         )
       }),
       tap(res => {
-        if(this.count==1){
+        if (this.count == 1) {
           this.searchNumber(res)
-        }       
+        }
         this.loading.next(false)
       })
     );
-    this.breakpointObserver.observe(['(min-width: 750px)'])
-      .subscribe((state: BreakpointState) => {
-        if (state.matches) {
-          this.isSmall = false
-        } else {
-          this.isSmall = true
-        }
-      });
+    
+   
 
 
   }
 
-  searchNumber(product){
+  searchNumber(product) {
     this.afs.firestore.runTransaction((transaction) => {
       const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(product.id);
 

@@ -31,6 +31,11 @@ export class WebViewComponent implements OnInit {
   loadingFav = new BehaviorSubject<boolean>(false);
   loadingFav$ = this.loadingFav.asObservable();
 
+  slideConfig = {
+    "slidesToShow": 1, "slidesToScroll": 1,
+    "autoplay": false
+  };
+
   constructor(
     public auth: AuthService,
     private afs: AngularFirestore,
@@ -40,7 +45,16 @@ export class WebViewComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('web');
-    
+    this.favorite$ = this.auth.user$.pipe(
+      map(user => {
+        if (user) {  
+          let ind = user.favorites?user.favorites.indexOf(this.product.id):-1
+          return ind == 0 ? ind + 2 : ind
+        } else {
+          return -1
+        }
+      })
+    )
   }
 
   ngOnChanges(){
@@ -54,16 +68,7 @@ export class WebViewComponent implements OnInit {
       })
     )
 
-    this.favorite$ = this.auth.user$.pipe(
-      map(user => {
-        if (user) {  
-          let ind = user.favorites?user.favorites.indexOf(this.product.id):-1
-          return ind == 0 ? ind + 2 : ind
-        } else {
-          return -1
-        }
-      })
-    )
+   
 
   }
 

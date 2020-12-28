@@ -1,4 +1,5 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
+<<<<<<< HEAD
 <div class="ms-container w3-section" style="position: relative;" *ngIf="product$ | async as product">
  
   <div style="padding:16px 0">
@@ -9,41 +10,60 @@
       {{product.category}}
     </span>
     <span *ngIf="product.subcategory">
+=======
+<div style="position: relative;">
+  <div class="ms-container" style="position: relative;padding-top: 16px;" *ngIf="product$ | async as product">
+    <div style="padding:16px 0">
+      <a class="bradcumb" routerLink="/main">Inicio</a> >
+      <a class="bradcumb" routerLink="/main/productos">Productos</a>
+>>>>>>> develop
       >
-      <span class="bradcumb" (click)="navigateCategory(product.category, product.subcategory)">
-        {{ product.subcategory}}
+      <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
+        {{product.category}}
       </span>
-    </span>
-    <span *ngIf="product.subsubcategory">
-      >
-      <span class="bradcumb"
-        (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">
-        {{product.subcategory }}
+      <span *ngIf="product.subcategory">
+        >
+        <span class="bradcumb" (click)="navigateCategory(product.category, product.subcategory)">
+          {{ product.subcategory}}
+        </span>
       </span>
-    </span>
-  </div>
-  <ng-template #big>
+      <span *ngIf="product.subsubcategory">
+        >
+        <span class="bradcumb"
+          (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">
+          {{product.subcategory }}
+        </span>
+      </span>
+    </div>
     <app-web-view [product]="product"></app-web-view>
-  </ng-template>
-
-  <div *ngIf="isSmall;else big">
-    <app-mobile-view [product]="product"></app-mobile-view>
-  </div>
-
-  <div class="w3-section">
-    <h4 class="product__subtitle">Productos similares</h4>
-    <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
-      <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-        <div style="padding:0 8px">
-          <app-product-div [product]="slide"></app-product-div>
+  
+    <div class="w3-section">
+      <h4 class="product__subtitle">Productos similares</h4>
+      <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
+        <div ngxSlickItem *ngFor="let slide of prods" class="slide">
+          <div style="padding:0 8px">
+            <app-product-div [product]="slide"></app-product-div>
+          </div>
         </div>
-      </div>
-    </ngx-slick-carousel>
+      </ngx-slick-carousel>
+    </div>
+    <div class="w3-section">
+      <h4 class="product__subtitle">Consultas sobre el producto</h4>
+  
+      <app-questions [idProduct]="product.id"></app-questions>
+  
+    </div>
   </div>
+<<<<<<< HEAD
   <div class="w3-section">
     <h4 class="product__subtitle">Consultas sobre el producto</h4>
 
     <app-questions [idProduct]="product.id" [nameProduct]="product.description" ></app-questions>
 
+=======
+  <div class="layoout" *ngIf="loading$ | async">
+    <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+    </mat-progress-spinner>
+>>>>>>> develop
   </div>
 </div>
