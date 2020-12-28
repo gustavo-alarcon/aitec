@@ -75,6 +75,7 @@ export class CreateEditProductComponent implements OnInit {
   skuList: Array<string> = []
 
   config = {
+    editable:true,
     placeholder: 'Descripción o contenido del módulo',
     tabsize: 2,
     height: '350px',

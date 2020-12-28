@@ -91,3 +91,27 @@
   overflow: hidden;
   cursor: zoom-in;
 }
+.small {
+  display: none;
+}
+
+.big {
+  display: block;
+}
+@media (max-width: 750px) {
+  .small {
+    display: block;
+  }
+
+  .big {
+    display: none;
+  }
+
+  .product__select {
+    width: 100%;
+  }
+
+  .product__title {
+    font-size: 1em;
+  }
+}

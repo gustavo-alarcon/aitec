@@ -2,23 +2,33 @@
 
   <div *ngFor="let element of order | paginate: config; let ind = index">
     <div>
-      <div class="w3-right-align w3-hide-large" *ngIf="edit">
-        <button (click)="delete(element)" mat-button color="warn">Eliminar</button>
-      </div>
-      <div class="product ms-flex--center" style="display: flex;">
-          <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]" [offset]="100" class="border--primary"
+      <div class="product ms-flex ms-flex--center">
+          <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]['photoURL']" [offset]="100" class="border--primary"
           class="product__image"/>
         <div class="product__big">
           <h4 class="product__name">
             {{ element["product"]["description"] | titlecase }}
           </h4>
           <p class="product__etiquet">SKU: {{ element["chosenProduct"]["sku"] }}</p>
-          
+          <div>
+            <span *ngIf="element['color']">
+              <mat-icon [style.color]="element.chosenProduct.color.color">brightness_1</mat-icon>
+              {{element.chosenProduct.color.name}}
+            </span>
+            <button (click)="delete(element)" mat-button color="warn">Eliminar</button>
+          </div>
+        </div>
+        <span class="ms-fill"></span>
+        <div class="product__small w3-hide-small">
+          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']" [color]="element['color']" size="md"></app-quantity-div>        
+          <p class="product__price" >
+            S/. {{ givePrice(element) | number: ".2" }}
+          </p>
         </div>
       </div>
-      <div class="w3-padding" style="display: flex; align-items: flex-end">
+      <div class="w3-padding w3-hide-large w3-hide-medium" style="display: flex; align-items: flex-end">
         <div>
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']" [color]="element['color']" size="sm"></app-quantity-div>
+          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']" [color]="element['color']" size="md"></app-quantity-div>
         </div>
         <span class="ms-fill"></span>
         <div class="w3-right-align w3-margin-top">

@@ -1,8 +1,11 @@
-<!--div class="store__container w3-section" style="position: relative">
-  <div>Inicio > Mi Carrito</div>
-  <div class="w3-margin-top div-content">
-    <div class="w3-container div-content__left">
-      <div *ngIf="(view$|async) != 4" class="ms-flex w3-margin-bottom w3-padding"
+<div class="store__container w3-section" style="position: relative;">
+  <div style="padding:16px 0">
+    <a class="bradcumb" routerLink="/main">Inicio</a> >
+    <a class="bradcumb" routerLink="/main/carrito">Mi Carrito</a>
+  </div>
+  <div class="w3-margin-top w3-row">
+    <div class="w3-container w3-col l8 col-md-7">
+      <div *ngIf="(view$|async) != 4" class="ms-flex w3-hide-small w3-margin-bottom w3-padding"
         style="justify-content: space-between">
         <button mat-raised-button color="primary" *ngIf="(view$|async) == 1; else firstButton">
           <mat-icon>check_circle_outline</mat-icon>
@@ -36,26 +39,61 @@
         </ng-template>
 
       </div>
+      <div *ngIf="(view$|async) != 4" class="w3-hide-large w3-hide-medium w3-margin-bottom"
+        style="justify-content: space-between;display: flex;">
+        <div class="w3-center" *ngIf="(view$|async) == 1; else firstMinButton">
+          <div class="mini-button w3-center">
+            <mat-icon>check_circle_outline</mat-icon>
+          </div>
+          <div>Revisa tu orden</div>
+        </div>
+        <ng-template #firstMinButton>
+          <div class="button--desactive w3-center" (click)="firstView()">
+            <div>
+              <mat-icon>check_circle_outline</mat-icon>
+            </div>
+            <div>Revisa tu orden</div>
+          </div>
+        </ng-template>
+        <div class="w3-center" *ngIf="(view$|async) == 2; else secondMinButton">
+          <div class="mini-button w3-center">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <div>Método de Entrega</div>
+        </div>
+        <ng-template #secondMinButton>
+          <div class="button--desactive w3-center" (click)="secondView()">
+            <div>
+              <mat-icon>local_shipping</mat-icon>
+            </div>
+            <div>Método de Entrega</div>
+          </div>
+        </ng-template>
+        <div class="w3-center" *ngIf="(view$|async) == 3; else thirdMinButton">
+          <div class="mini-button w3-center">
+            <mat-icon>request_page</mat-icon>
+          </div>
+          <div>Método de Pago</div>
+        </div>
+        <ng-template #thirdMinButton>
+          <div class="button--desactive w3-center" (click)="thirdView()">
+            <div>
+              <mat-icon>request_page</mat-icon>
+            </div>
+            <div>Método de Pago</div>
+          </div>
+        </ng-template>
+
+      </div>
       <div class="w3-margin-top div-content__scroll">
         <div *ngIf="(view$|async) == 1">
-          <div class="w3-hide-small">
-            <app-shopping-list></app-shopping-list>
-          </div>
-          <div class="w3-hide-large w3-hide-medium">
-            <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
-          </div>
+          <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
         </div>
         <div *ngIf="(view$|async) == 2">
           <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async">
             <h4 class="delivery__title w3-center">
               Por favor registra tus datos y verifícalos
             </h4>
-            <mat-radio-group color="primary" [formControl]="deliveryForm">
-              <mat-radio-button [value]="1"> Entrega en domicilio </mat-radio-button>
-              <mat-radio-button class="w3-margin-left" [value]="2">
-                Recojo en tienda
-              </mat-radio-button>
-            </mat-radio-group>
             <form [formGroup]="formGroup" class="w3-margin-top">
               <mat-form-field class="w3-block" appearance="outline">
                 <mat-label>Departamento</mat-label>
@@ -70,8 +108,7 @@
               </mat-form-field>
               <mat-form-field class="w3-block" appearance="outline" *ngIf="provincias$|async">
                 <mat-label>Provincia</mat-label>
-                <input type="text" placeholder="Provincia" matInput formControlName="provincia"
-                  [matAutocomplete]="autoP" />
+                <input type="text" placeholder="Provincia" matInput formControlName="provincia" [matAutocomplete]="autoP" />
                 <mat-autocomplete autoActiveFirstOption #autoP="matAutocomplete" [displayWith]="showProvincia">
                   <mat-option *ngFor="let option of filteredProvincia$ | async" [value]="option">
                     {{ option.provincia | titlecase }}
@@ -81,8 +118,7 @@
               </mat-form-field>
               <mat-form-field class="w3-block" appearance="outline" *ngIf="distritos$|async">
                 <mat-label>Distrito</mat-label>
-                <input type="text" placeholder="Distrito" matInput formControlName="distrito"
-                  [matAutocomplete]="autoX" />
+                <input type="text" placeholder="Distrito" matInput formControlName="distrito" [matAutocomplete]="autoX" />
                 <mat-autocomplete autoActiveFirstOption #autoX="matAutocomplete" [displayWith]="showDistrito">
                   <mat-option *ngFor="let option of filteredDistrito$ | async" [value]="option"
                     (click)="selectDelivery(option)">
@@ -91,54 +127,68 @@
                 </mat-autocomplete>
                 <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
               </mat-form-field>
-              <div *ngIf="(chooseDelivery$|async) == 1">
-                <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>Dirección</mat-label>
-                  <input autocomplete="off" formControlName="direccion" matInput placeholder="Teléfono" />
-                </mat-form-field>
-
-                <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>Referencia</mat-label>
-                  <input autocomplete="off" formControlName="referencia" type="tel" matInput placeholder="Teléfono" />
-                </mat-form-field>
-                <div class="w3-margin-bottom w3-margin-top">
-                  <div style="display: flex; flex-wrap: wrap; justify-content: space-between">
-                    <div style="width: 80%">
-                      Especifica tu dirección en el mapa (Opcional)
-                    </div>
-                    <button mat-icon-button color="primary" (click)="findMe()">
-                      <mat-icon>gps_fixed</mat-icon>
-                    </button>
-                  </div>
-                  <br />
-                  <google-map height="280px" width="100%" (mapClick)="mapClicked($event)" [center]="center"
-                    [zoom]="zoom">
-                    <map-marker [position]="center"></map-marker>
-                  </google-map>
-                </div>
-              </div>
-              <div *ngIf="delivery == 2">
-                <div *ngIf="formGroup.get('distrito').value">
-                  <mat-selection-list #shoes [multiple]="false">
-                    <div mat-subheader>Tiendas</div>
-                    <mat-list-option [value]="1">
-                      <mat-icon mat-list-icon>location_on</mat-icon>
-                      <div mat-line>
-                        P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
-                        de la plaza cayma)
-                      </div>
-                    </mat-list-option>
-                    <mat-list-option [value]="2">
-                      <mat-icon mat-list-icon>location_on</mat-icon>
-                      <div mat-line>
-                        P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
-                        de la plaza cayma)
-                      </div>
-                    </mat-list-option>
-                  </mat-selection-list>
-                </div>
-              </div>
             </form>
+            <div class="menuContainer">
+              <div (click)="change()" [ngClass]="{'activated': viewBol, 'deactivated': !viewBol}">
+                Entrega en domicilio
+              </div>
+              <div (click)="change()" [ngClass]="{'activated': !viewBol, 'deactivated': viewBol}">
+                Recojo en tienda
+              </div>
+            </div>
+            <div *ngIf="viewBol">
+              <div *ngIf="auth.user$ | async as user" class="w3-block">
+                <mat-card class="w3-margin-bottom">
+                  <mat-card-header>
+                    <mat-card-title style="font-size: 1em">
+                      <mat-icon style="vertical-align: middle">place</mat-icon>
+                      ¿En dónde recibirás tu pedido?
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <hr style="margin-top: 0" />
+                    <button *ngIf="user.location" mat-button color="primary" (click)="openMap(user, true)">
+                      Editar dirección
+                    </button>
+                    <div class="w3-padding">
+                      <div class="local-option" *ngIf="user.location; else nolocation">
+                        <div>
+                          <strong>{{ user.location.address }}</strong>
+                        </div>
+                        <div>Referencia: {{ user.location.reference }}</div>
+                      </div>
+                      <ng-template #nolocation>
+                        <div class="w3-center">
+                          <button mat-button color="primary" (click)="openMap(user, false)">
+                            Agregar dirección
+                          </button>
+                        </div>
+                      </ng-template>
+                    </div>
+                    <hr style="margin: 0" />
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+            <div *ngIf="!viewBol">
+              <mat-selection-list #shoes [multiple]="false">
+                <div mat-subheader>Tiendas</div>
+                <mat-list-option [value]="1">
+                  <mat-icon mat-list-icon>location_on</mat-icon>
+                  <div mat-line>
+                    P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
+                    de la plaza cayma)
+                  </div>
+                </mat-list-option>
+                <mat-list-option [value]="2">
+                  <mat-icon mat-list-icon>location_on</mat-icon>
+                  <div mat-line>
+                    P.T. cayma Mz G Lt 4b of.401, 4to piso ( referencia a una cuadra
+                    de la plaza cayma)
+                  </div>
+                </mat-list-option>
+              </mat-selection-list>
+            </div>
           </mat-card>
 
         </div>
@@ -300,7 +350,7 @@
         </div>
       </div>
     </div>
-    <div class="div-content__rigth">
+    <div class="w3-col l4 col-md-5">
       <div class="w3-padding">
         <div class="resume">
           <h2 class="resume__title">Resumen de pedido</h2>
@@ -419,15 +469,13 @@
             <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
               Compra</button>
           </div>
-          no no no no no
-          jo jo jo jo
         </div>
       </div>
     </div>
   </div>
-</div-->
+</div>
 
-<div class="store__container w3-section">
+<!--div class="store__container w3-section" *ngIf="sum$ | async as suma">
   <div style="padding:16px 0">
     <a class="bradcumb" routerLink="/main">Inicio</a> >
     <a class="bradcumb" routerLink="/main/carrito">Mi Carrito</a>
@@ -442,11 +490,11 @@
           <div class="resume">
             <h2 class="resume__title">Resumen de pedido</h2>
             <div class="resume__divider"></div>
-            <div class="resume__descrip w3-section">
+            <div class="resume__descrip w3-section" >
               <div class="ms-flex ms-flex--center">
                 <span>Subtotal</span>
                 <span class="ms-fill"></span>
-                <span>{{ subtotal$ | async | number: ".2" }}</span>
+                <span>{{ suma.sub }}</span>
               </div>
               <div class="ms-flex ms-flex--center">
                 <span>Cargos adicionales</span>
@@ -456,17 +504,17 @@
               <div class="ms-flex ms-flex--center">
                 <span>Descuento promocional</span>
                 <span class="ms-fill"></span>
-                <span>{{ discount$ | async | number: ".2" }}</span>
+                <span>{{ suma.disc | number: ".2" }}</span>
               </div>
               <div class="ms-flex ms-flex--center">
                 <span>IGV</span>
                 <span class="ms-fill"></span>
-                <span>{{ igv$ | async | number: ".2" }}</span>
+                <span>{{ suma.igv }}</span>
               </div>
               <div class="ms-flex ms-flex--center">
                 <span>Delivery</span>
                 <span class="ms-fill"></span>
-                <span>{{delivery$ | async | number: ".2"}}</span>
+                <span>{{suma.deli | number: ".2"}}</span>
               </div>
             </div>
             <div class="resume__divider"></div>
@@ -512,14 +560,11 @@
 
     </mat-step>
     <mat-step label="Método de Entrega" state="local_shipping">
-      <app-delivery></app-delivery>
+      <app-delivery [resume]="suma"></app-delivery>
     </mat-step>
     <mat-step label="Método de Pago" state="request_page">
-      <app-payment-method></app-payment-method>
-      <!--div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
-      </div-->
+      <app-payment-method  [resume]="suma"></app-payment-method>
+      
     </mat-step>
   </mat-horizontal-stepper>
-</div>
+</div-->

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { EventEmitter } from 'events';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -12,6 +13,9 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./payment-method.component.scss']
 })
 export class PaymentMethodComponent implements OnInit {
+  @Input() resumen: any
+  @Output() submittedForm = new EventEmitter();
+
   cardForm: FormGroup;
   documentForm: FormGroup;
 
@@ -119,6 +123,10 @@ export class PaymentMethodComponent implements OnInit {
     } else {
       return item.product.priceMin * item.quantity;
     }
+  }
+
+  sendInfo(){
+    this.submittedForm.emit(this.documentForm.value)
   }
 
 }
