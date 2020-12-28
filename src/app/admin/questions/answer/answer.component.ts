@@ -1,11 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { DatabaseService } from '../../../core/services/database.service';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { QuestionsService } from '../../../core/services/questions.service';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { map, startWith, take } from 'rxjs/operators';
+import { map, startWith, take, filter, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
+import { PushService } from 'src/app/core/services/push.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-answer',
@@ -27,19 +29,24 @@ export class AnswerComponent implements OnInit {
 
   init$: Observable<any[]>;
 
-  user:any;
+  userEmail;
+
+  @Input() emailUser:string;
+
 
   constructor(   
      public dbs: QuestionsService,
      public afs: AngularFirestore,
      private db:DatabaseService,
      private authService:AuthService,
+     private pushService: PushService
 
   ) { 
   
 }
 
   ngOnInit(): void {
+    
 
     const view = this.db.getCurrentMonthOfViewDate();
 
@@ -85,13 +92,9 @@ export class AnswerComponent implements OnInit {
         })
       )
 
-      this.user= this.authService.user$;
-      
-      console.log("===== user ===");
-      console.log(this.user);
-     
-    
     }
+
+
 
   getFilterTime(el, time) {
     let date = el.toMillis();
@@ -105,7 +108,7 @@ export class AnswerComponent implements OnInit {
 
   }
   
-  saveAnswer(idProduct:string,idQuestion:string){
+  saveAnswer(idProduct:string,idQuestion:string ,user:User){
 
     this.dbs.getQuestionById(idProduct,idQuestion).subscribe(
       (question:any) =>      
@@ -127,11 +130,11 @@ export class AnswerComponent implements OnInit {
         }
     );
 
-  this.sendEmail();
+  this.sendEmail(user);
 
   }
 
-  sendEmail(){
+  sendEmail(recipiendtUser:User){
 
     this.authService.user$.pipe(
       take(1)
@@ -143,14 +146,14 @@ export class AnswerComponent implements OnInit {
 
       let nombre;
 
-      if (user.personData.name) {        
-        nombre = user.personData.name.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+      if (recipiendtUser.personData.name) {        
+        nombre = recipiendtUser.personData.name.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
       } else{
-        nombre = user.name.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+        nombre = recipiendtUser.name.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
       }
 
         let message = {
-          to: `${user.email}`,
+          to: `${recipiendtUser.email}`,
           message: {
             subject: 'Consulta en Aitec App',
             html: 
@@ -249,7 +252,23 @@ export class AnswerComponent implements OnInit {
        });
       } 
     )
+   
+    this.sendMessage(recipiendtUser);
+  }
 
+  sendMessage(recipiendtUser:User){
+   
+    this.authService.user$.pipe(
+    take(1)
+    ).subscribe(
+      user =>{
+        const message='Tu pregunta fue respondida';
+        const title = 'Pregunta';
+        
+        this.pushService.sendPush(user,recipiendtUser,message,title);      
+
+      }
+    ) 
   }
 
 

@@ -5,6 +5,8 @@ import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms'
 import { AuthService } from '../../../core/services/auth.service';
 import { take } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { PushService } from '../../../core/services/push.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-questions',
@@ -35,7 +37,9 @@ export class QuestionsComponent implements OnInit {
     public questionsService:QuestionsService,
     private formbuilder:FormBuilder,
     public authService:AuthService,
-    public afs: AngularFirestore,
+    public afs: AngularFirestore,     
+    private pushService: PushService
+
     ) { 
     
     this.questionForm = this.formbuilder.group({
@@ -120,7 +124,7 @@ export class QuestionsComponent implements OnInit {
       }
 
         let message = {
-          to: `${user.email}`,
+          to: `mhalanocca@meraki-s.com`,
           message: {
             subject: 'Consulta en Aitec App',
             html: 
@@ -208,7 +212,36 @@ export class QuestionsComponent implements OnInit {
        });
       } 
     )
+    
+    this.sendMessage();
+  }
+  sendMessage(){
 
+    this.authService.user$.pipe(
+      take(1)
+      ).subscribe(
+        user =>{
+          const message='Tienes una pregunta por responder';
+          const title = 'Pregunta';
+
+          const recipiendtUser:User={
+            email:'aitec@aitec.com',
+            personData:{
+              type:"jurídica",
+              name:'aitec',
+              ruc: 99999,
+              address: '',
+              phone: '',
+              contactPerson: '',
+            },
+            uid:''
+
+          }
+          
+          this.pushService.sendPush(user,recipiendtUser,message,title);      
+  
+        }
+      )
   }
 
 }
