@@ -1,22 +1,9 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
-<<<<<<< HEAD
-<div class="ms-container w3-section" style="position: relative;" *ngIf="product$ | async as product">
- 
-  <div style="padding:16px 0">
-    <a class="bradcumb" routerLink="/main">Inicio</a> >
-    <a class="bradcumb" routerLink="/main/productos">Productos</a>
-    >
-    <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
-      {{product.category}}
-    </span>
-    <span *ngIf="product.subcategory">
-=======
 <div style="position: relative;">
   <div class="ms-container" style="position: relative;padding-top: 16px;" *ngIf="product$ | async as product">
     <div style="padding:16px 0">
       <a class="bradcumb" routerLink="/main">Inicio</a> >
       <a class="bradcumb" routerLink="/main/productos">Productos</a>
->>>>>>> develop
       >
       <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
         {{product.category}}
@@ -50,20 +37,12 @@
     <div class="w3-section">
       <h4 class="product__subtitle">Consultas sobre el producto</h4>
   
-      <app-questions [idProduct]="product.id"></app-questions>
+      <app-questions [idProduct]="product.id" [nameProduct]="product.description"></app-questions>
   
     </div>
   </div>
-<<<<<<< HEAD
-  <div class="w3-section">
-    <h4 class="product__subtitle">Consultas sobre el producto</h4>
-
-    <app-questions [idProduct]="product.id" [nameProduct]="product.description" ></app-questions>
-
-=======
   <div class="layoout" *ngIf="loading$ | async">
     <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
     </mat-progress-spinner>
->>>>>>> develop
   </div>
 </div>
