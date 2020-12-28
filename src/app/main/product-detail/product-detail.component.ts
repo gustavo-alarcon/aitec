@@ -59,16 +59,15 @@ export class ProductDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.productDiv = null
-    this.product$ = this.route.params.pipe(
-      switchMap((param) => {
+    this.product$ = combineLatest(
+      this.route.params,
+      this.dbs.getProductsList()
+    ).pipe(
+      switchMap(([param,prods]) => {
         window.scroll(0, 0);
         this.loading.next(true)
-        return combineLatest(
-          this.dbs.getProduct(param.id),
-
-          this.dbs.getProductsListValueChanges()
-        ).pipe(
-          map(([product, prods]) => {
+        return this.dbs.getProduct(param.id).pipe(
+          map(product => {
 
             this.prods = prods.filter(el => el.category == product.category)
             return product
