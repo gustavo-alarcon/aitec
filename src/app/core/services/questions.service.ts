@@ -20,16 +20,13 @@ export class QuestionsService {
 
   getQuestions(idProducto: string) {
 
-    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`);
-
-    this.questions = this.questionsCollection.snapshotChanges().pipe(
-      map(actions => actions.map(a => {
-        const data = a.payload.doc.data() as Questions;
-        const id = a.payload.doc.id;
-        return { id, ...data };
-      }))
+    return this.afs.collection<Product>(`db/aitec/productsList/${idProducto}/questions`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    ).get().pipe(
+      map((snap) => {
+        return snap.docs.map((el) => <Product>el.data());
+      })
     );
-    return this.questions;
 
   }
 

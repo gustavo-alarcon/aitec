@@ -225,7 +225,7 @@ export class QuestionsComponent implements OnInit {
           const title = 'Pregunta';
 
           const recipiendtUser:User={
-            email:'aitec@aitec.com',
+            email:'mhalanocca@meraki-s.com',
             personData:{
               type:"jurídica",
               name:'aitec',
