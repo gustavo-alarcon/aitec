@@ -17,18 +17,25 @@ export class QuestionsService {
   constructor(public afs: AngularFirestore) {
 
   }
+  
+  getQuestions(idProducto: string): Observable<Questions[]> {
+   
+    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`,(ref) => ref.orderBy('createdAt', 'desc'));
 
-  getQuestions(idProducto: string) {
-
-    return this.afs.collection<Product>(`db/aitec/productsList/${idProducto}/questions`, (ref) =>
-      ref.orderBy('createdAt', 'desc')
-    ).get().pipe(
-      map((snap) => {
-        return snap.docs.map((el) => <Product>el.data());
-      })
+    this.questions = this.questionsCollection.snapshotChanges().pipe(
+      map(actions => actions.map(a => {
+        const data = a.payload.doc.data() as Questions;
+        const id = a.payload.doc.id;
+        return { id, ...data };
+      }))
     );
+    return this.questions;
 
-  }
+    
+    
+  } 
+  
+  
 
 
   saveQuestion(idProducto: string, questions: Questions) {
