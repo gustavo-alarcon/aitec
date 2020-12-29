@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import { Component, OnInit, Input } from '@angular/core';
 import { Questions } from '../../../core/models/questions.model';
 import { QuestionsService } from '../../../core/services/questions.service';
@@ -7,6 +8,7 @@ import { take } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { PushService } from '../../../core/services/push.service';
 import { User } from '../../../core/models/user.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-questions',
@@ -38,11 +40,12 @@ export class QuestionsComponent implements OnInit {
     private formbuilder:FormBuilder,
     public authService:AuthService,
     public afs: AngularFirestore,     
-    private pushService: PushService
+    private pushService: PushService,
+    private snackbar: MatSnackBar
 
     ) { 
     
-    this.questionForm = this.formbuilder.group({
+       this.questionForm = this.formbuilder.group({
       question:['',Validators.required]
     });
     
@@ -68,7 +71,14 @@ export class QuestionsComponent implements OnInit {
     return this.questionForm.controls;
     
   }
-  
+  messageSnackbar:string='hola mundo';
+
+  openSnackBar(){
+    this.snackbar.open('Su pregunta fue enviada. En breve la respuesta', 'Cerrar', {
+      duration: 4000
+    });
+
+  }
   
   saveQuestion(){
     
@@ -225,7 +235,7 @@ export class QuestionsComponent implements OnInit {
           const title = 'Pregunta';
 
           const recipiendtUser:User={
-            email:'aitec@aitec.com',
+            email:'mhalanocca@meraki-s.com',
             personData:{
               type:"jurídica",
               name:'aitec',

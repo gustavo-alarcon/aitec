@@ -17,10 +17,10 @@ export class QuestionsService {
   constructor(public afs: AngularFirestore) {
 
   }
-
-  getQuestions(idProducto: string) {
-
-    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`);
+  
+  getQuestions(idProducto: string): Observable<Questions[]> {
+   
+    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`,(ref) => ref.orderBy('createdAt', 'desc'));
 
     this.questions = this.questionsCollection.snapshotChanges().pipe(
       map(actions => actions.map(a => {
@@ -31,7 +31,11 @@ export class QuestionsService {
     );
     return this.questions;
 
-  }
+    
+    
+  } 
+  
+  
 
 
   saveQuestion(idProducto: string, questions: Questions) {
