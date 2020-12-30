@@ -5,6 +5,14 @@
         <a (click)="navigateBrand(ban)">
           <img [src]="ban.photoURL" class="w3-block-banner" alt="" />
         </a>
+      </div>   
+    </ngx-slick-carousel>
+
+    <ngx-slick-carousel class="carousel-movil" #slickModal="slick-carousel" [config]="slideConfig">
+      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+        <a (click)="navigateBrand(ban)">
+          <img [src]="ban.photomovilURL" class="w3-block-banner" alt="" />
+        </a>
       </div>      
     </ngx-slick-carousel>
 

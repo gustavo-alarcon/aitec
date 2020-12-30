@@ -88,8 +88,18 @@
   margin: 30px;
 }
 
+.carousel-movil{
+  display: none;
+}
+
 // QUERY
 @media only screen and (max-width: 768px) {
+  .carousel{
+    display: none;    
+  }
+  .carousel-movil{
+    display: contents;
+  }
 
   .w3-block-0{
     width: 100%;

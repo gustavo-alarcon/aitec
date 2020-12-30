@@ -120,6 +120,7 @@ export class ShoppingCartComponent implements OnInit {
       })
     );
 
+
     this.subtotal$ = this.dbs.orderObs$.pipe(
       map((ord) => {
         return [...ord]
@@ -261,6 +262,12 @@ export class ShoppingCartComponent implements OnInit {
       address: [null],
     });
   }
+
+  //Debuging start
+  pruebaPasarela(){
+
+  }
+   //Debuging end
 
   firstView() {
     this.view.next(1);

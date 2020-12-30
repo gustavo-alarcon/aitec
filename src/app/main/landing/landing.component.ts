@@ -88,6 +88,16 @@ export class LandingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Debugin start
+       if (screen.width < 1024) {
+         console.log("Pantalla Grande ...");        
+       } else if (screen.width < 900) {
+        console.log("Pantalla Mediana ...");
+       } else if (screen.width < 600) {
+        console.log("Pantalla Pequeña ...");
+       }  
+
+    // Debugin end
 
     this.products$ = this.dbs.getLastProducts().pipe(
       map(prods => prods.filter(el => el.published)),
