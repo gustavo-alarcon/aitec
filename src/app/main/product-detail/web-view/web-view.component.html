@@ -122,7 +122,7 @@
     </div>
     <div class="w3-section w3-padding">
       <p style="font-size: 1.2em">
-        Marca: <strong>{{ product.brand.name }}</strong>
+        Marca: <strong>{{ product.brand.name?product.brand.name :product.brand }}</strong>
       </p>
       <div class="w3-section">
         <h4 class="product__subtitle">Descripción</h4>

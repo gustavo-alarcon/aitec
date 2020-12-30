@@ -1,12 +1,14 @@
 import { Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, startWith, take, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { NoLoginDialogComponent } from '../no-login-dialog/no-login-dialog.component';
 
 @Component({
   selector: 'app-web-view',
@@ -40,7 +42,8 @@ export class WebViewComponent implements OnInit {
     public auth: AuthService,
     private afs: AngularFirestore,
     private renderer: Renderer2,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -130,7 +133,9 @@ export class WebViewComponent implements OnInit {
   }
 
   login(){
-
+    this.dialog.open(NoLoginDialogComponent,{
+      width:'300px'
+    })
   }
 
 }

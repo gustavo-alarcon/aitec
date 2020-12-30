@@ -40,6 +40,7 @@ import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
 import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
+import { PaymentMethodDialogComponent } from './dialogs/payment-method-dialog/payment-method-dialog.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dial
     CreateEditCategoriesComponent,
     BrandsViewComponent,
     CuponDialogComponent,
-    AsesoresDialogComponent
+    AsesoresDialogComponent,
+    PaymentMethodDialogComponent
   ],
   imports: [
     CommonModule,

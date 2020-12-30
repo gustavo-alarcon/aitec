@@ -40,7 +40,7 @@ export class ShoppingListMobileComponent implements OnInit {
     this.snackBar.open('Ha eliminado un producto de su carrito', 'Aceptar', {
       duration: 6000
     })
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
 

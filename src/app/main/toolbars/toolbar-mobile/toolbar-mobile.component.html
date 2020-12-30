@@ -63,10 +63,15 @@
         </button>
       </mat-menu>
 
-      <button mat-icon-button routerLink="/main/carrito">
+      <button mat-icon-button routerLink="/main/carrito" *ngIf="dbs.order.length;else noOrder">
         <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
           shopping_cart</mat-icon>
       </button>
+      <ng-template #noOrder>
+        <button mat-icon-button >
+          <mat-icon>shopping_cart</mat-icon>
+        </button>
+      </ng-template>
     </div>
     <ng-template #iniciarSesion2>
       <button mat-button routerLink="/main/login/signIn" class="menu-button">

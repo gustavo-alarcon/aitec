@@ -32,6 +32,7 @@ export class ToolbarWebComponent implements OnInit {
 
   @ViewChild("megaMenu") menu: ElementRef;
 
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -76,7 +77,7 @@ export class ToolbarWebComponent implements OnInit {
   toggleMenu() {
     this.openedMenu = !this.openedMenu;
     this.firstOpening = !this.firstOpening;
-
+    this.selectCategory = null
     //this.renderer.setStyle(this.menu.nativeElement, "display",'block');
   }
 
@@ -111,16 +112,18 @@ export class ToolbarWebComponent implements OnInit {
     this.router.navigate(['/main/productos'], {
       queryParams: { promo: true },
     });
+    this.toggleMenu()
   }
 
   navigateProduct(product) {
     this.router.navigate(['/main/producto', product['sku']]);
-      this.clearInput();
+    this.clearInput();
   }
 
   navigateOnlyCategory(category) {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);
+    this.toggleMenu()
   }
 
   navigateCategory(category, subcategory) {
@@ -139,6 +142,7 @@ export class ToolbarWebComponent implements OnInit {
   }
 
   navigateBrand(name) {
+    this.toggleMenu()
     this.router.navigate(['/main/productos'], {
       queryParams: { brand: name },
     });
