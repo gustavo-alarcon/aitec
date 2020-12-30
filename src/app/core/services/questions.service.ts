@@ -17,10 +17,10 @@ export class QuestionsService {
   constructor(public afs: AngularFirestore) {
 
   }
-
-  getQuestions(idProducto: string) {
-
-    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`);
+  
+  getQuestions(idProducto: string): Observable<Questions[]> {
+   
+    this.questionsCollection = this.afs.collection<Questions>(`db/aitec/productsList/${idProducto}/questions`,(ref) => ref.orderBy('createdAt', 'desc'));
 
     this.questions = this.questionsCollection.snapshotChanges().pipe(
       map(actions => actions.map(a => {
@@ -31,7 +31,11 @@ export class QuestionsService {
     );
     return this.questions;
 
-  }
+    
+    
+  } 
+  
+  
 
 
   saveQuestion(idProducto: string, questions: Questions) {
@@ -114,11 +118,12 @@ export class QuestionsService {
 
    // get all questions
   getAllQuestions(): Observable<Questions[]> {
-    return this.afs.collectionGroup<Questions>('questions').valueChanges();
+    return this.afs.collectionGroup<Questions>('questions',(ref) =>
+    ref.orderBy('createdAt', 'desc')).valueChanges();
   }
   getQuestionsByUser(email:string): Observable<Questions[]> {
     return this.afs.collectionGroup<Questions>('questions', (ref) =>
-    ref.where("createdBy.email", "==",email)
+    ref.where("createdBy.email", "==",email).orderBy('createdAt', 'desc')
   ).get().pipe(
     map((snap) => {
       return snap.docs.map((el) => <Questions>el.data());
@@ -165,9 +170,7 @@ export class QuestionsService {
 
   }
 
-  updateQuestionById(idProduct:string,idQuestion:string,answer:string){
-
-    
+  updateQuestionById(idProduct:string,idQuestion:string,answer:string){ 
 
     const questionsRef = this.afs.firestore.collection(`db/aitec/productsList/${idProduct}/questions`).doc(idQuestion);
     const batch = this.afs.firestore.batch();

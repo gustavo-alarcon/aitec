@@ -71,6 +71,7 @@ export class ProductDetailComponent implements OnInit {
 
             this.prods = prods.filter(el => el.category == product.category)
             return product
+            
           })
         )
       }),

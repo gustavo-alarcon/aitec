@@ -23,6 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { LayoutModule } from '@angular/cdk/layout';
 import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 @NgModule({
   declarations: [
     ProductDetailComponent,
