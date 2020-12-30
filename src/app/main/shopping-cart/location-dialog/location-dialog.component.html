@@ -34,7 +34,7 @@
         </button>
       </div>
       <br />
-      <google-map height="280px" [center]="center" [zoom]="zoom" (mapClick)="mapClicked($event)">
+      <google-map height="280px" width="100%" [center]="center" [zoom]="zoom" (mapClick)="mapClicked($event)">
         <map-marker [position]="center"></map-marker>
       </google-map>
       <div style="display: flex; justify-content: flex-end">
