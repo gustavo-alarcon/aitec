@@ -20,7 +20,7 @@ export class LocationDialogComponent implements OnInit {
   latitud: number = -12.046301
   longitud: number = -77.031027
 
-  center = {lat: -12.046301, lng: -77.031027};
+  center = { lat: -12.046301, lng: -77.031027 };
   zoom = 15;
   display?: google.maps.LatLngLiteral;
 
@@ -29,17 +29,19 @@ export class LocationDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<LocationDialogComponent>,
     private af: AngularFirestore,
-    @Inject(MAT_DIALOG_DATA) public data:{user:User, edit:boolean}
+    @Inject(MAT_DIALOG_DATA) public data: { user: User, ind: number, edit: boolean, distrito: string; departamento: string; provincia: string }
   ) { }
 
   ngOnInit(): void {
-    if(this.data.edit){
+    console.log(this.data);
+    
+    if (this.data.edit) {
       this.firstFormGroup = this.fb.group({
-        reference: [this.data.user.location.reference, [Validators.required]],
-        name: [this.data.user.location.address, [Validators.required]],
+        reference: [this.data.user.location[this.data.ind].reference, [Validators.required]],
+        name: [this.data.user.location[this.data.ind].address, [Validators.required]],
       });
-      this.center = this.data.user.location.coord
-    }else{
+      this.center = this.data.user.location[this.data.ind].coord
+    } else {
       this.firstFormGroup = this.fb.group({
         reference: [null, [Validators.required]],
         name: [null, [Validators.required]],
@@ -51,7 +53,7 @@ export class LocationDialogComponent implements OnInit {
   findMe() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((posicion) => {
-        this.center = {lat: posicion.coords.latitude, lng: posicion.coords.longitude};
+        this.center = { lat: posicion.coords.latitude, lng: posicion.coords.longitude };
       }, function (error) {
         alert("Tenemos un problema para encontrar tu ubicación");
       });
@@ -62,18 +64,31 @@ export class LocationDialogComponent implements OnInit {
     this.center = event.latLng.toJSON();
   }
 
-  save(){
+  save() {
     this.firstFormGroup.disable()
     const userRef = this.af.firestore.collection(`/users`).doc(this.data.user.uid);
     const batch = this.af.firestore.batch()
     this.loading.next(true)
+    let newLoacation = {
+      address: this.firstFormGroup.get('name').value,
+      reference: this.firstFormGroup.get('reference').value,
+      coord: this.center,
+      distrito:this.data.distrito,
+      departamento:this.data.departamento,
+      provincia:this.data.provincia
+    }
 
-    batch.update(userRef,{
-      location: {
-        address: this.firstFormGroup.get('name').value,
-        reference: this.firstFormGroup.get('reference').value,
-        coord: this.center
-      }
+    let savelocations = this.data.user.location ? this.data.user.location : []
+    if (this.data.edit) {
+      savelocations[this.data.ind] = newLoacation
+    } else {
+      savelocations.push(newLoacation)
+    }
+    console.log(userRef);
+    console.log(savelocations);
+    
+    batch.update(userRef, {
+      location: savelocations
     })
 
     batch.commit().then(() => {

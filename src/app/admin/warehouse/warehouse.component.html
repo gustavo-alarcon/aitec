@@ -156,10 +156,6 @@
           </table>
 
         </div>
-        <div *ngIf="productsTableDataSource.filteredData.length == 0">
-          <p class="my-2 text-muted w3-center">Sin resultado de busqueda</p>
-          <mat-divider></mat-divider>
-        </div>
         <mat-paginator #productsPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
           showFirstLastButtons></mat-paginator>
       </mat-card>

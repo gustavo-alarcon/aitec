@@ -80,11 +80,12 @@
   left: 48px;
   z-index: 1000;
   width: 90%;
+  text-transform: uppercase;
   &__nav {
     padding-right: 0;
     padding-left: 0;
     padding-bottom: 0;
-    width: 270px;
+    width: 290px;
     border-right: 1px;
     border-top: 0;
     z-index: 1000;
@@ -100,15 +101,19 @@
   &__item {
     height: 36px;
     margin-bottom: 0;
-    padding: 0px 24px 0px 36px;
+    padding: 0px 16px 0px 25px;
     font-family: "Montserrat", sans-serif;
     font-weight: 400;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 0.9em;
     line-height: 36px;
     cursor: pointer;
     transition: all 0.5s ease-in-out;
     &:hover {
+      background-color: #3483fa;
+      color: white;
+    }
+    &--select {
       background-color: #3483fa;
       color: white;
     }
@@ -127,7 +132,7 @@
     }
   }
   &__section {
-    width: calc(100% - 270px);
+    width: calc(100% - 290px);
     overflow: hidden;
     padding: 25px;
     background-color: white;
@@ -180,6 +185,7 @@
     position: relative;
     width: 100%;
     padding-top: 100%;
+    cursor: pointer;
     &--image {
       position: absolute;
       top: 0;
@@ -191,228 +197,14 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-/* 
-.header-main{
-  background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
-  color: white;
-  padding: 0 16px;
-
-}
-.header-grid-logo{
-  display: grid;
-  grid-template-columns: auto 1fr;
-  border: 1px solid red;
-}
-
-.header-image{
-  margin-right: 10px;
-}
-
-.logoimage{
-  margin-right: 10px;
-  width: 200px;
-}
-
-.search-form{
-  display: flex;
-  font-family: "Montserrat", sans-serif;
-  font-size: 14px;
-  margin-top: 10px;
-  margin-bottom: 30px;
-  width: 50%;
-  background: white;
-  border: 1px solid red;
-} 
-.search-form-input{
-  width: 100%;
-  margin-top: 0px;  
-  border: transparent;
-}
-
-.search-form-button{
-    color: #cbcbcb;
-    background: white;    
-}
-
-.header-grid-user{
-  display: grid;
-  grid-template-columns: auto 1fr;
-  border: 1px solid red;
-  padding: 10px;
-}
-.contactanos{
-  padding-left: 200px;
-}
-
-.user{
-  text-align: end;
-}
-
-.redes-sociales{
-  position: absolute;
-  top: 20px;
-  right: 50px;
-  width: 200px;
-  border: 1px solid orange;
-}
-
-.menu{
-  position: absolute;
-  top: 80px;
-  left: 20px;
-  width: 250px;
-  border: 1px solid green;
-}
-.menu button{
-  display: inline;
-}
-
-.menu-button {
-  font-family: "Montserrat", sans-serif !important;
-  font-weight: 200 !important;
-}
-
-.social__button {
-  border: 1px solid white;
-  margin: 0 0.5em;
-}
-.social__button img {
-  width: 22px;
-}
-
-.categories {
-  position: absolute;
-  left: 48px;
-  z-index: 1000;
-  width: 90%;
-  &__nav {
-    padding-right: 0;
-    padding-left: 0;
-    padding-bottom: 0;
-    width: 270px;
-    border-right: 1px;
-    border-top: 0;
-    z-index: 1000;
-    background-color: #333;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-    min-height: 550px;
-  }
-  &__list {
-    margin-bottom: 0;
-    padding-inline-start: 0;
-    list-style: none;
-  }
-  &__item {
-    height: 36px;
-    margin-bottom: 0;
-    padding: 0px 24px 0px 36px;
-    font-family: "Montserrat", sans-serif;
-    font-weight: 400;
-    color: #ffffff;
-    font-size: 14px;
-    line-height: 36px;
-    cursor: pointer;
-    transition: all 0.5s ease-in-out;
-    &:hover {
-      background-color: #3483fa;
-      color: white;
-    }
-    &--name {
-      // border-bottom: 1px solid #c4c4c4;
-      display: flex;
-      align-items: center;
-      div {
-        width: fit-content;
-        margin-right: 4px;
-      }
-
-      mat-icon {
-        color: #aeaeae;
-      }
-    }
-  }
-  &__section {
-    width: calc(100% - 270px);
-    overflow: hidden;
-    padding: 25px;
-    background-color: white;
-    display: none;
-    color: #2b2b2b;
-    & img {
-      border: 1px solid #ddd;
-      width: 100%;height: 100%;object-fit: contain;
-    }
-  }
-  &__title {
-    font-family: Raleway;
-    color: #2b2b2b;
-    border-bottom: 2px solid var(--primary-color);
-    font-weight: 600;
-    font-size: 1.4em;
-    padding-bottom: 8px;
-  }
-  &__subtitle {
-    color: var(--primary-color);
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    padding-bottom: 0.4375rem;
-    margin-bottom: 0.5rem;
-    white-space: nowrap;
-    width: 100%;
-    text-overflow: ellipsis;
-    text-decoration: none;
-    border-bottom: 0.0625rem solid #BBBBBB;
-    overflow: hidden;
-  }
-  &__link{
-    cursor: pointer;
-    font-size: 0.875rem;
-    color: #666;
-    font-weight: 400;
-    display: block;
-    white-space: nowrap;
-    width: 100%;
-    text-overflow: ellipsis;
-    line-height: 1.25rem;
-    text-decoration: none;
-    overflow: hidden;
-    &:hover{
-      font-weight: 600;
-    }
-  }
-  &__brand {
-    position: relative;
-    width: 100%;
-    padding-top: 100%;
-    &--image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-    }
-  }
-}
 
 .nav-categs-overlay {
   position: absolute;
-  left: 0;
+  left: -16px;
   opacity: 0.3;
   background-color: #333;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding-bottom: 32px;
@@ -437,75 +229,6 @@
     display: inline-block;
     text-overflow: ellipsis;
     margin-bottom: 24px;
-    padding: 1.5rem 2rem 0;
+    padding: 1rem 1.5rem 0;
   }
-} */
-
-
-//Query
-/* 
-@media only screen and (max-width: 768px) {
-  
-  .header-grid-logo{
-    display: grid;
-    grid-column-gap: 1em;
-    grid-template-columns:  150px 1fr 1fr ;
-  }
-  .header-grid-logo{
-    position: rela;
-  }
-  .search-form{
-   width: 200px;
-   border: 1px solid red;
-
-  }
-  .search-form-input{
-    position: absolute;
-    width: 100%;
-    margin-top: 0px;  
-  }
-  
-  .search-form-button{
-      position: absolute;
-      left: 320px;
-      color: #cbcbcb;
-      background: white;    
-  }
-  .search-form-input{
-    width: 150px;
-    margin-top: 0px;  
-    border: transparent;
-  }
-  
-  .search-form-button{
-      color: #cbcbcb;
-      background: white;    
-  }
-
-  .logoimage{
-    position: absolute;
-    width: 70px;
-    height: 40px;
-    left: 100px;
-    top: 20px;
-  }
-  .redes-sociales{
-    display: none;
-  }
-  .contactanos{
-    display: none;
-  }
-  .menu{
-    position: absolute;
-    top: 20px;
-    left: 20px;
-  }
-  .menu-text{
-    display: none;
-  }
-
-  
-
 }
-
- */

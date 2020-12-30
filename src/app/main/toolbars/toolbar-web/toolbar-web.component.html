@@ -63,7 +63,7 @@
           <button mat-menu-item (click)="logOut()">
             <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
           </button>
-          <button mat-menu-item routerLink="/main/mispedidos" >
+          <button mat-menu-item routerLink="/main/mispedidos">
             <mat-icon>receipt</mat-icon>
             <span>Mis pedidos</span>
           </button>
@@ -71,18 +71,20 @@
             <mat-icon>favorite</mat-icon>
             <span>Mis favoritos</span>
           </button>
-          <button mat-menu-item routerLink="/main/preguntas" >
+          <button mat-menu-item routerLink="/main/preguntas">
             <mat-icon>question_answer</mat-icon>
             <span>Mis Preguntas</span>
           </button>
         </mat-menu>
-        <button mat-button routerLink="/main/carrito" matTooltip="Carrito">
+        <button mat-button routerLink="/main/carrito" matTooltip="Carrito" *ngIf="dbs.order.length;else noOrder">
           <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
             shopping_cart</mat-icon>
         </button>
-        <button mat-button matTooltip="Notificaciones">
-          <mat-icon matBadge="5" matBadgeColor="warn">notifications_none</mat-icon>
-        </button>
+        <ng-template #noOrder>
+          <button mat-button matTooltip="Carrito">
+            <mat-icon>shopping_cart</mat-icon>
+          </button>
+        </ng-template>
       </div>
     </div>
 
@@ -97,7 +99,9 @@
             <li class="categories__item" (mouseenter)="closeSection()">
               <div class="categories__item--name">Destacados</div>
             </li>
-            <li class="categories__item" *ngFor="let cat of listCategories" (mouseenter)="openSection(cat)">
+            <li class="categories__item"
+              [ngClass]="{'categories__item--select':selectCategory?selectCategory.category == cat.category:false}"
+              *ngFor="let cat of listCategories" (mouseenter)="openSection(cat)" (click)="openSection(cat)">
               <div class="categories__item--name">
                 <div>{{ cat.category }}</div>
                 <span class="ms-fill"></span>
@@ -112,11 +116,11 @@
               {{ selectCategory.category}}
             </h2>
             <div class="nav-categs-detail__body w3-row-padding">
-              <div class="w3-col m9 l9">
+              <div class="w3-col m8 l9">
                 <div class="nav-categs-detail__body-content">
                   <article class="nav-categs-detail__categ" *ngFor="let sub of selectCategory.subcategories">
                     <h4 class="categories__subtitle" (click)="navigateCategory(selectCategory.category,sub.name)">
-                      {{ sub.name | titlecase}}
+                      {{ sub.name }}
                     </h4>
                     <div>
                       <ul style="padding-inline-start: 1em;">
@@ -129,13 +133,12 @@
                   </article>
                 </div>
               </div>
-              <div class="w3-col m3 l3" *ngIf="selectCategory.brands.length">
+              <div class="w3-col m4 l3" *ngIf="selectCategory.brands.length">
                 <h4 class="categories__subtitle">Marcas Oficiales</h4>
                 <div class="w3-row-padding">
                   <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
                     <div class="w3-block w3-margin-bottom categories__brand mat-elevation-z2">
                       <div class=" categories__brand--image">
-
                         <img [defaultImage]="defaultImage" [lazyLoad]="brand.photoURL" [offset]="100"
                           (click)="navigateBrand(brand.name)" alt="brand.name" />
                       </div>
@@ -150,6 +153,8 @@
         </div>
       </div>
     </div>
+    <div class="nav-categs-overlay" (click)="toggleMenu()" (mouseenter)="toggleMenu()"
+      [style.display]="openedMenu ? 'block' : 'none'"></div>
   </div>
 </div>
 

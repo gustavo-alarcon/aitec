@@ -26,7 +26,7 @@ export class DeliveryStoresComponent implements OnInit {
   }
 
   dataStoreSource = new MatTableDataSource();
-  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address', 'actions'];
+  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address','schedule', 'actions'];
 
   @ViewChild('storePaginator', { static: false }) set content2(
     paginator1: MatPaginator

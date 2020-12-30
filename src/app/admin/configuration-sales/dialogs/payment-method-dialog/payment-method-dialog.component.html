@@ -1,0 +1,44 @@
+<div mat-dialog-title>
+  <h2 *ngIf="!data.edit" style="font-size: 1.2em; font-family: Montserrat; font-weight: 900">
+    {{ data.edit ? "Editar" : "Agregar" }} Método de Pago
+  </h2>
+  <mat-divider></mat-divider>
+  <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
+</div>
+<mat-dialog-content style="width: 400px; max-width: 85vw">
+  <form [formGroup]="createForm">
+    
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Nombre" />
+      <mat-error>
+        <span *ngIf="createForm.get('name').errors?.required">Campo requerido</span>
+        <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentra repetido.</span>
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Cuenta</mat-label>
+      <input autocomplete="off" formControlName="account" type="text" matInput placeholder="Número de cuenta" />
+    </mat-form-field>
+  </form>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
+    Cancelar
+  </button>
+  <div *ngIf="data.edit">
+    <button mat-raised-button color="primary" (click)="editSubmit()" type="button"
+      [disabled]="createForm.status != 'VALID'">
+      Editar
+    </button>
+  </div>
+  <div *ngIf="!data.edit">
+    <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
+      [disabled]="createForm.status != 'VALID'">
+      Guardar
+    </button>
+  </div>
+</mat-dialog-actions>

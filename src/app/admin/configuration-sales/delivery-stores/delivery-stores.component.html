@@ -120,6 +120,12 @@
             {{element.address}}
           </td>
         </ng-container>
+        <ng-container class="w3-center" matColumnDef="schedule">
+          <th *matHeaderCellDef class="w3-center">Horario de atención</th>
+          <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+            {{element.schedule}}
+          </td>
+        </ng-container>
         <ng-container class="w3-center" matColumnDef="actions" sticky>
           <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
             Acciones

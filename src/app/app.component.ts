@@ -42,6 +42,7 @@ export class AppComponent {
       filter(user => !!user),
       take(1),
       switchMap(user => {
+        this.dbs.uidUser = user.uid
         return this.push.getPermission(user)
       })
     )

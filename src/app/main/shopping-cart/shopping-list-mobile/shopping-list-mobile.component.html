@@ -15,7 +15,7 @@
               <mat-icon [style.color]="element.chosenProduct.color.color">brightness_1</mat-icon>
               {{element.chosenProduct.color.name}}
             </span>
-            <button (click)="delete(element)" mat-button color="warn">Eliminar</button>
+            <button (click)="delete(element['chosenProduct'])" mat-button color="warn">Eliminar</button>
           </div>
         </div>
         <span class="ms-fill"></span>
