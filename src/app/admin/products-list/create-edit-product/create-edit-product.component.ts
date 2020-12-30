@@ -683,6 +683,7 @@ export class CreateEditProductComponent implements OnInit {
           el.series.forEach(lo => {
             const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/series`).doc();
             batch.set(serieRef, {
+              id:serieRef.id,
               idWarehouse: warehouseRef.id,
               idProduct: newProduct.id,
               skuProduct: newProduct.sku,

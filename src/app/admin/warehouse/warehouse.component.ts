@@ -92,9 +92,9 @@ export class WarehouseComponent implements OnInit {
         map(([warehouse, products, filt]) => {
 
           return warehouse.map(el => {
-            el['product'] = products.filter(li => li.sku == el['skuProduct'])[0]
+            el['product'] = products.filter(li => li.id == el['idProduct'])[0]
             return el
-          }).filter(ol => {
+          }).filter(wr=>wr['product']).filter(ol => {
             return filt != 'Todos' ? ol.warehouse == filt : true
           })
         }),

@@ -31,6 +31,10 @@ export class DeleteProductComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log('here');
+    
+    console.log(this.data);
+    
     this.init$ = combineLatest(
       this.dbs.getWarehouseByProduct(this.data.id),
       this.dbs.getSeriesByProduct(this.data.id)
@@ -38,6 +42,10 @@ export class DeleteProductComponent implements OnInit {
       map(([warehouses, series]) => {
         this.warehouseList = warehouses.map(el => el.id)
         this.seriesList = series
+        console.log(warehouses);
+        console.log(series);
+        
+        
       }),
       tap(() => {
         this.loading.next(false)
@@ -54,17 +62,19 @@ export class DeleteProductComponent implements OnInit {
 
     let phot$ = this.data.gallery.map(el => this.dbs.deletePhoto(el.photoPath))
     forkJoin(phot$).subscribe(res => {
-      batch.delete(ref)
+     
+      /*
       this.seriesList.forEach(ser => {
         const sref = this.af.firestore.collection(`/db/aitec/warehouse/${ser['idWarehouse']}/series`).doc(ser['id']);
         batch.delete(sref)
-      })
+      })*/
 
       this.warehouseList.forEach(wh => {
         const whref = this.af.firestore.collection(`/db/aitec/warehouse`).doc(wh);
         batch.delete(whref)
       })
       
+      batch.delete(ref)
       batch.commit().then(() => {
         this.dialogref.close(true);
         this.loading.next(false)
