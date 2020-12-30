@@ -89,6 +89,7 @@ export class LandingComponent implements OnInit {
 
   ngOnInit(): void {
 
+
     this.products$ = this.dbs.getLastProducts().pipe(
       map(prods => prods.filter(el => el.published)),
       tap(res => {
