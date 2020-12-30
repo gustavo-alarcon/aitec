@@ -5,7 +5,10 @@ export interface User {
     address: string;
     reference: string;
     coord: { lat: number; lng: number };
-  };
+    departamento:string;
+    provincia:string;
+    distrito:string;
+  }[];
 
   personData: naturalPerson | businessPerson;
   name?:string;

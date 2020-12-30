@@ -93,8 +93,7 @@
   text-align: center;
   div {
     width: 50%;
-    height: 60px;
-    padding: 19px;
+    padding: 16px;
   }
   .activated {
     background: #ffffff;
@@ -110,5 +109,33 @@
     color: #c4c4c4;
     font-weight: bold;
     cursor: pointer;
+  }
+}
+
+.ordItem{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+.store{
+  padding: 5px;
+  &__address{
+    font-size: 0.9em;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  &__district{
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: #c4c4c4;
+    font-weight: 500;
+  }
+  &__schedule{
+    font-size: 1em;
+  }
+  &__selected{
+    background: #f1f1f1;
   }
 }

@@ -40,6 +40,7 @@ export class DatabaseService {
     quantity: number;
     chosenProduct: any;
     color: boolean;
+    price: number;
   }[] = [];
 
   public orderObs = new BehaviorSubject<
@@ -48,9 +49,12 @@ export class DatabaseService {
       quantity: number;
       chosenProduct: any;
       color: boolean;
+      price: number;
     }[]
   >([]);
   public orderObs$ = this.orderObs.asObservable();
+
+  public uidUser: string = ''
 
   public changeStock = new BehaviorSubject<any>([]);
   public changeStock$ = this.changeStock.asObservable();
@@ -1405,10 +1409,10 @@ export class DatabaseService {
       return Promise.all(promises);
     }).then(res => {
 
-
+      localStorage.removeItem(this.uidUser)
       return this.saveSale(user, newSale, phot)
 
-      //localStorage.removeItem(this.dbs.uidUser)
+      
 
     }).catch(() => {
       //this.snackBar.open('Error de conexión, no se completo la compra, intentelo de nuevo', 'cerrar')
@@ -1495,12 +1499,20 @@ export class DatabaseService {
 
 
           let message = {
-            to: [user.email],
+            to: ['mocharan@meraki-s.com'],
             template: {
               name: 'pedidoUser',
               data: {
                 order: this.order,
-                correlative: '#R' + ("000" + newCorr).slice(-4)
+                correlative: '#R' + ("000" + newCorr).slice(-4),
+                date:'',
+                payment:'',/*metodo de pago*/
+                document:'',/*boleta/facturacion*/
+                info:'',/*document info*/
+                subtotal:0,
+                igv:0,
+                envio:0,
+                total:0
               }
             }
           }

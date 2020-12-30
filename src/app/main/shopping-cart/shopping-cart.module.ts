@@ -30,8 +30,6 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { ShoppingCartRoutingModule } from './shopping-cart-routing.module';
 import { ShoppingCartComponent } from './shopping-cart.component';
 import { ShoppingListComponent } from './shopping-list/shopping-list.component';
-import { DeliveryComponent } from './delivery/delivery.component';
-import { PaymentMethodComponent } from './payment-method/payment-method.component';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 import { ShoppingListMobileComponent } from './shopping-list-mobile/shopping-list-mobile.component';
@@ -40,8 +38,6 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
   declarations: [
     ShoppingCartComponent,
     ShoppingListComponent,
-    DeliveryComponent,
-    PaymentMethodComponent,
     SaleDialogComponent,
     ShoppingListMobileComponent,
     LocationDialogComponent,

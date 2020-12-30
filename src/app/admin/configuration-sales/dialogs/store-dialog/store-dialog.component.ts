@@ -49,6 +49,7 @@ export class StoreDialogComponent implements OnInit {
       provincia: [this.data.edit ? this.data.data.provincia : null, Validators.required],
       distrito: [null],
       address: [this.data.edit ? this.data.data.address : null, Validators.required],
+      schedule: [this.data.edit ? this.data.data.schedule : null, Validators.required]
     });
 
     this.formGroup.get('provincia').disable();
@@ -159,6 +160,7 @@ export class StoreDialogComponent implements OnInit {
       provincia: this.formGroup.get('provincia').value,
       distrito: this.formGroup.get('distrito').value,
       address: this.formGroup.get('address').value,
+      schedule: this.formGroup.get('schedule').value,
       createdAt: this.data.edit ? this.data.data.createdAt : new Date()
     }
 

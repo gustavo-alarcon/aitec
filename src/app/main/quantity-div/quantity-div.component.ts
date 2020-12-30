@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Product } from 'src/app/core/models/product.model';
 
 @Component({
   selector: 'app-quantity-div',
@@ -11,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./quantity-div.component.scss'],
 })
 export class QuantityDivComponent implements OnInit {
-  @Input() product: any;
+  @Input() product: Product;
   @Input() chosen: any;
   @Input() color: boolean;
   @Input() size: string;
@@ -51,11 +52,12 @@ export class QuantityDivComponent implements OnInit {
       product: item,
       quantity: 1,
       chosenProduct: this.chosen,
-      color: this.color
+      color: this.color,
+      price:this.product.priceMin
     };
     this.dbs.order.push(newproduct);
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   increase(item) {
@@ -65,7 +67,7 @@ export class QuantityDivComponent implements OnInit {
 
     this.dbs.order[index]['quantity']++;
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   decrease(item) {
@@ -74,7 +76,7 @@ export class QuantityDivComponent implements OnInit {
     );
     this.dbs.order[index]['quantity']--;
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   view(event) {

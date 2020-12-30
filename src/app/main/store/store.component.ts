@@ -68,8 +68,7 @@ export class StoreComponent implements OnInit {
         let brand = null
 
         let listProd = []
-        console.log(param.productos);
-        
+
         if (param.search) {
           this.search = param.search;
           frag = param.search.toLowerCase()
@@ -77,8 +76,10 @@ export class StoreComponent implements OnInit {
         }
 
         if (param.brand) {
+          console.log(param.brand);
+
           this.searchBrand = param.brand;
-          brand = param.brand.toLowerCase()
+          brand = param.brand.toLowerCase().trim()
           state = 'brand'
         }
 
@@ -125,7 +126,13 @@ export class StoreComponent implements OnInit {
   filterProduct(state, prod, brand, cat, sub, subsub, word, frag, listProd) {
     switch (state) {
       case 'brand':
-        return prod.filter(el => el.brand.toLowerCase().includes(brand))
+        return prod.filter(el => {
+          if (typeof el.brand == 'string') {
+            return el.brand.toLowerCase().trim().includes(brand)
+          } else {
+            el.brand.name.toLowerCase().trim().includes(brand)
+          }
+        })
         break;
       case 'frag':
         return prod.filter((el) =>
@@ -153,7 +160,7 @@ export class StoreComponent implements OnInit {
       case 'productos':
         console.log('here');
         console.log(listProd);
-        
+
         return prod.filter(el => listProd.includes(el.id))
         break;
       default:

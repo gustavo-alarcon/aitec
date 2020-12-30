@@ -1,8 +1,8 @@
 <a (click)="navigateProduct(product['sku'])" *ngIf="product">
   <mat-card class="product">
-    <div class="product__star" *ngIf="!product.promo">
+    <!--div class="product__star" *ngIf="!product.promo">
       <mat-icon class="product__star--icon">grade</mat-icon>
-    </div>
+    </div-->
     <div class="product__discount" *ngIf="product.promo">
       <div class="product__discount--number">{{ product.promoData.offer }}</div>
       <div class="product__discount--percent">
