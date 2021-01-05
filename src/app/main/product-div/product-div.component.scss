@@ -3,6 +3,7 @@
   box-sizing: border-box;
   position: relative;
   cursor: pointer;
+  height: 400px;
   &__star {
     position: absolute;
     top: 0;
@@ -68,6 +69,15 @@
       text-align: left;
       line-height: 1.2em;
     }
+  }
+  &__promo {
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    color: var(--primary-color);
+    font-size: 0.9em;
+    margin-top: 8px;
+    padding: 5px;
+    font-weight: bold;
   }
 }
 

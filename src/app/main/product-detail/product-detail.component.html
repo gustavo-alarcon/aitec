@@ -24,16 +24,7 @@
     </div>
     <app-web-view [product]="product"></app-web-view>
   
-    <div class="w3-section">
-      <h4 class="product__subtitle">Productos similares</h4>
-      <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
-        <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-          <div style="padding:0 8px">
-            <app-product-div [product]="slide"></app-product-div>
-          </div>
-        </div>
-      </ngx-slick-carousel>
-    </div>
+    <app-product-category [category]="product.category"></app-product-category>
     <div class="w3-section">
       <h4 class="product__subtitle">Consultas sobre el producto</h4>
   

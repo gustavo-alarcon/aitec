@@ -8,6 +8,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { AsesoresDialogComponent } from '../dialogs/asesores-dialog/asesores-dialog.component';
 import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.component';
+import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/payment-method-dialog.component';
 
 @Component({
   selector: 'app-general',
@@ -27,7 +28,7 @@ export class GeneralComponent implements OnInit {
   initCoupon$: Observable<any>
 
   dataAdviserSource = new MatTableDataSource();
-  displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'actions'];
+  displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'phone', 'actions'];
 
   @ViewChild('adviserPaginator', { static: false }) set content2(
     paginator2: MatPaginator
@@ -36,6 +37,17 @@ export class GeneralComponent implements OnInit {
   }
 
   initAdviser$: Observable<any>
+
+  dataPaymentSource = new MatTableDataSource();
+  displayedPaymentColumns: string[] = ['index', 'name', 'account', 'actions'];
+
+  @ViewChild('paymentPaginator', { static: false }) set content3(
+    paginator3: MatPaginator
+  ) {
+    this.dataPaymentSource.paginator = paginator3;
+  }
+
+  initPay$: Observable<any>
   constructor(
     private dialog: MatDialog,
     public dbs: DatabaseService
@@ -53,6 +65,12 @@ export class GeneralComponent implements OnInit {
         this.dataAdviserSource.data = res;
       })
     );
+
+    this.initPay$ = this.dbs.getPaymentsChanges().pipe(
+      tap((res) => {
+        this.dataPaymentSource.data = res;
+      })
+    );
   }
 
   openCupon(movil: boolean, data) {
@@ -66,6 +84,15 @@ export class GeneralComponent implements OnInit {
 
   openUser(movil: boolean, data) {
     this.dialog.open(AsesoresDialogComponent, {
+      data: {
+        edit: movil,
+        data: data
+      }
+    })
+  }
+
+  openPayment(movil: boolean, data) {
+    this.dialog.open(PaymentMethodDialogComponent, {
       data: {
         edit: movil,
         data: data

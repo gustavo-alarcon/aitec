@@ -38,7 +38,7 @@
               </div>
               <div>
                 <div class="total">S/.
-                  {{(getTotal(sale.requestedProducts) + sale.deliveryPrice) | number: '.2'}}
+                  {{sale.total | number: '.2'}}
                 </div>
               </div>
             </div>
@@ -75,7 +75,7 @@
                   {{prod.product.description}}
                 </div>
                 <div style="width: 25%">
-                  S/. {{giveProductPrice(prod) | number:'.2'}}
+                  S/. {{prod.subtotal | number:'.2'}}
                 </div>
 
               </div>

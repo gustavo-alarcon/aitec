@@ -1,0 +1,10 @@
+<div class="w3-section" *ngIf="products$|async as prods">
+  <h4 class="product__subtitle">Productos similares</h4>
+  <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
+    <div ngxSlickItem *ngFor="let slide of prods" class="slide">
+      <div style="padding:0 8px">
+        <app-product-div [product]="slide" [price]="0"></app-product-div>
+      </div>
+    </div>
+  </ngx-slick-carousel>
+</div>

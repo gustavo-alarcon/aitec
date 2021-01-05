@@ -54,6 +54,7 @@ interface PromoData {
   quantity: number;
   promoPrice: number;
   offer?: number;
+  type?:string;
 }
 
 interface Gallery {

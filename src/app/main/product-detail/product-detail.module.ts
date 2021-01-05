@@ -23,13 +23,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { LayoutModule } from '@angular/cdk/layout';
 import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProductCategoryComponent } from './product-category/product-category.component';
 
 @NgModule({
   declarations: [
     ProductDetailComponent,
     QuestionsComponent,
     WebViewComponent,
-    NoLoginDialogComponent],
+    NoLoginDialogComponent,
+    ProductCategoryComponent],
   imports: [
     CommonModule,
     ProductDetailRoutingModule,
