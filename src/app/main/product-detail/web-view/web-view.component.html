@@ -47,20 +47,29 @@
             </div>
           </ngx-slick-carousel>
         </div>
-        <div *ngIf="product.promo" class=" big product__promo ms-flex">
-          <div style="width: fit-content">
-            Antes <strike>{{ product.priceMin }}</strike>
+       
+        <div *ngIf="product.promo && product.promoData.quantity == 1">
+          <div class=" big product__promo ms-flex">
+            <div style="width: fit-content">
+              Antes <strike>{{ product.priceMin }}</strike>
+            </div>
+            <div class="product__promo--discount">
+              {{ product.promoData.offer }} % Dscto
+            </div>
           </div>
-          <div class="product__promo--discount">
-            {{ product.promoData.offer }} % Dscto
+          <div class="product__price w3-section big">
+            <span>Ahora</span>
+            <span class="product__price--number">
+              S/. {{product.promoData.promoPrice | number: ".2"}}
+            </span>
           </div>
         </div>
-        <div class="product__price w3-section big">
-          <span *ngIf="product.promo">Ahora</span>
-          <span class="product__price--number">
-            S/.
-            {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
-          </span>
+        <div *ngIf="!product.promo || product.promoData.quantity > 1">
+          <div class="product__price w3-section big">
+            <span class="product__price--number">
+              S/. {{product.priceMin | number: ".2"}}
+            </span>
+          </div>
         </div>
         <mat-form-field class="product__select">
           <mat-label>Colores</mat-label>
@@ -75,21 +84,34 @@
           </mat-select>
         </mat-form-field>
         <div class="small">
-          <div *ngIf="product.promo" class="product__promo ms-flex">
-            <div style="width: fit-content">
-              Antes <strike>{{ product.priceMin }}</strike>
+          <div *ngIf="product.promo && product.promoData.quantity == 1">
+            <div class="product__promo ms-flex">
+              <div style="width: fit-content">
+                Antes <strike>{{ product.priceMin }}</strike>
+              </div>
+              <div class="product__promo--discount">
+                {{ product.promoData.offer }} % Dscto
+              </div>
             </div>
-            <div class="product__promo--discount">
-              {{ product.promoData.offer }} % Dscto
+            <div class="product__price w3-section">
+              <span>Ahora</span>
+              <span class="product__price--number">
+                S/. {{product.promoData.promoPrice | number: ".2"}}
+              </span>
             </div>
           </div>
-          <div class="product__price w3-section">
-            <span *ngIf="product.promo">Ahora</span>
-            <span class="product__price--number">
-              S/.
-              {{product.promo? product.promoData.promoPrice: (product.priceMin | number: ".2")}}
-            </span>
+          <div *ngIf="!product.promo || product.promoData.quantity > 1">
+            <div class="product__price w3-section">
+              <span class="product__price--number">
+                S/. {{product.priceMin | number: ".2"}}
+              </span>
+            </div>
           </div>
+          
+        </div>
+        <div *ngIf="product.promo && product.promoData.quantity > 1" class="w3-center product__promoDiv">
+          OFERTA: {{product.promoData.quantity}} x S/.
+          {{product.promoData.promoPrice | number: '.2'}}
         </div>
         <div class="product__stock">
           {{ productSelected.stock }} Unidades disponibles

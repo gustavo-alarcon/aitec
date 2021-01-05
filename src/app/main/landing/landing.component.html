@@ -28,7 +28,7 @@
       <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
         <div ngxSlickItem *ngFor="let slide of offers" class="slide">
           <div class="w3-padding">
-            <app-product-div [product]="slide"></app-product-div>
+            <app-product-div [product]="slide" [price]="0"></app-product-div>
           </div>
         </div>
       </ngx-slick-carousel>
@@ -64,7 +64,7 @@
             <div class="w3-row">
               <div *ngFor="let prod of listproducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
                 <div style="padding:0 8px">
-                  <app-product-div [product]="prod"></app-product-div>
+                  <app-product-div [product]="prod" [price]="0"></app-product-div>
                 </div>
               </div>
             </div>
@@ -80,7 +80,7 @@
             <div class="w3-row">
               <div *ngFor="let prod of lastProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
                 <div style="padding:0 8px">
-                  <app-product-div [product]="prod"></app-product-div>
+                  <app-product-div [product]="prod" [price]="0"></app-product-div>
                 </div>
               </div>
             </div>
@@ -96,7 +96,7 @@
             <div class="w3-row">
               <div *ngFor="let prod of offersProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
                 <div style="padding:0 8px">
-                  <app-product-div [product]="prod"></app-product-div>
+                  <app-product-div [product]="prod" [price]="0"></app-product-div>
                 </div>
               </div>
             </div>

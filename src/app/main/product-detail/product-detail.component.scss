@@ -6,18 +6,6 @@
   display: block;
 }
 
-.layoout {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  background-color: rgba(51, 51, 51, 0.336);
-  padding-top: 40vh;
-  min-height: 100vh;
-}
 
 @media (max-width: 600px) {
   .prod-big {

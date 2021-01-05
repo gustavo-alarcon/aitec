@@ -116,6 +116,13 @@
 
         </td>
       </ng-container>
+      <ng-container class="w3-center" matColumnDef="phone">
+        <th *matHeaderCellDef class="w3-center">Número de contacto</th>
+        <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+          {{ element['phone'] }}
+
+        </td>
+      </ng-container>
       
       <ng-container class="w3-center" matColumnDef="actions" sticky>
         <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
@@ -142,6 +149,65 @@
       <tr mat-row *matRowDef="let row; columns: displayedAdviserColumns"></tr>
     </table>
     <mat-paginator #adviserPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+      showFirstLastButtons></mat-paginator>
+  </div>
+</div>
+<div class="w3-section" *ngIf="initPay$ | async">
+  <h4 style="font-size: 1.2em;font-weight: 600;">Métodos de Pago</h4>
+  <button mat-raised-button class="w3-margin-bottom" (click)="openPayment(false,null)" color="primary">
+    <span>Agregar</span>
+    <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
+  </button>
+  <div *ngIf="dataPaymentSource.data.length">
+    <table mat-table [dataSource]="dataPaymentSource" matSort style="width:100%">
+      <ng-container class="w3-center" matColumnDef="index">
+        <th *matHeaderCellDef class="w3-center">Nº</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{
+            1 + i + paymentPaginator.pageIndex * paymentPaginator.pageSize
+          }}
+        </td>
+      </ng-container>
+
+      <ng-container class="w3-center" matColumnDef="name">
+        <th *matHeaderCellDef class="w3-center">Descripción</th>
+        <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+          {{ element['name']}}
+        </td>
+      </ng-container>
+
+      <ng-container class="w3-center" matColumnDef="account">
+        <th *matHeaderCellDef class="w3-center">Cuenta</th>
+        <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+          {{ element['account']?element['account']:'---' }}
+        </td>
+      </ng-container>
+      
+      <ng-container class="w3-center" matColumnDef="actions" sticky>
+        <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
+          Acciones
+        </th>
+        <td mat-cell *matCellDef="let element; let ind = index" class="w3-center">
+          <ng-container>
+            <mat-menu #rawMenu="matMenu">
+              <button class="w3-small" mat-menu-item (click)="openPayment(true,element)">
+                <mat-icon>edit</mat-icon> Editar
+              </button>
+              <button class="w3-small" mat-menu-item (click)="deleteDialog(element.id,'payments','Metodo de pago')">
+                <mat-icon>delete</mat-icon> Borrar
+              </button>
+            </mat-menu>
+
+            <button mat-icon-button [matMenuTriggerFor]="rawMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </ng-container>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedPaymentColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedPaymentColumns"></tr>
+    </table>
+    <mat-paginator #paymentPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
       showFirstLastButtons></mat-paginator>
   </div>
 </div>

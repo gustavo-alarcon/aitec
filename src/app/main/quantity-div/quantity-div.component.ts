@@ -16,6 +16,7 @@ export class QuantityDivComponent implements OnInit {
   @Input() chosen: any;
   @Input() color: boolean;
   @Input() size: string;
+  @Input() price: number;
   quantity$: Observable<number>;
 
   quantityForm = new FormControl(null);
@@ -93,7 +94,7 @@ export class QuantityDivComponent implements OnInit {
     if (number == 0 || isNaN(number)) {
       this.dbs.order[index]['quantity'] = 1;
     } else {
-      if (number >= this.product['realStock']) {
+      if (number >= this.chosen['stock']) {
         this.dbs.order[index]['quantity'] = this.chosen['stock'];
         this.snackBar.open(
           'Stock disponible del producto:' + this.chosen['stock'],

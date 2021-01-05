@@ -7,21 +7,21 @@
       " (click)="decrease(product)" [disabled]="quantity == 1">
       <mat-icon>remove</mat-icon>
     </button>
-    <input matInput type="number" min="1" [max]="product.realStock" style="width: 3em" (keydown)="onKeydown($event)"
+    <input matInput type="number" min="1" [max]="chosen.stock" style="width: 3em" (keydown)="onKeydown($event)"
       [formControl]="quantityForm" (change)="view($event)" />
 
     <button mat-mini-fab [ngClass]="
         size == 'md'
           ? 'quantityButton quantityButton--md w3-margin-left'
           : 'quantityButton quantityButton--sm'
-      " (click)="increase(product)" [disabled]="product['realStock'] <= quantity">
+      " (click)="increase(product)" [disabled]="chosen.stock <= quantity">
       <mat-icon>add</mat-icon>
     </button>
   </div>
 </div>
 <ng-template #noAdded>
   <button mat-flat-button color="primary" class="product__add" (click)="add(product)"
-    [style.visibility]="product['realStock'] > 0 ? 'visible' : 'hidden'">
+    [style.visibility]="chosen.stock > 0 ? 'visible' : 'hidden'">
     <mat-icon>shopping_cart</mat-icon>
     <span> Agregar al Carrito</span>
   </button>

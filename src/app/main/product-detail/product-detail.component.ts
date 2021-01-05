@@ -1,10 +1,9 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, Observer } from 'rxjs';
-import { map, switchMap, switchMapTo, take, takeLast, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
@@ -20,25 +19,7 @@ export class ProductDetailComponent implements OnInit {
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
-  slideConfig2 = {
-    "slidesToShow": 4, "slidesToScroll": 1,
-    "autoplay": false,
-    responsive: [
-      {
-        breakpoint: 1360,
-        settings: {
-          slidesToShow: 3
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 2,
-          arrows: false
-        }
-      }
-    ]
-  };
+
 
   isSmall$: Observer<any>
 
@@ -53,27 +34,16 @@ export class ProductDetailComponent implements OnInit {
     public auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
-    public breakpointObserver: BreakpointObserver,
     private afs: AngularFirestore
   ) { }
 
   ngOnInit(): void {
     this.productDiv = null
-    this.product$ = combineLatest(
-      this.route.params,
-      this.dbs.getProductsList()
-    ).pipe(
-      switchMap(([param,prods]) => {
+    this.product$ = this.route.params.pipe(
+      switchMap((param) => {
         window.scroll(0, 0);
         this.loading.next(true)
-        return this.dbs.getProduct(param.id).pipe(
-          map(product => {
-
-            this.prods = prods.filter(el => el.category == product.category)
-            return product
-            
-          })
-        )
+        return this.dbs.getProduct(param.id)
       }),
       tap(res => {
         if (this.count == 1) {
@@ -82,8 +52,8 @@ export class ProductDetailComponent implements OnInit {
         this.loading.next(false)
       })
     );
-    
-   
+
+
 
 
   }

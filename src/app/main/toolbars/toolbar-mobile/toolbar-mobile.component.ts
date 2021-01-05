@@ -48,8 +48,9 @@ export class ToolbarMobileComponent implements OnInit {
     ).pipe(
 
       map(([value, products]) => {
+        let prod = products.filter(p=>p.published)
         return value.length
-          ? products.filter(
+          ? prod.filter(
             (option) =>
               option['description'].toLowerCase().includes(value) ||
               option['sku'].toLowerCase().includes(value) ||

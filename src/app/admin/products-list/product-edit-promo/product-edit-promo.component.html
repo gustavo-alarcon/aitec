@@ -16,6 +16,12 @@
 
     <ng-container *ngIf="promoState$ | async">
 
+      <mat-radio-group formControlName="type" color="primary" class="w3-section w3-block">
+        <mat-radio-button [value]="1" style="margin-right: 8px;">Minorista</mat-radio-button>
+        <mat-radio-button [value]="2" style="margin-right: 8px;">Mayorista</mat-radio-button>
+        <mat-radio-button [value]="3">Todos</mat-radio-button>
+      </mat-radio-group>
+
       <!-- quantity  -->
       <mat-form-field style="display:block; margin-bottom: 8px" appearance="outline">
         <mat-label>Cantidad </mat-label>

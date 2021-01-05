@@ -9,335 +9,235 @@
 </div>
 
 <div mat-dialog-content style="padding-top: 40px;">
-  
-  <button mat-flat-button class="w3-block w3-section" color="primary" (click)="close()"
-    routerLink="/main/login/signUp">
+
+  <button mat-flat-button class="w3-block w3-section" color="primary" (click)="close()" routerLink="/main/login/signUp">
     Soy nuevo
   </button>
-  <button mat-stroked-button class="w3-block" color="primary" (click)="close()"
-    routerLink="/main/login/signIn">
+  <button mat-stroked-button class="w3-block" color="primary" (click)="close()" routerLink="/main/login/signIn">
     Ya tengo cuenta
   </button>
 </div>
 
-
-<!--table style="width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; border-collapse: collapse; 
-                      border: solid 1px #828282;">
-            <thead style="background-image: linear-gradient(90deg, #018EFB 0%, #270059 100%);">
-                <tr>                     
-                    <th style="padding: 10px 0; font-size: 1.3rem;">
-                        <h3 style="color: white; text-decoration: none;" >¡Gracias por tu compra!</h3>
-                    </th>
-                    <th style="padding: 10px 0; ">
-                        <img style="display: block; width: 150px; margin: 0 auto;" src="https://firebasestorage.googleapis.com/v0/b/aitec-ecommerce.appspot.com/o/logo%2Flogo-white.png?alt=media&token=b6c2f740-5bc5-4bb9-a956-d6f146e49c12" />
-                    </th>
-                </tr>
-            </thead>
-            <tbody>               
-                <tr>
-                    <td style="color: #828282;" colspan="6"  >
-                      <p style=" text-align: left; font-size: 13px; margin-left: 10px;">
-                        Tu pedido ha sido recibido y ahora está siendo procesado. Si deseas comunicarte con tu asesor puedes comunicarte al 999 999 999 o al correo [Correo del asesor].
-                      </p>
-                    </td>
-                </tr> 
-
-                <tr>
-                    <td style="color: #000;" colspan="6"  >
-                      <h2 style=" text-align: left; margin-left: 20px;">
-                        Información del pedido
-                      </h2>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 0;" colspan="6">
-                        <table style="color: #000; margin-left: 20px; " >
-                            <tr >
-                                <td style="color: #555555; padding-top: 5px;  font-weight: bold;">
-                                    Pedido:  
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;" >
-                                    {{correlative}}                                                                  
-                                </td>                   
-                                <td rowspan="5">
-                                    <img style="display: block; width: 200px; " src="https://firebasestorage.googleapis.com/v0/b/aitec-ecommerce.appspot.com/o/icon%2FOnline_shopping.png?alt=media&token=5617b79b-9e36-4396-89a1-0408a8c833fc" />
-
-                                </td>
-                            </tr>
-                            
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;">
-                                    Fecha de pedido:  
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                    {{date}}                         
-                                </td> 
-                            </tr>
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                    Costo total:
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                    {{costo}}                         
-                                </td> 
-                            </tr>
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                    Metodo de pago:   
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                    {{payment}}                        
-                                </td> 
-                            </tr>
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                    Estado de pedido:  
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                    Pendiente                         
-                                </td> 
-                            </tr>
-                            
-                        </table>
-                            
-                    </td>
-                </tr>
-
-
-               
-                <tr>
-                    <td style="color: #000; margin-left: 20px;" colspan="6" >                        
-                        <hr style="margin-left: 20px; margin-right: 20px;">
-                    </td>                   
-                </tr>
-
-                <tr>
-                    <td style="color: #000;" colspan="6" >
-                      <h2 style=" text-align: left; margin-left: 20px;">
-                        Datos de facturación
-                      </h2>
-                    </td>
-                </tr> 
-
-                
-                <tr>
-                    <td style="padding-bottom: 10px;" colspan="6">
-                        <table style="color: #000; margin-left: 20px; " >
-                            <tr >
-                                <td style="color: #555555; padding-top: 5px;  font-weight: bold;">
-                                    Tipo de comprobante:    
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;" >
-                                    {{document}}                                                                 
-                                </td>        
-                               
-                            </tr>
-                            
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;">
-                                    DNI :  
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                    {{info.dni}}
-                                </td> 
-                            </tr>
-                            <tr>
-                                <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                    Nombre: 
-                                </td>    
-                                <td style="color: #000; padding-top: 5px;">
-                                  {{info.name}}                       
-                                </td> 
-                            </tr>
-                            <tr>
-                              <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;">
-                                  RUC:  
-                              </td>    
-                              <td style="color: #000; padding-top: 5px;">
-                                 {{info.ruc}}
-                              </td> 
-                          </tr>
-                          <tr>
-                              <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                  Razón social: 
-                              </td>    
-                              <td style="color: #000; padding-top: 5px;">
-                                {{info.name}}                          
-                              </td> 
-                          </tr>
-                          <tr>
-                            <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                Dirección: 
-                            </td>    
-                            <td style="color: #000; padding-top: 5px;">
-                                {{info.address}}                        
-                            </td> 
-                        </tr>
-                        </table>
-                              
-                    </td>                   
-                </tr>
-                
-                <tr>
-                    <td style="color: #000; margin-left: 20px;" colspan="6" >                        
-                        <hr style="margin-left: 20px; margin-right: 20px;">
-                    </td>                   
-                </tr>
-
-                <tr>
-                    <td style="color: #000; padding-top: 0; margin: 0;" colspan="6" >
-                      <h2 style=" text-align: left; margin-left: 20px;">
-                        Datos de envío
-                      </h2>
-                    </td>
-                </tr> 
-
-                <tr>
-                    <td  colspan="6">
-                    <table style="color: #000; margin-left: 20px; " >
-                        <tr >
-                            <td style="color: #555555; padding-top: 5px;  font-weight: bold;">
-                                Departamento:    
-                            </td>    
-                            <td style="color: #000; padding-top: 5px;" >
-                                Arequipa                                                                 
-                            </td>        
-                           
-                        </tr>
-                        
-                        <tr>
-                            <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;">
-                                Distrito:   
-                            </td>    
-                            <td style="color: #000; padding-top: 5px;">
-                                Cercado
-                            </td> 
-                        </tr>
-                        <tr>
-                            <td style="color: #555555; padding-top: 5px; font-weight: bold;">
-                                Dirección: 
-                            </td>    
-                            <td style="color: #000; padding-top: 5px;">
-                                XXXXXXXXXXXXXXXXXXXXXXXXXXX                         
-                            </td> 
-                        </tr>                        
-                       
-                    </table>                                                 
-                    </td>                   
-                </tr>
-
-                <tr>
-                    <td style="color: #000; margin-left: 20px;" colspan="6" >                        
-                        <hr style="margin-left: 20px; margin-right: 20px;">
-                    </td>                   
-                </tr>
-
-                <tr>
-                    <td style="padding-bottom: 10px;  text-align: center; padding-top: 20px;" colspan="6" >
-                        <table class="default">
-
-                            <tr>                          
-                              <td>
-                                <h4 style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 50px; display: inline;">
-                                    Producto 
-                                </h4> 
-                              </td>
-                          
-                              <td>
-                                <h4 style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 50px; display: inline;">
-                                    Costo:  
-                                </h4> 
-                              </td>
-                          
-                              <td>
-                                <h4 style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 10px; display: inline;">
-                                    Cantidad
-                                </h4> 
-                              </td>                          
-                              <td>
-                                <h4 style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 10px; display: inline;">
-                                    Total
-                                </h4>  
-                              </td>                          
-                            </tr>
-                          
-                            <tr>                          
-                              <td><p style="color: #000; display: inline;margin-left: 20px; " >{{this.product.description}}</p>  </td>
-                              <td><p style="color: #000; display: inline;" >S/ {{this.price}}</p> </td>
-                              <td><p style="color: #000; display: inline; text-align: center;" >{{this.quantity}}</p></td>
-                              <td><p style="color: #000; display: inline; " >S/{{this.subtotal}}</p></td>
-                            </tr>                          
-                          </table>                           
-                    </td>                   
-                </tr>
-
-                <tr>
-                    <td style="color: #000; margin-left: 20px;" colspan="6" >                        
-                        <hr style="margin-left: 20px; margin-right: 20px;">
-                    </td>                   
-                </tr>
-                
-                <tr>
-                    <td colspan="6">
-                        <div style=" text-align: end;">
-                        <table style="margin: 0 auto; margin-right: 100px;">
-
-                            <tr>                                                          
-                                <td style="color: #555555; padding: 0px;  "> Subtotal:</td>
-                                <td style="color: #555555; padding: 0px;  ">S/{{subtotal}} </td>                              
-                            </tr>
-                            <tr>                                                          
-                                <td style="color: #555555; padding: 0px;  ">Envio:</td>
-                                <td style="color: #555555; padding: 0px;  ">S/{{envio}} </td>                              
-                            </tr>
-                            <tr>                                                          
-                                <td style="color: #555555; padding: 0px;  "> IGV:</td>
-                                <td style="color: #555555; padding: 0px;  ">S/{{igv}} </td>                              
-                            </tr>
-                            <tr>                                                          
-                                <td style="color: #000;; padding: 0px;  ">Total:</td>
-                                <td style="color: #000; padding: 0px;  ">S/{{total}} </td>                              
-                            </tr>
-                            
-                          </table>                           
-                        </div>
-                    </td>                   
-                </tr>
-              
-
-                <tr>
-                    <td style="color: #1c31ea; margin-left: 20px;" colspan="6" >                        
-                        <hr style="margin-left: 20px; margin-right: 20px;">
-                    </td>                   
-                </tr>
-            </tbody>
-            
-            <tfoot >
-                <tr>
-                    <td colspan="6" style="text-align:center">
-                        <h3 style="color: black;"
-                        > Evalúa tu experiencia de compra en Aitec
-                        </h3>
-                    </td>   
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align:center">
-                        <p style="color: #828282; margin-left: 20px; margin-right: 20px; margin-top: 0; margin-bottom: 0;"
-                        > Puedes calificar tu experiencia de compra y dejarnos tus comentarios. Tu reseña no es es útil para poder mejorar nuestro servicio.
-                        </p>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="6" style="text-align:center">
-                        <br/><br/>
-
-                    <a style="text-decoration: none; color: white; background-color: #1c31ea; padding: 10px 35px; border-radius: 10px; margin-top: 0;"
-                        href="#"
-                        > Calificar la compra</a>
-                      <br/><br/>
-  
-                    </td>
-                </tr>
-            </tfoot>
-        </table-->
+<!--table
+  style="width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; border-collapse: collapse;                        border: solid 1px #828282;">
+  <thead style="background-image: linear-gradient(90deg, #018EFB 0%, #270059 100%);">
+    <tr>
+      <th style="padding: 10px 0; font-size: 1.3rem;">
+        <h3 style="color: white; text-decoration: none;">¡Gracias por tu compra!</h3>
+      </th>
+      <th style="padding: 10px 0; "> <img style="display: block; width: 150px; margin: 0 auto;"
+          src="https://firebasestorage.googleapis.com/v0/b/aitec-ecommerce.appspot.com/o/logo%2Flogo-white.png?alt=media&token=b6c2f740-5bc5-4bb9-a956-d6f146e49c12" />
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="color: #828282;" colspan="6">
+        <p style=" text-align: left; font-size: 13px; margin-left: 10px;"> Tu pedido ha sido recibido y ahora está
+          siendo procesado. {{#if asesor}} Si deseas comunicarte con tu asesor puedes comunicarte al {{asesor.phone}} o
+          al correo {{asesor.email}}. {{/if}} </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #000;" colspan="6">
+        <h2 style=" text-align: left; margin-left: 20px;"> Información del pedido </h2>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 0;" colspan="6">
+        <table style="color: #000; margin-left: 20px; ">
+          <tr>
+            <td style="color: #555555; padding-top: 5px;  font-weight: bold;"> Pedido: </td>
+            <td style="color: #000; padding-top: 5px;"> {{correlative}} </td>
+            <td rowspan="5"> <img style="display: block; width: 200px; "
+                src="https://firebasestorage.googleapis.com/v0/b/aitec-ecommerce.appspot.com/o/icon%2FOnline_shopping.png?alt=media&token=5617b79b-9e36-4396-89a1-0408a8c833fc" />
+            </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;"> Fecha de pedido:
+            </td>
+            <td style="color: #000; padding-top: 5px;"> {{date}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Costo total: </td>
+            <td style="color: #000; padding-top: 5px;"> S/. {{total}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Metodo de pago: </td>
+            <td style="color: #000; padding-top: 5px;"> {{payment}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Estado de pedido: </td>
+            <td style="color: #000; padding-top: 5px;"> Pendiente </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #000; margin-left: 20px;" colspan="6">
+        <hr style="margin-left: 20px; margin-right: 20px;">
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #000;" colspan="6">
+        <h2 style=" text-align: left; margin-left: 20px;"> Datos de facturación </h2>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 10px;" colspan="6">
+        <table style="color: #000; margin-left: 20px; ">
+          <tr>
+            <td style="color: #555555; padding-top: 5px;  font-weight: bold;"> Tipo de comprobante: </td>
+            <td style="color: #000; padding-top: 5px;"> {{document}} </td>
+          </tr> {{#if boleta}} <tr>
+            <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;"> DNI : </td>
+            <td style="color: #000; padding-top: 5px;"> {{info.dni}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Nombre: </td>
+            <td style="color: #000; padding-top: 5px;"> {{info.name}} </td>
+          </tr> {{/if}} {{#if factura}} <tr>
+            <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;"> RUC: </td>
+            <td style="color: #000; padding-top: 5px;"> {{info.ruc}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Razón social: </td>
+            <td style="color: #000; padding-top: 5px;"> {{info.name}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Dirección: </td>
+            <td style="color: #000; padding-top: 5px;"> {{info.address}} </td>
+          </tr> {{/if}}
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #000; margin-left: 20px;" colspan="6">
+        <hr style="margin-left: 20px; margin-right: 20px;">
+      </td>
+    </tr>  
+    <tr>
+      <td style="color: #000; padding-top: 0; margin: 0;" colspan="6">
+        <h2 style=" text-align: left; margin-left: 20px;"> Datos de envío </h2>
+      </td>
+    </tr>
+    {{#if isDelivery}}
+    <tr>
+      <td colspan="6">
+        <table style="color: #000; margin-left: 20px; ">
+          <tr>
+            <td style="color: #555555; padding-top: 5px;  font-weight: bold;"> Departamento: </td>
+            <td style="color: #000; padding-top: 5px;"> {{location.departamento}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px;  margin-right: 10px; font-weight: bold;"> Distrito: </td>
+            <td style="color: #000; padding-top: 5px;"> {{location.distrito}} </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; padding-top: 5px; font-weight: bold;"> Dirección: </td>
+            <td style="color: #000; padding-top: 5px;"> {{location.address}} </td>
+          </tr>
+        </table>
+      </td>
+    </tr> {{/if}} 
+    <tr>
+      <td style="color: #000; margin-left: 20px;" colspan="6">
+        <hr style="margin-left: 20px; margin-right: 20px;">
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 10px;  text-align: center; padding-top: 20px;" colspan="6">
+        <table class="default">
+          <tr>
+            <td>
+              <h4
+                style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 50px; display: inline;">
+                Producto </h4>
+            </td>
+            <td>
+              <h4
+                style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 50px; display: inline;">
+                Costo: </h4>
+            </td>
+            <td>
+              <h4
+                style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 10px; display: inline;">
+                Cantidad </h4>
+            </td>
+            <td>
+              <h4
+                style="color: #555555; text-align: left; margin-left: 20px; margin-top: 0; margin-right: 10px; display: inline;">
+                Total </h4>
+            </td>
+          </tr> {{#each order}} <tr>
+            <td>
+              <p style="color: #000; display: inline;margin-left: 20px; ">{{this.product.description}}</p>
+            </td>
+            <td>
+              <p style="color: #000; display: inline;">S/ {{this.price}}</p>
+            </td>
+            <td>
+              <p style="color: #000; display: inline; text-align: center;">{{this.quantity}}</p>
+            </td>
+            <td>
+              <p style="color: #000; display: inline; ">S/{{this.subtotal}}</p>
+            </td>
+          </tr> {{/each}}
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #000; margin-left: 20px;" colspan="6">
+        <hr style="margin-left: 20px; margin-right: 20px;">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6">
+        <div style=" text-align: end;">
+          <table style="margin: 0 auto; margin-right: 100px;">
+            <tr>
+              <td style="color: #555555; padding: 0px;  "> Subtotal:</td>
+              <td style="color: #555555; padding: 0px;  ">S/{{subtotal}} </td>
+            </tr>
+            <tr>
+              <td style="color: #555555; padding: 0px;  ">Envio:</td>
+              <td style="color: #555555; padding: 0px;  ">S/{{envio}} </td>
+            </tr>
+            <tr>
+              <td style="color: #555555; padding: 0px;  "> IGV:</td>
+              <td style="color: #555555; padding: 0px;  ">S/{{igv}} </td>
+            </tr>
+            <tr>
+              <td style="color: #000;; padding: 0px;  ">Total:</td>
+              <td style="color: #000; padding: 0px;  ">S/{{total}} </td>
+            </tr>
+          </table>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="color: #1c31ea; margin-left: 20px;" colspan="6">
+        <hr style="margin-left: 20px; margin-right: 20px;">
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="6" style="text-align:center">
+        <h3 style="color: black;"> Evalúa tu experiencia de compra en Aitec </h3>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6" style="text-align:center">
+        <p style="color: #828282; margin-left: 20px; margin-right: 20px; margin-top: 0; margin-bottom: 0;"> Puedes
+          calificar tu experiencia de compra y dejarnos tus comentarios. Tu reseña no es es útil para poder mejorar
+          nuestro servicio. </p>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6" style="text-align:center"> <br /><br /> <a
+          style="text-decoration: none; color: white; background-color: #1c31ea; padding: 10px 35px; border-radius: 10px; margin-top: 0;"
+          href="#"> Calificar la compra</a> <br /><br /> </td>
+    </tr>
+  </tfoot>
+</table-->
