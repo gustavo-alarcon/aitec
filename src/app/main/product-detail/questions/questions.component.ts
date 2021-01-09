@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
 import { Questions } from '../../../core/models/questions.model';
 import { QuestionsService } from '../../../core/services/questions.service';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
@@ -28,11 +28,25 @@ export class QuestionsComponent implements OnInit {
   public searchProductId:any = [];
 
   @Input() idProduct:string;
+           
   @Input() nameProduct:string;
 
   public question ={} as Questions;
 
   public formQuestionSubmit=false;
+
+  ngOnChanges(changes: SimpleChanges) {     
+
+    /* 
+    this.idProduct = changes['idProduct'].currentValue;
+    this.nameProduct = changes['nameProduct'].currentValue;
+     */   
+
+    this.ngOnInit();
+  }
+
+ 
+
 
 
   constructor(
@@ -41,18 +55,19 @@ export class QuestionsComponent implements OnInit {
     public authService:AuthService,
     public afs: AngularFirestore,     
     private pushService: PushService,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
 
     ) { 
     
-       this.questionForm = this.formbuilder.group({
-      question:['',Validators.required]
-    });
+        this.questionForm = this.formbuilder.group({
+          question:['',Validators.required]
+        });
     
 
   }
- 
+
   ngOnInit(): void {
+
     
     this.questionsService.getQuestions(this.idProduct).subscribe(
       (questions:any) =>      
@@ -71,7 +86,6 @@ export class QuestionsComponent implements OnInit {
     return this.questionForm.controls;
     
   }
-  messageSnackbar:string='hola mundo';
 
   openSnackBar(){
     this.snackbar.open('Su pregunta fue enviada. En breve la respuesta', 'Cerrar', {
@@ -81,7 +95,8 @@ export class QuestionsComponent implements OnInit {
   }
   
   saveQuestion(){
-    
+
+
     this.questionForm.markAsPristine();
     this.questionForm.markAsUntouched();
 
@@ -253,5 +268,7 @@ export class QuestionsComponent implements OnInit {
         }
       )
   }
+
+
 
 }

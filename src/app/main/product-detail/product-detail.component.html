@@ -1,6 +1,7 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
 <div style="position: relative;">
   <div class="ms-container" style="position: relative;padding-top: 16px;" *ngIf="product$ | async as product">
+  
     <div style="padding:16px 0">
       <a class="bradcumb" routerLink="/main">Inicio</a> >
       <a class="bradcumb" routerLink="/main/productos">Productos</a>
@@ -34,11 +35,11 @@
         </div>
       </ngx-slick-carousel>
     </div>
-    <div class="w3-section">
+
+    <div class="w3-section" ng-chang>
       <h4 class="product__subtitle">Consultas sobre el producto</h4>
   
-      <app-questions [idProduct]="product.id" [nameProduct]="product.description"></app-questions>
-  
+      <app-questions  [idProduct]="product.id" [nameProduct]="product.description"></app-questions>
     </div>
   </div>
   <div class="layoout" *ngIf="loading$ | async">
