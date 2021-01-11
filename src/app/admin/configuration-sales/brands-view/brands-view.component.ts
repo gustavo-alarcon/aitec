@@ -20,7 +20,9 @@ export class BrandsViewComponent implements OnInit {
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
-  constructor(private dialog: MatDialog, private dbs: DatabaseService) { }
+  constructor(
+    private dialog: MatDialog, 
+    public dbs: DatabaseService) { }
 
   ngOnInit(): void {
     this.init$ = this.dbs.getBrands().pipe(

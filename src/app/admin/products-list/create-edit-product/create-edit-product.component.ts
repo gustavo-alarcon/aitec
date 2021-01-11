@@ -321,6 +321,7 @@ export class CreateEditProductComponent implements OnInit {
           this.secondFormGroup.get('colors').disable()
         } else {
           this.secondFormGroup.get('colors').enable()
+          this.itemsFormArray.clear()
         }
         return res
       })

@@ -83,6 +83,7 @@
 
 @media (max-width: 600px) {
   .product {
+    max-height: 300px;
     &__star {
       &--icon {
         height: 24px;

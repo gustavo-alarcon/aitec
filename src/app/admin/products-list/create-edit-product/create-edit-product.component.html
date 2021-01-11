@@ -138,7 +138,8 @@
                 </mat-option>
               </mat-autocomplete>
             </mat-form-field>
-            <!--mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox-->
+            <ng-container *ngIf="noColor$ | async"></ng-container>
+            <mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox>
           </div>
         </div>
         <div class="w3-row-padding w3-margin-top">
