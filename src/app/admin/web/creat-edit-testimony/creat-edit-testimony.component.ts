@@ -226,7 +226,7 @@ export class CreatEditTestimonyComponent implements OnInit {
     }
 
     if (this.createForm.get('rating').value != this.data.data.message) {
-      update['rating'] = this.createForm.get('message').value
+      update['rating'] = this.createForm.get('rating').value
     }
 
     if (photo) {

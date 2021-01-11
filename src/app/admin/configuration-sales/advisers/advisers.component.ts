@@ -11,24 +11,22 @@ import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.compo
 import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/payment-method-dialog.component';
 
 @Component({
-  selector: 'app-general',
-  templateUrl: './general.component.html',
-  styleUrls: ['./general.component.scss']
+  selector: 'app-advisers',
+  templateUrl: './advisers.component.html',
+  styleUrls: ['./advisers.component.scss']
 })
-export class GeneralComponent implements OnInit {
+export class AdvisersComponent implements OnInit {
 
-  dataCouponSource = new MatTableDataSource();
-  displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'actions'];
+  dataAdviserSource = new MatTableDataSource();
+  displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'phone', 'actions'];
 
-  @ViewChild('couponPaginator', { static: false }) set content(
-    paginator1: MatPaginator
+  @ViewChild('adviserPaginator', { static: false }) set content2(
+    paginator2: MatPaginator
   ) {
-    this.dataCouponSource.paginator = paginator1;
+    this.dataAdviserSource.paginator = paginator2;
   }
-  initCoupon$: Observable<any>
 
-
-
+  initAdviser$: Observable<any>
 
   constructor(
     private dialog: MatDialog,
@@ -36,15 +34,16 @@ export class GeneralComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.initCoupon$ = this.dbs.getCoupons().pipe(
+    this.initAdviser$ = this.dbs.getAdvisers().pipe(
       tap((res) => {
-        this.dataCouponSource.data = res;
+        this.dataAdviserSource.data = res;
       })
     );
+
   }
 
-  openCupon(movil: boolean, data) {
-    this.dialog.open(CuponDialogComponent, {
+  openUser(movil: boolean, data) {
+    this.dialog.open(AsesoresDialogComponent, {
       data: {
         edit: movil,
         data: data
@@ -63,4 +62,5 @@ export class GeneralComponent implements OnInit {
       }
     })
   }
+
 }

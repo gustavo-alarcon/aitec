@@ -11,44 +11,43 @@ import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dia
 import { StoreDialogComponent } from '../dialogs/store-dialog/store-dialog.component';
 
 @Component({
-  selector: 'app-delivery-stores',
-  templateUrl: './delivery-stores.component.html',
-  styleUrls: ['./delivery-stores.component.scss']
+  selector: 'app-stores',
+  templateUrl: './stores.component.html',
+  styleUrls: ['./stores.component.scss']
 })
-export class DeliveryStoresComponent implements OnInit {
-  dataSource = new MatTableDataSource();
-  displayedColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'delivery', 'actions'];
+export class StoresComponent implements OnInit {
+  dataStoreSource = new MatTableDataSource();
+  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address','schedule', 'actions'];
 
-  @ViewChild('productsPaginator', { static: false }) set content(
+  @ViewChild('storePaginator', { static: false }) set content2(
     paginator1: MatPaginator
   ) {
-    this.dataSource.paginator = paginator1;
+    this.dataStoreSource.paginator = paginator1;
   }
 
-  init$: Observable<any>
-  
+  initStore$: Observable<any>
+
   constructor(
     private dialog: MatDialog,
     public dbs: DatabaseService
   ) { }
 
   ngOnInit(): void {
-    this.init$ = this.dbs.getDelivery().pipe(
+    this.initStore$ = this.dbs.getStores().pipe(
       tap((res) => {
-        this.dataSource.data = res;
+        this.dataStoreSource.data = res;
       })
     );
   }
 
-  openDialog(movil: boolean, data) {
-    this.dialog.open(DeliveryDialogComponent, {
+  openStoreDialog(movil: boolean, data) {
+    this.dialog.open(StoreDialogComponent, {
       data: {
         edit: movil,
         data: data
       }
     })
   }
-
 
   deleteDialog(id: string, type: string, title: string) {
     this.dialog.open(DeleteConfiDialogComponent, {
@@ -60,6 +59,4 @@ export class DeliveryStoresComponent implements OnInit {
       }
     })
   }
-
-
 }

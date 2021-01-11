@@ -71,6 +71,8 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
+  public openConfi:boolean = true
+
   constructor(
     private afs: AngularFirestore,
     private storage: AngularFireStorage,
@@ -90,6 +92,10 @@ export class DatabaseService {
   generalConfigDoc = this.afs
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
+
+  changeOpenSide(){
+    this.openConfi = !this.openConfi
+  }
 
   getOpening(): Observable<Array<{ opening: string; closing: string }>> {
     return this.afs
