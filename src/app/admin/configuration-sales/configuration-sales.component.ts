@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
   selector: 'app-configuration-sales',
@@ -16,9 +17,15 @@ export class ConfigurationSalesComponent implements OnInit {
   activeLink = this.links[0];
 
   loadingRouteConfig: boolean;
-  constructor() { }
+  sidenav:boolean = true
+  constructor(
+    public dbs: DatabaseService
+  ) { }
 
   ngOnInit(): void {
   }
 
+  toggleSidenav(): void{
+    !this.sidenav;
+  }
 }

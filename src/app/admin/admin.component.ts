@@ -14,6 +14,8 @@ export class AdminComponent implements OnInit {
 
   openedMenu: boolean = false;
 
+  confiOpenedFlag: boolean = false;
+
   constructor(
     public auth: AuthService,
     private dialog: MatDialog,
@@ -41,4 +43,14 @@ export class AdminComponent implements OnInit {
     }
     return name + ' ' + lastName
   }
+
+  confiOpened(): void{
+    this.confiOpenedFlag = true;
+  }
+
+  confiClosed(): void{
+    this.confiOpenedFlag = false;
+  }
+
+
 }

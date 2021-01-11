@@ -58,8 +58,9 @@ export class ToolbarWebComponent implements OnInit {
     ).pipe(
 
       map(([value, products]) => {
+        let prod = products.filter(p=>p.published)
         return value.length
-          ? products.filter(
+          ? prod.filter(
             (option) =>
               option['description'].toLowerCase().includes(value) ||
               option['sku'].toLowerCase().includes(value) ||
@@ -113,6 +114,7 @@ export class ToolbarWebComponent implements OnInit {
       queryParams: { promo: true },
     });
     this.toggleMenu()
+    this.closeSection() 
   }
 
   navigateProduct(product) {
@@ -124,6 +126,7 @@ export class ToolbarWebComponent implements OnInit {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);
     this.toggleMenu()
+    this.closeSection() 
   }
 
   navigateCategory(category, subcategory) {
@@ -131,6 +134,7 @@ export class ToolbarWebComponent implements OnInit {
     let sub = subcategory.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub]);
     this.toggleMenu()
+    this.closeSection() 
   }
 
   navigateSubCategory(category, subcategory, subsubcategory) {
@@ -139,6 +143,7 @@ export class ToolbarWebComponent implements OnInit {
     let subsub = subsubcategory.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub, subsub]);
     this.toggleMenu()
+    this.closeSection() 
   }
 
   navigateBrand(name) {
@@ -146,6 +151,7 @@ export class ToolbarWebComponent implements OnInit {
     this.router.navigate(['/main/productos'], {
       queryParams: { brand: name },
     });
+    this.closeSection() 
   }
 
   showSelectedUser(staff): string | undefined {

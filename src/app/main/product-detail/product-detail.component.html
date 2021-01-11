@@ -25,6 +25,7 @@
     </div>
     <app-web-view [product]="product"></app-web-view>
   
+<<<<<<< HEAD
     <div class="w3-section">
       <h4 class="product__subtitle">Productos similares</h4>
       <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
@@ -37,6 +38,10 @@
     </div>
 
     <div class="w3-section" ng-chang>
+=======
+    <app-product-category [category]="product.category"></app-product-category>
+    <div class="w3-section">
+>>>>>>> develop
       <h4 class="product__subtitle">Consultas sobre el producto</h4>
   
       <app-questions  [idProduct]="product.id" [nameProduct]="product.description"></app-questions>

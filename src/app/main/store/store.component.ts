@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PaginationInstance } from 'ngx-pagination';
-import { combineLatest, Observable } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, startWith, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -13,6 +13,9 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./store.component.scss'],
 })
 export class StoreComponent implements OnInit {
+
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
 
   category$: Observable<any>;
   config: PaginationInstance = {
@@ -51,73 +54,81 @@ export class StoreComponent implements OnInit {
     this.category$ = this.dbs.getCategories()
 
     this.products$ = combineLatest(
-      this.searchForm.valueChanges.pipe(startWith('')),
       this.route.params,
-      this.route.queryParams,
-      this.dbs.getProductsListValueChanges()
+      this.route.queryParams
     ).pipe(
-      map(([word, id, param, products]) => {
-        let state = 'nada'
-        let prods = products.filter(el => el.published)
-        let cat = ''
-        let sub = ''
-        let subsub = ''
+      switchMap(([id, param]) => {
+        this.loading.next(true)
+        return combineLatest(
+          this.searchForm.valueChanges.pipe(startWith('')),
+          this.dbs.getProductsListValueChanges()
+        ).pipe(
+          map(([word, products]) => {
 
-        let frag = null
-        let promo = false
-        let brand = null
+            let state = 'nada'
+            let prods = products.filter(el => el.published)
+            let cat = ''
+            let sub = ''
+            let subsub = ''
 
-        let listProd = []
+            let frag = null
+            let promo = false
+            let brand = null
 
-        if (param.search) {
-          this.search = param.search;
-          frag = param.search.toLowerCase()
-          state = 'frag'
-        }
+            let listProd = []
 
-        if (param.brand) {
-          console.log(param.brand);
+            if (param.search) {
+              this.search = param.search;
+              frag = param.search.toLowerCase()
+              state = 'frag'
+            }
 
-          this.searchBrand = param.brand;
-          brand = param.brand.toLowerCase().trim()
-          state = 'brand'
-        }
+            if (param.brand) {
+              console.log(param.brand);
 
-        if (param.promo) {
-          this.searchPromo = param.promo;
-          promo = true
-        }
+              this.searchBrand = param.brand;
+              brand = param.brand.toLowerCase().trim()
+              state = 'brand'
+            }
 
-        if (param.productos) {
-          listProd = param.productos.split('-')
-          state = 'productos'
-        }
+            if (param.promo) {
+              this.searchPromo = param.promo;
+              promo = true
+            }
 
-        if (id.id) {
-          cat = id.id.split('-').join(' ')
-          this.searchCategory = cat;
-          state = 'cat'
-        }
-        if (id.cat) {
-          sub = id.cat.split('-').join(' ')
-          this.searchSubCategory = sub;
-          state = 'sub'
-        }
-        if (id.sub) {
-          subsub = id.sub.split('-').join(' ')
-          this.searchSubSubCategory = subsub;
-          state = 'subsub'
-        }
+            if (param.productos) {
+              listProd = param.productos.split('-')
+              state = 'productos'
+            }
 
-        if (promo) {
-          return prods.filter((el) => el.promo)
-        } else {
+            if (id.id) {
+              cat = id.id.split('-').join(' ')
+              this.searchCategory = cat;
+              state = 'cat'
+            }
+            if (id.cat) {
+              sub = id.cat.split('-').join(' ')
+              this.searchSubCategory = sub;
+              state = 'sub'
+            }
+            if (id.sub) {
+              subsub = id.sub.split('-').join(' ')
+              this.searchSubSubCategory = subsub;
+              state = 'subsub'
+            }
 
-          return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag, listProd)
-        }
+            if (promo) {
+              return prods.filter((el) => el.promo)
+            } else {
 
+              return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag, listProd)
+            }
+
+          }),
+        )
       }),
       tap((res) => {
+        this.loading.next(false)
         this.products = res;
       })
     );
@@ -145,16 +156,16 @@ export class StoreComponent implements OnInit {
         );
         break;
       case 'cat':
-        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
+        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
         break;
       case 'sub':
-        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
-          .filter(el => el.subcategory.toLowerCase() == sub.toLowerCase())
+        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
+          .filter(el => el.subcategory.toLowerCase().trim() == sub.toLowerCase().trim())
         break;
       case 'subsub':
-        return prod.filter(el => el.category.toLowerCase() == cat.toLowerCase())
-          .filter(el => el.subcategory.toLowerCase() == sub.toLowerCase())
-          .filter(el => el.subsubcategory.toLowerCase() == subsub.toLowerCase())
+        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
+          .filter(el => el.subcategory.toLowerCase().trim() == sub.toLowerCase().trim())
+          .filter(el => el.subsubcategory?el.subsubcategory.toLowerCase().trim() == subsub.toLowerCase().trim():false)
         break;
 
       case 'productos':

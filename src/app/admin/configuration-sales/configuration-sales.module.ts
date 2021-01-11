@@ -41,6 +41,9 @@ import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
 import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
 import { PaymentMethodDialogComponent } from './dialogs/payment-method-dialog/payment-method-dialog.component';
+import { StoresComponent } from './stores/stores.component';
+import { AdvisersComponent } from './advisers/advisers.component';
+import { PaymentViewComponent } from './payment-view/payment-view.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +58,10 @@ import { PaymentMethodDialogComponent } from './dialogs/payment-method-dialog/pa
     BrandsViewComponent,
     CuponDialogComponent,
     AsesoresDialogComponent,
-    PaymentMethodDialogComponent
+    PaymentMethodDialogComponent,
+    StoresComponent,
+    AdvisersComponent,
+    PaymentViewComponent
   ],
   imports: [
     CommonModule,

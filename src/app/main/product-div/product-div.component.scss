@@ -3,6 +3,7 @@
   box-sizing: border-box;
   position: relative;
   cursor: pointer;
+  height: 400px;
   &__star {
     position: absolute;
     top: 0;
@@ -69,10 +70,20 @@
       line-height: 1.2em;
     }
   }
+  &__promo {
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    color: var(--primary-color);
+    font-size: 0.9em;
+    margin-top: 8px;
+    padding: 5px;
+    font-weight: bold;
+  }
 }
 
 @media (max-width: 600px) {
   .product {
+    max-height: 300px;
     &__star {
       &--icon {
         height: 24px;

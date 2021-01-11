@@ -6,7 +6,6 @@
   margin: auto;
 }
 
-
 .store__search {
   width: 250px;
   background-color: white;
@@ -35,7 +34,6 @@
   }
 }
 
-
 .categories__item .megadrop {
   opacity: 0;
   visibility: hidden;
@@ -46,7 +44,7 @@
   width: 800px;
   min-height: 100%;
   text-align: left;
-  margin-top:30px;
+  margin-top: 30px;
   background-color: white;
   padding: 0;
   z-index: 99;
@@ -60,6 +58,7 @@
 }
 
 .filtro {
+  text-transform: uppercase;
   &__panel {
     box-shadow: none;
   }
@@ -68,11 +67,11 @@
     height: 48px;
     border-bottom: 1px solid #c4c4c4;
     cursor: pointer;
-    font-weight: 500;
     padding: 0px 16px 0 10px;
+    font: 500 0.8em, "Helvetica Neue", sans-serif !important;
   }
 
-  &__sub{
+  &__sub {
     padding: 10px 0;
     cursor: pointer;
   }
@@ -81,25 +80,26 @@
     padding: 0px 10px;
     border-bottom: 1px solid #c4c4c4;
     border-radius: 0;
+    font-size: 0.85em;
   }
 
   &__panel .mat-expansion-panel-header.mat-expanded {
     /* height: 64px; */
-    border-left: 4px solid  #1c31ea;
+    border-left: 4px solid #1c31ea;
   }
 
   &__panel .mat-expansion-panel-header:hover {
     background-color: transparent;
   }
 
+  &__panel .mat-expansion-panel-content {
+    font: 500 0.8em, "Helvetica Neue", sans-serif;
+  }
+
   &__scroll {
     max-height: 28em;
     overflow: auto;
   }
-}
-
-::ng-deep .filtro__panel .mat-expansion-panel-body {
-  padding: 0 0 0 10px;
 }
 
 .category-button {

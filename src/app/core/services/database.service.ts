@@ -71,6 +71,8 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
+  public openConfi:boolean = true
+
   constructor(
     private afs: AngularFirestore,
     private storage: AngularFireStorage,
@@ -90,6 +92,10 @@ export class DatabaseService {
   generalConfigDoc = this.afs
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
+
+  changeOpenSide(){
+    this.openConfi = !this.openConfi
+  }
 
   getOpening(): Observable<Array<{ opening: string; closing: string }>> {
     return this.afs
@@ -291,6 +297,26 @@ export class DatabaseService {
       );
   }
 
+  getPaymentsChanges() {
+    return this.afs
+      .collection(`/db/aitec/config/generalConfig/payments`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getPaymentsDoc(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/config/generalConfig/payments`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
+
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
   getProductsList(): Observable<Product[]> {
@@ -326,6 +352,19 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
+  }
+
+  getProductsListByCategory(category:string): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.where('category', '==',category)
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
   }
 
   getWarehouseListValueChanges(): Observable<Product[]> {
@@ -502,21 +541,22 @@ export class DatabaseService {
   editProductPromo(
     productId: string,
     promo: boolean,
-    promoData: Product['promoData'] | Package['promoData'],
-    pack?: boolean
+    promoData: Product['promoData']
   ): firebase.default.firestore.WriteBatch {
     let productRef: DocumentReference;
     let batch = this.afs.firestore.batch();
 
     //Editting
     productRef = this.afs.firestore
-      .collection(pack ? this.packagesListRef : this.productsListRef)
+      .collection(this.productsListRef)
       .doc(productId);
     batch.update(productRef, {
       promo,
       promoData: {
         promoPrice: promoData.promoPrice,
         quantity: promoData.quantity,
+        offer: promoData.offer,
+        type: promoData.type
       },
     });
     return batch;
@@ -1073,31 +1113,31 @@ export class DatabaseService {
         shareReplay(1)
       );
   }
-
-  getPayments(): Observable<any> {
-    return this.afs
-      .collection(`/db/distoProductos/config`)
-      .doc('generalConfig')
-      .valueChanges()
-      .pipe(
-        map((res) => res['payments']),
-        map((res) => {
-          return res.sort((a, b) => {
-            const nameA = a.name;
-            const nameB = b.name;
-
-            let comparison = 0;
-            if (nameA > nameB) {
-              comparison = 1;
-            } else if (nameA < nameB) {
-              comparison = -1;
-            }
-            return comparison;
-          });
-        }),
-        shareReplay(1)
-      );
-  }
+  /*
+    getPayments(): Observable<any> {
+      return this.afs
+        .collection(`/db/distoProductos/config`)
+        .doc('generalConfig')
+        .valueChanges()
+        .pipe(
+          map((res) => res['payments']),
+          map((res) => {
+            return res.sort((a, b) => {
+              const nameA = a.name;
+              const nameB = b.name;
+  
+              let comparison = 0;
+              if (nameA > nameB) {
+                comparison = 1;
+              } else if (nameA < nameB) {
+                comparison = -1;
+              }
+              return comparison;
+            });
+          }),
+          shareReplay(1)
+        );
+    }*/
 
   getConfiUsers(): Observable<User[]> {
     return this.afs
@@ -1385,15 +1425,17 @@ export class DatabaseService {
     return this.afs.firestore.runTransaction((transaction) => {
       let promises = []
       this.order.forEach((order, ind) => {
-        const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(order.product.sku);
+        console.log(order);
+
+        const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(order.product.id);
 
         promises.push(transaction.get(ref).then((prodDoc) => {
-
+          //let products = prodDoc.data().products
           let purchase = prodDoc.data().purchaseNumber ? prodDoc.data().purchaseNumber + order.quantity : order.quantity;
-          let newStock = prodDoc.data().realStock - order.quantity;
+          //let newStock = prodDoc.data().virtualStock - order.quantity;
 
           transaction.update(ref, {
-            realStock: newStock,
+            //virtualStock: newStock,
             purchaseNumber: purchase
           });
 
@@ -1408,27 +1450,56 @@ export class DatabaseService {
       })
       return Promise.all(promises);
     }).then(res => {
+      console.log(res);
 
-      localStorage.removeItem(this.uidUser)
+      //localStorage.removeItem(this.uidUser)
       return this.saveSale(user, newSale, phot)
 
-      
 
-    }).catch(() => {
+
+    }).catch((error) => {
       //this.snackBar.open('Error de conexión, no se completo la compra, intentelo de nuevo', 'cerrar')
-
+      console.log("Transaction failed: ", error);
 
     })
 
   }
 
   saveSale(user: User, newSale, phot?: any) {
+    console.log('here');
 
     const saleCount = this.afs.firestore.collection(`/db/aitec/config/`).doc('generalConfig');
     const saleRef = this.afs.firestore.collection(`/db/aitec/sales`).doc();
     const emailRef = this.afs.firestore.collection(`/mail`).doc();
 
     newSale.id = saleRef.id
+    let newOrder = [...this.order].map(ord => {
+      ord['subtotal'] = ord.price * ord.quantity
+      return ord
+    })
+
+
+
+    let mess = {
+      order: newOrder,
+      correlative: '#R',
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
+      payment: newSale.payType.name,/*metodo de pago*/
+      document: newSale.document,/*boleta/facturacion*/
+      boleta: newSale.idDocument == 1,
+      factura: newSale.idDocument == 2,
+      info: newSale.documentInfo,/*document info*/
+      subtotal: (newSale.total * 0.82).toFixed(2),
+      igv: (newSale.total * 0.18).toFixed(2),
+      envio: newSale.deliveryPrice.toFixed(2),
+      total: newSale.total.toFixed(2),
+      asesor: newSale.adviser,
+      deliveryType: newSale.deliveryType,
+      location: newSale.deliveryInfo,
+      isDelivery: newSale.idDelivery == 1,
+      isStore: newSale.idDelivery == 2,
+      store: newSale.deliveryInfo
+    }
 
     if (phot) {
       let photos = [...phot.data.map(el => this.uploadPhotoVoucher(newSale.id, el))]
@@ -1458,15 +1529,12 @@ export class DatabaseService {
             transaction.update(saleCount, { salesCounter: newCorr });
 
             newSale.correlative = newCorr
-
+            mess.correlative = '#R' + ("000" + newCorr).slice(-4)
             let message = {
               to: [user.email],
               template: {
                 name: 'pedidoUser',
-                data: {
-                  order: this.order,
-                  correlative: '#R' + ("000" + newCorr).slice(-4)
-                }
+                data: mess
               }
             }
 
@@ -1496,24 +1564,13 @@ export class DatabaseService {
           transaction.update(saleCount, { salesCounter: newCorr });
 
           newSale.correlative = newCorr
-
+          mess.correlative = '#R' + ("000" + newCorr).slice(-4)
 
           let message = {
             to: ['mocharan@meraki-s.com'],
             template: {
               name: 'pedidoUser',
-              data: {
-                order: this.order,
-                correlative: '#R' + ("000" + newCorr).slice(-4),
-                date:'',
-                payment:'',/*metodo de pago*/
-                document:'',/*boleta/facturacion*/
-                info:'',/*document info*/
-                subtotal:0,
-                igv:0,
-                envio:0,
-                total:0
-              }
+              data: mess
             }
           }
 

@@ -11,6 +11,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 export class ProductDivComponent implements OnInit {
   
   @Input() product: Product
+  @Input() price: Product
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
   constructor(
