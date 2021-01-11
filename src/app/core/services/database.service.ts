@@ -1571,4 +1571,29 @@ export class DatabaseService {
       );
   }
 
+  // User
+  getUserListValueChanges(): Observable<User[]> {
+    return this.afs
+      .collection<User>(`/users/`)
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  editCustomerType(user: User, customerType: string ) {
+    const userRef = this.afs.firestore.collection(`/users/`).doc(user.uid);
+    const batch = this.afs.firestore.batch();
+
+    user.customerType=customerType;
+
+    batch.update(userRef,user);
+          
+    batch.commit().then(
+      ref => {
+       
+      }
+    );  
+  }
+
+
+
 }

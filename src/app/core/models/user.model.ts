@@ -1,6 +1,9 @@
 export interface User {
   uid?: string;
   email: string;
+  role?:string;
+  customerType?:string;
+  orders?:number;
   location?: {
     address: string;
     reference: string;
