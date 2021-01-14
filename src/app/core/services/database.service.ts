@@ -1662,7 +1662,8 @@ export class DatabaseService {
       const password='testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
       
       var auth = 'Basic ' + btoa(username + ":" + password);
-      var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
+      //var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
+       var url = "/api-payment/V4/Charge/CreatePayment";
 
       const httpOptions = {
         headers: new HttpHeaders({
