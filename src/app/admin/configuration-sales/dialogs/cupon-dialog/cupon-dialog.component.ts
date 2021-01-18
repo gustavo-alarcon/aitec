@@ -1,5 +1,5 @@
 import { AngularFirestore } from '@angular/fire/firestore';
-import { startWith, map, take, takeLast, switchMap, filter } from 'rxjs/operators';
+import { startWith, map, take, takeLast, switchMap, filter, debounceTime } from 'rxjs/operators';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Observable, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { Component, OnInit, Inject } from '@angular/core';
@@ -14,9 +14,11 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 })
 export class CuponDialogComponent implements OnInit {
 
+  types: Array<any> = [{ id: 1, name: 'En soles' }, { id: 2, name: 'Porcentaje' }]
   redirects: Array<string> = ['Toda la compra', 'Categoría/subcategoría', 'Marca']
   category$: Observable<string[]>
   brand$: Observable<any>
+  name$: Observable<any>
 
   loading = new BehaviorSubject<boolean>(false)
   loading$ = this.loading.asObservable()
@@ -36,14 +38,22 @@ export class CuponDialogComponent implements OnInit {
 
   ngOnInit() {
     this.createForm = this.fb.group({
-      discount: [this.data.edit ? this.data.data.discount : null, [Validators.required,Validators.min(0)]],
+      discount: [this.data.edit ? this.data.data.discount : null, [Validators.required, Validators.min(0)]],
       name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]],
       brand: [this.data.edit ? this.data.data.brand : null],
       category: [this.data.edit ? this.data.data.category : null],
-      start: [null, Validators.required],
-      end: [null, Validators.required],
-      redirectTo:[this.data.edit ? this.data.data.redirectTo : null, Validators.required]
+      type: [this.data.edit ? this.data.data.type : null, Validators.required],
+      limit: [this.data.edit ? this.data.data.limit : null],
+      start: [null],
+      end: [null],
+      limitDate: [this.data.edit ? this.data.data.limitDate :false],
+      redirectTo: [this.data.edit ? this.data.data.redirectTo : null, Validators.required]
     })
+
+    this.name$ = this.createForm.get('name').valueChanges.pipe(
+      debounceTime(500),
+      map(el => el.trim())
+    )
 
     this.category$ = combineLatest(
       this.createForm.get('category').valueChanges.pipe(
@@ -96,6 +106,17 @@ export class CuponDialogComponent implements OnInit {
   onSubmitForm() {
     this.createForm.markAsPending();
     this.createForm.disable()
+
+    if (this.createForm.get('limitDate').value) {
+      let startDate = this.createForm.get('start').value
+      let endDate = this.createForm.get('end').value
+      if (!startDate || !endDate) {
+        this.snackBar.open('Ponga Fecha', 'Cerrar', {
+          duration: 6000,
+        });
+        return;
+      }
+    }
     this.loading.next(true)
 
     if (this.data.edit) {
@@ -110,7 +131,6 @@ export class CuponDialogComponent implements OnInit {
       .collection(`/db/aitec/coupons`)
       .doc(this.createForm.get('name').value);
 
-    
     const batch = this.afs.firestore.batch();
 
     let newCoupon = {
@@ -120,10 +140,13 @@ export class CuponDialogComponent implements OnInit {
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
-      startDate: this.createForm.get('start').value,
-      endDate: this.createForm.get('end').value,
+      startDate: this.createForm.get('limitDate').value ? this.createForm.get('start').value : null,
+      endDate: this.createForm.get('limitDate').value ? this.createForm.get('end').value : null,
+      limitDate: this.createForm.get('limitDate').value,
+      limit: this.createForm.get('limit').value,
+      type: this.createForm.get('type').value,
       createdAt: new Date(),
-      count:0
+      count: 0
     }
 
     batch.set(productRef, newCoupon);
@@ -150,8 +173,11 @@ export class CuponDialogComponent implements OnInit {
       discount: this.createForm.get('discount').value,
       category: this.createForm.get('category').value,
       brand: this.createForm.get('brand').value,
-      startDate: this.createForm.get('start').value,
-      endDate: this.createForm.get('end').value
+      startDate: this.createForm.get('limitDate').value ? this.createForm.get('start').value : null,
+      endDate: this.createForm.get('limitDate').value ? this.createForm.get('end').value : null,
+      limit: this.createForm.get('limit').value,
+      limitDate: this.createForm.get('limitDate').value,
+      type: this.createForm.get('type').value
     }
 
     batch.update(productRef, newCoupon);
@@ -163,6 +189,10 @@ export class CuponDialogComponent implements OnInit {
         duration: 6000,
       });
     });
+  }
+
+  onKeydown(event) {
+    return event.keyCode != 32;
   }
 
   nameRepeatedValidator(data) {

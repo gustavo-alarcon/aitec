@@ -21,7 +21,7 @@ export class QuantityDivComponent implements OnInit {
 
   quantityForm = new FormControl(null);
   constructor(
-    public dbs: DatabaseService, 
+    public dbs: DatabaseService,
     private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
@@ -31,7 +31,7 @@ export class QuantityDivComponent implements OnInit {
   ngOnChanges() {
     this.quantity$ = this.dbs.orderObs$.pipe(
       map((order) => {
-        let index = order.length? order.findIndex(el => el['chosenProduct']['sku'] == this.chosen['sku']):-1
+        let index = order.length ? order.findIndex(el => el['chosenProduct']['sku'] == this.chosen['sku']) : -1
         if (index >= 0) {
           let orderProduct = order[index];
           return orderProduct['quantity'];
@@ -54,7 +54,7 @@ export class QuantityDivComponent implements OnInit {
       quantity: 1,
       chosenProduct: this.chosen,
       color: this.color,
-      price:this.product.priceMin
+      price: this.price
     };
     this.dbs.order.push(newproduct);
     this.dbs.orderObs.next(this.dbs.order);

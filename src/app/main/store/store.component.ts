@@ -61,7 +61,7 @@ export class StoreComponent implements OnInit {
         this.loading.next(true)
         return combineLatest(
           this.searchForm.valueChanges.pipe(startWith('')),
-          this.dbs.getProductsListValueChanges()
+          this.dbs.getProductsList()
         ).pipe(
           map(([word, products]) => {
 
@@ -84,8 +84,6 @@ export class StoreComponent implements OnInit {
             }
 
             if (param.brand) {
-              console.log(param.brand);
-
               this.searchBrand = param.brand;
               brand = param.brand.toLowerCase().trim()
               state = 'brand'
@@ -117,6 +115,8 @@ export class StoreComponent implements OnInit {
               state = 'subsub'
             }
 
+            console.log(state);
+            
             if (promo) {
               return prods.filter((el) => el.promo)
             } else {
@@ -169,9 +169,6 @@ export class StoreComponent implements OnInit {
         break;
 
       case 'productos':
-        console.log('here');
-        console.log(listProd);
-
         return prod.filter(el => listProd.includes(el.id))
         break;
       default:

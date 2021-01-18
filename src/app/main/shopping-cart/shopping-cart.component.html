@@ -34,7 +34,7 @@
             Método de Pago
           </button>
           <ng-template #thirdButton>
-            <button mat-button class="button--desactive" [disabled]="chooseDelivery$ | async"  (click)="thirdView()">
+            <button mat-button class="button--desactive" [disabled]="chooseDelivery$ | async" (click)="thirdView()">
               <mat-icon>request_page</mat-icon>
               Método de Pago
             </button>
@@ -97,25 +97,25 @@
               Por favor registra tus datos y verifícalos
             </h4>
             <form [formGroup]="formGroup" class="w3-margin-top">
-              <mat-form-field  class="w3-block" appearance="outline">
+              <mat-form-field class="w3-block" appearance="outline">
                 <mat-label>Departamento</mat-label>
-                <mat-select disableRipple  formControlName="departamento">
+                <mat-select disableRipple formControlName="departamento">
                   <mat-option *ngFor="let dept of places" (click)="selectProvincias(dept)" [value]="dept">
                     {{ dept.departamento | titlecase }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-form-field  class="w3-block" appearance="outline">
+              <mat-form-field class="w3-block" appearance="outline">
                 <mat-label>Provincia</mat-label>
-                <mat-select disableRipple  formControlName="provincia">
+                <mat-select disableRipple formControlName="provincia">
                   <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option">
                     {{ option.provincia | titlecase }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-form-field  class="w3-block" appearance="outline">
+              <mat-form-field class="w3-block" appearance="outline">
                 <mat-label>Distrito</mat-label>
-                <mat-select disableRipple  formControlName="distrito">
+                <mat-select disableRipple formControlName="distrito">
                   <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option">
                     {{ option.distrito | titlecase }}
                   </mat-option>
@@ -160,13 +160,13 @@
                         <hr style="margin: 0" />
                       </div>
                     </div>
-  
+
                     <div class="w3-padding w3-center">
                       <button mat-button color="primary" (click)="openMap(user,0, false)">
                         Agregar dirección
                       </button>
                     </div>
-  
+
                   </mat-card-content>
                 </mat-card>
               </div>
@@ -186,7 +186,7 @@
                     </div>
                   </mat-card-content>
                 </mat-card>
-  
+
               </div>
             </div>
           </mat-card>
@@ -385,7 +385,7 @@
                   {{prod.product.description}}
                 </div>
                 <div style="width: 25%">
-                  S/. {{getPrice(prod) | number:'.2'}}
+                  {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
                 </div>
 
               </div>
@@ -424,18 +424,19 @@
             <div style="display: flex; margin-top: 20px;justify-content: space-between;">
               <div><strong>Total a pagar:</strong></div>
               <div class="ticket__total">
-                S/. {{ sum$ | async }}
+                S/. {{ totalAll$ | async }}
               </div>
             </div>
           </div>
           <div *ngIf="(view$|async) == 1">
             <p class="resume__small">*El costo del delivery se agregará despues de registrar el método de entrega</p>
-            <div class="w3-margin-bottom">
+            <div class="w3-margin-bottom" *ngIf="initCoupon$ | async">
               <h4 class="resume__subtitle">Tengo un código de descuento</h4>
               <div class="email-form background-color w3-margin-top">
-                <input matInput type="text" autocomplete="off" class="email-form__input" style="border: none" />
+                <input matInput type="text" autocomplete="off" [formControl]="couponForm" class="email-form__input"
+                  style="border: none" />
 
-                <button mat-button class="email-form__button">
+                <button mat-button class="email-form__button" (click)="getDiscountCoupon()">
                   <mat-icon>refresh</mat-icon>
                 </button>
               </div>
@@ -458,7 +459,7 @@
               <p class="resume__small">*El Nombre o correo de tu asesor ayudará a que podamos hacer mejor seguimiento a
                 tu pedido</p>
             </div>
-            <div class="resume__title w3-section">Total: S/. {{ sum$ | async }}</div>
+            <div class="resume__title w3-section">Total: S/. {{ totalAll$ | async }}</div>
             <div class="w3-center w3-margin-bottom">
               <button mat-raised-button (click)="secondView()" color="primary" class="resume__button">Continuar</button>
             </div>
@@ -476,7 +477,7 @@
               </p>
             </div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button [disabled]="chooseDelivery$ | async"  (click)="thirdView()" color="primary"
+              <button mat-raised-button [disabled]="chooseDelivery$ | async" (click)="thirdView()" color="primary"
                 class="resume__button">Generar orden de
                 pedido</button>
             </div>
@@ -486,7 +487,7 @@
             <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
               Compra</button>
           </div>
-          
+
         </div>
       </div>
     </div>

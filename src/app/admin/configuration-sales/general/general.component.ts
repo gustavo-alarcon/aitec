@@ -6,9 +6,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
-import { AsesoresDialogComponent } from '../dialogs/asesores-dialog/asesores-dialog.component';
 import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.component';
-import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/payment-method-dialog.component';
 
 @Component({
   selector: 'app-general',
@@ -18,7 +16,7 @@ import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/p
 export class GeneralComponent implements OnInit {
 
   dataCouponSource = new MatTableDataSource();
-  displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'actions'];
+  displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'count', 'actions'];
 
   @ViewChild('couponPaginator', { static: false }) set content(
     paginator1: MatPaginator

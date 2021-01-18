@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith, take, tap } from 'rxjs/operators';
+import { Sale } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -21,18 +22,25 @@ export class ShoppingCartComponent implements OnInit {
   view = new BehaviorSubject<number>(1);
   view$ = this.view.asObservable();
 
+  discount = new BehaviorSubject<string>('0.00');
+  discount$ = this.discount.asObservable();
+
   list$: Observable<any>;
   sum$: Observable<string>;
-  discount$: Observable<string>;
   subtotal$: Observable<string>;
   igv$: Observable<string>;
   delivery$: Observable<any>;
+  totalAll$: Observable<string>;
 
   products: Array<any>;
   total: number = 0
 
   adviserForm: FormControl = new FormControl('')
   advisers$: Observable<any>;
+
+  initCoupon$: Observable<any>
+  couponList: Array<any> = []
+  couponForm: FormControl = new FormControl('')
 
   user: User
 
@@ -119,11 +127,14 @@ export class ShoppingCartComponent implements OnInit {
       })
     )
     this.products = this.dbs.order;
-    this.sum$ = combineLatest(this.dbs.orderObs$, this.dbs.delivery$).pipe(
+    this.sum$ = combineLatest(
+      this.dbs.orderObs$,
+      this.dbs.delivery$
+    ).pipe(
       map(([ord, del]) => {
         if (ord.length) {
           let suma = [...ord]
-            .map((el) => this.getPrice(el))
+            .map((el) => this.giveProductPrice(el))
             .reduce((a, b) => a + b, 0);
           this.total = suma + del;
           return (suma + del).toFixed(2);
@@ -133,30 +144,30 @@ export class ShoppingCartComponent implements OnInit {
       })
     );
 
-
-    this.subtotal$ = this.dbs.orderObs$.pipe(
-      map((ord) => {
-        return [...ord]
-          .map((el) => el.quantity * el.product.priceMin * 0.82)
-          .reduce((a, b) => a + b, 0).toFixed(2);
+    this.totalAll$ = combineLatest(
+      this.sum$,
+      this.discount$
+    ).pipe(
+      map(([sum, dis]) => {
+        return (Number(sum) - Number(dis)).toFixed(2)
+      }),
+      tap(res => {
+        this.total = Number(res)
       })
-    );
+    )
 
-    this.igv$ = this.dbs.orderObs$.pipe(
-      map((ord) => {
-        return [...ord]
-          .map((el) => el.quantity * el.product.priceMin * 0.18)
-          .reduce((a, b) => a + b, 0).toFixed(2);
+    this.subtotal$ = this.sum$.pipe(
+      map(sum => {
+        return (Number(sum) * 0.82).toFixed(2)
       })
-    );
+    )
 
-    this.discount$ = this.dbs.orderObs$.pipe(
-      map((ord) => {
-        return [...ord]
-          .map((el) => this.getDiscount(el))
-          .reduce((a, b) => a + b, 0).toFixed(2);
+    this.igv$ = this.sum$.pipe(
+      map(sum => {
+        return (Number(sum) * 0.18).toFixed(2)
       })
-    );
+    )
+
 
     this.advisers$ = combineLatest(
       this.adviserForm.valueChanges.pipe(
@@ -166,12 +177,19 @@ export class ShoppingCartComponent implements OnInit {
     ).pipe(
 
       map(([value, advisers]) => {
+
         let filt = typeof value == 'object' ? value.displayName : value
         return advisers.filter((el) =>
           value ? el['displayName'].toLowerCase().includes(filt.toLowerCase()) : true
         );
       })
     );
+
+    this.initCoupon$ = this.dbs.getCoupons().pipe(
+      tap(res => {
+        this.couponList = res
+      })
+    )
 
     /*Delivery*/
     this.initDelivery$ = combineLatest(
@@ -269,10 +287,10 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   //Debuging start
-  pruebaPasarela(){
+  pruebaPasarela() {
 
   }
-   //Debuging end
+  //Debuging end
 
   firstView() {
     this.view.next(1);
@@ -326,7 +344,7 @@ export class ShoppingCartComponent implements OnInit {
         store: this.delivery == 2 ? this.stores[this.selectedStore] : null
       }
 
-      let newSale = {
+      let newSale: Sale = {
         id: '',
         correlative: 0,
         correlativeType: 'R',
@@ -377,18 +395,61 @@ export class ShoppingCartComponent implements OnInit {
 
   }
 
-  getPrice(item) {
+
+
+  giveProductPrice(item): number {
     if (item.product.promo) {
-      return item.product.promoData.promoPrice * item.quantity;
-    } else {
-      return item.price * item.quantity;
+      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+      let noPromTotalPrice = noPromTotalQuantity * item.price;
+      return promTotalPrice + noPromTotalPrice;
+    }
+    else {
+      return item.quantity * item.price
     }
   }
 
   getDiscount(item) {
-    let promoPrice = this.getPrice(item);
-    let realPrice = item.quantity * item.price;
-    return realPrice - promoPrice;
+    return 0;
+  }
+
+  getDiscountCoupon() {
+    let value = this.couponForm.value
+    if (value) {
+      this.couponForm.disable()
+      let ind = this.couponList.findIndex(el => el.name == value)
+      if (ind >= 0) {
+        let coupon = this.couponList[ind]
+        let today = new Date()
+        let validDate = today.getTime() >= coupon.startDate.toMillis() && today.getTime() <= coupon.endDate.toMillis()
+        if (validDate) {
+          if (coupon.type == 1) {
+            this.discount.next(coupon.discount.toFixed(2))
+          } else {
+            let disc = this.total * (coupon.discount / 100)
+            if (coupon.limit > 0) {
+              if (disc > coupon.limit) {
+                this.discount.next(coupon.limit.toFixed(2))
+              } else {
+                this.discount.next(disc.toFixed(2))
+              }
+            } else {
+              this.discount.next(disc.toFixed(2))
+            }
+          }
+        } else {
+          this.snackbar.open('Código expirado', 'Aceptar');
+        }
+        this.couponForm.setValue('')
+      } else {
+        this.snackbar.open('Código de descuento incorrecto', 'Aceptar');
+
+      }
+
+      this.couponForm.enable()
+    }
+
   }
 
   showAdviser(staff): string | undefined {

@@ -165,7 +165,7 @@ export class CustomerComponent implements OnInit {
     this.dbs.editCustomerType(user,customerType);
   }
   changeRetailer(user:User){
-    const customerType='Menorista';
+    const customerType='Minorista';
     this.dbs.editCustomerType(user,customerType);
   }
 

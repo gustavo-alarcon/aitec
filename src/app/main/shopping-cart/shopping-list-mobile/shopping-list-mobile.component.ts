@@ -44,13 +44,17 @@ export class ShoppingListMobileComponent implements OnInit {
   }
 
 
-  givePrice(item) {
+  giveProductPrice(item): number {
     if (item.product.promo) {
-      return item.product.promoData.promoPrice
-    } else {
-      return item.product.priceMin
+      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+      let noPromTotalPrice = noPromTotalQuantity * item.price;
+      return promTotalPrice + noPromTotalPrice;
+    }
+    else {
+      return item.quantity * item.price
     }
   }
-
 
 }
