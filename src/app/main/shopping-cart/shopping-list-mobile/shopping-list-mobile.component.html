@@ -3,8 +3,8 @@
   <div *ngFor="let element of order | paginate: config; let ind = index">
     <div>
       <div class="product ms-flex ms-flex--center">
-          <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]['photoURL']" [offset]="100" class="border--primary"
-          class="product__image"/>
+        <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]['photoURL']"
+          [offset]="100" class="border--primary" class="product__image" />
         <div class="product__big">
           <h4 class="product__name">
             {{ element["product"]["description"] | titlecase }}
@@ -20,20 +20,22 @@
         </div>
         <span class="ms-fill"></span>
         <div class="product__small w3-hide-small">
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']" [color]="element['color']" size="md"></app-quantity-div>        
-          <p class="product__price" >
-            S/. {{ givePrice(element) | number: ".2" }}
+          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
+            [price]="element['price']" [color]="element['color']" size="md"></app-quantity-div>
+          <p class="product__price">
+            {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
           </p>
         </div>
       </div>
       <div class="w3-padding w3-hide-large w3-hide-medium" style="display: flex; align-items: flex-end">
         <div>
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']" [color]="element['color']" size="md"></app-quantity-div>
+          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
+            [color]="element['color']" [price]="element['price']" size="md"></app-quantity-div>
         </div>
         <span class="ms-fill"></span>
         <div class="w3-right-align w3-margin-top">
           <div class="product__price">
-            S/. {{ givePrice(element) | number: ".2" }}
+            {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
           </div>
         </div>
       </div>

@@ -311,39 +311,7 @@ export class SalesDetailComponent implements OnInit {
               //If we are editting it (deshacer), and we are returning from
               //confirmedDocument to confirmedRequest, we should refill the 
               //lost stock
-              if(newStatus==this.saleStatusOptions.attended){
-                if(edit){
-                  this.dbs.saveRealStock(this.sale.requestedProducts,false).then((res)=>{
-                    console.log('deshacer');
-                    list=res
-                    save=true
-                  })
-                }else{
-                  this.dbs.saveRealStock(this.sale.requestedProducts,true).then((res)=>{
-                    console.log('atendido');
-                    list=res
-                    save=true
-                  })
-                }
-                
-              }
-
-              
-              if (newStatus == this.saleStatusOptions.cancelled) {
-                if(this.sale.status==this.saleStatusOptions.attended){
-                  this.dbs.unsaveRealStock(this.sale.requestedProducts,true).then((res)=>{
-                    console.log('atendido-anulado');
-                    list=res
-                    save=true
-                  })
-                }else{
-                  this.dbs.unsaveRealStock(this.sale.requestedProducts,false).then((res)=>{
-                    console.log('solicitado-atendido');
-                    list=res
-                    save=true
-                  })
-                }
-              }
+             
               // //If we are editting it (deshacer), and we are returning from
               // //confirmedDelivery to confirmedDocument, we should refill the 
               // //lost stock

@@ -3,7 +3,7 @@
   <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
     <div ngxSlickItem *ngFor="let slide of prods" class="slide">
       <div style="padding:0 8px">
-        <app-product-div [product]="slide" [price]="0"></app-product-div>
+        <app-product-div [product]="slide"></app-product-div>
       </div>
     </div>
   </ngx-slick-carousel>

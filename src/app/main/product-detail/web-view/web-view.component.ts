@@ -17,6 +17,9 @@ import { NoLoginDialogComponent } from '../no-login-dialog/no-login-dialog.compo
 })
 export class WebViewComponent implements OnInit {
   @Input() product: Product
+  @Input() price: number
+  @Input() promo: boolean
+  
   selectImage: any
   galleryImg: Array<any>
 
@@ -47,11 +50,10 @@ export class WebViewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('web');
     this.favorite$ = this.auth.user$.pipe(
       map(user => {
-        if (user) {  
-          let ind = user.favorites?user.favorites.indexOf(this.product.id):-1
+        if (user) {
+          let ind = user.favorites ? user.favorites.indexOf(this.product.id) : -1
           return ind == 0 ? ind + 2 : ind
         } else {
           return -1
@@ -60,7 +62,7 @@ export class WebViewComponent implements OnInit {
     )
   }
 
-  ngOnChanges(){
+  ngOnChanges() {
     this.selected.setValue(this.product.products[0])
     this.changeColor$ = this.selected.valueChanges.pipe(
       startWith(this.product.products[0]),
@@ -71,7 +73,7 @@ export class WebViewComponent implements OnInit {
       })
     )
 
-   
+
 
   }
 
@@ -101,7 +103,6 @@ export class WebViewComponent implements OnInit {
       })
 
       batch.commit().then(() => {
-        console.log('save');
         this.loadingFav.next(false)
         this.snackBar.open('Agregado a favoritos', 'Cerrar', {
           duration: 6000,
@@ -117,7 +118,7 @@ export class WebViewComponent implements OnInit {
       let ref = this.afs.firestore.collection(`/users`).doc(user.uid);
       let exist = user.favorites
       let ind = exist.indexOf(this.product.id)
-      exist.splice(ind,1)
+      exist.splice(ind, 1)
       batch.update(ref, {
         favorites: exist
       })
@@ -132,10 +133,19 @@ export class WebViewComponent implements OnInit {
     })
   }
 
-  login(){
-    this.dialog.open(NoLoginDialogComponent,{
-      width:'300px'
+  login() {
+    this.dialog.open(NoLoginDialogComponent, {
+      width: '300px'
     })
+  }
+
+  getDiscount(promo) {
+    let price = this.price
+    let moneyDisccount: number = 0
+    let percentageDisccount: number = 0
+    moneyDisccount = (price * promo.quantity - promo.promoPrice);
+    percentageDisccount = (moneyDisccount / (price * promo.quantity)) * 100.0;
+    return Math.round(percentageDisccount)
   }
 
 }

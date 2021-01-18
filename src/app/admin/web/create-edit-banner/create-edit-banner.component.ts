@@ -72,6 +72,10 @@ export class CreateEditBannerComponent implements OnInit {
       product: [null]
     })
 
+    if(this.data.edit){
+      this.products = this.data.data.products
+    }
+
     this.products$ = combineLatest(
       this.createForm.get('product').valueChanges.pipe(
         startWith<any>(''),

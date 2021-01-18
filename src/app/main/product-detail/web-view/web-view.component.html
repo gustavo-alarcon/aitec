@@ -47,27 +47,27 @@
             </div>
           </ngx-slick-carousel>
         </div>
-       
-        <div *ngIf="product.promo && product.promoData.quantity == 1">
+
+        <div *ngIf="promo && product.promoData.quantity == 1">
           <div class=" big product__promo ms-flex">
             <div style="width: fit-content">
-              Antes <strike>{{ product.priceMin }}</strike>
+              Antes <strike>{{price | currency: 'S/. ':'symbol':'2.2-2'}}</strike>
             </div>
             <div class="product__promo--discount">
-              {{ product.promoData.offer }} % Dscto
+              {{ getDiscount(product.promoData) }} % Dscto
             </div>
           </div>
           <div class="product__price w3-section big">
             <span>Ahora</span>
             <span class="product__price--number">
-              S/. {{product.promoData.promoPrice | number: ".2"}}
+              {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
             </span>
           </div>
         </div>
-        <div *ngIf="!product.promo || product.promoData.quantity > 1">
+        <div *ngIf="!promo || product.promoData.quantity > 1">
           <div class="product__price w3-section big">
             <span class="product__price--number">
-              S/. {{product.priceMin | number: ".2"}}
+              {{price | currency: 'S/. ':'symbol':'2.2-2'}}
             </span>
           </div>
         </div>
@@ -84,38 +84,43 @@
           </mat-select>
         </mat-form-field>
         <div class="small">
-          <div *ngIf="product.promo && product.promoData.quantity == 1">
+          <div *ngIf="promo && product.promoData.quantity == 1">
             <div class="product__promo ms-flex">
               <div style="width: fit-content">
-                Antes <strike>{{ product.priceMin }}</strike>
+                Antes <strike>{{price | currency: 'S/. ':'symbol':'2.2-2'}}</strike>
               </div>
               <div class="product__promo--discount">
-                {{ product.promoData.offer }} % Dscto
+                {{ getDiscount(product.promoData) }} % Dscto
               </div>
             </div>
             <div class="product__price w3-section">
               <span>Ahora</span>
               <span class="product__price--number">
-                S/. {{product.promoData.promoPrice | number: ".2"}}
+                {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
               </span>
             </div>
           </div>
-          <div *ngIf="!product.promo || product.promoData.quantity > 1">
+          <div *ngIf="!promo || product.promoData.quantity > 1">
             <div class="product__price w3-section">
               <span class="product__price--number">
-                S/. {{product.priceMin | number: ".2"}}
+                {{price | currency: 'S/. ':'symbol':'2.2-2'}}
               </span>
             </div>
           </div>
-          
+
         </div>
-        <div *ngIf="product.promo && product.promoData.quantity > 1" class="w3-center product__promoDiv">
-          OFERTA: {{product.promoData.quantity}} x S/.
-          {{product.promoData.promoPrice | number: '.2'}}
+        <div *ngIf="promo && product.promoData.quantity > 1" class="w3-center product__promoDiv">
+          OFERTA: {{product.promoData.quantity}} x {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
         </div>
-        <div class="product__stock">
-          {{ productSelected.stock }} Unidades disponibles
+        <div class="product__stock" *ngIf="productSelected.stock==1;else stock">
+          Último stock disponible
         </div>
+        <ng-template #stock>
+          <div class="product__stock">
+            {{ productSelected.stock }} Unidades disponibles
+          </div>
+        </ng-template>
+
         <div class="w3-section">
           <div>Paga con:</div>
           <div class="ms-flex w3-section" style="justify-content: space-around">
@@ -129,8 +134,8 @@
         <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
-            <app-quantity-div [product]="product" [chosen]="productSelected" [color]="product.products.length > 1"
-              size="md"></app-quantity-div>
+            <app-quantity-div [product]="product" [price]="price" [chosen]="productSelected"
+              [color]="product.products.length > 1" size="md"></app-quantity-div>
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"

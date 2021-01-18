@@ -3,7 +3,7 @@
     <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
       <mat-icon>keyboard_return</mat-icon>
     </button>
-    <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.5em;">
+    <h2 style="font-size:1.5em;">
       Cupones
     </h2>
   </div>
@@ -30,9 +30,9 @@
       </ng-container>
 
       <ng-container class="w3-center" matColumnDef="discount">
-        <th *matHeaderCellDef class="w3-center">Descuento (%)</th>
+        <th *matHeaderCellDef class="w3-center">Descuento</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
-          {{ element['discount'] }}
+          <span *ngIf="element['type']==1">S/ .</span> {{ element['discount'] }} <span *ngIf="element['type']==2"> %</span>
         </td>
       </ng-container>
 
@@ -47,6 +47,12 @@
         <th *matHeaderCellDef class="w3-center">Descuento en: </th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['redirectTo'] }}
+        </td>
+      </ng-container>
+      <ng-container class="w3-center" matColumnDef="count">
+        <th *matHeaderCellDef class="w3-center">Usados </th>
+        <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
+          {{ element['count'] }}
         </td>
       </ng-container>
       <ng-container class="w3-center" matColumnDef="actions" sticky>

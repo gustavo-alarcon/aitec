@@ -77,7 +77,7 @@
           <div class="w3-row ms-row" style="min-height: 80vh" *ngIf="products.length;else noData">
             <div *ngFor="let product of products | paginate: config" class="w3-col col-sm-4 col-xs-6  w3-margin-bottom">
               <div style="padding:0 8px">
-                <app-product-div [product]="product" [price]="0"></app-product-div>
+                <app-product-div [product]="product"></app-product-div>
               </div>
             </div>
           </div>

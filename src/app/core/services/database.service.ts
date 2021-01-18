@@ -55,6 +55,8 @@ export class DatabaseService {
   public orderObs$ = this.orderObs.asObservable();
 
   public uidUser: string = ''
+  public isMayUser = new BehaviorSubject<boolean>(false);
+  public isMayUser$ = this.isMayUser.asObservable();
 
   public changeStock = new BehaviorSubject<any>([]);
   public changeStock$ = this.changeStock.asObservable();
@@ -71,7 +73,7 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
-  public openConfi:boolean = true
+  public openConfi: boolean = true
 
   constructor(
     private afs: AngularFirestore,
@@ -93,7 +95,7 @@ export class DatabaseService {
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
 
-  changeOpenSide(){
+  changeOpenSide() {
     this.openConfi = !this.openConfi
   }
 
@@ -354,10 +356,10 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  getProductsListByCategory(category:string): Observable<Product[]> {
+  getProductsListByCategory(category: string): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
-        ref.where('category', '==',category)
+        ref.where('category', '==', category)
       )
       .get()
       .pipe(
@@ -766,14 +768,6 @@ export class DatabaseService {
     return upload$;
   }
 
-  getProductRecipesValueChanges(productId: string): Observable<Recipe[]> {
-    return this.afs
-      .collection<Recipe>(this.recipesRef, (ref) =>
-        ref.where('productsId', 'array-contains', productId)
-      )
-      .valueChanges();
-  }
-
   getSalesUser(user: string): Observable<Sale[]> {
     return this.afs
       .collection<Sale>(`/db/aitec/sales`, (ref) =>
@@ -782,136 +776,7 @@ export class DatabaseService {
       .valueChanges();
   }
 
-  //Logistics
-  getBuysCorrelativeValueChanges(): Observable<number> {
-    return this.getGeneralConfigDoc().pipe(
-      map((res) => {
-        if (res) {
-          if (res.hasOwnProperty('buysCounter')) {
-            return res.buysCounter + 1;
-          } else {
-            return 0;
-          }
-        } else {
-          return 0;
-        }
-      }),
-      shareReplay(1)
-    );
-  }
 
-  getBuyRequests(date: { begin: Date; end: Date }): Observable<Buy[]> {
-    return this.afs
-      .collection<Buy>(this.buysRef, (ref) =>
-        ref
-          .where('requestedDate', '<=', date.end)
-          .where('requestedDate', '>=', date.begin)
-      )
-      .valueChanges()
-      .pipe(map((res) => res.sort((a, b) => b.correlative - a.correlative)));
-  }
-
-  createEditBuyRequest(
-    request: Buy,
-    requestedProducts: BuyRequestedProduct[],
-    edit: boolean,
-    oldBuyRequest: Buy
-  ): Promise<void> {
-    let configRef: DocumentReference = this.afs.firestore
-      .collection(this.configRef)
-      .doc('generalConfig');
-
-    let buyRef: DocumentReference = !edit
-      ? this.afs.firestore.collection(this.buysRef).doc()
-      : this.afs.firestore.collection(this.buysRef).doc(oldBuyRequest.id);
-
-    let buyData: Buy = request;
-    buyData.id = buyRef.id;
-
-    let requestedProductRef: DocumentReference;
-    let requestedProductData: BuyRequestedProduct;
-
-    let batch = this.afs.firestore.batch();
-
-    if (edit) {
-      //adding docs for requested products
-      requestedProducts.forEach((product) => {
-        requestedProductRef = this.afs.firestore
-          .collection(this.buysRef + `/${buyRef.id}/buyRequestedProducts`)
-          .doc(product.id);
-        requestedProductData = product;
-        requestedProductData.buyId = buyRef.id;
-        batch.set(requestedProductRef, requestedProductData);
-      });
-      //deleting deleted products
-      let deletedProducts = oldBuyRequest.requestedProducts.filter(
-        (el) => !request.requestedProducts.find((el2) => el2 == el)
-      );
-      deletedProducts.forEach((productId) => {
-        requestedProductRef = this.afs.firestore
-          .collection(this.buysRef + `/${buyRef.id}/buyRequestedProducts`)
-          .doc(productId);
-        batch.delete(requestedProductRef);
-      });
-      //buy data
-      batch.set(buyRef, buyData);
-
-      return batch.commit();
-    } else {
-      return this.afs.firestore.runTransaction((transaction) => {
-        // This code may get re-run multiple times if there are conflicts.
-        return transaction.get(configRef).then((sfDoc) => {
-          //adding docs for requested products
-          requestedProducts.forEach((product) => {
-            requestedProductRef = this.afs.firestore
-              .collection(this.buysRef + `/${buyRef.id}/buyRequestedProducts`)
-              .doc(product.id);
-            requestedProductData = product;
-            requestedProductData.buyId = buyRef.id;
-            transaction.set(requestedProductRef, requestedProductData);
-          });
-
-          //counter
-          if (!sfDoc.exists) {
-            transaction.set(configRef, { buysCounter: 1 }, { merge: true });
-          } else {
-            let config = <GeneralConfig>sfDoc.data();
-
-            if (!config.hasOwnProperty('buysCounter')) {
-              transaction.set(configRef, { buysCounter: 1 }, { merge: true });
-              buyData.correlative = 1;
-              transaction.set(buyRef, buyData);
-            } else {
-              transaction.update(configRef, {
-                buysCounter: config.buysCounter + 1,
-              });
-              buyData.correlative = config.buysCounter + 1;
-              transaction.set(buyRef, buyData);
-            }
-          }
-        });
-      });
-    }
-  }
-
-  getBuyRequestedProducts(request: string): Observable<BuyRequestedProduct[]> {
-    return this.afs
-      .collection<BuyRequestedProduct>(
-        this.buysRef + `/${request}/buyRequestedProducts`,
-        (ref) => ref.orderBy('productDescription')
-      )
-      .valueChanges();
-  }
-
-  getVirtualStock(product: Product): Observable<BuyRequestedProduct[]> {
-    return this.afs
-      .collectionGroup<BuyRequestedProduct>('buyRequestedProducts', (ref) =>
-        ref.where('id', '==', product.id).where('validated', '==', false)
-      )
-      .valueChanges();
-  }
-
-  //Sales
   getSales(date: { begin: Date; end: Date }): Observable<Sale[]> {
     let real = {
       begin: new Date(date.begin),
@@ -1088,56 +953,6 @@ export class DatabaseService {
       return batch
   }*/
 
-  //configuracion
-  getDistricts(): Observable<any> {
-    return this.afs
-      .collection(`/db/distoProductos/config`)
-      .doc('generalConfig')
-      .valueChanges()
-      .pipe(
-        map((res) => res['districts']),
-        map((res) => {
-          return res.sort((a, b) => {
-            const nameA = a.name;
-            const nameB = b.name;
-
-            let comparison = 0;
-            if (nameA > nameB) {
-              comparison = 1;
-            } else if (nameA < nameB) {
-              comparison = -1;
-            }
-            return comparison;
-          });
-        }),
-        shareReplay(1)
-      );
-  }
-  /*
-    getPayments(): Observable<any> {
-      return this.afs
-        .collection(`/db/distoProductos/config`)
-        .doc('generalConfig')
-        .valueChanges()
-        .pipe(
-          map((res) => res['payments']),
-          map((res) => {
-            return res.sort((a, b) => {
-              const nameA = a.name;
-              const nameB = b.name;
-  
-              let comparison = 0;
-              if (nameA > nameB) {
-                comparison = 1;
-              } else if (nameA < nameB) {
-                comparison = -1;
-              }
-              return comparison;
-            });
-          }),
-          shareReplay(1)
-        );
-    }*/
 
   getConfiUsers(): Observable<User[]> {
     return this.afs
@@ -1149,10 +964,6 @@ export class DatabaseService {
   //NUEVO
 
   getProduct(id: string): Observable<Product> {
-    /*return this.afs
-      .doc<Product>(`${this.productsListRef}/${id}`)
-      .valueChanges()
-      .pipe(shareReplay(1));*/
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
         ref.where('sku', '==', id)
@@ -1165,241 +976,11 @@ export class DatabaseService {
       );
   }
 
-  getUnitProduct(id: string): Observable<Product> {
+  getProductObs(id: string): Observable<Product> {
     return this.afs
       .doc<Product>(`${this.productsListRef}/${id}`)
       .valueChanges()
       .pipe(shareReplay(1));
-  }
-
-  getPackage(id): Observable<Package> {
-    return this.afs
-      .doc<Package>(`${this.packagesListRef}/${id}`)
-      .valueChanges()
-      .pipe(shareReplay(1));
-  }
-
-  getItemsPackage(array) {
-    return this.afs
-      .collection<Product>(this.productsListRef, (ref) =>
-        ref.where('id', 'in', array)
-      )
-      .valueChanges()
-      .pipe(shareReplay(1));
-  }
-
-  getProductsListCategory(category): Observable<Product[]> {
-    return this.afs
-      .collection<Product>(this.productsListRef, (ref) =>
-        ref.where('category', '==', category)
-      )
-      .get()
-      .pipe(
-        map((snap) => {
-          return snap.docs.map((el) => <Product>el.data());
-        })
-      );
-  }
-
-  getPackagesListCategory(category): Observable<Package[]> {
-    return this.afs
-      .collection<Package>(this.packagesListRef, (ref) =>
-        ref.where('category', '==', category)
-      )
-      .get()
-      .pipe(
-        map((snap) => {
-          return snap.docs.map((el) => <Package>el.data());
-        })
-      );
-  }
-
-  getneworder(ord) {
-    let copy = [...ord];
-    let newOrder: any = [...copy].map((order) => {
-      if (order['chosenOptions']) {
-        return order['chosenOptions'].map((el) => {
-          return {
-            product: el,
-            quantity: 1 * order.quantity,
-          };
-        });
-      } else {
-        return [order];
-      }
-    });
-
-    let otherorder = [...newOrder]
-      .reduce((a, b) => a.concat(b), [])
-      .map((el, index, array) => {
-        let counter = 0;
-        let others = [];
-        let reduce = 0;
-        array.forEach((al) => {
-          if (al.product['id'] == el.product['id']) {
-            counter++;
-            others.push(al.quantity);
-          }
-        });
-        if (counter > 1) {
-          reduce = others.reduce((d, e) => d + e, 0);
-        } else {
-          reduce = el.quantity;
-        }
-
-        return {
-          product: el.product,
-          reduce: reduce,
-        };
-      })
-      .filter(
-        (dish, index, array) =>
-          array.findIndex((el) => el.product['id'] === dish.product['id']) ===
-          index
-      );
-
-    return otherorder;
-  }
-
-  saveTransaction(ord) {
-    return this.afs.firestore.runTransaction((transaction) => {
-      let promises = [];
-      ord.forEach((order, ind) => {
-        const sfDocRef = this.afs.firestore
-          .collection(`/db/distoProductos/productsList`)
-          .doc(order.product.id);
-
-        promises.push(
-          transaction
-            .get(sfDocRef)
-            .then((prodDoc) => {
-              let newStock = prodDoc.data().virtualStock - order.reduce;
-              if (newStock >= prodDoc.data().sellMinimum) {
-                return {
-                  isSave: true,
-                  index: ind,
-                };
-              } else {
-                return {
-                  isSave: false,
-                  stock:
-                    prodDoc.data().virtualStock - prodDoc.data().sellMinimum,
-                  index: ind,
-                };
-              }
-            })
-            .catch((error) => {
-              console.log('Transaction failed: ', error);
-              return {
-                isSave: false,
-                stock: null,
-                index: ind,
-              };
-            })
-        );
-      });
-      return Promise.all(promises);
-    });
-  }
-
-  saveRealStock(ord, sum: boolean) {
-    let newOrder = this.getneworder(ord);
-    return this.afs.firestore.runTransaction((transaction) => {
-      let promises = [];
-      newOrder.forEach((order, ind) => {
-        const sfDocRef = this.afs.firestore
-          .collection(`/db/distoProductos/productsList`)
-          .doc(order.product.id);
-
-        promises.push(
-          transaction
-            .get(sfDocRef)
-            .then((prodDoc) => {
-              if (sum) {
-                let newStock = prodDoc.data().realStock - order.reduce;
-                transaction.update(sfDocRef, { realStock: newStock });
-                if (newStock >= prodDoc.data().sellMinimum) {
-                  return {
-                    isSave: true,
-                    product: prodDoc.data().description,
-                  };
-                } else {
-                  return {
-                    isSave: false,
-                    product: prodDoc.data().id,
-                  };
-                }
-              } else {
-                let newStock = prodDoc.data().realStock + order.reduce;
-                transaction.update(sfDocRef, { realStock: newStock });
-                return {
-                  isSave: true,
-                  product: prodDoc.data().description,
-                };
-              }
-            })
-            .catch((error) => {
-              console.log('Transaction failed: ', error);
-              return {
-                isSave: false,
-                product: null,
-              };
-            })
-        );
-      });
-      return Promise.all(promises);
-    });
-  }
-
-  unsaveRealStock(ord, sum: boolean) {
-    let newOrder = this.getneworder(ord);
-    return this.afs.firestore.runTransaction((transaction) => {
-      let promises = [];
-      newOrder.forEach((order, ind) => {
-        const sfDocRef = this.afs.firestore
-          .collection(`/db/distoProductos/productsList`)
-          .doc(order.product.id);
-
-        promises.push(
-          transaction
-            .get(sfDocRef)
-            .then((prodDoc) => {
-              let newStock = prodDoc.data().realStock + order.reduce;
-              let newVirtualStock = prodDoc.data().virtualStock + order.reduce;
-              if (sum) {
-                transaction.update(sfDocRef, {
-                  realStock: newStock,
-                  virtualStock: newVirtualStock,
-                });
-              } else {
-                transaction.update(sfDocRef, { virtualStock: newVirtualStock });
-              }
-              return {
-                isSave: true,
-                product: prodDoc.data().description,
-              };
-            })
-            .catch((error) => {
-              console.log('Transaction failed: ', error);
-              return {
-                isSave: false,
-                product: null,
-              };
-            })
-        );
-      });
-      return Promise.all(promises);
-    });
-  }
-
-  getProductsEntry(date: { begin: Date; end: Date }) {
-    return this.afs
-      .collectionGroup<BuyRequestedProduct>('buyRequestedProducts', (ref) =>
-        ref
-          .where('requestedDate', '<=', date.end)
-          .where('requestedDate', '>=', date.begin)
-      )
-      .valueChanges();
   }
 
   getUserFinishedSales(user: User): Observable<Sale[]> {
@@ -1609,6 +1190,8 @@ export class DatabaseService {
   }
 
 
+
+  // User
   getUserDisplayName(userId: string): Observable<string> {
     return this.afs
       .collection(`/users`)
@@ -1628,7 +1211,6 @@ export class DatabaseService {
       );
   }
 
-  // User
   getUserListValueChanges(): Observable<User[]> {
     return this.afs
       .collection<User>(`/users/`)
@@ -1636,19 +1218,26 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  editCustomerType(user: User, customerType: string ) {
+  editCustomerType(user: User, customerType: string) {
     const userRef = this.afs.firestore.collection(`/users/`).doc(user.uid);
     const batch = this.afs.firestore.batch();
 
-    user.customerType=customerType;
+    user.customerType = customerType;
 
-    batch.update(userRef,user);
-          
+    batch.update(userRef, user);
+
     batch.commit().then(
       ref => {
-       
+
       }
-    );  
+    );
+  }
+
+  getOneCoupon(id) {
+    return this.afs
+      .doc(`/db/aitec/coupons/${id}`)
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
 

@@ -23,10 +23,6 @@ export class DeliveryDialogComponent implements OnInit {
   provincias: Array<any> = [];
   distritos: Array<any> = [];
 
-  filteredDepartamento$: Observable<any> = of([])
-  filteredProvincia$: Observable<any> = of([])
-  filteredDistrito$: Observable<any> = of([])
-
   init$: Observable<any>;
   provincias$: Observable<any>;
   distritos$: Observable<any>;
@@ -62,97 +58,21 @@ export class DeliveryDialogComponent implements OnInit {
       this.formGroup.get('distrito').disable();
     }
 
-    this.filteredDepartamento$ = this.formGroup
-      .get('departamento')
-      .valueChanges.pipe(
-        startWith(''),
-        map((value) => {
-          let val = typeof value == 'object' ? value['name'] : value
-          return this.departamentos.filter((el) =>
-            value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-          );
-        })
-      );
+   
 
-    this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
-      startWith(''),
-      map(dept => {
-        if (!this.data.edit) {
-          /*
-          if (this.formGroup.get('provincia').value) {
-            this.formGroup.get('provincia').setValue('')
-            this.formGroup.get('distrito').disable()
-          }*/
-
-          if (typeof dept === 'object') {
-            this.selectProvincias(dept)
-          }
-        }
-        return true
-      })
-    )
-
-    this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
-      startWith(''),
-      map(prov => {
-        if (!this.data.edit) {
-          if (prov && typeof prov === 'object') {
-            this.selectDistritos(prov)
-
-          }
-        } else {
-          this.selectDistritos(this.data.data.provincia)
-        }
-        return true
-      })
-    )
-    this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
-      startWith(''),
-      map((value) => {
-        let val = ''
-        if (value) {
-          val = typeof value == 'object' ? value['name'] : value
-        }
-        return this.provincias.filter((el) =>
-          val ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-        );
-      })
-    );
-
-    this.filteredDistrito$ = this.formGroup.get('distrito').valueChanges.pipe(
-      startWith(''),
-      map((value) => {
-        let val = ''
-        if (value) {
-          val = typeof value == 'object' ? value['name'] : value
-        }
-        return this.distritos.filter((el) =>
-          value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-        );
-      })
-    );
-
-
-  }
-
-  showDepartamento(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
-  }
-  showProvincia(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
-  }
-  showDistrito(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
   }
 
   selectProvincias(option) {
     this.provincias = this.pl.getProvincias(option.id);
+    this.formGroup.get('provincia').setValue(null);
     this.formGroup.get('provincia').enable();
-
+    this.formGroup.get('distrito').setValue(null);
+    this.formGroup.get('distrito').disable();
   }
 
   selectDistritos(option) {
     this.distritos = this.pl.getDistritos(option.id);
+    this.formGroup.get('distrito').setValue(null);
     this.formGroup.get('distrito').enable();
 
   }

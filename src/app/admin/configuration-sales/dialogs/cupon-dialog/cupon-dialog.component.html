@@ -12,20 +12,17 @@
 
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>Cupón</mat-label>
-        <input autocomplete="off" formControlName="name" type="text" matInput />
+        <input autocomplete="off" formControlName="name" (keydown)="onKeydown($event)" type="text" matInput />
         <mat-hint>Sin espacios</mat-hint>
         <mat-error>
           <span *ngIf="createForm.get('name').errors?.required">Campo requerido</span>
           <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentrarepetido.</span>
         </mat-error>
       </mat-form-field>
-      <mat-form-field class="w3-block" appearance="outline">
-        <mat-label>Descuento (%)</mat-label>
-        <input autocomplete="off" formControlName="discount" type="number" matInput placeholder="Descuento" />
-        <span matSuffix>&nbsp;%</span>
-        <mat-error>Campo requerido</mat-error>
-      </mat-form-field>
-
+      <div class="w3-block w3-margin-bottom">
+        <label>Con límite de tiempo:</label>
+        <mat-slide-toggle color="primary" formControlName="limitDate"></mat-slide-toggle>
+      </div>
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>FECHA/PERIODO</mat-label>
         <mat-date-range-input [rangePicker]="picker">
@@ -35,13 +32,32 @@
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>
-
-      <mat-date-range-picker #picker></mat-date-range-picker>
+      <div class="w3-block w3-margin-bottom">
+        <label>Tipo de Descuento:</label><br>
+        <mat-radio-group color="primary" class="example-radio-group" formControlName="type">
+          <mat-radio-button *ngFor="let ty of types" [value]="ty.id">
+            {{ty.name}}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Descuento</mat-label>
+        <span matPrefix *ngIf="createForm.get('type').value==1">S/. &nbsp;</span>
+        <input autocomplete="off" formControlName="discount" type="number" matInput placeholder="Descuento" />
+        <span matSuffix *ngIf="createForm.get('type').value==2">&nbsp;%</span>
+        <mat-error>Campo requerido</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w3-block" appearance="outline" *ngIf="createForm.get('type').value==2">
+        <mat-label>Límite</mat-label>
+        <span matPrefix>S/.&nbsp;</span>
+        <input autocomplete="off" formControlName="limit" type="number" matInput />
+        <mat-hint>El limite en soles en el descuento</mat-hint>
+      </mat-form-field>
     </div>
     <div class="w3-col m6 l6 w3-padding">
       <div>
         <label>Descuento a:</label>
-        <mat-radio-group class="example-radio-group" color="primary" formControlName="redirectTo">
+        <mat-radio-group color="primary" class="example-radio-group" formControlName="redirectTo">
           <mat-radio-button *ngFor="let season of redirects" [value]="season">
             {{season}}
           </mat-radio-button>
