@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
+import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ListDialogComponent } from './list-dialog/list-dialog.component';
@@ -28,6 +29,9 @@ export class WarehouseComponent implements OnInit {
   itemsFilterForm: FormControl;
   promoFilterForm: FormControl;
   warehouseForm: FormControl = new FormControl('');
+  entryWarehouseControl: FormControl;
+  entryProductControl: FormControl;
+  entryScanControl: FormControl;
 
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
@@ -60,7 +64,9 @@ export class WarehouseComponent implements OnInit {
 
   categorySelected: boolean = false;
 
-
+  view: string = "products";
+  warehouses$: Observable<Warehouse>;
+  entryProducts$: Observable<Product[]>
 
   constructor(
     private fb: FormBuilder,
@@ -80,6 +86,9 @@ export class WarehouseComponent implements OnInit {
     this.categoryForm = this.fb.control("");
     this.itemsFilterForm = this.fb.control("");
     this.promoFilterForm = this.fb.control(false);
+    this.entryWarehouseControl = this.fb.control('');
+    this.entryProductControl = this.fb.control('');
+    this.entryScanControl = this.fb.control('');
   }
 
   initObservables() {
@@ -90,7 +99,6 @@ export class WarehouseComponent implements OnInit {
         startWith('Todos')
       )).pipe(
         map(([warehouse, products, filt]) => {
-
           return warehouse.map(el => {
             el['product'] = products.filter(li => li.id == el['idProduct'])[0]
             return el
@@ -103,6 +111,29 @@ export class WarehouseComponent implements OnInit {
           this.loading.next(false)
         })
       )
+
+    this.entryProducts$ = combineLatest(
+      this.dbs.getWarehouseListValueChanges(),
+      this.dbs.getProductsListValueChanges(),
+      this.entryWarehouseControl.valueChanges.pipe(startWith('')),
+      this.entryProductControl.valueChanges.pipe(startWith(''), map(product => product.product ? product.product.description : product))
+    ).pipe(
+      map(([warehouses, products, selection, product]) => {
+        return warehouses.map(warehouse => {
+          // Adding product object to warehouse object
+          warehouse['product'] = products.filter(product => product.sku == warehouse['skuProduct'])[0];
+          return warehouse
+        }).filter(ol => {
+          return selection != 'Todos' ? ol.warehouse == selection : true;
+        }).filter(el => {
+          if (el['product']) {
+            return el['product'].description.toLowerCase().includes(product.toLowerCase());
+          } else {
+            return false
+          }
+        })
+      })
+    )
 
 
   }
@@ -163,6 +194,19 @@ export class WarehouseComponent implements OnInit {
 
     const name = 'Lista_de_productos' + '.xlsx';
     XLSX.writeFile(wb, name);*/
+  }
+
+  changeView(view): void {
+    this.view = view;
+  }
+
+  showEntryProduct(product: any): string | null {
+    console.log(product)
+    return product.product ? product.product.description : null;
+  }
+
+  save(): void {
+    // 
   }
 
 
