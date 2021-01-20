@@ -26,6 +26,7 @@ export class WebViewComponent implements OnInit {
   @ViewChild("image") image: ElementRef;
   productSelected: any = null
 
+  selectedProduct:any
   selected = new FormControl('')
   changeColor$: Observable<any>
 
@@ -50,6 +51,22 @@ export class WebViewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    
+  }
+
+  ngOnChanges() {
+    this.selectedProduct = this.product
+    this.selected.setValue(this.product.products[0])
+    
+    this.changeColor$ = this.selected.valueChanges.pipe(
+      startWith(this.product.products[0]),
+      tap(res => {
+        this.productSelected = res
+        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
+        this.selectImage = this.galleryImg[0]
+      })
+    )
+
     this.favorite$ = this.auth.user$.pipe(
       map(user => {
         if (user) {
@@ -60,19 +77,6 @@ export class WebViewComponent implements OnInit {
         }
       })
     )
-  }
-
-  ngOnChanges() {
-    this.selected.setValue(this.product.products[0])
-    this.changeColor$ = this.selected.valueChanges.pipe(
-      startWith(this.product.products[0]),
-      tap(res => {
-        this.productSelected = res
-        this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
-        this.selectImage = this.galleryImg[0]
-      })
-    )
-
 
 
   }

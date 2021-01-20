@@ -76,7 +76,8 @@ export class StoreComponent implements OnInit {
             let brand = null
 
             let listProd = []
-
+            console.log(param);
+            
             if (param.search) {
               this.search = param.search;
               frag = param.search.toLowerCase()
@@ -116,7 +117,7 @@ export class StoreComponent implements OnInit {
             }
 
             console.log(state);
-            
+
             if (promo) {
               return prods.filter((el) => el.promo)
             } else {
@@ -148,10 +149,10 @@ export class StoreComponent implements OnInit {
       case 'frag':
         return prod.filter((el) =>
           frag
-            ? el['description'].toLowerCase().includes(frag) ||
-            el['sku'].toLowerCase().includes(frag) ||
-            el['category'].toLowerCase().includes(frag) ||
-            el['subcategory'].toLowerCase().includes(frag)
+            ? el['description'].toLowerCase().includes(frag)
+            || el['sku'].toLowerCase().includes(frag)
+            || (el['category'] ? el['category'].toLowerCase().includes(frag) : false)
+            //el['subcategory']?el['subcategory'].toLowerCase().includes(frag):false
             : true
         );
         break;
@@ -165,7 +166,7 @@ export class StoreComponent implements OnInit {
       case 'subsub':
         return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
           .filter(el => el.subcategory.toLowerCase().trim() == sub.toLowerCase().trim())
-          .filter(el => el.subsubcategory?el.subsubcategory.toLowerCase().trim() == subsub.toLowerCase().trim():false)
+          .filter(el => el.subsubcategory ? el.subsubcategory.toLowerCase().trim() == subsub.toLowerCase().trim() : false)
         break;
 
       case 'productos':
