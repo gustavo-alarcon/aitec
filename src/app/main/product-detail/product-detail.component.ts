@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Observer } from 'rxjs';
+import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -15,13 +15,10 @@ export class ProductDetailComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
-  isSmall = false
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
-
-
-  isSmall$: Observer<any>
+  price: number = 0
 
   @ViewChild("image") image: ElementRef;
 
@@ -43,7 +40,20 @@ export class ProductDetailComponent implements OnInit {
       switchMap((param) => {
         window.scroll(0, 0);
         this.loading.next(true)
-        return this.dbs.getProduct(param.id)
+        return combineLatest(
+          this.dbs.getProduct(param.id),
+          this.dbs.isMayUser$
+        ).pipe(
+          map(([product, user]) => {
+
+            this.price = product.priceMin
+            if (user) {
+              this.price = product.priceMay
+            }
+
+            return product
+          })
+        );
       }),
       tap(res => {
         if (this.count == 1) {

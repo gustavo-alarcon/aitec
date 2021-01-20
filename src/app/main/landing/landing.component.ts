@@ -61,6 +61,7 @@ export class LandingComponent implements OnInit {
 
   init$: Observable<any>
   products$: Observable<any>
+  allproducts: Array<any> = []
   listproducts: Array<any> = []
   lastProducts: Array<any> = []
   offersProducts: Array<any> = []
@@ -86,6 +87,7 @@ export class LandingComponent implements OnInit {
     this.products$ = this.dbs.getLastProducts().pipe(
       map(prods => prods.filter(el => el.published)),
       tap(res => {
+        this.allproducts = res
         this.listproducts = res.filter(el => !el.promo).filter(el => el.searchNumber).sort((a, b) => b.searchNumber - a.searchNumber).slice(0, 4)
         this.lastProducts = res.slice(0, 4)
         this.offers = res.filter(el => el.promo)
@@ -153,7 +155,8 @@ export class LandingComponent implements OnInit {
             queryParams: { productos: banner.products.map(el => el.id).join('-') },
           });
         } else {
-          this.router.navigate(['/main/producto', banner.products[0]['id']]);
+          let prod = this.allproducts.filter(pr => banner.products[0]['id'] == pr.id)[0]
+          this.router.navigate(['/main/producto', prod.sku]);
         }
         break;
       default:

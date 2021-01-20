@@ -36,14 +36,6 @@
         ">
         <div>
           <div class="menu">
-            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="web">
-              <mat-icon class="menu__icon">language</mat-icon>
-              Web
-            </button>
-            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="sale-configuration">
-              <mat-icon class="menu__icon">build</mat-icon>
-              Conf. Ventas
-            </button>
             <mat-expansion-panel style="box-shadow:none; border-radius:0px 0px 0px 0px" class="w3-block"
               [ngClass]="{'ms-expansion-panel-menu':confiOpenedFlag}" (opened)="confiOpened()" (closed)="confiClosed()">
               <mat-expansion-panel-header class="menu__button">
@@ -52,7 +44,7 @@
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
-              <button mat-button class="w3-block menu__button" routerLink="web"
+              <button mat-button class="w3-block menu__button" routerLink="web/banners"
                 style="text-align:left;border-radius:0px 0px 0px 0px" (click)="toggleSideMenu()">
                 <mat-icon class="menu__icon">language</mat-icon>
                 Ventas

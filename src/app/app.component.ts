@@ -27,13 +27,13 @@ export class AppComponent {
     private snackBar: MatSnackBar,
     private auth: AuthService,
     public push: PushService
-  ){}
+  ) { }
 
-  ngOnInit(){
+  ngOnInit() {
     this.version$ = this.dbs.getGeneralConfigDoc().pipe(
       tap(conf => {
         console.log(conf.lastVersion);
-        if(conf.lastVersion != this.dbs.version){
+        if (conf.lastVersion != this.dbs.version) {
           this.snackBar.open("Versión incorrecta")
         }
       }),
@@ -42,7 +42,12 @@ export class AppComponent {
       filter(user => !!user),
       take(1),
       switchMap(user => {
+        console.log(user);
+
         this.dbs.uidUser = user.uid
+        if (user.customerType == 'Mayorista') {
+          this.dbs.isMayUser.next(true)
+        }
         return this.push.getPermission(user)
       })
     )
