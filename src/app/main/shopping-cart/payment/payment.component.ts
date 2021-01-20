@@ -15,7 +15,6 @@ export class PaymentComponent implements OnInit {
 
   // payment gateway
   
-  title = "IZI PAY";
   promiseError = null;
 
   KR;
