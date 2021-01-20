@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { BrandComponent } from '../dialogs/brand/brand.component';
@@ -11,14 +12,24 @@ import { BrandComponent } from '../dialogs/brand/brand.component';
   styleUrls: ['./brands-view.component.scss'],
 })
 export class BrandsViewComponent implements OnInit {
+
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
+
   init$: Observable<any>;
 
-  defaultImage = "../../../../assets/images/logo-black.png";
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
-  constructor(private dialog: MatDialog, private dbs: DatabaseService) { }
+  constructor(
+    private dialog: MatDialog, 
+    public dbs: DatabaseService) { }
 
   ngOnInit(): void {
-    this.init$ = this.dbs.getBrands();
+    this.init$ = this.dbs.getBrands().pipe(
+      tap(()=>{
+        this.loading.next(false)
+      })
+    )
   }
 
   openDialog(movil: boolean, data) {

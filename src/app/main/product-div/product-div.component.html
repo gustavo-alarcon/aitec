@@ -1,33 +1,56 @@
-<a (click)="navigateProduct(product['sku'])" *ngIf="product">
-  <mat-card class="product">
-    <div class="product__star" *ngIf="!product.promo">
-      <mat-icon class="product__star--icon">grade</mat-icon>
-    </div>
-    <div class="product__discount" *ngIf="product.promo">
-      <div class="product__discount--number">{{ product.promoData.offer }}</div>
-      <div class="product__discount--percent">
-        <div>%</div>
-        <div>OFF</div>
-      </div>
-    </div>
-    <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="product.gallery[product.indCover].photoURL" [offset]="100"
-      class="product__image" alt="" />
-    <mat-card-content>
-      <h4 class="product__title w3-margin-top">{{ product.description }}</h4>
+<a (click)="navigateProduct(product['sku'])">
 
-      <div class="product__descrip" [style.visibility]="product.promo ? 'visible' : 'hidden'">
-        Antes
-        <span class="product__offer">S/. {{ product.priceMin | number: ".2" }}</span>
+  <mat-card class="product">
+    <div class="product__container w3-row" *ngIf="init$ | async as producto;else load">
+      <!--div class="product__star" *ngIf="!product.promo">
+      <mat-icon class="product__star--icon">grade</mat-icon>
+    </div-->
+      <div class="product__discount" *ngIf="promo">
+        <div class="product__discount--number">{{ getDiscount(product.promoData) }} </div>
+        <div class="product__discount--percent">
+          <div>%</div>
+          <div>OFF</div>
+        </div>
       </div>
-      <div class="product__price">
-        <span *ngIf="product.promo">Ahora</span>
-        <span class="product__price--number" *ngIf="product.promo">
-          S/. {{ product.promoData.promoPrice | number: ".2" }}
-        </span>
-        <span class="product__price--number" *ngIf="!product.promo">
-          S/. {{ product.priceMin | number: ".2" }}
-        </span>
+      <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="producto.gallery[producto.indCover].photoURL"
+        [offset]="100" class="product__image" alt="" />
+      <mat-card-content>
+        <h4 class="product__title w3-margin-top">{{ producto.description }}</h4>
+
+        <div class="product__descrip"
+          [style.visibility]="promo && producto.promoData.quantity == 1 ? 'visible' : 'hidden'">
+          Antes
+          <span class="product__offer">{{price | currency: 'S/. ':'symbol':'2.2-2'}}</span>
+        </div>
+        <div class="product__price">
+          <div *ngIf="promo && producto.promoData.quantity == 1">
+            <span>Ahora</span>
+            <span class="product__price--number">
+              {{producto.promoData.promoPrice  | currency: 'S/. ':'symbol':'2.2-2'}}
+            </span>
+          </div>
+
+          <span class="product__price--number" *ngIf="!promo || producto.promoData.quantity > 1">
+            {{price | currency: 'S/. ':'symbol':'2.2-2'}}
+          </span>
+        </div>
+        <div *ngIf="promo && producto.promoData.quantity > 1" class="w3-center product__promo">
+          OFERTA: {{producto.promoData.quantity}} x S/.
+          {{producto.promoData.promoPrice | number: '.2'}}
+        </div>
+      </mat-card-content>
+    </div>
+
+    <ng-template #load>
+      <div class="w3-display-container product__loader">
+        <div class="w3-display-middle">
+          <div class="lds-facebook">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
       </div>
-    </mat-card-content>
+    </ng-template>
   </mat-card>
 </a>

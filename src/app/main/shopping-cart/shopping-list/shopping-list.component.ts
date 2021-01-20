@@ -28,6 +28,8 @@ export class ShoppingListComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataSource.data = this.dbs.order
+    console.log(this.dbs.order);
+    
   }
 
   getPrice(item){

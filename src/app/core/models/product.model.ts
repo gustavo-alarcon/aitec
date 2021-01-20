@@ -38,8 +38,9 @@ export interface Product {
   indCover: number;
   searchNumber: number;
   purchaseNumber: number;  //Número total de compras
-  warehouse: Array<any>,
-  skuArray: Array<string>
+  warehouse: Array<any>;
+  skuArray: Array<string>;
+  questions?:number;
 }
 
 interface unitProduct {
@@ -53,6 +54,7 @@ interface PromoData {
   quantity: number;
   promoPrice: number;
   offer?: number;
+  type?:string;
 }
 
 interface Gallery {

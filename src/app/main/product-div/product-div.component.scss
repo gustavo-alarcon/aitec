@@ -1,9 +1,9 @@
 .product {
   border: 1px solid #e0e0e0;
   box-sizing: border-box;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   position: relative;
   cursor: pointer;
+  height: 400px;
   &__star {
     position: absolute;
     top: 0;
@@ -18,10 +18,9 @@
   }
   &__image {
     height: 100%;
-    min-height: 250px;
-    max-height: 250px;
+    min-height: 220px;
+    max-height: 220px;
     object-fit: contain;
-
   }
   &__title {
     font-family: Montserrat;
@@ -43,7 +42,7 @@
     font-family: Roboto;
     font-weight: 500;
     color: var(--primary-color);
-    &--number{
+    &--number {
       font-size: 1.3em;
     }
   }
@@ -70,5 +69,78 @@
       text-align: left;
       line-height: 1.2em;
     }
+  }
+  &__promo {
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    color: var(--primary-color);
+    font-size: 0.9em;
+    margin-top: 8px;
+    padding: 5px;
+    font-weight: bold;
+  }
+  &__loader{
+    min-height: 165px;
+    height: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .product {
+    max-height: 300px;
+    &__star {
+      &--icon {
+        height: 24px;
+        width: 24px;
+        font-size: 24px;
+      }
+    }
+    &__image {
+      min-height: 150px;
+      max-height: 150px;
+      object-fit: contain;
+      margin-bottom: 0px !important;
+    }
+    &__title {
+      height: 3em;
+    }
+  }
+}
+
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  left: 8px;
+  width: 16px;
+  background: #ececec;
+  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.lds-facebook div:nth-child(1) {
+  left: 8px;
+  animation-delay: -0.24s;
+}
+.lds-facebook div:nth-child(2) {
+  left: 32px;
+  animation-delay: -0.12s;
+}
+.lds-facebook div:nth-child(3) {
+  left: 56px;
+  animation-delay: 0;
+}
+@keyframes lds-facebook {
+  0% {
+    top: 8px;
+    height: 64px;
+  }
+  50%,
+  100% {
+    top: 24px;
+    height: 32px;
   }
 }

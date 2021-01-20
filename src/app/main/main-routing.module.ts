@@ -47,6 +47,14 @@ const routes: Routes = [
       {
         path: 'mispedidos',
         loadChildren: () => import('./shopping-history/shopping-history.module').then(mod => mod.ShoppingHistoryModule)
+      },
+      {
+        path: 'favoritos',
+        loadChildren: () => import('./favorites/favorites.module').then(mod => mod.FavoritesModule)
+      },
+      {
+        path: 'preguntas',
+        loadChildren: () => import('./questions/questions.module').then(mod => mod.QuestionsModule)
       }
     ]
   }

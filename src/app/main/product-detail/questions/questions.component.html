@@ -21,9 +21,22 @@
       [disabled]="!questionForm.valid"
       mat-raised-button
       color="primary"
+      (click)="openSnackBar()"
     >
       Preguntar
     </button>
+
+    <!-- <mat-form-field>
+      <mat-label>Message</mat-label>
+      <input matInput value="Disco party!" #message>
+    </mat-form-field>
+    
+    <mat-form-field>
+      <mat-label>Action</mat-label>
+      <input matInput value="Dance" #action>
+    </mat-form-field>
+    
+    <button mat-stroked-button (click)="openSnackBar(message.value, action.value)">Show snack-bar</button> -->
 
     <span
       *ngIf="
@@ -60,8 +73,9 @@
       </svg>
 
       {{ item.answer }}
-      <small
-        >{{ item.createdAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
+
+      <small *ngIf="item.answerAt"
+        >{{ item.answerAt["seconds"] * 1000 | date: "dd/MM/yyyy" }}
       </small>
     </span>
   </div>

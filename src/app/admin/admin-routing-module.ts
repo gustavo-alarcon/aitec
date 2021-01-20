@@ -27,6 +27,15 @@ const routes: Routes = [
       {
         path: 'warehouse',
         loadChildren: () => import('./warehouse/warehouse.module').then(mod => mod.WarehouseModule)
+      },
+      {
+        path: 'questions',
+        loadChildren: () => import('./questions/questions.module').then(mod => mod.QuestionsModule)
+      }
+      ,
+      {
+        path: 'customers',
+        loadChildren: () => import('./customer/customer.module').then(mod => mod.CustomerModule)
       }
       /*
       {

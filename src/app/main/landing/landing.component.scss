@@ -58,3 +58,67 @@
     color: #f2c94c;
   }
 }
+
+.img-oferta img{
+  display: inline;
+}
+
+.w3-block-0{
+  width: 50%;
+  height: 25vw;
+}
+
+.w3-block-1{
+  width: 25%;
+  height: 25vw;
+
+}
+
+.w3-block-2{
+  width: 25%;
+  height: 25vw;
+
+}
+.w3-block-banner{
+  width: 100%;
+  height: 25vw;
+}
+
+.container-carousel{
+  margin: 30px;
+}
+
+.carousel-movil{
+  display: none;
+}
+
+// QUERY
+@media only screen and (max-width: 768px) {
+  .carousel-web{
+    display: none;    
+  }
+  .carousel-movil{
+    display: contents;
+  }
+
+  .w3-block-0{
+    width: 100%;
+    height: 40vw;
+  }
+  .w3-block-1{
+    width: 50%;
+    height: 40vw;  
+  }  
+  .w3-block-2{
+    width: 50%;
+    height: 40vw;
+  }
+  .w3-block-banner{
+    width: 100%;
+    height: 40vw;
+  }
+  .title-section{
+    font-size: 1.2em;
+  }
+}
+

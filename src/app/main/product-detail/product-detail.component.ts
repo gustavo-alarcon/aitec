@@ -1,9 +1,10 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap, switchMapTo, takeLast, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Observer } from 'rxjs';
+import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-product-detail',
@@ -11,102 +12,75 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./product-detail.component.scss'],
 })
 export class ProductDetailComponent implements OnInit {
-  loading = new BehaviorSubject<boolean>(true);
+  loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
   productDiv: any
   prods: Array<any> = []
-  galleryImg: Array<any>
-  selectImage: any
-  slideConfig2 = {
-    "slidesToShow": 4, "slidesToScroll": 1,
-    "autoplay": false,
-    responsive: [
-      {
-        breakpoint: 1360,
-        settings: {
-          slidesToShow: 3
-        }
-      },
-      {
-        breakpoint: 780,
-        settings: {
-          slidesToShow: 2
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
-  };
+  price: number = 0
 
   @ViewChild("image") image: ElementRef;
 
   defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   colorSelected: any = null
+  count: number = 1
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
-    private renderer: Renderer2,
-    private router: Router
-  ) {
-    this.route.paramMap.subscribe(params => {
-      console.log(params.get('param'));
-
-      console.log(params['id']);
-      
-      
-      this.ngOnInit();
-    });
-  }
+    private router: Router,
+    private afs: AngularFirestore
+  ) { }
 
   ngOnInit(): void {
     this.productDiv = null
     this.product$ = this.route.params.pipe(
       switchMap((param) => {
+        window.scroll(0, 0);
+        this.loading.next(true)
         return combineLatest(
           this.dbs.getProduct(param.id),
-
-          this.dbs.getProductsListValueChanges()
+          this.dbs.isMayUser$
         ).pipe(
-          map(([product, prods]) => {
+          map(([product, user]) => {
 
-            this.prods = prods.filter(el => el.category == product.category)
+            this.price = product.priceMin
+            if (user) {
+              this.price = product.priceMay
+            }
+
             return product
           })
-        )
+        );
       }),
       tap(res => {
-        this.productDiv = res
-        this.colorSelected = res.colors[0]
+        if (this.count == 1) {
+          this.searchNumber(res)
+        }
         this.loading.next(false)
-
-        this.galleryImg = res.products[0].gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
-        this.selectImage = this.galleryImg[res.indCover]
-
       })
     );
 
+
+
+
   }
 
-  changeSelectImage(image) {
-    this.selectImage = image
-  }
+  searchNumber(product) {
+    this.afs.firestore.runTransaction((transaction) => {
+      const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(product.id);
 
-  zoom(e) {
-    var zoomer = e.currentTarget;
-    let offsetX = e.offsetX
-    let offsetY = e.offsetY
+      return transaction.get(ref).then((doc) => {
+        let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
+        searchNumber++
+        transaction.update(ref, { searchNumber: searchNumber });
+      });
+    }).then(() => {
+      this.count++
 
-    let x = offsetX / zoomer.offsetWidth * 100
-    let y = offsetY / zoomer.offsetHeight * 100
-    this.renderer.setStyle(this.image.nativeElement, 'background-position', x + '% ' + y + '%')
+    })
   }
 
   navigate(category, subcategory) {

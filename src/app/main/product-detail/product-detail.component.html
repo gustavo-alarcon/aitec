@@ -1,129 +1,39 @@
 <!--mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar-->
-<div class="ms-container w3-section" style="position: relative" *ngIf="product$ | async as product">
-  <div>
-    <a mat-flat-button routerLink="/main">Inicio</a> >
-    <a mat-flat-button routerLink="/main/productos">Productos</a>
-    <span>
+<div style="position: relative;">
+  <div class="ms-container" style="position: relative;padding-top: 16px;" *ngIf="product$ | async as product">
+  
+    <div style="padding:16px 0">
+      <a class="bradcumb" routerLink="/main">Inicio</a> >
+      <a class="bradcumb" routerLink="/main/productos">Productos</a>
       >
-      <a mat-flat-button (click)="navigateOnlyCategory(product.category)">{{
-        product.category
-      }}</a>
-    </span>
-    <span *ngIf="product.subcategory">
-      >
-      <a mat-flat-button (click)="navigateCategory(product.category, product.subcategory)">{{ product.subcategory }}</a>
-    </span>
-    <span *ngIf="product.subsubcategory">
-      >
-      <a mat-flat-button
-        (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">{{ product.subcategory }}</a>
-    </span>
+      <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
+        {{product.category}}
+      </span>
+      <span *ngIf="product.subcategory">
+        >
+        <span class="bradcumb" (click)="navigateCategory(product.category, product.subcategory)">
+          {{ product.subcategory}}
+        </span>
+      </span>
+      <span *ngIf="product.subsubcategory">
+        >
+        <span class="bradcumb"
+          (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">
+          {{product.subcategory }}
+        </span>
+      </span>
+    </div>
+    <app-web-view [product]="product" [price]="price"></app-web-view>
+  
+    <app-product-category [category]="product.category"></app-product-category>
+    <div class="w3-section">
+      <h4 class="product__subtitle">Consultas sobre el producto</h4>
+  
+      <app-questions  [idProduct]="product.id" [nameProduct]="product.description"></app-questions>
+    </div>
   </div>
-  <mat-card class="product">
-    <mat-card-content>
-      <div class="w3-row w3-padding">
-        <div class="w3-col l8 m7">
-          <div class="gallery">
-            <div class="gallery__side">
-              <div class="gallery__div border--primary w3-block" [ngClass]="
-                  img.ind == selectImage.ind ? 'gallery__div--select' : 'none'
-                " *ngFor="let img of galleryImg">
-                <img [defaultImage]="defaultImage" [lazyLoad]="img.photoURL" [offset]="100"
-                  (click)="changeSelectImage(img)" class="gallery__div--image" alt="" />
-              </div>
-            </div>
-            <figure #image class="zoom" (mousemove)="zoom($event)"
-              [style.background-image]="'url(' + selectImage.photoURL + ')'">
-              <div style="background-color: white">
-                <img [defaultImage]="defaultImage" [lazyLoad]="selectImage.photoURL" [offset]="100"
-                  class="gallery__image" />
-              </div>
-            </figure>
-          </div>
-        </div>
-        <div class="w3-col l4 m5">
-          <div class="ms-flex ms-flex--center">
-            <span>{{product.purchaseNumber}} vendidos</span>
-            <span class="ms-fill"></span>
-            <button mat-icon-button color="primary">
-              <mat-icon>favorite_border</mat-icon>
-            </button>
-          </div>
-          <h2 class="product__title">{{ product.description }}</h2>
-          <div *ngIf="product.promo" class="product__promo ms-flex">
-            <div style="width: fit-content">
-              Antes <strike>{{ product.priceMin }}</strike>
-            </div>
-            <div class="product__promo--discount">
-              {{ product.promoData.offer }} % Dscto
-            </div>
-          </div>
-          <div class="product__price w3-section">
-            <span *ngIf="product.promo">Ahora</span>
-            <span class="product__price--number">
-              S/.
-              {{
-                product.promo
-                  ? product.promoData.promoPrice
-                  : (product.priceMin | number: ".2")
-              }}
-            </span>
-          </div>
-          <div class="product__stock">
-            {{ product.virtualStock }} Unidades disponibles
-          </div>
-          <div class="w3-section">
-            <div>Paga con:</div>
-            <div class="ms-flex w3-section" style="justify-content: space-around">
-              <img src="../../../assets/images/visa.png" class="mini-img" alt="" />
-              <img src="../../../assets/images/mastercad.png" class="mini-img" alt="" />
-              <img src="../../../assets/images/visa_electron.png" class="mini-img" alt="" />
-              <img src="../../../assets/images/american.png" class="mini-img" alt="" />
-            </div>
-          </div>
-
-          <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
-          <div class="w3-center">
-            <app-quantity-div [product]="productDiv" size="md"></app-quantity-div>
-          </div>
-        </div>
-      </div>
-      <div class="w3-section w3-padding">
-        <p style="font-size: 1.2em">
-          Marca: <strong>{{ product.brand.name }}</strong>
-        </p>
-        <div class="w3-section">
-          <h4 class="product__subtitle">Descripción</h4>
-          <div [innerHTML]="product.additionalDescription"></div>
-        </div>
-
-        <div class="w3-section">
-          <h4 class="product__subtitle">Calificaciones</h4>
-          <div style="color: #f2c94c">
-            <mat-icon>star</mat-icon>
-            <mat-icon>star</mat-icon>
-            <mat-icon>star</mat-icon>
-            <mat-icon>star</mat-icon>
-            <mat-icon>star_half</mat-icon>
-          </div>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-  <div class="w3-section">
-    <h4 class="product__subtitle">Productos similares</h4>
-    <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
-      <div ngxSlickItem *ngFor="let slide of prods" class="slide">
-        <div class="w3-padding">
-          <app-product-div [product]="slide"></app-product-div>
-        </div>
-      </div>
-    </ngx-slick-carousel>
-  </div>
-  <div class="w3-section">
-    <h4 class="product__subtitle">Consultas sobre el producto</h4>
-
-    <app-questions [idProduct]="product.id"></app-questions>
-    
+  <div class="layoout" *ngIf="loading$ | async">
+    <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+    </mat-progress-spinner>
   </div>
 </div>

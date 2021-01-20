@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Product } from 'src/app/core/models/product.model';
 
 @Component({
   selector: 'app-quantity-div',
@@ -11,25 +12,30 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./quantity-div.component.scss'],
 })
 export class QuantityDivComponent implements OnInit {
-  @Input() product: any;
+  @Input() product: Product;
+  @Input() chosen: any;
+  @Input() color: boolean;
   @Input() size: string;
+  @Input() price: number;
   quantity$: Observable<number>;
 
   quantityForm = new FormControl(null);
-  constructor(public dbs: DatabaseService, private snackBar: MatSnackBar) {}
+  constructor(
+    public dbs: DatabaseService,
+    private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
 
+  }
+
+  ngOnChanges() {
     this.quantity$ = this.dbs.orderObs$.pipe(
       map((order) => {
-        
-        let index = order.findIndex(
-          (el) => el['product']['sku'] == this.product['sku']
-        );
+        let index = order.length ? order.findIndex(el => el['chosenProduct']['sku'] == this.chosen['sku']) : -1
         if (index >= 0) {
           let orderProduct = order[index];
           return orderProduct['quantity'];
-        }else{
+        } else {
           return null
         }
       }),
@@ -42,32 +48,36 @@ export class QuantityDivComponent implements OnInit {
   }
 
   add(item) {
+
     let newproduct = {
       product: item,
       quantity: 1,
+      chosenProduct: this.chosen,
+      color: this.color,
+      price: this.price
     };
     this.dbs.order.push(newproduct);
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   increase(item) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == item['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
 
     this.dbs.order[index]['quantity']++;
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   decrease(item) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == item['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
     this.dbs.order[index]['quantity']--;
     this.dbs.orderObs.next(this.dbs.order);
-    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   view(event) {
@@ -79,15 +89,15 @@ export class QuantityDivComponent implements OnInit {
 
   changeQuantity(number) {
     let index = this.dbs.order.findIndex(
-      (el) => el['product']['sku'] == this.product['sku']
+      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
     );
     if (number == 0 || isNaN(number)) {
       this.dbs.order[index]['quantity'] = 1;
     } else {
-      if (number >= this.product['realStock']) {
-        this.dbs.order[index]['quantity'] = this.product['realStock'];
+      if (number >= this.chosen['stock']) {
+        this.dbs.order[index]['quantity'] = this.chosen['stock'];
         this.snackBar.open(
-          'Stock disponible del producto:' + this.product['realStock'],
+          'Stock disponible del producto:' + this.chosen['stock'],
           'Aceptar',
           {
             duration: 6000,

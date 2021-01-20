@@ -11,19 +11,37 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 @Component({
   selector: 'app-customer',
   templateUrl: './customer.component.html',
-  styleUrls: ['./customer.component.css']
+  styleUrls: ['./customer.component.scss']
 })
 export class CustomerComponent implements OnInit {
+  
+  //Client
+  clientDataSource = new MatTableDataSource();
+  ClientDisplayedColumns: string[] = [ 'index','name','email','tipo','pedidos','actions'];
 
-  dataSource = new MatTableDataSource();
-  displayedColumns: string[] = ['index', 'name', 'phone', 'address', 'sales'];
-
-  @ViewChild("paginatorList", { static: false }) set content(paginator: MatPaginator) {
-    this.dataSource.paginator = paginator;
+  @ViewChild("paginatorClient", { static: false }) set content(paginator: MatPaginator) {
+    this.clientDataSource.paginator = paginator;
   }
+  clientsList$: Observable<User[]>;
 
-  list$: Observable<User[]>;
-  listFiltered$: Observable<User[]>;
+
+  //ranking
+  rankingDataSource = new MatTableDataSource<any>();
+  rankingDisplayedColumns: string[] = ['index','name','products','service','delivery','comentary','order'];
+
+  @ViewChild("rankingPaginator", { static: false }) set contentRat(paginator: MatPaginator) {
+    this.rankingDataSource.paginator = paginator;
+  }
+  
+  
+
+ 
+  rankingList$: Observable<Clients[]>;
+
+  rankingDataSources=dataRankingClient;
+
+
+
   listFilter: FormControl;
 
   //rating
@@ -31,12 +49,7 @@ export class CustomerComponent implements OnInit {
   ratingFiltered$: Observable<Sale[]>;
   date: FormControl;
   ratingFilter: FormControl;
-  ratingDataSource = new MatTableDataSource<Sale>();
-  ratingDisplayedColumns: string[] = ['nroMandadito', 'cliente', 'servicio', 'productos', 'comentario'];
 
-  @ViewChild("ratingPaginator", { static: false }) set contentRat(paginator: MatPaginator) {
-    this.ratingDataSource.paginator = paginator;
-  }
 
   //noResult
   noResult$: Observable<string>;
@@ -47,16 +60,37 @@ export class CustomerComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    /*
-    this.noResult$ = this.dbs.noDataImage$.pipe(
+    
+    /* this.noResult$ = this.dbs.noDataImage$.pipe(
       tap(res=>{
         this.noResultImage = '../../../../assets/images/no_data/no_data_' + res + '.svg'
       })
-    )
-    //Clientes
-    this.list$ = this.dbs.getCustomers().pipe(
+    ) */
+    //Clients
+    this.clientsList$ = this.dbs.getUserListValueChanges().pipe(
       tap(res => {
-        this.dataSource.data = res.sort((a, b) => a.displayName.localeCompare(b.displayName)).map((el, i) => {
+        this.clientDataSource.data = res;
+
+      }),
+      shareReplay(1)
+    )
+
+
+    //Clients
+    /* this.rankingList$ = this.dbs.getUserListValueChanges().pipe(
+      tap(res => {
+        this.clientDataSource.data = res;
+
+      }),
+      shareReplay(1)
+    ) */
+   
+
+    /*
+
+     this.list$ = this.dbs.getUserListValueChanges().pipe(
+      tap(res => {
+        this.clientDataSource.data = res.sort((a, b) => a.name.localeCompare(b.name)).map((el, i) => {
           return {
             ...el,
             index: i + 1
@@ -65,6 +99,7 @@ export class CustomerComponent implements OnInit {
       }),
       shareReplay(1)
     )
+
 
     this.listFilter = new FormControl("");
 
@@ -125,6 +160,15 @@ export class CustomerComponent implements OnInit {
       )*/
   }
 
+  changeWholesaler(user:User){
+    const customerType='Mayorista';
+    this.dbs.editCustomerType(user,customerType);
+  }
+  changeRetailer(user:User){
+    const customerType='Minorista';
+    this.dbs.editCustomerType(user,customerType);
+  }
+
   getCurrentMonthOfViewDate(): { from: Date, to: Date } {
     const date = new Date();
     const fromMonth = date.getMonth();
@@ -144,3 +188,26 @@ export class CustomerComponent implements OnInit {
     return { from: actualFromDate, to: toDate };
   }
 }
+
+export interface Clients{
+  codigo:number;
+  name:string ;
+  products:number ;
+  service:number ;
+  delivery:number ;
+  comentary:string ;
+  order:string ;
+}
+
+const dataRankingClient:Clients[]=[
+  {codigo:1,name:'Luis Perez',products:4,service:2,delivery:5,comentary:'comentary',order:'#123'},
+  {codigo:2,name:'Luis Perez',products:4,service:3,delivery:4,comentary:'comentary',order:'#123'},
+  {codigo:3,name:'Luis Perez',products:2,service:1,delivery:5,comentary:'comentary',order:'#123'},
+  {codigo:4,name:'Luis Perez',products:4,service:3,delivery:2,comentary:'comentary',order:'#123'},
+  {codigo:5,name:'Luis Perez',products:4,service:3,delivery:5,comentary:'comentary',order:'#123'},
+  {codigo:6,name:'Luis Perez',products:3,service:5,delivery:2,comentary:'comentary',order:'#123'},
+  {codigo:7,name:'Luis Perez',products:4,service:3,delivery:5,comentary:'comentary',order:'#123'},
+  {codigo:8,name:'Luis Perez',products:1,service:3,delivery:2,comentary:'comentary',order:'#123'},
+  {codigo:9,name:'Luis Perez',products:2,service:3,delivery:4,comentary:'comentary',order:'#123'},
+  {codigo:10,name:'Luis Perez',products:4,service:2,delivery:5,comentary:'comentary',order:'#123'},
+];

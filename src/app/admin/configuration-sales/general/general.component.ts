@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
-import { AsesoresDialogComponent } from '../dialogs/asesores-dialog/asesores-dialog.component';
 import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.component';
 
 @Component({
@@ -17,7 +16,7 @@ import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.compo
 export class GeneralComponent implements OnInit {
 
   dataCouponSource = new MatTableDataSource();
-  displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'actions'];
+  displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'count', 'actions'];
 
   @ViewChild('couponPaginator', { static: false }) set content(
     paginator1: MatPaginator
@@ -26,16 +25,9 @@ export class GeneralComponent implements OnInit {
   }
   initCoupon$: Observable<any>
 
-  dataAdviserSource = new MatTableDataSource();
-  displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'actions'];
 
-  @ViewChild('adviserPaginator', { static: false }) set content2(
-    paginator2: MatPaginator
-  ) {
-    this.dataAdviserSource.paginator = paginator2;
-  }
 
-  initAdviser$: Observable<any>
+
   constructor(
     private dialog: MatDialog,
     public dbs: DatabaseService
@@ -45,12 +37,6 @@ export class GeneralComponent implements OnInit {
     this.initCoupon$ = this.dbs.getCoupons().pipe(
       tap((res) => {
         this.dataCouponSource.data = res;
-      })
-    );
-
-    this.initAdviser$ = this.dbs.getAdvisers().pipe(
-      tap((res) => {
-        this.dataAdviserSource.data = res;
       })
     );
   }
@@ -64,14 +50,6 @@ export class GeneralComponent implements OnInit {
     })
   }
 
-  openUser(movil: boolean, data) {
-    this.dialog.open(AsesoresDialogComponent, {
-      data: {
-        edit: movil,
-        data: data
-      }
-    })
-  }
 
   deleteDialog(id: string, type: string, title: string) {
     this.dialog.open(DeleteConfiDialogComponent, {

@@ -51,9 +51,11 @@ export class ShoppingHistoryComponent implements OnInit {
             map(end =>  end.setHours(23, 59, 59))
           )
         ).pipe(
-          map(([products, startdate,enddate]) => {
+          map(([sales, startdate,enddate]) => {
+            console.log(sales);
+            
             let date = {begin:startdate,end:enddate}
-            return products.filter((el) => {
+            return sales.filter((el) => {
               return this.getFilterTime(el["createdAt"], date);
             });
           })
@@ -85,7 +87,7 @@ export class ShoppingHistoryComponent implements OnInit {
       let noPromTotalPrice = noPromTotalQuantity * item.product.price;
       return this.roundNumber(promTotalPrice + noPromTotalPrice);
     } else {
-      return this.roundNumber(item.quantity * item.product.price);
+      return this.roundNumber(item.quantity * item.price);
     }
   }
 

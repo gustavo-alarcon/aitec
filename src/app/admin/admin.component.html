@@ -1,5 +1,30 @@
 <div class="animated fadeIn delay-4 slower">
   <!-- <ng-container *ngIf="user$ | async"> </ng-container> -->
+  <mat-toolbar class="main__toolbar">
+    <button mat-icon-button (click)="toggleSideMenu()">
+      <mat-icon class="dark-icon">menu</mat-icon>
+    </button>
+    <a class="w3-margin-left w3-margin-right main__logo" routerLink="/web">
+      <img src="../../assets/images/logo-white.png" class="main__logoimage" alt="logo" />
+    </a>
+    <span class="ms-fill"></span>
+    <ng-template #login>
+      <button mat-button routerLink="/main/login/signIn" class="menu-button">
+        <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
+      </button>
+    </ng-template>
+    <div *ngIf="auth.user$ | async as user; else login">
+      <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+        <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
+        {{ getName(user) }}
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="logOut()">
+          <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
+        </button>
+      </mat-menu>
+    </div>
+  </mat-toolbar>
   <mat-sidenav-container style="height: 100vh">
     <mat-sidenav mode="over" #sideMenu [(opened)]="openedMenu">
       <div style="
@@ -11,14 +36,27 @@
         ">
         <div>
           <div class="menu">
-            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="web">
-              <mat-icon class="menu__icon">language</mat-icon>
-              Web
-            </button>
-            <button mat-button class="w3-block menu__button" (click)="toggleSideMenu()" routerLink="sale-configuration">
-              <mat-icon class="menu__icon">build</mat-icon>
-              Conf. Ventas
-            </button>
+            <mat-expansion-panel style="box-shadow:none; border-radius:0px 0px 0px 0px" class="w3-block"
+              [ngClass]="{'ms-expansion-panel-menu':confiOpenedFlag}" (opened)="confiOpened()" (closed)="confiClosed()">
+              <mat-expansion-panel-header class="menu__button">
+                <mat-panel-title style="font-weight:500" [ngClass]="{'ms-expansion-panel-title':confiOpenedFlag}">
+                  <mat-icon class="menu__icon">settings</mat-icon> Configuración
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <button mat-button class="w3-block menu__button" routerLink="web/banners"
+                style="text-align:left;border-radius:0px 0px 0px 0px" (click)="toggleSideMenu()">
+                <mat-icon class="menu__icon">language</mat-icon>
+                Web
+              </button>
+              <button mat-button class="w3-block menu__button" routerLink="sale-configuration"
+                style="text-align:left;border-radius:0px 0px 0px 0px;" (click)="toggleSideMenu()">
+                <mat-icon class="menu__icon">build</mat-icon>
+                Ventas
+              </button>
+              <p class="w3-margin-bottom"></p>
+
+            </mat-expansion-panel>
             <button mat-button class="w3-block menu__button" routerLink="products" (click)="toggleSideMenu()">
               <mat-icon class="menu__icon">widgets</mat-icon>
               Lista de Productos
@@ -35,7 +73,11 @@
               <mat-icon class="menu__icon">corporate_fare</mat-icon>
               Almacenes
             </button>
-            
+            <button mat-button class="w3-block menu__button" routerLink="questions" (click)="toggleSideMenu()">
+              <mat-icon class="menu__icon">question_answer</mat-icon>
+              Respuestas
+            </button>
+
           </div>
         </div>
 
@@ -62,34 +104,7 @@
       </div>
     </mat-sidenav>
     <mat-sidenav-content cdkScrollable>
-      <mat-toolbar class="main__toolbar">
-        <button mat-icon-button (click)="toggleSideMenu()">
-          <mat-icon class="dark-icon">menu</mat-icon>
-        </button>
-        <a class="w3-margin-left w3-margin-right main__logo" routerLink="/web">
-          <img src="../../assets/images/logo-white.png" class="main__logoimage" alt="logo" />
-        </a>
-        <span class="ms-fill"></span>
-        <ng-template #login>
-          <button mat-button routerLink="/main/login/signIn" class="menu-button">
-            <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
-          </button>
-        </ng-template>
-        <div *ngIf="auth.user$ | async as user; else login">
-          <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
-            <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
-            {{ getName(user) }}
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="logOut()">
-              <mat-icon class="dark-icon">input</mat-icon> Cierra sesión
-            </button>
-          </mat-menu>
-        </div>
-      </mat-toolbar>
-      <div class="main__space">
-        <router-outlet></router-outlet>
-      </div>
+      <router-outlet></router-outlet>
     </mat-sidenav-content>
   </mat-sidenav-container>
 </div>

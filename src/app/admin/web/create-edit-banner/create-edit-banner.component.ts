@@ -72,6 +72,10 @@ export class CreateEditBannerComponent implements OnInit {
       product: [null]
     })
 
+    if(this.data.edit){
+      this.products = this.data.data.products
+    }
+
     this.products$ = combineLatest(
       this.createForm.get('product').valueChanges.pipe(
         startWith<any>(''),
@@ -358,7 +362,7 @@ export class CreateEditBannerComponent implements OnInit {
       photomovilURL: '',
       photomovilPath: '',
       published: true,
-      products: this.products.map(el => { return { id: el['id'], description: el['description'] } }),
+      products: this.products.map(el => { return { id: el['sku'], description: el['description'] } }),
       position: this.data.index
     }
     this.createBanner(newBanner, this.photos.data.photoURL, this.photos.data.photomovilURL)

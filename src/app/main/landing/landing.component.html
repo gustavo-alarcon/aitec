@@ -1,21 +1,34 @@
 <div *ngIf="init$ | async;else loader">
-  <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
-    <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-      <a (click)="navigateBrand(ban)">
-        <img [src]="ban.photoURL" class="w3-block" alt="" />
-      </a>
-    </div>
+    
+    <ngx-slick-carousel class="carousel-web" #slickModal="slick-carousel" [config]="slideConfig">
+      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+        <a (click)="navigateBrand(ban)">
+          <img [src]="ban.photoURL" class="w3-block-banner" alt="" />
+        </a>
+      </div>   
+    </ngx-slick-carousel>
 
-  </ngx-slick-carousel>
+    <ngx-slick-carousel class="carousel-movil" #slickModal="slick-carousel" [config]="slideConfig">
+      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+        <a (click)="navigateBrand(ban)">
+          <img [src]="ban.photomovilURL" class="w3-block-banner" alt="" />
+        </a>
+      </div>      
+    </ngx-slick-carousel>
+
   <div class="w3-padding w3-center">
     <div class="font--primary">
       <mat-icon fontSet="material-icons-outlined" class="section__icon">offline_bolt</mat-icon>
     </div>
     <h2 class="title-section">Ofertas</h2>
   </div>
-  <a (click)="navigateBrand(pro)" *ngFor="let pro of promo">
-    <img [src]="pro.photoURL" class="w3-block" alt="promo" />
-  </a>
+
+  <div class="img-oferta">
+    <a (click)="navigateBrand(pro)" *ngFor="let pro of promo;  let i = index">
+      <img [src]="pro.photoURL" class="w3-block-{{i}}" alt="promo" />
+    </a>
+  </div>
+  
 
 
   <div class="w3-section ms-container">
@@ -54,11 +67,11 @@
         <h2 class="title-section">Nuestros Productos</h2>
       </div>
       <mat-tab-group class="section__tab w3-margin-top" mat-align-tabs="center" color="primary">
-        <mat-tab label="Los más buscados">
+        <mat-tab label="Los más buscados" *ngIf="listproducts.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of listproducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
@@ -70,11 +83,11 @@
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Últimos productos">
+        <mat-tab label="Últimos productos" *ngIf="lastProducts.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of lastProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
@@ -86,11 +99,11 @@
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Ofertas">
+        <mat-tab label="Ofertas" *ngIf="offersProducts.length">
           <div class="w3-padding w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-lg-4 col-sm-6 col-xxl-3 w3-margin-bottom">
-                <div class="w3-padding">
+              <div *ngFor="let prod of offersProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
+                <div style="padding:0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>

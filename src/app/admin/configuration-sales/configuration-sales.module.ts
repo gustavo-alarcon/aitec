@@ -27,7 +27,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
 
-
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
 import { CategoriesComponent } from './categories/categories.component';
@@ -40,6 +39,10 @@ import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
 import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
+import { PaymentMethodDialogComponent } from './dialogs/payment-method-dialog/payment-method-dialog.component';
+import { StoresComponent } from './stores/stores.component';
+import { AdvisersComponent } from './advisers/advisers.component';
+import { PaymentViewComponent } from './payment-view/payment-view.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +56,11 @@ import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dial
     CreateEditCategoriesComponent,
     BrandsViewComponent,
     CuponDialogComponent,
-    AsesoresDialogComponent
+    AsesoresDialogComponent,
+    PaymentMethodDialogComponent,
+    StoresComponent,
+    AdvisersComponent,
+    PaymentViewComponent
   ],
   imports: [
     CommonModule,

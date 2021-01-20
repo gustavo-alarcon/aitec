@@ -4,11 +4,8 @@
 }
 
 .main__toolbar {
-  position: fixed;
   background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
   color: white;
-  top: 0;
-  z-index: 150;
 }
 
 .main__logo {
@@ -85,7 +82,7 @@
 .menu__button {
   text-align: left;
   border-radius: 0px 0px 0px 0px;
-  padding: 5px 10px 5px 40px;
+  padding: 5px 24px;
   font-size: 1em;
   letter-spacing: 0.05em;
   //color: #2B2B2B;

@@ -10,9 +10,8 @@
       </mat-date-range-input>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
-
-
     </mat-form-field>
+
     <div *ngIf="init$ | async as sales">
       <div class="w3-hide-small w3-hide-medium" style="display: flex;">
         <div style="width: 70%">
@@ -39,7 +38,7 @@
               </div>
               <div>
                 <div class="total">S/.
-                  {{(getTotal(sale.requestedProducts) + sale.deliveryPrice) | number: '.2'}}
+                  {{sale.total | number: '.2'}}
                 </div>
               </div>
             </div>
@@ -76,7 +75,7 @@
                   {{prod.product.description}}
                 </div>
                 <div style="width: 25%">
-                  S/. {{giveProductPrice(prod) | number:'.2'}}
+                  S/. {{prod.subtotal | number:'.2'}}
                 </div>
 
               </div>

@@ -1,11 +1,17 @@
 export interface User {
   uid?: string;
   email: string;
+  role?:string;
+  customerType?:string;
+  orders?:number;
   location?: {
     address: string;
     reference: string;
     coord: { lat: number; lng: number };
-  };
+    departamento:string;
+    provincia:string;
+    distrito:string;
+  }[];
 
   personData: naturalPerson | businessPerson;
   name?:string;
@@ -14,7 +20,8 @@ export interface User {
   lastBrowser?: string[]
   fcmTokens?: {
     [token: string]: true
-  }
+  };
+  favorites?:string[]
 }
 interface naturalPerson {
   type:"natural";

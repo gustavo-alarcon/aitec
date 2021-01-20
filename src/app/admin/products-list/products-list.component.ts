@@ -17,6 +17,7 @@ import { Product } from 'src/app/core/models/product.model';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { ProductEditPromoComponent } from './product-edit-promo/product-edit-promo.component';
+import { DeleteProductComponent } from './delete-product/delete-product.component';
 
 @Component({
   selector: 'app-products-list',
@@ -166,7 +167,10 @@ export class ProductsListComponent implements OnInit {
   }
 
   onDeleteItem(product: Product) {
-    
+    this.dialog.open(DeleteProductComponent,{
+      width: '350px',
+      data: product
+    })
 
   }
 

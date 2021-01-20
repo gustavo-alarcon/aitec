@@ -1,7 +1,7 @@
 // Custom Theming for Angular Material
 @import "./assets/css/animate.css";
 @import "./assets/css/w3.css";
-@import '~@angular/material/theming';
+@import "~@angular/material/theming";
 // Plus imports for other components in your app.
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -45,7 +45,6 @@ $mat-aitec-primary-palette: (
     A700: #000000,
   ),
 );
-
 
 $aitec-primary: mat-palette($mat-aitec-primary-palette);
 $aitec-accent: mat-palette($mat-amber, 800);
@@ -119,7 +118,7 @@ a {
 
 :root {
   // --primary-color: #1c31ea;
-  --primary-color:#1c31ea;
+  --primary-color: #1c31ea;
   --accent-color: #ff8f00;
   --warn-color: #f44336;
   --forth-color: #f44336;
@@ -212,7 +211,7 @@ a {
   font-family: "Raleway", sans-serif !important;
 }
 
-.mat-icon{
+.mat-icon {
   vertical-align: middle;
 }
 
@@ -294,11 +293,8 @@ a {
     width: 100%;
   }
 
-  .mat-expansion-panel-body {
-    padding: 0 16px 16px !important;
-  }
   .mat-expansion-panel-header {
-    padding: 0 16px !important;
+    padding: 0 16px;
   }
 }
 
@@ -373,7 +369,6 @@ img.ng-lazyloaded {
   font-family: "Raleway", sans-serif;
 }
 
-
 .mat-expansion-panel-body {
   font-family: "Raleway", sans-serif;
 }
@@ -414,10 +409,10 @@ img.ng-lazyloaded {
 }
 
 .ticket__total {
-  background: #FF8A00;
+  background: #ff8a00;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 5px;
-  font-size: 1.5em;
+  font-size: 1.2em;
   text-align: center;
   letter-spacing: 0.05em;
   color: white;
@@ -458,7 +453,7 @@ img.ng-lazyloaded {
 .mat-expansion-panel-header {
   background-color: transparent;
   font-family: Raleway;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .section__tab .mat-tab-label {
@@ -583,15 +578,14 @@ img.ng-lazyloaded {
     width: 970px;
   }
 }
-@media (min-width: 1200px){
+@media (min-width: 1200px) {
   .ms-container {
     width: 1200px;
-}
+  }
 }
 
-
-.ms-content{
-  max-width:1400px;
+.ms-content {
+  max-width: 1400px;
   margin: auto;
   padding: 30px;
 }
@@ -602,10 +596,27 @@ img.ng-lazyloaded {
   padding: 0 !important;
 }
 
+.col-xs-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
 @media (min-width: 480px) {
   .col-sm-6 {
     flex: 0 0 50%;
     max-width: 50%;
+  }
+}
+
+@media (min-width: 550px) {
+  .col-sm-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .col-sm-4 {
+    flex: 0 0 33.33333333%;
+    max-width: 33.33333333%;
   }
 }
 
@@ -651,10 +662,17 @@ img.ng-lazyloaded {
   left: calc(100% + 20px);
 }
 
-.map-container{
+.map-container {
   border-radius: 10px;
   border: 2px solid;
   border-color: var(--primary-color);
+}
+
+@media (max-width: 550px) {
+  .title-section::before,
+  .title-section::after {
+    width: 20px;
+  }
 }
 
 /* width */
@@ -680,17 +698,113 @@ img.ng-lazyloaded {
   background: #003e6e;
 }
 
-
-
 .slide.slick-list:focus {
-  outline: none!important;
+  outline: none !important;
 }
 
-.slick-arrow.slick-prev, .slick-arrow.slick-next {
+.slick-arrow.slick-prev,
+.slick-arrow.slick-next {
   height: 40px;
-    width: 40px;
+  width: 40px;
 }
-.slick-arrow.slick-prev:before, .slick-arrow.slick-next:before{
+.slick-arrow.slick-prev:before,
+.slick-arrow.slick-next:before {
   color: var(--primary-color) !important;
   font-size: 30px;
+}
+
+.bradcumb{
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0 5px;
+  font-family: Montserrat;
+  text-transform: uppercase;
+  font-size: 0.85em;
+}
+
+
+.resume {
+ 
+  width: 100%;
+  font-family: Montserrat;
+  color: #828282;
+  
+  &__title {
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #2b2b2b;
+  }
+  &__divider {
+    width: 100%;
+    height: 2px;
+    background-color: #828282;
+  }
+  &__list {
+    font-size: 0.9em;
+  }
+  &__descrip {
+    letter-spacing: 0.05em;
+  }
+  &__small {
+    font-size: 0.7em;
+    margin-top: 5px;
+  }
+  &__subtitle {
+    font-family: Raleway;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 16px;
+    color: #555555;
+  }
+  &__button {
+    width: 250px;
+  }
+}
+
+@media (min-width: 780px) {
+  .col-md-5 {
+    width: 41.66666%;
+  }
+  .col-md-7 {
+    width: 58.33333%;
+  }
+  .resume{
+    padding: 10px 5px 10px 16px;
+    border-left: 1px solid #c4c4c4;
+  }
+}
+
+@media (max-width: 780px) {
+  .resume {
+    max-width:500px;
+    padding: 30px;
+    margin: 16px auto;
+    border: 1px solid #c4c4c4;
+  }
+}
+
+@media (max-width: 500px) {
+  .resume {
+    padding: 16px;
+  }
+}
+
+.filtro__panel .mat-expansion-panel-body {
+  padding: 0 0 0 10px;
+}
+
+
+.layoout {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(51, 51, 51, 0.336);
+  padding-top: 40vh;
+  min-height: 100vh;
 }

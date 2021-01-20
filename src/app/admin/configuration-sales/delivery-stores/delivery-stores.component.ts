@@ -25,33 +25,17 @@ export class DeliveryStoresComponent implements OnInit {
     this.dataSource.paginator = paginator1;
   }
 
-  dataStoreSource = new MatTableDataSource();
-  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address', 'actions'];
-
-  @ViewChild('storePaginator', { static: false }) set content2(
-    paginator1: MatPaginator
-  ) {
-    this.dataStoreSource.paginator = paginator1;
-  }
-
   init$: Observable<any>
-  initStore$: Observable<any>
+  
   constructor(
-    private afs: AngularFirestore,
     private dialog: MatDialog,
-    private dbs: DatabaseService
+    public dbs: DatabaseService
   ) { }
 
   ngOnInit(): void {
     this.init$ = this.dbs.getDelivery().pipe(
       tap((res) => {
         this.dataSource.data = res;
-      })
-    );
-
-    this.initStore$ = this.dbs.getStores().pipe(
-      tap((res) => {
-        this.dataStoreSource.data = res;
       })
     );
   }
@@ -65,14 +49,6 @@ export class DeliveryStoresComponent implements OnInit {
     })
   }
 
-  openStoreDialog(movil: boolean, data) {
-    this.dialog.open(StoreDialogComponent, {
-      data: {
-        edit: movil,
-        data: data
-      }
-    })
-  }
 
   deleteDialog(id: string, type: string, title: string) {
     this.dialog.open(DeleteConfiDialogComponent, {

@@ -5,56 +5,6 @@
   width: 100%;
   margin: auto;
 }
-.categories {
-  position: relative;
-  &__list {
-    margin-bottom: 0;
-    padding-inline-start: 0;
-  }
-  &__item {
-    width: 100%;
-    list-style: none;
-    height: 48px;
-    margin-bottom: 0;
-    padding: 0 5px;
-    font-family: Roboto;
-    color: #555555;
-    line-height: 48px;
-    cursor: pointer;
-    border-bottom: 1px solid #c4c4c4;
-    transition: all 0.5s ease-in-out;
-    &:hover {
-      background-color: var(--primary-color);
-      color: white;
-    }
-  }
-
-  &__section{
-    width: calc(100% - 270px);
-    overflow: hidden;
-    padding: 25px;
-    background-color: white;
-    visibility: hidden;
-    color: #2B2B2B;
-    & img{
-      border: 1px solid #ddd;
-    }
-  }
-  &__title{
-    font-family: Raleway;
-    color: #2B2B2B;
-    border-bottom: 2px solid var(--primary-color);
-    font-weight: 600;
-    font-size: 1.4em;
-    padding-bottom: 8px;
-  }
-  &__subtitle{
-    color: var(--primary-color);
-    font-size:1.1em;
-    cursor: pointer;
-  }
-}
-
 
 .store__search {
   width: 250px;
@@ -84,7 +34,6 @@
   }
 }
 
-
 .categories__item .megadrop {
   opacity: 0;
   visibility: hidden;
@@ -95,7 +44,7 @@
   width: 800px;
   min-height: 100%;
   text-align: left;
-  margin-top:30px;
+  margin-top: 30px;
   background-color: white;
   padding: 0;
   z-index: 99;
@@ -109,33 +58,48 @@
 }
 
 .filtro {
-  &__title {
-    font-size: 1.2em;
-    font-weight: 600;
-  }
-
+  text-transform: uppercase;
   &__panel {
     box-shadow: none;
   }
 
+  &__link {
+    height: 48px;
+    border-bottom: 1px solid #c4c4c4;
+    cursor: pointer;
+    padding: 0px 16px 0 10px;
+    font: 500 0.8em, "Helvetica Neue", sans-serif !important;
+  }
+
+  &__sub {
+    padding: 10px 0;
+    cursor: pointer;
+  }
+
   &__panel .mat-expansion-panel-header {
-    padding: 0px 10px 0px 0px;
+    padding: 0px 10px;
     border-bottom: 1px solid #c4c4c4;
     border-radius: 0;
+    font-size: 0.85em;
+  }
+
+  &__panel .mat-expansion-panel-header.mat-expanded {
+    /* height: 64px; */
+    border-left: 4px solid #1c31ea;
   }
 
   &__panel .mat-expansion-panel-header:hover {
     background-color: transparent;
   }
 
+  &__panel .mat-expansion-panel-content {
+    font: 500 0.8em, "Helvetica Neue", sans-serif;
+  }
+
   &__scroll {
     max-height: 28em;
     overflow: auto;
   }
-}
-
-::ng-deep .filtro__panel .mat-expansion-panel-body {
-  padding: 0 0 0 10px;
 }
 
 .category-button {

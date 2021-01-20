@@ -22,11 +22,15 @@
       <mat-label>Correo</mat-label>
       <input autocomplete="off" formControlName="email" type="text" matInput placeholder="Correo" />
       <mat-error>
-        <span *ngIf="createForm.get('email').errors?.required"
-          >Campo requerido</span
-        >
+        <span *ngIf="createForm.get('email').errors?.required">
+          Campo requerido</span>
         <span *ngIf="createForm.get('email').errors?.email">Formato no válido</span>
       </mat-error>
+    </mat-form-field>
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Número de contacto</mat-label>
+      <input autocomplete="off" formControlName="phone" type="phone" matInput />
+      <mat-error>Campo requerido</mat-error>
     </mat-form-field>
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Código Único</mat-label>

@@ -1,0 +1,19 @@
+<div>
+  <div mat-dialog-title>
+    <h2 class="title-dialog">
+      <mat-icon style="vertical-align: middle;">warning</mat-icon> Eliminar Producto2
+    </h2>
+    <mat-divider></mat-divider>
+    <mat-progress-bar *ngIf="loading$ | async" mode="indeterminate"></mat-progress-bar>
+  </div>
+  <ng-container *ngIf="init$|async"></ng-container>
+  <div mat-dialog-content>
+    <p>¿Desea continuar con la acción?</p>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close>Cerrar</button>
+    <button class="w3-margin-left" mat-raised-button color='warn' [disabled]="loading$ | async"
+      (click)="save()">Borrar</button>
+  </div>
+</div>

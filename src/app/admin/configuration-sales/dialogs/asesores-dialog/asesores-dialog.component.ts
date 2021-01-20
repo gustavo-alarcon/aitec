@@ -33,6 +33,7 @@ export class AsesoresDialogComponent implements OnInit {
     this.createForm = this.fb.group({
       lastname: [this.data.edit ? this.data.data.lastname : null, Validators.required],
       name: [this.data.edit ? this.data.data.name : null, Validators.required],
+      phone: [this.data.edit ? this.data.data.phone : null, Validators.required],
       email: [this.data.edit ? this.data.data.email : null, [Validators.required, Validators.email]],
       code: [this.data.edit ? this.data.data.code : null, [Validators.required], [this.nameRepeatedValidator(this.data)]]
     })
@@ -66,6 +67,7 @@ export class AsesoresDialogComponent implements OnInit {
       lastname: this.createForm.get('lastname').value,
       email: this.createForm.get('email').value,
       code: this.createForm.get('code').value,
+      phone: this.createForm.get('phone').value,
       createdAt: new Date(),
       displayName: this.createForm.get('name').value + ' ' + this.createForm.get('lastname').value
     }
@@ -91,6 +93,7 @@ export class AsesoresDialogComponent implements OnInit {
       lastname: this.createForm.get('lastname').value,
       email: this.createForm.get('email').value,
       code: this.createForm.get('code').value,
+      phone: this.createForm.get('phone').value,
       displayName: this.createForm.get('name').value + ' ' + this.createForm.get('lastname').value
     }
 

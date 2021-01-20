@@ -1,4 +1,13 @@
 <div class="w3-section">
+  <div class="ms-flex ms-flex--center">
+    <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
+      <mat-icon>keyboard_return</mat-icon>
+    </button>
+    <h2 style="font-size:1.5em;">
+      Categorías
+    </h2>
+  </div>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
   <button mat-raised-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
     <span>Agregar</span>
     <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>

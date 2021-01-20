@@ -18,8 +18,8 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product| Package;
-  quantity: number;               
+  product: Product | Package;
+  quantity: number;
   //If "product" is a package, we will have to specify the chosen products
   //for each field in package.items. chosenOptions will contain the
   //chosen products in the same order as each field in package.items.
@@ -30,13 +30,9 @@ export interface Sale {
   id: string;
   correlative: number;
   correlativeType: string;
-  payType?: string | {
-    account: string;
-    image: string;
-    name: string;
-  },
+  payType?: any,
   document?: string,             //tipo de comprobante
-  location: {
+  location?: {
     address: string,
     district: any,
     coord?: {
@@ -51,12 +47,24 @@ export interface Sale {
   user: User;                   //requesting user
   requestDate: Date,            //Fecha deseada por cliente
 
+  idDocument: number;
+  documentInfo: any;
+  payInfo: any;
+
+  idDelivery: number;
+  deliveryType: string;
+  deliveryInfo: any;
+
+  observation: string;
+
+  adviser:any;
+  coupon:any;
   //A partir de este punto, todo varia de acuerdo
   //a formulario de ventas.
   status: saleStatusOptions[keyof saleStatusOptions]
 
-  requestedProducts: SaleRequestedProducts[];     
-  
+  requestedProducts: SaleRequestedProducts[];
+
 
   deliveryPrice: number;
   total: number;
@@ -131,6 +139,6 @@ export interface Sale {
   editedAt?: Date,
   editedBy?: User
 
-  transactionCliente?:any;
-  transactionSale?:any;
+  transactionCliente?: any;
+  transactionSale?: any;
 }
