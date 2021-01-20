@@ -26,6 +26,7 @@ import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -76,7 +77,8 @@ export class DatabaseService {
   constructor(
     private afs: AngularFirestore,
     private storage: AngularFireStorage,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private http: HttpClient
   ) {
     //this.opening$ = this.getOpening();
   }
@@ -1650,7 +1652,35 @@ export class DatabaseService {
       }
     );  
   }
+  
+ //Payment
+  async methodPostAsync(data): Promise<any> {
 
+    try {
 
+      const username='13421879';
+      const password='testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
+      
+      var auth = 'Basic ' + btoa(username + ":" + password);
+      //var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
+       var url = "/api-payment/V4/Charge/CreatePayment";
 
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Access-Control-Allow-Origin':'*',
+          'Content-Type':  'application/json',
+           Authorization: `${auth}`,
+         
+        })
+       };
+      
+       let res = await this.http.post(url, JSON.stringify(data), httpOptions).toPromise();;
+
+       
+      return res;
+    } catch (error) {
+      await console.log(error);
+    }
+
+  }
 }
