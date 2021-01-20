@@ -16,15 +16,25 @@
       />
     </mat-form-field>
 
-    <button
-      type="submit"
-      [disabled]="!questionForm.valid"
-      mat-raised-button
-      color="primary"
-      (click)="openSnackBar()"
-    >
-      Preguntar
-    </button>
+      <div *ngIf="authService.user$ | async; else loginbutton"  style="display: inline-flex;">
+        <button
+          type="submit"
+          [disabled]="!questionForm.valid"
+          mat-raised-button
+          color="primary"
+          (click)="openSnackBar()"
+         
+          >
+        Preguntar
+      </button>
+      </div>
+      <ng-template #loginbutton>
+        <button type="button" mat-flat-button color="primary"  (click)="login()"           
+          >
+          Preguntar
+        </button>
+      </ng-template>
+    
 
     <!-- <mat-form-field>
       <mat-label>Message</mat-label>
