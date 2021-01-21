@@ -31,6 +31,7 @@ export class WarehouseComponent implements OnInit {
   warehouseForm: FormControl = new FormControl('');
   entryWarehouseControl: FormControl;
   entryProductControl: FormControl;
+  entrySKUControl: FormControl;
   entryScanControl: FormControl;
 
   //Table
@@ -66,7 +67,13 @@ export class WarehouseComponent implements OnInit {
 
   view: string = "products";
   warehouses$: Observable<Warehouse>;
-  entryProducts$: Observable<Product[]>
+  entryProducts$: Observable<Product[]>;
+
+  selectedProduct = new BehaviorSubject<any>(null);
+  selectedProduct$ = this.selectedProduct.asObservable();
+
+  seriesList: Array<any> = [];
+  entryStock: number = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -88,6 +95,7 @@ export class WarehouseComponent implements OnInit {
     this.promoFilterForm = this.fb.control(false);
     this.entryWarehouseControl = this.fb.control('');
     this.entryProductControl = this.fb.control('');
+    this.entrySKUControl = this.fb.control('');
     this.entryScanControl = this.fb.control('');
   }
 
@@ -102,7 +110,7 @@ export class WarehouseComponent implements OnInit {
           return warehouse.map(el => {
             el['product'] = products.filter(li => li.id == el['idProduct'])[0]
             return el
-          }).filter(wr=>wr['product']).filter(ol => {
+          }).filter(wr => wr['product']).filter(ol => {
             return filt != 'Todos' ? ol.warehouse == filt : true
           })
         }),
@@ -120,7 +128,7 @@ export class WarehouseComponent implements OnInit {
     ).pipe(
       map(([warehouses, products, selection, product]) => {
         return warehouses.map(warehouse => {
-          // Adding product object to warehouse object
+          // Adding product property to warehouse object
           warehouse['product'] = products.filter(product => product.sku == warehouse['skuProduct'])[0];
           return warehouse
         }).filter(ol => {
@@ -134,8 +142,6 @@ export class WarehouseComponent implements OnInit {
         })
       })
     )
-
-
   }
 
   applyFilter(event: Event) {
@@ -201,13 +207,53 @@ export class WarehouseComponent implements OnInit {
   }
 
   showEntryProduct(product: any): string | null {
-    console.log(product)
     return product.product ? product.product.description : null;
+  }
+
+  selectedEntryProduct(event: any): void {
+    this.selectedProduct.next(event.option.value.product);
+  }
+
+  showEntrySKU(product: any): string | null {
+    console.log(product);
+    return product ? product.sku + ' | ' + product.color.name : null
+  }
+
+  selectedEntrySKU(event: any): void {
+    this.entryStock = event.option.value.stock;
+  }
+
+  addSerie() {
+    let sku = this.entrySKUControl.value.sku
+    console.log(sku);
+
+    if (sku) {
+      let scan = this.entryScanControl.value
+      if (scan.toLowerCase().includes(sku.toLowerCase())) {
+
+        this.seriesList.push(scan)
+      } else {
+        let real = sku + scan
+        this.seriesList.push(real)
+      }
+
+
+      this.entryStock = this.seriesList.length;
+      this.entryScanControl.setValue('')
+    } else {
+      this.snackBar.open('Por favor, elija SKU', 'Aceptar');
+    }
+  }
+
+  removeSerie(i) {
+    this.seriesList.splice(i, 1)
+    this.entryStock = this.seriesList.length;
   }
 
   save(): void {
     // 
   }
+
 
 
 }
