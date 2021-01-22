@@ -22,7 +22,7 @@
       </div>
       <div class="w3-col l4">
         <div class="ms-flex ms-flex--center">
-          <span *ngIf="product.purchaseNumber > 1;else new">{{product.purchaseNumber}} vendidos</span>
+          <span *ngIf="selectedProduct.purchaseNumber > 1;else new">{{selectedProduct.purchaseNumber}} vendidos</span>
           <ng-template #new> <span>Nuevo</span> </ng-template>
           <span class="ms-fill"></span>
           <div *ngIf="favorite$|async as fav">
@@ -38,7 +38,7 @@
           </div>
 
         </div>
-        <h2 class="product__title">{{ product.description }}</h2>
+        <h2 class="product__title">{{ selectedProduct.description }}</h2>
         <div class="small">
           <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
             <div ngxSlickItem *ngFor="let slide of galleryImg" class="slide">
@@ -48,19 +48,19 @@
           </ngx-slick-carousel>
         </div>
 
-        <div *ngIf="promo && product.promoData.quantity == 1">
+        <div *ngIf="promo && selectedProduct.promoData.quantity == 1">
           <div class=" big product__promo ms-flex">
             <div style="width: fit-content">
               Antes <strike>{{price | currency: 'S/. ':'symbol':'2.2-2'}}</strike>
             </div>
             <div class="product__promo--discount">
-              {{ getDiscount(product.promoData) }} % Dscto
+              {{ getDiscount(selectedProduct.promoData) }} % Dscto
             </div>
           </div>
           <div class="product__price w3-section big">
             <span>Ahora</span>
             <span class="product__price--number">
-              {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
+              {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
             </span>
           </div>
         </div>
@@ -90,13 +90,13 @@
                 Antes <strike>{{price | currency: 'S/. ':'symbol':'2.2-2'}}</strike>
               </div>
               <div class="product__promo--discount">
-                {{ getDiscount(product.promoData) }} % Dscto
+                {{ getDiscount(selectedProduct.promoData) }} % Dscto
               </div>
             </div>
             <div class="product__price w3-section">
               <span>Ahora</span>
               <span class="product__price--number">
-                {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
+                {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
               </span>
             </div>
           </div>
@@ -110,7 +110,7 @@
 
         </div>
         <div *ngIf="promo && product.promoData.quantity > 1" class="w3-center product__promoDiv">
-          OFERTA: {{product.promoData.quantity}} x {{product.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
+          OFERTA: {{selectedProduct.promoData.quantity}} x {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
         </div>
         <div class="product__stock" *ngIf="productSelected.stock==1;else stock">
           Último stock disponible
@@ -131,15 +131,15 @@
           </div>
         </div>
 
-        <p *ngIf="product.guarantee">Garantia: <strong>{{product.timeguarantee}} meses</strong></p>
+        <p *ngIf="selectedProduct.guarantee">Garantia: <strong>{{selectedProduct.timeguarantee}} meses</strong></p>
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
-            <app-quantity-div [product]="product" [price]="price" [chosen]="productSelected"
-              [color]="product.products.length > 1" size="md"></app-quantity-div>
+            <app-quantity-div [product]="selectedProduct" [price]="price" [chosen]="productSelected"
+              [color]="selectedProduct.products.length > 1" size="md"></app-quantity-div>
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"
-              [style.visibility]="product['realStock'] > 0 ? 'visible' : 'hidden'">
+              [style.visibility]="selectedProduct['realStock'] > 0 ? 'visible' : 'hidden'">
               <mat-icon>shopping_cart</mat-icon>
               <span> Agregar al Carrito</span>
             </button>
@@ -149,11 +149,11 @@
     </div>
     <div class="w3-section w3-padding">
       <p style="font-size: 1.2em">
-        Marca: <strong>{{ product.brand.name?product.brand.name :product.brand }}</strong>
+        Marca: <strong>{{ selectedProduct.brand.name?selectedProduct.brand.name :selectedProduct.brand }}</strong>
       </p>
       <div class="w3-section">
         <h4 class="product__subtitle">Descripción</h4>
-        <div [innerHTML]="product.additionalDescription"></div>
+        <div [innerHTML]="selectedProduct.additionalDescription"></div>
       </div>
 
       <div class="w3-section">

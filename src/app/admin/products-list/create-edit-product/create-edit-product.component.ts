@@ -536,8 +536,6 @@ export class CreateEditProductComponent implements OnInit {
     } else {
       this.snackBar.open('Por favor, elija SKU', 'Aceptar');
     }
-
-
   }
 
   removeSerie(i) {

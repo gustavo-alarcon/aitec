@@ -32,9 +32,11 @@ export class AppComponent {
   ngOnInit() {
     this.version$ = this.dbs.getGeneralConfigDoc().pipe(
       tap(conf => {
-        console.log(conf.lastVersion);
+        // console.log(conf.lastVersion);
         if (conf.lastVersion != this.dbs.version) {
-          this.snackBar.open("Versión incorrecta")
+          this.snackBar.open("🤓 Hola! --- Hay una nueva versión de la página, actualízala para tener las últimas características 😉", 'Aceptar', {
+            duration: 10000
+          })
         }
       }),
     )
