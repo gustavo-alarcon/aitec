@@ -14,33 +14,39 @@ export class PaymentComponent implements OnInit {
   @Input() total:string;
 
   // payment gateway
-  
+
   promiseError = null;
 
   KR;
 
+  data;
+
   private static readonly API_ENDPOINT = 'https://api.micuentaweb.pe';
   private static readonly API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
   
-  data = {
-    "amount":   2000,
-    "currency": "PEN",
-    "orderId":  "myOrderId - Test - Prueba",
-    "customer": {
-        "email": "mhalanocca@meraki-s.com"
-    }
-  };
-
   constructor(
               private readonly db:DatabaseService,
               private readonly router:Router,
 
               ) { }
 
-  async ngOnInit(): Promise<void> {   
-        
+  async ngOnInit(): Promise<void> {
+    
+    let decimal=parseFloat(this.total).toFixed(2);    
+    let totalPay =decimal.replace(/\./g,'');
+    
+    this.data = {
+      "amount": totalPay,
+      "currency": "PEN",
+      "orderId":  "myOrderId - Test - Prueba",
+      "customer": {
+          "email": "mhalanocca@meraki-s.com"
+      }
+    };
     await this.loadPaymentLibrary();
     await this.initializePaymentForm();
+
+   
   }
 
   private async loadPaymentLibrary(): Promise<void> {
@@ -66,12 +72,13 @@ export class PaymentComponent implements OnInit {
       if (response.clientAnswer.orderStatus === 'PAID') {
         console.log('Payment success');
 
-        this.PayFinishForm(response);
+        this.PayFinishSuccess(response);
         return true;
       }
       else {
         console.error(`Payment status : ${response.clientAnswer.orderStatus}`);
         return false;
+        //this.PayFinishError();
       }
     });
     this.KR.onError((error) => {
@@ -92,16 +99,16 @@ export class PaymentComponent implements OnInit {
   }
 
   
-  PayFinishForm(response){
+  PayFinishSuccess(response){
     
-    this.router.navigate(['/paysuccess']);
-    
-    /* this.transfereService.setData(response); 
-    this.router.navigate(['/finishpay']); */
-    //return `${this.router.navigate(['/finishpay',response])}`;
+    this.router.navigate(['main/carrito/success']);    
 
   }
-
+  
+  PayFinishError(){
+    this.router.navigate(['main/carrito/error']);
+  }
+  
   
 
 }

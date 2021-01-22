@@ -16,28 +16,25 @@
       />
     </mat-form-field>
 
-    <button
-      type="submit"
-      [disabled]="!questionForm.valid"
-      mat-raised-button
-      color="primary"
-      (click)="openSnackBar()"
-    >
-      Preguntar
-    </button>
-
-    <!-- <mat-form-field>
-      <mat-label>Message</mat-label>
-      <input matInput value="Disco party!" #message>
-    </mat-form-field>
+      <div *ngIf="authService.user$ | async; else loginbutton"  style="display: inline-flex;">
+        <button
+          type="submit"
+          [disabled]="!questionForm.valid"
+          mat-raised-button
+          color="primary"
+          (click)="openSnackBar()"
+         
+          >
+        Preguntar
+      </button>
+      </div>
+      <ng-template #loginbutton>
+        <button type="button" mat-flat-button color="primary"  (click)="login()"           
+          >
+          Preguntar
+        </button>
+      </ng-template>
     
-    <mat-form-field>
-      <mat-label>Action</mat-label>
-      <input matInput value="Dance" #action>
-    </mat-form-field>
-    
-    <button mat-stroked-button (click)="openSnackBar(message.value, action.value)">Show snack-bar</button> -->
-
     <span
       *ngIf="
         frm.question.dirty &&
@@ -51,9 +48,9 @@
   </form>
 </div>
 
-<h3>Últimas realizadas</h3>
+<h3>Últimas consultas realizadas</h3>
 <div *ngFor="let item of questions">
-  <div class="boder-question">
+  <div class="boder-question">  
     <span class="question"> {{ item.question }} </span>
 
     <span class="answer">

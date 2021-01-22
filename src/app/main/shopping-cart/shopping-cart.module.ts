@@ -37,7 +37,7 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
 import { PaymentComponent } from './payment/payment.component';
 
 import { HttpClientModule } from '@angular/common/http';
-import { PaymentSuccessComponent } from './payment-success/payment-success.component';
+import { PaymentErrorComponent } from './payment-error/payment-error.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +47,7 @@ import { PaymentSuccessComponent } from './payment-success/payment-success.compo
     ShoppingListMobileComponent,
     LocationDialogComponent,
     PaymentComponent,
-    PaymentSuccessComponent,
+    PaymentErrorComponent,
   ],
   imports: [
     CommonModule,

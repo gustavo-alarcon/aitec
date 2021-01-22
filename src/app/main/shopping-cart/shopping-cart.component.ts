@@ -147,15 +147,6 @@ export class ShoppingCartComponent implements OnInit {
       })
     );
 
-<<<<<<< HEAD
-
-
-    this.subtotal$ = this.dbs.orderObs$.pipe(
-      map((ord) => {
-        return [...ord]
-          .map((el) => el.quantity * el.product.priceMin * 0.82)
-          .reduce((a, b) => a + b, 0).toFixed(2);
-=======
     this.totalAll$ = combineLatest(
       this.sum$,
       this.discount$
@@ -165,7 +156,6 @@ export class ShoppingCartComponent implements OnInit {
       }),
       tap(res => {
         this.total = Number(res)
->>>>>>> develop
       })
     )
 
@@ -298,18 +288,10 @@ export class ShoppingCartComponent implements OnInit {
       })
     )
 
-<<<<<<< HEAD
 
 
   }
 
-=======
-  //Debuging start
-  pruebaPasarela() {
-
-  }
-  //Debuging end
->>>>>>> develop
 
   firstView() {
     this.view.next(1);

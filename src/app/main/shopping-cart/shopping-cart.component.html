@@ -251,7 +251,7 @@
                 </div>
               </div>
               <div *ngIf="method.value==2">
-                <form [formGroup]="cardForm" class="w3-margin-top">
+                <!-- <form [formGroup]="cardForm" class="w3-margin-top">
                   <div>Elige el tipo de tarjeta:</div>
                   <div class="w3-center w3-section">
                     <button mat-button (click)="chooseType('visa')"
@@ -309,13 +309,14 @@
                     <mat-error>Campo requerido</mat-error>
                   </mat-form-field>   
                   
-                </form>
+                </form> -->
 
                 <!-- Payment -->
 
-                <app-payment ></app-payment>
-
-
+                <div *ngIf="totalAll$ | async  as total">
+                 <app-payment [total]="total" ></app-payment>
+                 
+               </div>
 
               </div>
             </div>
