@@ -61,7 +61,7 @@ export class StoreComponent implements OnInit {
         this.loading.next(true)
         return combineLatest(
           this.searchForm.valueChanges.pipe(startWith('')),
-          this.dbs.getProductsList()
+          this.dbs.getProductsListValueChanges()
         ).pipe(
           map(([word, products]) => {
 
