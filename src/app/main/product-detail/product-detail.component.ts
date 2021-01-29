@@ -56,9 +56,7 @@ export class ProductDetailComponent implements OnInit {
         );
       }),
       tap(res => {
-        if (this.count == 1) {
-          this.searchNumber(res)
-        }
+        this.searchNumber(res)
         this.loading.next(false)
       })
     );
@@ -70,16 +68,21 @@ export class ProductDetailComponent implements OnInit {
 
   searchNumber(product) {
     this.afs.firestore.runTransaction((transaction) => {
-      const ref = this.afs.firestore.collection(`/db/aitec/productsList`).doc(product.id);
-
+      const ref = this.afs.firestore.collection(`/db/aitec/searchProducts`).doc(product.id);
       return transaction.get(ref).then((doc) => {
-        let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
-        searchNumber++
-        transaction.update(ref, { searchNumber: searchNumber });
+        if (!doc.exists) {
+          transaction.set(ref, { searchNumber: 1, id: product.id});
+        }else{
+          let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
+          searchNumber++
+          transaction.update(ref, { searchNumber: searchNumber });
+        }
+
+        
       });
     }).then(() => {
       this.count++
-
+      console.log('save')
     })
   }
 

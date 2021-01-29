@@ -41,6 +41,7 @@ export class ShoppingCartComponent implements OnInit {
   initCoupon$: Observable<any>
   couponList: Array<any> = []
   couponForm: FormControl = new FormControl('')
+  couponVerified: boolean = false
 
   user: User
 
@@ -295,11 +296,19 @@ export class ShoppingCartComponent implements OnInit {
   firstView() {
     this.view.next(1);
   }
+
   secondView() {
     this.view.next(2);
   }
+
   thirdView() {
-    this.view.next(3);
+    let check = this.chooseDelivery$.pipe(take(1))
+    check.subscribe(ch => {
+      if (!ch) {
+        this.view.next(3);
+      }
+    })
+
   }
 
   validatedThirdButton() {
@@ -410,44 +419,98 @@ export class ShoppingCartComponent implements OnInit {
     }
   }
 
-  getDiscount(item) {
-    return 0;
+  getDiscount(coupon) {
+    switch (coupon.redirectTo) {
+      case 'Toda la compra':
+        return coupon.type == 2 ? this.total * (coupon.discount / 100) : coupon.discount
+        break;
+      case 'Categoría/subcategoría':
+        let ord = [...this.dbs.order].filter(orde => {
+          let cat = coupon.category.split(' >> ')
+          switch (cat.length) {
+            case 1:
+              return orde.product.category == cat[0]
+              break;
+            case 2:
+              return orde.product.category == cat[0]
+                && (orde.product.subcategory ? orde.product.subcategory == cat[1] : false)
+              break;
+            case 3:
+              return orde.product.category == cat[0]
+                && (orde.product.subcategory ? orde.product.subcategory == cat[1] : false)
+                && (orde.product.subsubcategory ? orde.product.subsubcategory == cat[2] : false)
+              break;
+            default:
+              break;
+          }
+        }).reduce((a, b) => a + b.price, 0)
+        return coupon.type == 2 ? ord * (coupon.discount / 100) : ord > coupon.discount ? coupon.discount : ord
+        break;
+      case 'Marca':
+        let des = [...this.dbs.order].filter(or => or.product.brand.name ? or.product.brand.name == coupon.brand : or.product.brand == coupon.brand)
+          .reduce((a, b) => a + b.price, 0)
+        return coupon.type == 2 ? des * (coupon.discount / 100) : des > coupon.discount ? coupon.discount : des
+        break;
+    }
+  }
+
+  clearCoupon() {
+    this.couponForm.setValue('')
+    this.discount.next('0.00')
+    this.couponForm.enable()
+    this.couponVerified = false
   }
 
   getDiscountCoupon() {
     let value = this.couponForm.value
+
     if (value) {
       this.couponForm.disable()
       let ind = this.couponList.findIndex(el => el.name == value)
       if (ind >= 0) {
         let coupon = this.couponList[ind]
-        let today = new Date()
-        let validDate = today.getTime() >= coupon.startDate.toMillis() && today.getTime() <= coupon.endDate.toMillis()
-        if (validDate) {
-          if (coupon.type == 1) {
-            this.discount.next(coupon.discount.toFixed(2))
-          } else {
-            let disc = this.total * (coupon.discount / 100)
-            if (coupon.limit > 0) {
-              if (disc > coupon.limit) {
-                this.discount.next(coupon.limit.toFixed(2))
-              } else {
-                this.discount.next(disc.toFixed(2))
-              }
-            } else {
-              this.discount.next(disc.toFixed(2))
-            }
-          }
+        if (coupon.users.includes(this.dbs.uidUser)) {
+          this.snackbar.open('Cupón ya utilizado', 'Aceptar');
+          this.couponForm.enable()
         } else {
-          this.snackbar.open('Código expirado', 'Aceptar');
+          let from = coupon.from ? this.total >= coupon.from : true
+          if (from) {
+            let today = new Date()
+            let validDate = coupon.limitDate ? today.getTime() >= coupon.startDate.toMillis() && today.getTime() <= coupon.endDate.toMillis() : true
+            if (validDate) {
+              let disc = this.getDiscount(coupon)
+              if (coupon.type == 1) {
+                this.discount.next(disc.toFixed(2))
+              } else {
+                if (coupon.limit > 0) {
+                  if (disc > coupon.limit) {
+                    this.discount.next(coupon.limit.toFixed(2))
+
+                  } else {
+                    this.discount.next(disc.toFixed(2))
+                  }
+                } else {
+                  this.discount.next(disc.toFixed(2))
+                }
+              }
+              this.couponVerified = true
+            } else {
+              this.snackbar.open('Código expirado', 'Aceptar');
+              this.couponForm.enable()
+            }
+          } else {
+            this.snackbar.open('El código no se puede utilizar para este monto de compra', 'Aceptar');
+            this.couponForm.enable()
+          }
         }
-        this.couponForm.setValue('')
+
       } else {
         this.snackbar.open('Código de descuento incorrecto', 'Aceptar');
+        this.couponForm.enable()
 
       }
 
-      this.couponForm.enable()
+
     }
 
   }

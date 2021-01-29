@@ -19,10 +19,11 @@
           <span *ngIf="createForm.get('name').errors?.nameRepeatedValidator">Este nombre ya se encuentrarepetido.</span>
         </mat-error>
       </mat-form-field>
-      <div class="w3-block w3-margin-bottom">
+      <div class="w3-block w3-margin-bottom w3-margin-top">
         <label>Con límite de tiempo:</label>
         <mat-slide-toggle color="primary" formControlName="limitDate"></mat-slide-toggle>
       </div>
+      <ng-container *ngIf="date$ | async"></ng-container>
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>FECHA/PERIODO</mat-label>
         <mat-date-range-input [rangePicker]="picker">
@@ -53,9 +54,16 @@
         <input autocomplete="off" formControlName="limit" type="number" matInput />
         <mat-hint>El limite en soles en el descuento</mat-hint>
       </mat-form-field>
+
     </div>
     <div class="w3-col m6 l6 w3-padding">
-      <div>
+      <mat-form-field class="w3-block" appearance="outline">
+        <mat-label>Apartir de</mat-label>
+        <span matPrefix>S/.&nbsp;</span>
+        <input autocomplete="off" formControlName="from" type="number" matInput />
+        <mat-hint>Aplicar el cupón desde este monto, agregar si corresponse</mat-hint>
+      </mat-form-field>
+      <div class="w3-margin-top">
         <label>Descuento a:</label>
         <mat-radio-group color="primary" class="example-radio-group" formControlName="redirectTo">
           <mat-radio-button *ngFor="let season of redirects" [value]="season">
