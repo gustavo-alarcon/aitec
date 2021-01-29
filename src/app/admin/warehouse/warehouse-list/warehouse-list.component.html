@@ -1,0 +1,18 @@
+<div class="w3-section ms-container">
+  <mat-card>
+    <mat-card-content>
+      <div class="w3-block ms-flex" style="align-items: baseline">
+        <button mat-flat-button (click)="onCreateEditItem(false)" color="primary" class="w3-margin-right">
+          <mat-icon>add</mat-icon>Crear
+        </button>
+
+        <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
+          <input (keyup)="applyFilter($event)" matInput type="text" placeholder="Escriba..." autocomplete="off" />
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+</div>

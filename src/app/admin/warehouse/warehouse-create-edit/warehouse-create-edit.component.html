@@ -1,0 +1,26 @@
+<div class="ms-flex">
+  <h2 mat-dialog-title>{{edit ? 'Editar' : 'Crear'}}</h2>
+  <span class="ms-fill"></span>
+  <button mat-icon-button>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-divider></mat-divider>
+
+<mat-dialog-content>
+  <div [formGroup]="placeFormGroup">
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Departamento</mat-label>
+      <mat-select formControlName="department">
+        <mat-option *ngFor="let item of departmentList" (click)="selectDepartment(item)" [value]="dept">
+          {{ item.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button color="warn">Cerrar</button>
+</mat-dialog-actions>

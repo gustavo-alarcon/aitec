@@ -1,0 +1,54 @@
+.reveal {
+  display: inline-block;
+}
+
+.triangleTopLeft {
+  width: auto;
+  position: relative;
+}
+
+.promo {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  left: 0px;
+  z-index: 3;
+  background: #ef5350;
+  padding: 3px 7px;
+  color: white;
+  font-size: 0.7em;
+  letter-spacing: 0.2em;
+}
+
+.entry {
+  display: flex;
+  align-items: flex-start;
+
+  &_container {
+
+  }
+
+  &_actions {
+    margin-top: 10px;
+  }
+}
+
+.info {
+  padding: 1em;
+  border: dashed 1px lightgrey;
+  border-radius: 10px 10px;
+  margin: 2px 10px;
+  width: 30%;
+
+  &--default {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+
+  p {
+    align-self: center;
+    justify-self: center;
+    color: grey;
+  }
+}
