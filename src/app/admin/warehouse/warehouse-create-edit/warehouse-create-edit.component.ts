@@ -13,12 +13,15 @@ import { PlacesService } from 'src/app/core/services/places.service';
 export class WarehouseCreateEditComponent implements OnInit {
 
   placeFormGroup: FormGroup;
+
   departmentList: Array<any>;
+  providenceList: Array<any>;
+  districtList: Array<any>;
 
   constructor(
     private places : PlacesService,
     private fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) private data: {edit: boolean, warehouse?: Warehouse}
+    @Inject(MAT_DIALOG_DATA) public data: {edit: boolean, warehouse?: Warehouse}
   ) { }
 
   ngOnInit(): void {
@@ -29,8 +32,19 @@ export class WarehouseCreateEditComponent implements OnInit {
 
   initForms(): void {
     this.placeFormGroup = this.fb.group({
-      department: [(this.data.edit ? this.data.warehouse.department : null), Validators.required]
+      department: [(this.data.edit ? this.data.warehouse.department : null), Validators.required],
+      providence: [(this.data.edit ? this.data.warehouse.providence : null), Validators.required],
+      district: [(this.data.edit ? this.data.warehouse.city : null), Validators.required],
+      address: [(this.data.edit ? this.data.warehouse.address : null), Validators.required],
     })
+  }
+
+  selectProvidence(item): void {
+    this.districtList = this.places.getDistritos(item.id)
+  }
+
+  selectDepartment(item): void {
+    this.providenceList = this.places.getProvincias(item.id)
   }
 
 }

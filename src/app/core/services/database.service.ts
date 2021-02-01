@@ -26,6 +26,7 @@ import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { Warehouse } from '../models/warehouse.model';
 
 @Injectable({
   providedIn: 'root',
@@ -373,6 +374,15 @@ export class DatabaseService {
     return this.afs
       .collection<Product>(`/db/aitec/warehouse/`, (ref) =>
         ref.orderBy('warehouse', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getWarehouseList(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
       )
       .valueChanges()
       .pipe(shareReplay(1));

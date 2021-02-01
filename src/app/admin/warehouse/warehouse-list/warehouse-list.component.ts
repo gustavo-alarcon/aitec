@@ -1,8 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, startWith, tap } from 'rxjs/operators';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
+import { DatabaseService } from 'src/app/core/services/database.service';
 import { WarehouseCreateEditComponent } from '../warehouse-create-edit/warehouse-create-edit.component';
 
 @Component({
@@ -14,13 +20,44 @@ export class WarehouseListComponent implements OnInit {
 
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
-  
+
+  warehouses$: Observable<Array<Warehouse>>;
+
+  searchFormControl = new FormControl('');
+
+  dataSource = new MatTableDataSource<Warehouse>();
+  displayedColumns: string[] = ['index', 'name', 'location', 'address', 'actions'];
+  @ViewChild('warehousePaginator', { static: false }) set content(paginator: MatPaginator) {
+    this.dataSource.paginator = paginator;
+  }
+  @ViewChild(MatSort, { static: false }) set content2(sort: MatSort) {
+    this.dataSource.sort = sort;
+  }
+
   constructor(
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public dbs: DatabaseService
   ) { }
 
   ngOnInit(): void {
+    this.warehouses$ = combineLatest(
+      this.dbs.getWarehouseList(),
+      this.searchFormControl.valueChanges.pipe(
+        startWith(''),
+        map(value => {return value.toLowerCase()})
+      )).pipe(
+        map(([warehouses, search]) => {
+          console.log(warehouses);
+          console.log(search);
+          
+          return warehouses.filter(el => el.name.toLowerCase().includes(search))
+        }),
+        tap(res => {
+          this.dataSource.data = res
+          this.loading.next(false)
+        })
+      )
   }
 
   onCreateEditItem(edit: boolean, warehouse?: Warehouse) {
@@ -30,6 +67,10 @@ export class WarehouseListComponent implements OnInit {
         warehouse: warehouse
       }
     })
+  }
+
+  applyFilter(event): void {
+    // 
   }
 
 
