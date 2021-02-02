@@ -26,6 +26,7 @@ import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { Warehouse } from '../models/warehouse.model';
 
 @Injectable({
   providedIn: 'root',
@@ -376,6 +377,23 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
+  }
+
+  getWarehouseList(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getWarehousesObservable(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges();
   }
 
   getWarehouseSeriesValueChanges(id): Observable<Product[]> {
@@ -1240,6 +1258,41 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  // WAREHOUSE
+  createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
 
+    let newData: Warehouse = {
+      id: warehouseRef.id,
+      department: data.department,
+      providence: data.providence,
+      district: data.district,
+      address: data.address,
+      name: data.name,
+      createdAt: new Date(),
+      createdBy: user,
+      editedAt: null,
+      editedBy: null
+    }
+
+    if (edit) {
+      warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+      batch.update(warehouseRef, newData);
+    } else {
+      batch.set(warehouseRef, newData);
+    }
+
+    return batch
+  }
+
+  deleteWarehouse(id: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+
+    batch.delete(warehouseRef);
+
+    return batch;
+  }
 
 }
