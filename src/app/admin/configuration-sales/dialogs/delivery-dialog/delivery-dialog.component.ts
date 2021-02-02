@@ -58,6 +58,13 @@ export class DeliveryDialogComponent implements OnInit {
       this.formGroup.get('distrito').disable();
     }
 
+    if (this.data.edit) {
+      this.formGroup.get('departamento').setValue(this.data.data.departamento.id)
+      this.selectProvincias(this.data.data.departamento)
+      this.formGroup.get('provincia').setValue(this.data.data.provincia.id)
+      this.selectDistritos(this.data.data.provincia)
+    }
+
    
 
   }
@@ -86,7 +93,7 @@ export class DeliveryDialogComponent implements OnInit {
       }
     }
 
-    this.formGroup.get('distrito').setValue('')
+    this.formGroup.get('distrito').setValue(null)
 
   }
 
@@ -101,13 +108,12 @@ export class DeliveryDialogComponent implements OnInit {
     this.loading.next(true)
     let newDelivery = {
       id: this.data.edit ? this.data.data.id : '',
-      departamento: this.formGroup.get('departamento').value,
-      provincia: this.formGroup.get('provincia').value,
+      departamento: this.departamentos.find(dep => dep.id == this.formGroup.get('departamento').value),
+      provincia: this.provincias.find(prov => prov.id == this.formGroup.get('provincia').value),
       distritos: this.deliveryDistritos,
       delivery: this.formGroup.get('delivery').value,
       createdAt: this.data.edit ? this.data.data.createdAt : new Date()
     }
-    console.log(newDelivery);
     if (this.data.edit) {
       this.edit(newDelivery)
     } else {

@@ -15,7 +15,7 @@
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>Departamento</mat-label>
         <mat-select disableRipple formControlName="departamento">
-          <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept">
+          <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept.id">
             {{ dept.name | titlecase }}
           </mat-option>
         </mat-select>
@@ -23,7 +23,7 @@
       <mat-form-field class="w3-block" appearance="outline">
         <mat-label>Provincia</mat-label>
         <mat-select disableRipple formControlName="provincia">
-          <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option">
+          <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option.id">
             {{ option.name | titlecase }}
           </mat-option>
         </mat-select>
@@ -33,7 +33,7 @@
         <mat-select disableRipple formControlName="distrito">
           <mat-option value="all" (click)="selectDelivery('all')" > 
             Todos los distritos </mat-option>
-          <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option">
+          <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option.id">
             {{ option.name | titlecase }}
           </mat-option>
         </mat-select>

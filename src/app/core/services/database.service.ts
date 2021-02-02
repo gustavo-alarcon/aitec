@@ -110,20 +110,17 @@ export class DatabaseService {
         shareReplay(1)
       );
   }
-
-  /*saveAll() {
+/*
+  saveAll(products) {
     const batch = this.afs.firestore.batch();
 
-    this.products.forEach(el => {
+    products.forEach(el => {
       let productRef = this.afs.firestore
-        .collection(`db/aitec/productsList`)
-        .doc(el.sku);
-      batch.update(productRef, {
-        priceMin:el.price,
-        model:'modelo',
-        virtualStock:el.realStock,
-        guarantee:false,
-        colors:[]
+        .collection(`db/aitec/searchProducts`)
+        .doc(el.id);
+      batch.set(productRef, {
+        id:el.id,
+        searchNumber: el.searchNumber
       });
 
     })
@@ -339,6 +336,19 @@ export class DatabaseService {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
         ref.orderBy('createdAt', 'desc')
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  }
+
+  getSearchsProducts(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(`db/aitec/searchProducts`, (ref) =>
+        ref.orderBy('searchNumber', 'desc')
       )
       .get()
       .pipe(

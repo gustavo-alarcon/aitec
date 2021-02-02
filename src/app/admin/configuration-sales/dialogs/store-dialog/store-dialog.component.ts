@@ -22,13 +22,7 @@ export class StoreDialogComponent implements OnInit {
   provincias: Array<any> = [];
   distritos: Array<any> = [];
 
-  filteredDepartamento$: Observable<any> = of([])
-  filteredProvincia$: Observable<any> = of([])
-  filteredDistrito$: Observable<any> = of([])
-
   init$: Observable<any>;
-  provincias$: Observable<any>;
-  distritos$: Observable<any>;
 
   deliveryDistritos: Array<any> = [];
 
@@ -45,9 +39,9 @@ export class StoreDialogComponent implements OnInit {
   ngOnInit(): void {
     this.departamentos = this.pl.getDepartamentos()
     this.formGroup = this.fb.group({
-      departamento: [this.data.edit ? this.data.data.departamento : null, Validators.required],
-      provincia: [this.data.edit ? this.data.data.provincia : null, Validators.required],
-      distrito: [null],
+      departamento: [null, Validators.required],
+      provincia: [null, Validators.required],
+      distrito: [null, Validators.required],
       address: [this.data.edit ? this.data.data.address : null, Validators.required],
       schedule: [this.data.edit ? this.data.data.schedule : null, Validators.required]
     });
@@ -55,93 +49,23 @@ export class StoreDialogComponent implements OnInit {
     this.formGroup.get('provincia').disable();
     this.formGroup.get('distrito').disable();
 
-    this.filteredDepartamento$ = this.formGroup
-      .get('departamento')
-      .valueChanges.pipe(
-        startWith(''),
-        map((value) => {
-          let val = typeof value == 'object' ? value['name'] : value
-          return this.departamentos.filter((el) =>
-            value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-          );
-        })
-      );
-
-    this.provincias$ = this.formGroup.get('departamento').valueChanges.pipe(
-      startWith(''),
-      map(dept => {
-        if (!this.data.edit) {
-          /*
-          if (this.formGroup.get('provincia').value) {
-            this.formGroup.get('provincia').setValue('')
-            this.formGroup.get('distrito').disable()
-          }*/
-
-          if (typeof dept === 'object') {
-            this.selectProvincias(dept)
-          }
-        }
-        return true
-      })
-    )
-
-    this.distritos$ = this.formGroup.get('provincia').valueChanges.pipe(
-      startWith(''),
-      map(prov => {
-        if (!this.data.edit) {
-          if (prov && typeof prov === 'object') {
-            this.selectDistritos(prov)
-
-          }
-        } else {
-          this.selectDistritos(this.data.data.provincia)
-        }
-        return true
-      })
-    )
-    this.filteredProvincia$ = this.formGroup.get('provincia').valueChanges.pipe(
-      startWith(''),
-      map((value) => {
-        let val = ''
-        if (value) {
-          val = typeof value == 'object' ? value['name'] : value
-        }
-        return this.provincias.filter((el) =>
-          val ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-        );
-      })
-    );
-
-    this.filteredDistrito$ = this.formGroup.get('distrito').valueChanges.pipe(
-      startWith(''),
-      map((value) => {
-        let val = ''
-        if (value) {
-          val = typeof value == 'object' ? value['name'] : value
-        }
-        return this.distritos.filter((el) =>
-          value ? el.name.toLowerCase().includes(val.toLowerCase()) : true
-        );
-      })
-    );
-
+    if (this.data.edit) {
+      this.formGroup.get('departamento').setValue(this.data.data.departamento.id)
+      this.selectProvincias(this.data.data.departamento)
+      this.formGroup.get('provincia').setValue(this.data.data.provincia.id)
+      this.selectDistritos(this.data.data.provincia)
+      this.formGroup.get('distrito').setValue(this.data.data.distrito.id)
+    }
 
   }
 
-  showDepartamento(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
-  }
-  showProvincia(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
-  }
-  showDistrito(staff): string | undefined {
-    return staff ? staff['name'] : undefined;
-  }
 
   selectProvincias(option) {
     this.provincias = this.pl.getProvincias(option.id);
+    this.formGroup.get('provincia').setValue(null);
     this.formGroup.get('provincia').enable();
-
+    this.formGroup.get('distrito').setValue(null);
+    this.formGroup.get('distrito').disable();
   }
 
   selectDistritos(option) {
@@ -156,14 +80,13 @@ export class StoreDialogComponent implements OnInit {
     this.loading.next(true)
     let newDelivery = {
       id: this.data.edit ? this.data.data.id : '',
-      departamento: this.formGroup.get('departamento').value,
-      provincia: this.formGroup.get('provincia').value,
-      distrito: this.formGroup.get('distrito').value,
+      departamento: this.departamentos.find(dep => dep.id == this.formGroup.get('departamento').value),
+      provincia: this.provincias.find(prov => prov.id == this.formGroup.get('provincia').value),
+      distrito: this.distritos.find(dis => dis.id == this.formGroup.get('distrito').value),
       address: this.formGroup.get('address').value,
       schedule: this.formGroup.get('schedule').value,
       createdAt: this.data.edit ? this.data.data.createdAt : new Date()
     }
-
     if (this.data.edit) {
       this.edit(newDelivery)
     } else {
@@ -172,16 +95,16 @@ export class StoreDialogComponent implements OnInit {
 
   }
 
-  create(newCategory) {
+  create(newStore) {
     let productRef = this.afs.firestore
       .collection(`/db/aitec/config/generalConfig/stores`)
       .doc();
 
     let batch = this.afs.firestore.batch();
 
-    newCategory.id = productRef.id;
+    newStore.id = productRef.id;
 
-    batch.set(productRef, newCategory);
+    batch.set(productRef, newStore);
 
     batch.commit().then(() => {
       this.dialogRef.close(true);
@@ -192,21 +115,26 @@ export class StoreDialogComponent implements OnInit {
     });
   }
 
-  edit(newCategory) {
+  edit(newStore) {
     let productRef = this.afs.firestore
       .collection(`/db/aitec/config/generalConfig/stores`)
-      .doc(newCategory.id);
+      .doc(newStore.id);
 
     let batch = this.afs.firestore.batch();
+    let change = JSON.stringify(newStore) === JSON.stringify(this.data.data)
+    if (!change) {
+      batch.update(productRef, newStore);
 
-    batch.update(productRef, newCategory);
-
-    batch.commit().then(() => {
+      batch.commit().then(() => {
+        this.dialogRef.close(true);
+        this.loading.next(false);
+        this.snackBar.open('Cambios guardados', 'Cerrar', {
+          duration: 6000,
+        });
+      });
+    } else {
       this.dialogRef.close(true);
       this.loading.next(false);
-      this.snackBar.open('Cambios guardados', 'Cerrar', {
-        duration: 6000,
-      });
-    });
+    }
   }
 }

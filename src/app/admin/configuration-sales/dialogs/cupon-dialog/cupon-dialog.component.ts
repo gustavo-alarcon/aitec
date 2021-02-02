@@ -19,6 +19,7 @@ export class CuponDialogComponent implements OnInit {
   category$: Observable<string[]>
   brand$: Observable<any>
   name$: Observable<any>
+  date$: Observable<any>
 
   loading = new BehaviorSubject<boolean>(false)
   loading$ = this.loading.asObservable()
@@ -37,6 +38,8 @@ export class CuponDialogComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log(this.data.data);
+
     this.createForm = this.fb.group({
       discount: [this.data.edit ? this.data.data.discount : null, [Validators.required, Validators.min(0)]],
       name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]],
@@ -47,12 +50,32 @@ export class CuponDialogComponent implements OnInit {
       start: [null],
       end: [null],
       limitDate: [this.data.edit ? this.data.data.limitDate :false],
-      redirectTo: [this.data.edit ? this.data.data.redirectTo : null, Validators.required]
+      redirectTo: [this.data.edit ? this.data.data.redirectTo : null, Validators.required],
+      from: [this.data.edit ? this.data.data.from : null]
     })
 
     this.name$ = this.createForm.get('name').valueChanges.pipe(
       debounceTime(500),
       map(el => el.trim())
+    )
+
+    this.date$ = this.createForm.get('limitDate').valueChanges.pipe(
+      startWith(this.data.edit ? this.data.data.limitDate : false),
+      map(res => {
+        if (res) {
+          this.createForm.get('start').enable()
+          this.createForm.get('end').enable()
+          if (this.data.edit) {
+            this.createForm.get('start').setValue(this.getDate(this.data.data.startDate))
+            this.createForm.get('end').setValue(this.getDate(this.data.data.endDate))
+          }
+        } else {
+          this.createForm.get('start').disable()
+          this.createForm.get('start').setValue(null)
+          this.createForm.get('end').disable()
+          this.createForm.get('end').setValue(null)
+        }
+      })
     )
 
     this.category$ = combineLatest(
@@ -98,25 +121,30 @@ export class CuponDialogComponent implements OnInit {
 
   }
 
+  getDate(date) {
+    return new Date(date.seconds * 1000)
+  }
+  
   showSelected(staff): string | undefined {
     return staff ? staff['description'] : undefined;
   }
 
 
   onSubmitForm() {
-    this.createForm.markAsPending();
-    this.createForm.disable()
-
     if (this.createForm.get('limitDate').value) {
       let startDate = this.createForm.get('start').value
       let endDate = this.createForm.get('end').value
       if (!startDate || !endDate) {
-        this.snackBar.open('Ponga Fecha', 'Cerrar', {
+        this.snackBar.open('Agregue Fechas', 'Cerrar', {
           duration: 6000,
         });
         return;
       }
     }
+
+    this.createForm.markAsPending();
+    this.createForm.disable()
+
     this.loading.next(true)
 
     if (this.data.edit) {
@@ -146,7 +174,9 @@ export class CuponDialogComponent implements OnInit {
       limit: this.createForm.get('limit').value,
       type: this.createForm.get('type').value,
       createdAt: new Date(),
-      count: 0
+      users: [],
+      count: 0,
+      from: this.createForm.get('from').value
     }
 
     batch.set(productRef, newCoupon);
@@ -177,7 +207,8 @@ export class CuponDialogComponent implements OnInit {
       endDate: this.createForm.get('limitDate').value ? this.createForm.get('end').value : null,
       limit: this.createForm.get('limit').value,
       limitDate: this.createForm.get('limitDate').value,
-      type: this.createForm.get('type').value
+      type: this.createForm.get('type').value,
+      from: this.createForm.get('from').value
     }
 
     batch.update(productRef, newCoupon);
