@@ -75,7 +75,7 @@ export class CreateEditProductComponent implements OnInit {
   skuList: Array<string> = []
 
   config = {
-    editable:true,
+    editable: true,
     placeholder: 'Descripción o contenido del módulo',
     tabsize: 2,
     height: '350px',
@@ -135,9 +135,11 @@ export class CreateEditProductComponent implements OnInit {
 
     this.init$ = combineLatest(
       this.route.params,
-      this.dbs.getCategories()
+      this.dbs.getCategories(),
+      this.dbs.getWarehouses()
     ).pipe(
-      switchMap(([id, categories]) => {
+      switchMap(([id, categories, warehouses]) => {
+        console.log(warehouses)
         let fil = categories.map(el => {
           let first = [el['category']]
           let subs = el['subcategories'].map(lo => {
@@ -241,7 +243,7 @@ export class CreateEditProductComponent implements OnInit {
     this.brand$ = combineLatest(
       this.secondFormGroup.get('brand').valueChanges.pipe(
         startWith<any>(''),
-        map(el => typeof el == 'object' ? el['name'] : el)
+        map(el => typeof el == 'string' ? el : el['name'])
       ),
       this.dbs.getBrands()
     ).pipe(
@@ -254,7 +256,7 @@ export class CreateEditProductComponent implements OnInit {
     this.filteredColor$ = this.secondFormGroup.get('colors').valueChanges.pipe(
       startWith<any>(''),
       map(col => {
-        let value = col ? typeof col == 'object' ? col.name : col : ''
+        let value = col ? typeof col == 'string' ? col : col.name : ''
         return this.pl.color.sort((a, b) => a.name.localeCompare(b.name))
           .filter(el => col ? el.name.toLowerCase().includes(value.toLowerCase()) : true)
       })
@@ -280,7 +282,6 @@ export class CreateEditProductComponent implements OnInit {
             this.itemsFormArray.removeAt(i)
           }
         }
-
 
       })
     );
@@ -682,7 +683,7 @@ export class CreateEditProductComponent implements OnInit {
           el.series.forEach(lo => {
             const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/series`).doc();
             batch.set(serieRef, {
-              id:serieRef.id,
+              id: serieRef.id,
               idWarehouse: warehouseRef.id,
               idProduct: newProduct.id,
               skuProduct: newProduct.sku,
@@ -706,7 +707,7 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   editProduct() {
-    
+
 
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
 

@@ -19,7 +19,7 @@ export class ProductDivComponent implements OnInit {
   promo: boolean = false
   init$: Observable<any>
 
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
   constructor(
     private router: Router,
     private dbs: DatabaseService,

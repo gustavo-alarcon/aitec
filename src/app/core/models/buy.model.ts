@@ -1,5 +1,4 @@
 import { Product } from './product.model'
-import { Unit } from './unit.model'
 import { User } from './user.model'
 
 export const buysCollRef = `db/distoProductos/buys`
@@ -44,7 +43,6 @@ export interface BuyRequestedProduct {               //How many products should 
   buyId: string;          //Indicates the id of the buy request
 
   productDescription: string;
-  unit: Unit;
   unitPrice: number;
   quantity: number;
 

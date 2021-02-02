@@ -57,7 +57,7 @@ export class WarehouseComponent implements OnInit, OnDestroy {
 
 
   //Variables
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
 
   //noResult
   noResult$: Observable<string>;

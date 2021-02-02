@@ -92,103 +92,112 @@
           <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
         </div>
         <div *ngIf="(view$|async) == 2">
+          <div class="menuContainer">
+            <div (click)="change(1)" [ngClass]="{'activated': viewDelivery==1, 'deactivated': viewDelivery!=1}">
+              Entrega en domicilio
+            </div>
+            <div (click)="change(2)" [ngClass]="{'activated': viewDelivery==2, 'deactivated': viewDelivery!=2}">
+              Recojo en tienda
+            </div>
+            <div (click)="change(3)" [ngClass]="{'activated': viewDelivery==3, 'deactivated': viewDelivery!=3}">
+              Coordinar entrega
+            </div>
+          </div>
           <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async;else loader">
-            <h4 class="delivery__title w3-center">
-              Por favor registra tus datos y verifícalos
-            </h4>
-            <form [formGroup]="formGroup" class="w3-margin-top">
-              <mat-form-field class="w3-block" appearance="outline">
-                <mat-label>Departamento</mat-label>
-                <mat-select disableRipple formControlName="departamento">
-                  <mat-option *ngFor="let dept of places" (click)="selectProvincias(dept)" [value]="dept">
-                    {{ dept.departamento | titlecase }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field class="w3-block" appearance="outline">
-                <mat-label>Provincia</mat-label>
-                <mat-select disableRipple formControlName="provincia">
-                  <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option">
-                    {{ option.provincia | titlecase }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field class="w3-block" appearance="outline">
-                <mat-label>Distrito</mat-label>
-                <mat-select disableRipple formControlName="distrito">
-                  <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option">
-                    {{ option.distrito | titlecase }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </form>
-            <div *ngIf="selectedDelivery">
-              <div class="menuContainer">
-                <div (click)="change(1)" [ngClass]="{'activated': viewBol, 'deactivated': !viewBol}">
-                  Entrega en domicilio
-                </div>
-                <div (click)="change(2)" [ngClass]="{'activated': !viewBol, 'deactivated': viewBol}">
-                  Recojo en tienda
-                </div>
-              </div>
-              <div *ngIf="viewBol">
-                <mat-card class="w3-margin-bottom">
-                  <mat-card-header>
-                    <mat-card-title style="font-size: 1em">
-                      <mat-icon style="vertical-align: middle">place</mat-icon>
-                      ¿En dónde recibirás tu pedido?
-                    </mat-card-title>
-                  </mat-card-header>
-                  <mat-card-content>
-                    <hr style="margin-top: 0" />
-                    <div *ngIf="user.location">
-                      <div *ngFor="let loc of locations;let k=index" (click)="selectLocal(k)"
-                        [ngClass]="{'store__selected': selectedLocation == k}">
-                        <div class="store">
-                          <div><strong>{{ loc.address }}</strong></div>
-                          <div>Referencia: {{ loc.reference }}</div>
-                          <div class="store__district">
-                            {{loc.distrito}} - {{loc.provincia}} - {{loc.departamento}}
-                          </div>
-                          <div class="ms-flex">
-                            <span class="ms-fill"></span>
-                            <button mat-button color="primary" (click)="openMap(user,k, true)">
-                              Editar
-                            </button>
-                          </div>
-                        </div>
-                        <hr style="margin: 0" />
-                      </div>
-                    </div>
-
-                    <div class="w3-padding w3-center">
-                      <button mat-button color="primary" (click)="openMap(user,0, false)">
-                        Agregar dirección
-                      </button>
-                    </div>
-
-                  </mat-card-content>
-                </mat-card>
-              </div>
-              <div *ngIf="!viewBol">
-                <mat-card>
-                  <mat-card-content>
-                    <div *ngFor="let store of stores;let i=index" (click)="selectStore(i)"
-                      [ngClass]="{'store__selected': selectedStore == i}">
+            <ng-container [ngSwitch]="viewDelivery" class="w3-block delivery">
+              <mat-card-content *ngSwitchCase="1">
+                <h4 class="delivery__title w3-center">
+                  Por favor registra tus datos y verifícalos
+                </h4>
+                <form [formGroup]="formGroup" class="w3-margin-top">
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>Departamento</mat-label>
+                    <mat-select disableRipple formControlName="departamento">
+                      <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept.id">
+                        {{ dept.name | titlecase }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>Provincia</mat-label>
+                    <mat-select disableRipple formControlName="provincia">
+                      <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option.id">
+                        {{ option.name | titlecase }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field class="w3-block" appearance="outline">
+                    <mat-label>Distrito</mat-label>
+                    <mat-select disableRipple formControlName="distrito">
+                      <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option.id">
+                        {{ option.name | titlecase }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </form>
+                <div  *ngIf="selectedDelivery">
+                  <div style="font-size: 1em">
+                    <mat-icon style="vertical-align: middle">place</mat-icon>
+                    ¿En dónde recibirás tu pedido?
+                  </div>
+                  <hr style="margin-top: 0" />
+                  <div *ngIf="user.location">
+                    <div *ngFor="let loc of locations;let k=index" (click)="selectLocal(k)"
+                      [ngClass]="{'store__selected': selectedLocation == k}">
                       <div class="store">
-                        <div class="store__address">{{store.address}}</div>
+                        <div><strong>{{ loc.address }}</strong></div>
+                        <div>Referencia: {{ loc.reference }}</div>
                         <div class="store__district">
-                          {{store.distrito.name}} - {{store.provincia.name}} - {{store.departamento.name}}
+                          {{loc.distrito}} - {{loc.provincia}} - {{loc.departamento}}
                         </div>
-                        <div class="store__schedule">{{store.schedule}}</div>
+                        <div class="ms-flex">
+                          <span class="ms-fill"></span>
+                          <button mat-button color="primary" (click)="openMap(user,k, true)">
+                            Editar
+                          </button>
+                        </div>
                       </div>
                       <hr style="margin: 0" />
                     </div>
-                  </mat-card-content>
-                </mat-card>
-
-              </div>
-            </div>
+                  </div>
+                  <div class="w3-padding w3-center">
+                    <button mat-button color="primary" (click)="openMap(user,0, false)">
+                      Agregar dirección
+                    </button>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-content *ngSwitchCase="2">
+                <h4 class="delivery__title">
+                  Ubica nuestras tiendas en: 
+                </h4>
+                <div *ngFor="let store of stores;let i=index" (click)="selectStore(i)"
+                  [ngClass]="{'store__selected': selectedStore == i}">
+                  <div class="store">
+                    <div class="store__address">{{store.address}}</div>
+                    <div class="store__district">
+                      {{store.distrito.name}} - {{store.provincia.name}} - {{store.departamento.name}}
+                    </div>
+                    <div class="store__schedule">{{store.schedule}}</div>
+                  </div>
+                  <hr style="margin: 0" />
+                </div>
+              </mat-card-content>
+              <mat-card-content *ngSwitchCase="3">
+                <h4 class="delivery__title">
+                  Coordina el delivery con la tienda.
+                </h4>
+                <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
+                <ul>
+                  <li>999 999 999</li>
+                  <li>999 999 999</li>
+                </ul>
+                <p>o enviarnos un correo con el número de tu pedido a:</p>
+                <p>correo@aitec.com</p>
+                <p>Luego de coordinar el delivery el precio se actualizará con el costo respectivo.</p>
+              </mat-card-content>
+            </ng-container>
+            
           </mat-card>
 
         </div>

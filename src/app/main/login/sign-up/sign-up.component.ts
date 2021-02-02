@@ -15,10 +15,10 @@ import { TermsComponent } from '../../terms/terms.component';
   styleUrls: ['./sign-up.component.scss']
 })
 export class SignUpComponent implements OnInit {
-  getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
+  getUser$: Observable<{ authUser: firebase.default.User, dbUser: User, type: "registered" | "unregistered" | "unexistent" }>;
 
-  providerType:["email", "google", "facebook"]= ["email", "google", "facebook"];
-  personalInfoType:["natural", "jurídica"] = ["natural", "jurídica"]
+  providerType: ["email", "google", "facebook"] = ["email", "google", "facebook"];
+  personalInfoType: ["natural", "jurídica"] = ["natural", "jurídica"]
 
   providerTypeParam: string = null;
   emailParam: string = null;
@@ -31,7 +31,7 @@ export class SignUpComponent implements OnInit {
   hideRepeatedPass: boolean = true;
 
 
-  
+
   providerForm: FormControl;
   emailForm: FormGroup;
   personalInfoForm: FormGroup;
@@ -50,18 +50,12 @@ export class SignUpComponent implements OnInit {
     this.initForms();
     this.initObservables()
   }
-  deb(){
-    console.log(this.providerForm)
-    console.log(this.emailForm)
-    console.log(this.personalInfoForm)
-  }
 
-  
-  
-  initForms(){
+
+  initForms() {
     //Por definir providerForm
     this.providerForm = this.fb.control(
-      this.providerType[0], 
+      this.providerType[0],
       Validators.required)
     this.emailForm = this.fb.group({
       //Falta chequear rellenado con email FALTAAAAAAA
@@ -95,15 +89,15 @@ export class SignUpComponent implements OnInit {
       ),
       //Business
       ruc: this.fb.control(
-        {value: null, disabled: true}, Validators.required
+        { value: null, disabled: true }, Validators.required
       ),
       address: this.fb.control(
-        {value: null, disabled: true}, Validators.required
+        { value: null, disabled: true }, Validators.required
       ),
       contactPerson: this.fb.control(
-        {value: null, disabled: true}, Validators.required
+        { value: null, disabled: true }, Validators.required
       ),
-      
+
     })
     this.feedForm = this.fb.control(
       false
@@ -113,16 +107,15 @@ export class SignUpComponent implements OnInit {
     )
   }
 
-  termsAndConditions(){
+  termsAndConditions() {
     this.dialog.open(TermsComponent)
   }
 
-  initObservables(){
+  initObservables() {
     this.providerType$ = this.providerForm.valueChanges.pipe(
       startWith(this.providerForm.value),
-      map((res: "email"| "google"| "facebook") => {
-        console.log(res)
-        if(res == "google" || res =="facebook"){
+      map((res: "email" | "google" | "facebook") => {
+        if (res == "google" || res == "facebook") {
           this.emailForm.get("pass").disable()
           this.emailForm.get("repeatedPass").disable()
           return false
@@ -136,8 +129,8 @@ export class SignUpComponent implements OnInit {
 
     this.personalInfoType$ = this.personalInfoForm.get("type").valueChanges.pipe(
       startWith(this.personalInfoForm.get("type").value),
-      map((res: "natural"| "juridica") => {
-        if(res == "natural"){
+      map((res: "natural" | "juridica") => {
+        if (res == "natural") {
           this.personalInfoForm.get("lastName").enable()
           this.personalInfoForm.get("dni").enable()
 
@@ -156,35 +149,35 @@ export class SignUpComponent implements OnInit {
         }
       })
     )
+
     this.getUser$ = this.auth.getUser$.pipe(
       tap(userData => {
-      if(userData){
-        console.log(userData)
-        switch(userData.type){
-          case "registered":
-            this.snackbar.open("Bienvenido...", "Aceptar")
-            this.router.navigateByUrl('/main')
-            break;
-          case "unregistered":
-            switch(userData.authUser.providerData[0].providerId){
-              case 'google.com':
-                this.providerForm.setValue(this.providerType[1])
-                break;
-              case 'facebook.com':
-                this.providerForm.setValue(this.providerType[2])
-                break;
-            }
-            this.emailForm.get("email").setValue(userData.authUser.email)
-            this.providerForm.disable()
-            break;
-          case "unexistent":
-            break;
+        if (userData) {
+          switch (userData.type) {
+            case "registered":
+              this.snackbar.open("Bienvenido...", "Aceptar")
+              this.router.navigateByUrl('/main')
+              break;
+            case "unregistered":
+              switch (userData.authUser.providerData[0].providerId) {
+                case 'google.com':
+                  this.providerForm.setValue(this.providerType[1])
+                  break;
+                case 'facebook.com':
+                  this.providerForm.setValue(this.providerType[2])
+                  break;
+              }
+              this.emailForm.get("email").setValue(userData.authUser.email)
+              this.providerForm.disable()
+              break;
+            case "unexistent":
+              break;
+          }
         }
-      }
-    }))
+      }))
   }
 
-  registerUser(userData: {authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}){
+  registerUser(userData: { authUser: firebase.default.User, dbUser: User, type: "registered" | "unregistered" | "unexistent" }) {
     this.emailForm.markAsPending();
     let user = {
       email: this.emailForm.get("email").value,
@@ -192,8 +185,8 @@ export class SignUpComponent implements OnInit {
       feed: this.feedForm.value,
     };
 
-    this.auth.registerUser(userData.authUser, user, this.emailForm.get("pass").enabled ? 
-      this.emailForm.get("pass").value:null).catch(
+    this.auth.registerUser(userData.authUser, user, this.emailForm.get("pass").enabled ?
+      this.emailForm.get("pass").value : null).catch(
         err => {
           this.snackbar.open("Ocurrió un error. Vuelva a intentarlo.", "Aceptar");
           console.log(err);
@@ -201,23 +194,23 @@ export class SignUpComponent implements OnInit {
       );
   }
 
-  signInProvider(type: "facebook"|"google") {
+  signInProvider(type: "facebook" | "google") {
     this.auth.signIn(type)
-    .catch(error => {
-      this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
-      console.log(error);
-    });;
+      .catch(error => {
+        this.snackbar.open('Parece que hubo un error ...', 'Cerrar');
+        console.log(error);
+      });;
   }
 
   emailRepeatedValidator() {
-    return (control: AbstractControl): 
-      Observable<{wrongProvider: string}|
-                  {repeatedUser: boolean }|null> => {
+    return (control: AbstractControl):
+      Observable<{ wrongProvider: string } |
+      { repeatedUser: boolean } | null> => {
       const email = control.value;
       const parent = control.parent;
       const providerTypeForm = this.providerForm.value;
 
-      if(!parent) return of(null)
+      if (!parent) return of(null)
 
       return of(email).pipe(
         debounceTime(500),
@@ -228,19 +221,19 @@ export class SignUpComponent implements OnInit {
 
           console.log(res[0])
           //El metodo de email es google
-          switch(res[0]) {
+          switch (res[0]) {
             case 'google.com':
               //El formulario no está seleccionado con google
-              if(providerTypeForm != 'google'){
-                return of({wrongProvider: 'google'})
+              if (providerTypeForm != 'google') {
+                return of({ wrongProvider: 'google' })
               }
               //El formulario esta seleccionado con google
               return this.auth.getUserByEmail(email).pipe(
                 map(user => {
                   //Usuario registrado en DB
-                  if(user){
-                    return {repeatedUser: true}
-                  } 
+                  if (user) {
+                    return { repeatedUser: true }
+                  }
                   //Usuario no registrado en db
                   return null
                 })
@@ -248,16 +241,16 @@ export class SignUpComponent implements OnInit {
             //El método de email es facebook
             case 'facebook.com':
               //El formulario no está seleccionado con facebook
-              if(providerTypeForm != 'facebook'){
-                return of({wrongProvider: 'facebook'})
+              if (providerTypeForm != 'facebook') {
+                return of({ wrongProvider: 'facebook' })
               }
               //El formulario esta seleccionado con facebook
               return this.auth.getUserByEmail(email).pipe(
                 map(user => {
                   //Usuario registrado en DB
-                  if(user){
-                    return {repeatedUser: true}
-                  } 
+                  if (user) {
+                    return { repeatedUser: true }
+                  }
                   //Usuario no registrado en db
                   return null
                 })
@@ -265,42 +258,41 @@ export class SignUpComponent implements OnInit {
             //El método de email es email
             case 'email':
               //El formulario no está seleccionado con email
-              if(providerTypeForm != 'email'){
-                return of({wrongProvider: 'email'})
+              if (providerTypeForm != 'email') {
+                return of({ wrongProvider: 'email' })
               }
               //El formulario esta seleccionado con email
               return this.auth.getUserByEmail(email).pipe(
                 map(user => {
                   //Usuario registrado en DB
-                  if(user){
-                    return {repeatedUser: true}
-                  } 
+                  if (user) {
+                    return { repeatedUser: true }
+                  }
                   //Usuario no registrado en db
                   return null
                 })
               )
-            default: 
-              console.log("no registrado")
+            default:
               //usuario no registrado. Continuar
               parent.get('pass').enable()
-              parent.get('repeatedPass').enable() 
+              parent.get('repeatedPass').enable()
               return of(null)
           }
         }
-      ))
+        ))
     }
   }
 
   samePassValidator() {
-    return (control: AbstractControl): ValidationErrors|null => {
+    return (control: AbstractControl): ValidationErrors | null => {
       let parent = control.parent;
       let pass: string = null;
       let repeatedPass: string = null;
-      if(parent){
+      if (parent) {
         pass = parent.get('pass').value;
         repeatedPass = parent.get('repeatedPass').value
-        if(pass && repeatedPass){
-          return pass == repeatedPass ? null:{noRepeatedPass: true}
+        if (pass && repeatedPass) {
+          return pass == repeatedPass ? null : { noRepeatedPass: true }
         }
       }
       return null

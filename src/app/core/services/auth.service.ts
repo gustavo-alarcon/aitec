@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import { Platform } from '@angular/cdk/platform';
+import { Location } from "@angular/common";
 
 // export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
 export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
@@ -24,7 +25,7 @@ export class AuthService {
   usersRef = `users`
 
   public user$: Observable<User>;
-  public getUser$: Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>;
+  public getUser$: Observable<{ authUser: firebase.default.User, dbUser: User, type: "registered" | "unregistered" | "unexistent" }>;
 
 
   public authLoader: boolean = false;
@@ -36,6 +37,7 @@ export class AuthService {
     public snackbar: MatSnackBar,
     private platform: Platform,
     private dbs: DatabaseService,
+    private location: Location
   ) {
 
     this.afAuth.setPersistence('local');
@@ -43,7 +45,7 @@ export class AuthService {
     // observe user authentication
     this.user$ = this.afAuth.user.pipe(
       switchMap(user => {
-        if(user){
+        if (user) {
           return this.afs.collection('users').doc<User>(user.uid).valueChanges()
         } else {
           return of(null)
@@ -53,36 +55,36 @@ export class AuthService {
     this.getUser$ = this.getUserObservable()
   }
 
-  private getUserObservable(): Observable<{authUser: firebase.default.User, dbUser: User, type: "registered"|"unregistered"|"unexistent"}>{
+  private getUserObservable(): Observable<{ authUser: firebase.default.User, dbUser: User, type: "registered" | "unregistered" | "unexistent" }> {
     return this.afAuth.authState.pipe(
       switchMap(authUser => {
         // console.log(authUser)
-        if(authUser){
+        if (authUser) {
           // console.log(authUser);
-          return this.afs.collection<User>('users').doc(authUser.uid).get({source: "server"}).pipe(
+          return this.afs.collection<User>('users').doc(authUser.uid).get({ source: "server" }).pipe(
             map(res => {
-              if(res.exists){
+              if (res.exists) {
                 return <User>res.data()
               } else {
                 return null
               }
             }),
             map(dbUser => {
-              if(!dbUser){
-                if(!authUser.email){
+              if (!dbUser) {
+                if (!authUser.email) {
                   this.snackbar.open("Este usuario no posee correo válido. Inicie sesión con cuenta válida.", "Aceptar")
                   this.afAuth.signOut()
-                  return {authUser: null, dbUser: null, type: "unexistent"}
+                  return { authUser: null, dbUser: null, type: "unexistent" }
                 } else {
-                  return {authUser, dbUser: null, type: "unregistered"}
+                  return { authUser, dbUser: null, type: "unregistered" }
                 }
               } else {
-                  return {authUser, dbUser, type: "registered"}
+                return { authUser, dbUser, type: "registered" }
               }
             })
           )
         } else {
-          return of({authUser: null, dbUser: null, type: null})
+          return of({ authUser: null, dbUser: null, type: null })
         }
       }),
       shareReplay(1)
@@ -97,7 +99,7 @@ export class AuthService {
     return this.afAuth.signInWithEmailAndPassword(email, pass);
   }
 
-  public signUpEmail(email: string, pass: string ): Promise<firebase.default.auth.UserCredential> {
+  public signUpEmail(email: string, pass: string): Promise<firebase.default.auth.UserCredential> {
     return this.afAuth.createUserWithEmailAndPassword(email, pass);
   }
 
@@ -105,7 +107,7 @@ export class AuthService {
     return this.afAuth.sendPasswordResetEmail(email)
   }
 
-  public signIn(type: 'google'|'facebook'): Promise<void | firebase.default.auth.UserCredential> {
+  public signIn(type: 'google' | 'facebook'): Promise<void | firebase.default.auth.UserCredential> {
     let provider = null;
 
     switch (type) {
@@ -124,7 +126,7 @@ export class AuthService {
         });
     } else {
       return this.afAuth.signInWithPopup(provider)
-        .then((cred)=> {
+        .then((cred) => {
           console.log("signIn with desk")
         }).catch(err => {
           console.log(err)
@@ -135,6 +137,8 @@ export class AuthService {
   public logout(): void {
     this.dbs.order = []
     this.dbs.orderObs.next([])
+    localStorage.clear()
+    this.dbs.isMayUser.next(false)
     this.afAuth.signOut().finally(() => {
       this.router.navigateByUrl('/main');
     });
@@ -155,7 +159,7 @@ export class AuthService {
 
   //User from DB
   getUserByEmail(email: string): Observable<User> {
-    return this.afs.collection<User>(this.usersRef, ref => ref.where("email", "==", email)).get({source: "server"})
+    return this.afs.collection<User>(this.usersRef, ref => ref.where("email", "==", email)).get({ source: "server" })
       .pipe(
         map(snap => {
           if (snap.empty) {
@@ -171,30 +175,31 @@ export class AuthService {
     return from(this.afAuth.fetchSignInMethodsForEmail(email))
   }
 
-  registerUser(authUser: firebase.default.User, dbUser: User, pass?: string): Promise<any>{
+  registerUser(authUser: firebase.default.User, dbUser: User, pass?: string): Promise<any> {
     let userRef: DocumentReference = null;
     let uid: string = null;
-      if(pass){
-        return this.signUpEmail(dbUser.email, pass).then((cred) => {
-          uid = cred.user.uid
-          userRef = this.afs.firestore.collection(this.usersRef).doc(uid);
-          return userRef.set({...dbUser, uid})
-          }).then(res => {
-            this.snackbar.open("Bienvenido!", "Aceptar")
-            return this.router.navigateByUrl(`/main`)
-          }).catch(err => {
-            this.handleError(err)
-          })
-      } else {
-        let uid = authUser.uid
-        userRef = this.afs.firestore.collection(this.usersRef).doc(uid)
-        return userRef.set({...dbUser, uid}).then(res => {
-          this.snackbar.open("Bienvenido!", "Aceptar")
-          return this.router.navigateByUrl(`/main`)
-        }).catch(err => {
-          this.handleError(err)
-        })
-      }
+    if (pass) {
+      return this.signUpEmail(dbUser.email, pass).then((cred) => {
+        uid = cred.user.uid
+        userRef = this.afs.firestore.collection(this.usersRef).doc(uid);
+        return userRef.set({ ...dbUser, uid })
+      }).then(res => {
+        this.snackbar.open("Bienvenido!", "Aceptar")
+        this.location.back()
+      }).catch(err => {
+        this.handleError(err)
+      })
+    } else {
+      let uid = authUser.uid
+      userRef = this.afs.firestore.collection(this.usersRef).doc(uid)
+      return userRef.set({ ...dbUser, uid }).then(res => {
+        this.snackbar.open("Bienvenido!", "Aceptar")
+        this.location.back()
+
+      }).catch(err => {
+        this.handleError(err)
+      })
+    }
   }
 
 }
