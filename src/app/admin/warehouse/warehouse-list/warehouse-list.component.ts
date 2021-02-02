@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -27,7 +28,7 @@ export class WarehouseListComponent implements OnInit {
 
   dataSource = new MatTableDataSource<Warehouse>();
   displayedColumns: string[] = ['index', 'name', 'location', 'address', 'actions'];
-  @ViewChild('warehousePaginator', { static: false }) set content(paginator: MatPaginator) {
+  @ViewChild('paginator', { static: false }) set content(paginator: MatPaginator) {
     this.dataSource.paginator = paginator;
   }
   @ViewChild(MatSort, { static: false }) set content2(sort: MatSort) {
@@ -37,7 +38,8 @@ export class WarehouseListComponent implements OnInit {
   constructor(
     private router: Router,
     private dialog: MatDialog,
-    public dbs: DatabaseService
+    public dbs: DatabaseService,
+    private snackbar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -45,12 +47,9 @@ export class WarehouseListComponent implements OnInit {
       this.dbs.getWarehouseList(),
       this.searchFormControl.valueChanges.pipe(
         startWith(''),
-        map(value => {return value.toLowerCase()})
+        map(value => { return value.toLowerCase() })
       )).pipe(
         map(([warehouses, search]) => {
-          console.log(warehouses);
-          console.log(search);
-          
           return warehouses.filter(el => el.name.toLowerCase().includes(search))
         }),
         tap(res => {
@@ -65,12 +64,29 @@ export class WarehouseListComponent implements OnInit {
       data: {
         edit: edit,
         warehouse: warehouse
-      }
+      },
+      maxWidth: 700
     })
   }
 
-  applyFilter(event): void {
-    // 
+  deleteWarehouse(id: string): void {
+    this.loading.next(true);
+
+    this.dbs.deleteWarehouse(id)
+      .commit()
+      .then(() => {
+        this.loading.next(false);
+        this.snackbar.open(`Almacén borrado satisfactoriamente!`, "Aceptar", {
+          duration: 6000
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        this.loading.next(false);
+        this.snackbar.open(`Parece que hubo un error borrando el almacén!`, "Aceptar", {
+          duration: 6000
+        });
+      })
   }
 
 

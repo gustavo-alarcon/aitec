@@ -1,5 +1,8 @@
 <div class="ms-flex">
-  <h2 mat-dialog-title style="margin: 0px 0px"> <mat-icon style="vertical-align:middle; margin-right: 8px" >corporate_fare</mat-icon>{{data.edit ? 'Editar' : 'Crear'}}</h2>
+  <h2 mat-dialog-title style="margin: 0px 0px">
+    <mat-icon style="vertical-align:middle; margin-right: 8px">corporate_fare</mat-icon>{{data.edit ? 'Editar' :
+    'Crear'}}
+  </h2>
   <span class="ms-fill"></span>
   <button mat-icon-button mat-dialog-close>
     <mat-icon>close</mat-icon>
@@ -15,26 +18,29 @@
         <mat-form-field class="w3-block w3-small" appearance="outline">
           <mat-label>Departamento</mat-label>
           <mat-select formControlName="department">
-            <mat-option *ngFor="let item of departmentList" (click)="selectDepartment(item)" [value]="item">
+            <mat-option *ngFor="let item of departmentList" (click)="selectedDepartment(item)" [value]="item">
               {{ item.name | titlecase }}
             </mat-option>
           </mat-select>
+          <mat-hint *ngIf="data.edit">{{data.warehouse.department.name}}</mat-hint>
         </mat-form-field>
         <mat-form-field class="w3-block w3-small" appearance="outline">
           <mat-label>Provincia</mat-label>
           <mat-select formControlName="providence">
-            <mat-option *ngFor="let item of providenceList" (click)="selectProvidence(item)" [value]="item">
+            <mat-option *ngFor="let item of providenceList" (click)="selectedProvidence(item)" [value]="item">
               {{ item.name | titlecase }}
             </mat-option>
           </mat-select>
+          <mat-hint *ngIf="data.edit">{{data.warehouse.providence.name}}</mat-hint>
         </mat-form-field>
         <mat-form-field class="w3-block w3-small" appearance="outline">
           <mat-label>Distrito</mat-label>
           <mat-select formControlName="district">
-            <mat-option *ngFor="let item of districtList" (click)="selectDistrict(item)" [value]="item">
+            <mat-option *ngFor="let item of districtList" [value]="item">
               {{ item.name | titlecase }}
             </mat-option>
           </mat-select>
+          <mat-hint *ngIf="data.edit">{{data.warehouse.district.name}}</mat-hint>
         </mat-form-field>
 
       </div>
@@ -43,13 +49,27 @@
           <mat-label>Dirección</mat-label>
           <input matInput type="text" formControlName="address" placeholder="Dirección" autocomplete="off">
         </mat-form-field>
+        <mat-form-field class="w3-block w3-small" appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput type="text" formControlName="name" placeholder="Nombre del almacén" autocomplete="off">
+          <mat-progress-bar *ngIf="placeFormGroup.get('name').pending" mode="indeterminate"></mat-progress-bar>
+          <mat-error>
+            <span *ngIf="placeFormGroup.get('name').errors?.required">Campo requerido</span>
+            <span *ngIf="placeFormGroup.get('name').invalid && placeFormGroup.get('name').dirty && placeFormGroup.get('name').value">
+              {{placeFormGroup.get('name').value}} ya existe en la lista.</span>
+          </mat-error>
+        </mat-form-field>
+
+        
       </div>
     </div>
   </div>
 </mat-dialog-content>
 <mat-divider></mat-divider>
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="warn" mat-dialog-close>Cerrar</button>
-  <button mat-raised-button color="primary" [disabled]="!placeFormGroup.valid">Crear</button>
+  <button mat-raised-button color="primary" [disabled]="!placeFormGroup.valid" (click)="save()">{{data.edit ? 'Editar' :
+    'Crear'}}</button>
 </mat-dialog-actions>

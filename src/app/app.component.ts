@@ -44,8 +44,6 @@ export class AppComponent {
       filter(user => !!user),
       take(1),
       switchMap(user => {
-        console.log(user);
-
         this.dbs.uidUser = user.uid
         if (user.customerType == 'Mayorista') {
           this.dbs.isMayUser.next(true)
