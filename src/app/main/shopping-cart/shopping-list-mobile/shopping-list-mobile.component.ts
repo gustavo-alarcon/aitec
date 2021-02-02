@@ -19,7 +19,7 @@ export class ShoppingListMobileComponent implements OnInit {
   @Input() edit: boolean
   @Input() purchase: boolean
 
-  defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/images/aitec-512x512.png";
 
   constructor(
     private snackBar: MatSnackBar,

@@ -1,18 +1,4 @@
-<!--div class="ms-container w3-section w3-padding">
-  <h2 class="title">
-    <mat-icon style="vertical-align: middle;">build</mat-icon>
-    Configuración Ventas
-  </h2>
-  <nav mat-tab-nav-bar>
-    <a mat-tab-link *ngFor="let link of links" [routerLink]="link['route']" routerLinkActive #rla="routerLinkActive"
-      [active]="rla.isActive">
-      {{link['name']}}
-    </a>
-  </nav>
-  <div class="w3-padding w3-section">
-    <router-outlet></router-outlet>
-  </div>
-</div-->
+
 <div class="animated fadeIn delay-4 slower">
   <div class="ms-container w3-section">
     <h2 class="title">
@@ -24,31 +10,27 @@
 
       <mat-sidenav mode="side" style="width: 250px;" [opened]="dbs.openConfi" class="mat-elevation-z4">
         <button mat-button class="w3-block menu__button"  routerLink="marcas">
-          <mat-icon class="menu__icon">language</mat-icon>
+          <mat-icon class="menu__icon">sell</mat-icon>
           Marcas
         </button>
         <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="categorias">
-          <mat-icon class="menu__icon">build</mat-icon>
+          <mat-icon class="menu__icon">apps</mat-icon>
           Categorías
         </button>
         <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="stores">
-          <mat-icon class="menu__icon">widgets</mat-icon>
+          <mat-icon class="menu__icon">storefront</mat-icon>
           Tiendas
         </button>
-        <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="delivery">
-          <mat-icon class="menu__icon">assignment</mat-icon>
-          Delivery
-        </button>
         <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="asesores">
-          <mat-icon class="menu__icon">group</mat-icon>
+          <mat-icon class="menu__icon">remember_me</mat-icon>
           Asesores
         </button>
-        <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="general">
-          <mat-icon class="menu__icon">corporate_fare</mat-icon>
+        <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="cupones">
+          <mat-icon class="menu__icon">local_play</mat-icon>
           Cupones
         </button>
         <button mat-button class="w3-block menu__button w3-border-top w3-border-light-grey" routerLink="payments">
-          <mat-icon class="menu__icon">corporate_fare</mat-icon>
+          <mat-icon class="menu__icon">local_atm</mat-icon>
           Métodos de pago
         </button>
       </mat-sidenav>

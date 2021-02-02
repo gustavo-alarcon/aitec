@@ -19,10 +19,11 @@ export class ProductDetailComponent implements OnInit {
   productDiv: any
   prods: Array<any> = []
   price: number = 0
+  promo: boolean = false
 
   @ViewChild("image") image: ElementRef;
 
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
 
   colorSelected: any = null
   count: number = 1
@@ -47,8 +48,10 @@ export class ProductDetailComponent implements OnInit {
           map(([product, user]) => {
 
             this.price = product.priceMin
+            this.promo = product.promo
             if (user) {
               this.price = product.priceMay
+              this.promo = false
             }
 
             return product

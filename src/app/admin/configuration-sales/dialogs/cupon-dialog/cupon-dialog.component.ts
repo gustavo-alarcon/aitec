@@ -6,6 +6,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { Coupon } from 'src/app/core/models/coupon.model';
 
 @Component({
   selector: 'app-cupon-dialog',
@@ -49,7 +50,7 @@ export class CuponDialogComponent implements OnInit {
       limit: [this.data.edit ? this.data.data.limit : null],
       start: [null],
       end: [null],
-      limitDate: [this.data.edit ? this.data.data.limitDate :false],
+      limitDate: [this.data.edit ? this.data.data.limitDate : false],
       redirectTo: [this.data.edit ? this.data.data.redirectTo : null, Validators.required],
       from: [this.data.edit ? this.data.data.from : null]
     })
@@ -124,7 +125,7 @@ export class CuponDialogComponent implements OnInit {
   getDate(date) {
     return new Date(date.seconds * 1000)
   }
-  
+
   showSelected(staff): string | undefined {
     return staff ? staff['description'] : undefined;
   }
@@ -161,7 +162,7 @@ export class CuponDialogComponent implements OnInit {
 
     const batch = this.afs.firestore.batch();
 
-    let newCoupon = {
+    let newCoupon: Coupon = {
       id: this.createForm.get('name').value,
       name: this.createForm.get('name').value,
       redirectTo: this.createForm.get('redirectTo').value,

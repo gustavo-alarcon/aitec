@@ -178,7 +178,7 @@
       <ng-container *ngIf="totalItems$ | async"></ng-container>
       <div class="grid-item" *ngFor="let group of itemsFormArray.controls; let i = index">
         <div class="w3-row">
-          <div class="w3-col m3 l3">
+          <div class="w3-col m3 l3" *ngIf="colorSelect[i]">
             <mat-icon [style.color]="colorSelect[i].color">brightness_1</mat-icon> {{colorSelect[i].name}}
           </div>
           <div class="w3-col m6 l6">

@@ -1,6 +1,11 @@
+import { Brand } from "./product.model";
+
 export interface Category {
-    index: number;
-    name: string;
-    photoPath: string;
-    photoURL: string;
+  id: string;
+  idCategory: string;
+  idSubCategory: string;
+  name: string;
+  createdAt: Date;
+  completeName?: string;
+  brands?: Brand[]
 }

@@ -36,7 +36,7 @@ export class MainComponent implements OnInit {
   init$: Observable<any>
   footer: any
 
-  defaultImage = "../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../assets/images/aitec-512x512.png";
 
   constructor(
     private auth: AuthService,

@@ -18,7 +18,7 @@ export class ShoppingListComponent implements OnInit {
     this.dataSource.paginator = paginator1;
   }
 
-  defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/images/aitec-512x512.png";
 
   constructor(
     private router: Router,
