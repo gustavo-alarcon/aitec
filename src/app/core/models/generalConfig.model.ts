@@ -4,4 +4,8 @@ export interface GeneralConfig{
   buysCounter: number;
   maxWeight: number;
   lastVersion: string;
+  news: {
+    visible: boolean,
+    imageURL: string
+  }
 }

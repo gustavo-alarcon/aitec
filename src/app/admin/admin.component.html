@@ -69,10 +69,27 @@
               <mat-icon class="menu__icon">group</mat-icon>
               Clientes
             </button>
-            <button mat-button class="w3-block menu__button" routerLink="warehouse" (click)="toggleSideMenu()">
-              <mat-icon class="menu__icon">corporate_fare</mat-icon>
-              Almacenes
-            </button>
+            <mat-expansion-panel style="box-shadow:none; border-radius:0px 0px 0px 0px" class="w3-block"
+              [ngClass]="{'ms-expansion-panel-menu':warehousesOpenedFlag}" (opened)="warehousesOpened()" (closed)="warehousesClosed()">
+              <mat-expansion-panel-header class="menu__button">
+                <mat-panel-title style="font-weight:500" [ngClass]="{'ms-expansion-panel-title':warehousesOpenedFlag}">
+                  <mat-icon class="menu__icon">corporate_fare</mat-icon> Almacenes
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <button mat-button class="w3-block menu__button" routerLink="warehouse/list"
+                style="text-align:left;border-radius:0px 0px 0px 0px" (click)="toggleSideMenu()">
+                <mat-icon class="menu__icon">corporate_fare</mat-icon>
+                Lista de almacenes
+              </button>
+              <button mat-button class="w3-block menu__button" routerLink="warehouse/inventory"
+                style="text-align:left;border-radius:0px 0px 0px 0px;" (click)="toggleSideMenu()">
+                <mat-icon class="menu__icon">ballot</mat-icon>
+                inventario
+              </button>
+              <p class="w3-margin-bottom"></p>
+
+            </mat-expansion-panel>
             <button mat-button class="w3-block menu__button" routerLink="questions" (click)="toggleSideMenu()">
               <mat-icon class="menu__icon">question_answer</mat-icon>
               Respuestas
