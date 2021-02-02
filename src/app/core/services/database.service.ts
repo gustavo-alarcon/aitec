@@ -32,7 +32,7 @@ import { Warehouse } from '../models/warehouse.model';
   providedIn: 'root',
 })
 export class DatabaseService {
-  public version: string = 'V0.0.1r';
+  public version: string = 'V0.0.2r';
   public isOpen: boolean = false;
   public isAdmin: boolean = false;
 
