@@ -26,12 +26,13 @@ import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { Warehouse } from '../models/warehouse.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DatabaseService {
-  public version: string = 'V0.0.1r';
+  public version: string = 'V0.0.2r';
   public isOpen: boolean = false;
   public isAdmin: boolean = false;
 
@@ -109,20 +110,17 @@ export class DatabaseService {
         shareReplay(1)
       );
   }
-
-  /*saveAll() {
+/*
+  saveAll(products) {
     const batch = this.afs.firestore.batch();
 
-    this.products.forEach(el => {
+    products.forEach(el => {
       let productRef = this.afs.firestore
-        .collection(`db/aitec/productsList`)
-        .doc(el.sku);
-      batch.update(productRef, {
-        priceMin:el.price,
-        model:'modelo',
-        virtualStock:el.realStock,
-        guarantee:false,
-        colors:[]
+        .collection(`db/aitec/searchProducts`)
+        .doc(el.id);
+      batch.set(productRef, {
+        id:el.id,
+        searchNumber: el.searchNumber
       });
 
     })
@@ -347,6 +345,19 @@ export class DatabaseService {
       );
   }
 
+  getSearchsProducts(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(`db/aitec/searchProducts`, (ref) =>
+        ref.orderBy('searchNumber', 'desc')
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  }
+
   getProductsListValueChanges(): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
@@ -376,6 +387,23 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
+  }
+
+  getWarehouseList(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getWarehousesObservable(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges();
   }
 
   getWarehouseSeriesValueChanges(id): Observable<Product[]> {
@@ -1240,6 +1268,41 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  // WAREHOUSE
+  createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
 
+    let newData: Warehouse = {
+      id: warehouseRef.id,
+      department: data.department,
+      providence: data.providence,
+      district: data.district,
+      address: data.address,
+      name: data.name,
+      createdAt: new Date(),
+      createdBy: user,
+      editedAt: null,
+      editedBy: null
+    }
+
+    if (edit) {
+      warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+      batch.update(warehouseRef, newData);
+    } else {
+      batch.set(warehouseRef, newData);
+    }
+
+    return batch
+  }
+
+  deleteWarehouse(id: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+
+    batch.delete(warehouseRef);
+
+    return batch;
+  }
 
 }

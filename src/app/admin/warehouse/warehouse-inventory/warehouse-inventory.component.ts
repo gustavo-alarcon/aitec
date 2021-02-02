@@ -1,26 +1,23 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith, takeUntil, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { ListDialogComponent } from './list-dialog/list-dialog.component';
 
 @Component({
-  selector: 'app-warehouse',
-  templateUrl: './warehouse.component.html',
-  styleUrls: ['./warehouse.component.scss']
+  selector: 'app-warehouse-inventory',
+  templateUrl: './warehouse-inventory.component.html',
+  styleUrls: ['./warehouse-inventory.component.scss']
 })
-export class WarehouseComponent implements OnInit, OnDestroy {
-
+export class WarehouseInventoryComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
@@ -83,7 +80,6 @@ export class WarehouseComponent implements OnInit, OnDestroy {
     public snackBar: MatSnackBar,
     private dbs: DatabaseService,
     public auth: AuthService,
-    private router: Router,
     private dialog: MatDialog
   ) { }
 
@@ -174,14 +170,14 @@ export class WarehouseComponent implements OnInit, OnDestroy {
     return category ? category.name : null
   }
 
-  openDialog(row) {
-    this.dialog.open(ListDialogComponent, {
-      data: {
-        name: row.product.description,
-        id: row.id
-      }
-    })
-  }
+  // openDialog(row) {
+  //   this.dialog.open(ListDialogComponent, {
+  //     data: {
+  //       name: row.product.description,
+  //       id: row.id
+  //     }
+  //   })
+  // }
 
 
   downloadXls(): void {
@@ -271,7 +267,5 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   save(): void {
     // 
   }
-
-
 
 }

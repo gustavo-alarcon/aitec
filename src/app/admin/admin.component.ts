@@ -15,6 +15,7 @@ export class AdminComponent implements OnInit {
   openedMenu: boolean = false;
 
   confiOpenedFlag: boolean = false;
+  warehousesOpenedFlag: boolean = false;
 
   constructor(
     public auth: AuthService,
@@ -50,6 +51,14 @@ export class AdminComponent implements OnInit {
 
   confiClosed(): void{
     this.confiOpenedFlag = false;
+  }
+
+  warehousesOpened(): void{
+    this.warehousesOpenedFlag = true;
+  }
+
+  warehousesClosed(): void{
+    this.warehousesOpenedFlag = false;
   }
 
 
