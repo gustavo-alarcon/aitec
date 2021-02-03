@@ -9,7 +9,8 @@ export class WebComponent implements OnInit {
   links = [
     { name: 'Banners', route: 'banners' },
     { name: 'Contacto', route: 'contacto' },
-    { name: 'Landing', route: 'landing' }
+    { name: 'Landing', route: 'landing' },
+    { name: 'Noticias', route: 'news' }
   ];
 
   activeLink = this.links[0];

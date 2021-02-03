@@ -49,7 +49,8 @@ import { DeleteConfiDialogComponent } from './delete-confi-dialog/delete-confi-d
     MatInputModule,
     MatBadgeModule,
     MatAutocompleteModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatSlideToggleModule
   ],
   providers: [
     ConfirmationDialogComponent,

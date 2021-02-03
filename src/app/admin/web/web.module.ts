@@ -36,6 +36,7 @@ import { CreateEditBannerComponent } from './create-edit-banner/create-edit-bann
 import { ContactComponent } from './contact/contact.component';
 import { LandingComponent } from './landing/landing.component';
 import { CreatEditTestimonyComponent } from './creat-edit-testimony/creat-edit-testimony.component';
+import { NewsComponent } from './news/news.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { CreatEditTestimonyComponent } from './creat-edit-testimony/creat-edit-t
     CreateEditBannerComponent,
     ContactComponent,
     LandingComponent,
-    CreatEditTestimonyComponent
+    CreatEditTestimonyComponent,
+    NewsComponent
   ],
   imports: [
     CommonModule,
