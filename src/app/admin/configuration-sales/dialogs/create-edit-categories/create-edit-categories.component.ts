@@ -1,3 +1,4 @@
+import { keyframes } from '@angular/animations';
 import { Component, Inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import {
@@ -12,6 +13,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
+import { Category } from 'src/app/core/models/category.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
@@ -184,24 +186,22 @@ export class CreateEditCategoriesComponent implements OnInit {
       categories: el.get('categories').value,
     }));
 
-    let newCategory = {
-      id: this.data.edit ? this.data.data.id : '',
-      category: this.packageForm.get('category').value,
-      subcategories: subs,
+    let newCategory:Category = {
+      id: '',
+      idCategory:null,
+      idSubCategory:null,
+      name: this.packageForm.get('category').value,
+      completeName: this.packageForm.get('category').value,
       brands: this.selectBrand,
-      createdAt: this.data.edit ? this.data.data.createdAt : new Date(),
+      createdAt: new Date()
     };
 
-    if (this.data.edit) {
-      this.edit(newCategory);
-    } else {
-      this.create(newCategory);
-    }
+    this.create(newCategory);
   }
 
   create(newCategory) {
     let productRef = this.afs.firestore
-      .collection(`/db/aitec/config/generalConfig/categories`)
+      .collection(`/db/aitec/config/generalConfig/allCategories`)
       .doc();
 
     let batch = this.afs.firestore.batch();

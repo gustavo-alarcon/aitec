@@ -205,7 +205,7 @@ export class CreateEditBannerComponent implements OnInit {
     let reader = new FileReader();
     this.photos.resizing$[formControlName].next(true);
 
-    this.ng2ImgMax.resizeImage(image[0], 10000, 426)
+    this.ng2ImgMax.resizeImage(image[0], 1000, 426)
       .pipe(
         take(1)
       ).subscribe(result => {

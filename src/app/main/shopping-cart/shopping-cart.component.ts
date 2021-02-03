@@ -54,22 +54,16 @@ export class ShoppingCartComponent implements OnInit {
   idDelivery$ = this.idDelivery.asObservable();
 
   places: Array<any> = [];
+  departamentos: Array<any> = [];
   provincias: Array<any> = [];
   distritos: Array<any> = [];
 
   stores: any[] = []
   locations: any[] = []
 
-  filteredDepartamento$: Observable<any>;
-  filteredProvincia$: Observable<any>;
-  filteredDistrito$: Observable<any>;
-
-  provincias$: Observable<any>
-  distritos$: Observable<any>
-
   chooseDelivery$: Observable<any>
 
-  viewBol: boolean = true
+  viewDelivery: number = 1;
 
   selectedLocation: any
   selectedStore: number = 0
@@ -211,6 +205,9 @@ export class ShoppingCartComponent implements OnInit {
       }),
       tap(res => {
         this.places = this.convertPlaces(res)
+        this.departamentos = res.map(el => el.departamento).filter((item, index, data) => {
+          return data.findIndex(i => i.id === item.id) === index;
+        })
       })
     )
 
@@ -233,22 +230,21 @@ export class ShoppingCartComponent implements OnInit {
       map(([id, del, dis]) => {
 
         if (dis) {
-          if (dis.distrito) {
-            this.locations = [...this.user.location].filter(loc => {
-              //let ubigeo = this.formGroup.value
-              return loc.distrito == dis.distrito
-            })
-          }
+          this.locations = [...this.user.location].filter(loc => {
+            //let ubigeo = this.formGroup.value
+            return loc.idDistrito == dis
+          })
         }
         if (id == 1) {
           return del == 0 || this.locations.length == 0
         } else {
-          return !dis
+          return false
         }
       })
     )
 
     /*Payments*/
+
     this.cardForm = this.fb.group({
       type: [null],
       numero: [null],
@@ -269,9 +265,22 @@ export class ShoppingCartComponent implements OnInit {
       address: [null, Validators.required],
     });
 
-    this.initPayment$ = this.auth.user$.pipe(
-      map(user => {
+    this.initPayment$ = combineLatest(
+      this.auth.user$,
+      this.dbs.getPaymentsChanges()
+    ).pipe(
+      map(([user, payments]) => {
+
+        this.payments = payments.map(pay => {
+          return {
+            name: pay['name'],
+            account: pay['account'],
+            value: pay['voucher'] ? 3 : pay['name'].includes('arjeta') ? 2 : 1
+          }
+        })
+
         this.user = user
+
         if (user.personData.type == 'natural') {
           this.boletaForm.get('dni').setValue(user.personData['dni'])
           this.boletaForm.get('name').setValue(user.personData['name'] + ' ' + user.personData['lastName'])
@@ -522,18 +531,20 @@ export class ShoppingCartComponent implements OnInit {
   /*Delivery*/
 
   change(id) {
-    this.viewBol = !this.viewBol
+    this.viewDelivery = id
     this.delivery = id
     this.idDelivery.next(id)
-    if (id == 2) {
-      this.dbs.delivery.next(0);
-    } else {
+    if (id == 1) {
       this.dbs.delivery.next(this.selectedDelivery);
+    } else {
+      this.dbs.delivery.next(0);
     }
   }
 
   selectProvincias(option) {
-    this.provincias = option.provincias;
+    this.provincias = this.places.filter(pl => pl.provincia.department_id == option.id).map(pl => pl.provincia).filter((item, index, data) => {
+      return data.findIndex(i => i.id === item.id) === index;
+    });
     this.formGroup.get('provincia').setValue(null);
     this.formGroup.get('provincia').enable();
     this.formGroup.get('distrito').setValue(null);
@@ -543,7 +554,7 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   selectDistritos(option) {
-    this.distritos = option.distritos;
+    this.distritos = this.places.filter(pl => pl.provincia.id == option.id).map(pl => pl.distritos).reduce((a, b) => a.concat(b), []);
     this.formGroup.get('distrito').setValue(null);
     this.formGroup.get('distrito').enable();
     this.selectedDelivery = 0
@@ -568,7 +579,8 @@ export class ShoppingCartComponent implements OnInit {
     let convert = array.map(el => {
       el.distritos = el.distritos.map(dis => {
         return {
-          distrito: dis.name,
+          id: dis.id,
+          name: dis.name,
           province_id: dis.province_id,
           delivery: el.delivery
         }
@@ -576,23 +588,7 @@ export class ShoppingCartComponent implements OnInit {
       return el
     })
 
-    return convert.map((lo, ind, arr) => {
-      return {
-        departamento: lo.departamento.name,
-        provincias: arr.filter(li => li.provincia.department_id == lo.departamento.id).map((lu, i, dist) => {
-          return {
-            provincia: lu.provincia.name,
-            distritos: dist.map(d => {
-              return d.distritos
-            }).reduce((a, b) => a.concat(b), []).filter(la => la.province_id == lu.provincia.id)
-          }
-        }).filter((item, index, data) => {
-          return data.findIndex(i => i.provincia === item.provincia) === index;
-        })
-      }
-    }).filter((item, index, data) => {
-      return data.findIndex(i => i.departamento === item.departamento) === index;
-    })
+    return convert
   }
 
   openMap(user, index, edit) {
@@ -601,9 +597,10 @@ export class ShoppingCartComponent implements OnInit {
         user: user,
         edit: edit,
         ind: index,
-        departamento: this.formGroup.value['departamento']['departamento'],
-        provincia: this.formGroup.value['provincia']['provincia'],
-        distrito: this.formGroup.value['distrito']['distrito']
+        departamento: this.departamentos.find(dt => dt.id == this.formGroup.value['departamento']).name,
+        provincia: this.provincias.find(pv => pv.id == this.formGroup.value['provincia']).name,
+        distrito: this.distritos.find(ds => ds.id == this.formGroup.value['distrito']).name,
+        idDistrito: this.formGroup.value['distrito']
       }
     })
   }

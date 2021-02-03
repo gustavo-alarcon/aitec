@@ -30,11 +30,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
 import { CategoriesComponent } from './categories/categories.component';
-import { DeliveryStoresComponent } from './delivery-stores/delivery-stores.component';
-import { DeliveryDialogComponent } from './dialogs/delivery-dialog/delivery-dialog.component';
 import { StoreDialogComponent } from './dialogs/store-dialog/store-dialog.component';
 import { BrandComponent } from './dialogs/brand/brand.component';
-import { GeneralComponent } from './general/general.component';
 import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/create-edit-categories.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
@@ -43,16 +40,15 @@ import { PaymentMethodDialogComponent } from './dialogs/payment-method-dialog/pa
 import { StoresComponent } from './stores/stores.component';
 import { AdvisersComponent } from './advisers/advisers.component';
 import { PaymentViewComponent } from './payment-view/payment-view.component';
+import { CouponViewComponent } from './coupon-view/coupon-view.component';
+import { CategoryDialogComponent } from './dialogs/category-dialog/category-dialog.component';
 
 @NgModule({
   declarations: [
     ConfigurationSalesComponent,
     CategoriesComponent,
-    DeliveryStoresComponent,
-    DeliveryDialogComponent,
     StoreDialogComponent,
     BrandComponent,
-    GeneralComponent,
     CreateEditCategoriesComponent,
     BrandsViewComponent,
     CuponDialogComponent,
@@ -60,7 +56,9 @@ import { PaymentViewComponent } from './payment-view/payment-view.component';
     PaymentMethodDialogComponent,
     StoresComponent,
     AdvisersComponent,
-    PaymentViewComponent
+    PaymentViewComponent,
+    CouponViewComponent,
+    CategoryDialogComponent
   ],
   imports: [
     CommonModule,
