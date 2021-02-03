@@ -1284,4 +1284,52 @@ export class DatabaseService {
     return batch;
   }
 
+  uploadPhotoNews(file: File): Observable<string | number> {
+    console.log(file);
+
+    const path = `/news/${file.name}`;
+    console.log(path);
+
+
+    // Reference to storage bucket
+    const ref = this.storage.ref(path);
+
+    // The main task
+    let uploadingTask = this.storage.upload(path, file);
+
+    let snapshot$ = uploadingTask.percentageChanges();
+    let url$ = of('url!').pipe(
+      switchMap((res) => {
+        return <Observable<string>>ref.getDownloadURL();
+      })
+    );
+
+    let upload$ = concat(snapshot$, url$);
+    return upload$;
+  }
+
+  updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
+
+    if (!photo) {
+      let batch = this.afs.firestore.batch();
+      batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
+      return of(batch);
+    } else {
+      return this.uploadPhotoNews(photo)
+        .pipe(
+          switchMap(res => {
+            let batch = this.afs.firestore.batch();
+            if (typeof res == 'string') {
+              batch.update(this.generalConfigDoc.ref, { news: { visible: visible, imageURL: res } });
+            } else {
+              batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
+            }
+
+            return of(batch);
+          })
+        )
+    }
+
+  }
+
 }

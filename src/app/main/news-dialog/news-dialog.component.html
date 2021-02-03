@@ -1,1 +1,10 @@
-<p>news-dialog works!</p>
+<mat-dialog-content>
+  <div *ngIf="config$ | async as config; else default">
+    <img [src]="config.news.imageURL" alt="noticias">
+  </div>
+  <ng-template #default>
+    <div>
+      <p>Cargando...</p>
+    </div>
+  </ng-template>
+</mat-dialog-content>
