@@ -1,14 +1,15 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
+import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -63,8 +64,8 @@ export class WarehouseInventoryComponent implements OnInit {
   categorySelected: boolean = false;
 
   view: string = "products";
-  warehouses$: Observable<Warehouse>;
-  entryProducts$: Observable<Product[]>;
+  warehouses$: Observable<Warehouse[]>;
+  entryProducts$: Observable<WarehouseProduct[]>;
 
   selectedProduct = new BehaviorSubject<any>(null);
   selectedProduct$ = this.selectedProduct.asObservable();
@@ -75,6 +76,8 @@ export class WarehouseInventoryComponent implements OnInit {
   closeSubscriptions = new BehaviorSubject<boolean>(false);
   closeSubscriptions$ = this.closeSubscriptions.asObservable();
 
+
+
   constructor(
     private fb: FormBuilder,
     public snackBar: MatSnackBar,
@@ -84,18 +87,9 @@ export class WarehouseInventoryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+
     this.initForms();
     this.initObservables();
-
-    this.entrySKUControl.valueChanges
-      .pipe(
-        takeUntil(this.closeSubscriptions$),
-        startWith(''),
-      )
-      .subscribe(res => {
-        console.log(res);
-        
-      })
   }
 
   ngOnDestroy(): void {
@@ -106,13 +100,15 @@ export class WarehouseInventoryComponent implements OnInit {
     this.categoryForm = this.fb.control("");
     this.itemsFilterForm = this.fb.control("");
     this.promoFilterForm = this.fb.control(false);
-    this.entryWarehouseControl = this.fb.control('');
-    this.entryProductControl = this.fb.control('');
-    this.entrySKUControl = this.fb.control('');
-    this.entryScanControl = this.fb.control('');
+    this.entryWarehouseControl = this.fb.control('', Validators.required);
+    this.entryProductControl = this.fb.control('', Validators.required);
+    // this.entrySKUControl = this.fb.control('', Validators.required);
+    this.entryScanControl = this.fb.control('', customValidators.barcodeAlreadyExists(this.dbs, this.entryWarehouseControl.value, this.entryProductControl.value));
   }
 
   initObservables() {
+    this.warehouses$ = this.dbs.getWarehouseList();
+
     this.productsObservable$ = combineLatest(
       this.dbs.getWarehouseListValueChanges(),
       this.dbs.getProductsListValueChanges(),
@@ -134,27 +130,24 @@ export class WarehouseInventoryComponent implements OnInit {
       )
 
     this.entryProducts$ = combineLatest(
-      this.dbs.getWarehouseListValueChanges(),
-      this.dbs.getProductsListValueChanges(),
-      this.entryWarehouseControl.valueChanges.pipe(startWith('')),
-      this.entryProductControl.valueChanges.pipe(startWith(''), map(product => product.product ? product.product.description : product))
+      this.entryWarehouseControl.valueChanges
+        .pipe(
+          startWith(''),
+          switchMap(warehouse => { return this.dbs.getWarehouseProducts(warehouse) })
+        ),
+      this.entryProductControl.valueChanges
+        .pipe(
+          startWith(''),
+          debounceTime(300),
+          distinctUntilChanged(),
+          map(product => product.description ? product.description : product)
+        )
     ).pipe(
-      map(([warehouses, products, selection, product]) => {
-        return warehouses.map(warehouse => {
-          // Adding product property to warehouse object
-          warehouse['product'] = products.filter(product => product.sku == warehouse['skuProduct'])[0];
-          return warehouse
-        }).filter(ol => {
-          return selection != 'Todos' ? ol.warehouse == selection : true;
-        }).filter(el => {
-          if (el['product']) {
-            return el['product'].description.toLowerCase().includes(product.toLowerCase());
-          } else {
-            return false
-          }
-        })
+      map(([products, entryProduct]) => {
+        return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) })
       })
     )
+
   }
 
   applyFilter(event: Event) {
@@ -219,12 +212,12 @@ export class WarehouseInventoryComponent implements OnInit {
     this.view = view;
   }
 
-  showEntryProduct(product: any): string | null {
-    return product.product ? product.product.description : null;
+  showEntryProduct(product: WarehouseProduct): string | null {
+    return product.description ? product.description : null;
   }
 
   selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value.product);
+    this.selectedProduct.next(event.option.value);
   }
 
   showEntrySKU(product: any): string | null {
@@ -238,24 +231,18 @@ export class WarehouseInventoryComponent implements OnInit {
   }
 
   addSerie() {
-    let sku = this.entrySKUControl.value.sku
-    console.log(sku);
+    let scan = this.entryScanControl.value.trim();
 
-    if (sku) {
-      let scan = this.entryScanControl.value
-      if (scan.toLowerCase().includes(sku.toLowerCase())) {
-
-        this.seriesList.push(scan)
-      } else {
-        let real = sku + scan
-        this.seriesList.push(real)
-      }
-
-
+    // First, lets check if the SKU already exist in our skuArray
+    if (this.checkSKU(scan)) {
+      // If exist, then check if the barcode already exists in the product serial numbers
+      this.seriesList.unshift(scan);
       this.entryStock = this.seriesList.length;
-      this.entryScanControl.setValue('')
+      this.entryScanControl.setValue('');
+
     } else {
-      this.snackBar.open('Por favor, elija SKU', 'Aceptar');
+      // If not exists, we have to add the SKU to the current product
+      this.addNewSKUToProduct(this.entryProductControl.value);
     }
   }
 
@@ -264,8 +251,44 @@ export class WarehouseInventoryComponent implements OnInit {
     this.entryStock = this.seriesList.length;
   }
 
-  save(): void {
-    // 
+  checkSKU(code: string): boolean {
+    let product = this.entryProductControl.value;
+    let exist = false;
+
+    product.skuArray.every(sku => {
+      exist = code.startsWith(sku);
+      return !exist;
+    });
+
+    return exist;
   }
 
+  addNewSKUToProduct(product: WarehouseProduct): void {
+    console.log('new sku');
+
+  }
+
+  save(): void {
+    //
+  }
+
+}
+
+export class customValidators {
+  static barcodeAlreadyExists(dbs: DatabaseService, warehouse: Warehouse, product: WarehouseProduct) {
+    return (control: AbstractControl) => {
+      const barcode = control.value;
+      console.log(barcode);
+      console.log(warehouse);
+      console.log(product);
+      return dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
+        debounceTime(500),
+        tap(res => {
+          console.log(res);
+        }),
+        map(serials => !!serials.find(serial => serial.barcode === barcode) ? { barcodeAlreadyExists: true } : null),
+        take(1)
+      )
+    }
+  }
 }

@@ -25,6 +25,8 @@ import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Warehouse } from '../models/warehouse.model';
+import { WarehouseProduct } from '../models/warehouseProduct.model';
+import { SerialNumber } from '../models/SerialNumbermodel';
 
 @Injectable({
   providedIn: 'root',
@@ -1308,6 +1310,28 @@ export class DatabaseService {
     return upload$;
   }
 
+  getWarehouseProducts(warehouse: Warehouse): Observable<WarehouseProduct[]> {
+    if (!warehouse.id) {
+      return of([])
+    }
+
+    return this.afs.collection<WarehouseProduct>(`/db/aitec/warehouses/${warehouse.id}/products`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+  getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
+    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+
+  // NEWS CONFIGURATION
   updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
 
     if (!photo) {
