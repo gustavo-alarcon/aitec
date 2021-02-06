@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, take, takeUntil, tap, timeout } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
@@ -55,7 +55,7 @@ export class WarehouseInventoryComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/icons/aitec-192x192.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -76,7 +76,14 @@ export class WarehouseInventoryComponent implements OnInit {
   closeSubscriptions = new BehaviorSubject<boolean>(false);
   closeSubscriptions$ = this.closeSubscriptions.asObservable();
 
+  scanValidation = new BehaviorSubject<boolean>(false);
+  scanValidation$ = this.scanValidation.asObservable();
 
+  validatingScan = new BehaviorSubject<boolean>(false);
+  validatingScan$ = this.validatingScan.asObservable();
+
+  actionAddSerie = new BehaviorSubject<boolean>(false);
+  actionAddSerie$ = this.actionAddSerie.asObservable();
 
   constructor(
     private fb: FormBuilder,
@@ -103,7 +110,7 @@ export class WarehouseInventoryComponent implements OnInit {
     this.entryWarehouseControl = this.fb.control('', Validators.required);
     this.entryProductControl = this.fb.control('', Validators.required);
     // this.entrySKUControl = this.fb.control('', Validators.required);
-    this.entryScanControl = this.fb.control('', customValidators.barcodeAlreadyExists(this.dbs, this.entryWarehouseControl.value, this.entryProductControl.value));
+    this.entryScanControl = this.fb.control('');
   }
 
   initObservables() {
@@ -148,6 +155,50 @@ export class WarehouseInventoryComponent implements OnInit {
       })
     )
 
+    this.scanValidation$ = combineLatest(
+      this.entryWarehouseControl.valueChanges,
+      this.entryProductControl.valueChanges,
+      this.entryScanControl.valueChanges.pipe(distinctUntilChanged(), filter(scan => !(scan === ''))),
+      this.actionAddSerie$.pipe(distinctUntilChanged())
+    ).pipe(
+      map(([warehouse, product, scan, add]) => {
+        console.log('Init ', add);
+
+        this.validatingScan.next(true);
+        if (warehouse && product) {
+          this.dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
+            take(1),
+            map(serials => { return !!serials.find(serial => serial.barcode === scan) ? true : false }),
+          ).subscribe(res => {
+            if (res) {
+              this.entryScanControl.markAsTouched()
+              this.entryScanControl.setErrors({
+                repeated: true
+              });
+              this.snackBar.open(`🚨 El código escaneado ya existe en este almacén!`, 'Aceptar', {
+                duration: 6000
+              });
+            } else {
+              if (add) {
+                this.addSerie();
+              }
+              this.entryScanControl.setErrors(null)
+            }
+
+            this.validatingScan.next(false);
+            this.actionAddSerie.next(false);
+
+            return res;
+          })
+        } else {
+          this.entryScanControl.setErrors(null)
+          this.validatingScan.next(false);
+          this.actionAddSerie.next(false);
+          return false
+        }
+      })
+    )
+
   }
 
   applyFilter(event: Event) {
@@ -162,15 +213,6 @@ export class WarehouseInventoryComponent implements OnInit {
   showCategory(category: any): string | null {
     return category ? category.name : null
   }
-
-  // openDialog(row) {
-  //   this.dialog.open(ListDialogComponent, {
-  //     data: {
-  //       name: row.product.description,
-  //       id: row.id
-  //     }
-  //   })
-  // }
 
 
   downloadXls(): void {
@@ -233,17 +275,26 @@ export class WarehouseInventoryComponent implements OnInit {
   addSerie() {
     let scan = this.entryScanControl.value.trim();
 
-    // First, lets check if the SKU already exist in our skuArray
+    // First, lets check if the scanned code is part of our inventory
     if (this.checkSKU(scan)) {
-      // If exist, then check if the barcode already exists in the product serial numbers
-      this.seriesList.unshift(scan);
-      this.entryStock = this.seriesList.length;
-      this.entryScanControl.setValue('');
-
+      // If exist in our inventory, then check if the barcode already exists in the product serial numbers
+      if (this.checkSerialList(scan)) {
+        this.snackBar.open(`🚨 El código escaneado ya se encuentra en la lista!`, 'Aceptar', {
+          duration: 6000
+        });
+      } else {
+        this.seriesList.unshift(scan);
+        this.entryStock = this.seriesList.length;
+        this.entryScanControl.setValue('');
+      }
     } else {
       // If not exists, we have to add the SKU to the current product
       this.addNewSKUToProduct(this.entryProductControl.value);
     }
+  }
+
+  dispatchAddSerie(): void {
+    this.actionAddSerie.next(true);
   }
 
   removeSerie(i) {
@@ -263,6 +314,17 @@ export class WarehouseInventoryComponent implements OnInit {
     return exist;
   }
 
+  checkSerialList(barcode: string): boolean {
+    let exist = false;
+
+    this.seriesList.every(serie => {
+      exist = serie === barcode;
+      return !exist
+    })
+
+    return exist;
+  }
+
   addNewSKUToProduct(product: WarehouseProduct): void {
     console.log('new sku');
 
@@ -272,23 +334,4 @@ export class WarehouseInventoryComponent implements OnInit {
     //
   }
 
-}
-
-export class customValidators {
-  static barcodeAlreadyExists(dbs: DatabaseService, warehouse: Warehouse, product: WarehouseProduct) {
-    return (control: AbstractControl) => {
-      const barcode = control.value;
-      console.log(barcode);
-      console.log(warehouse);
-      console.log(product);
-      return dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
-        debounceTime(500),
-        tap(res => {
-          console.log(res);
-        }),
-        map(serials => !!serials.find(serial => serial.barcode === barcode) ? { barcodeAlreadyExists: true } : null),
-        take(1)
-      )
-    }
-  }
 }

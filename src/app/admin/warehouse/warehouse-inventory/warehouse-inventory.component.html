@@ -236,12 +236,13 @@
                   <mat-icon matPrefix class="w3-margin-right" style="transform: rotateZ(90deg);">line_weight
                   </mat-icon>
                   <input [formControl]="entryScanControl" matInput type="text" placeholder="Escriba..."
-                    autocomplete="off" (keyup.enter)="addSerie()">
+                    autocomplete="off" (keyup.enter)="dispatchAddSerie()">
                   <mat-hint>Presione ENTER para agregar</mat-hint>
-                  <mat-progress-bar *ngIf="entryScanControl.pending" mode="indeterminate"></mat-progress-bar>
+                  <mat-progress-bar *ngIf="validatingScan$ | async" mode="indeterminate"></mat-progress-bar>
                   <mat-error>
-                    <span *ngIf="entryScanControl.invalid && entryScanControl.dirty && entryScanControl.value">
+                    <span>
                       {{entryScanControl.value}} ya existe en este almacén.</span>
+                      {{scanValidation$ | async}}
                   </mat-error>
                 </mat-form-field>
 
