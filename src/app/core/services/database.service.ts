@@ -24,11 +24,8 @@ import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
-<<<<<<< HEAD
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-=======
 import { Warehouse } from '../models/warehouse.model';
->>>>>>> develop
 
 @Injectable({
   providedIn: 'root',
@@ -1281,9 +1278,7 @@ export class DatabaseService {
       await console.log(error);
     }
 
-<<<<<<< HEAD
   }
-=======
   // WAREHOUSE
   createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
@@ -1369,5 +1364,4 @@ export class DatabaseService {
 
   }
 
->>>>>>> develop
 }
