@@ -11,6 +11,7 @@ export interface User {
     departamento:string;
     provincia:string;
     distrito:string;
+    idDistrito:string;
   }[];
 
   personData: naturalPerson | businessPerson;

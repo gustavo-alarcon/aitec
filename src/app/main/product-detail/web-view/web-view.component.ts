@@ -30,7 +30,7 @@ export class WebViewComponent implements OnInit {
   selected = new FormControl('')
   changeColor$: Observable<any>
 
-  defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/images/aitec-512x512.png";
 
   favorite$: Observable<any>
 

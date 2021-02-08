@@ -36,12 +36,13 @@ export class CategoriesComponent implements OnInit {
   }
   
   openDialog(movil: boolean,data) {
+    /*
     this.dialog.open(CreateEditCategoriesComponent, {
       data: {
         edit: movil,
         data:data
       }
-    })
+    })*/
   }
 
   deleteDialog(id: string) {

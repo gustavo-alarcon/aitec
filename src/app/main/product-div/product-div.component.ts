@@ -19,7 +19,7 @@ export class ProductDivComponent implements OnInit {
   promo: boolean = false
   init$: Observable<any>
 
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
   constructor(
     private router: Router,
     private dbs: DatabaseService,
@@ -28,19 +28,16 @@ export class ProductDivComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.init$ = combineLatest(
-      this.dbs.getProductObs(this.product.id),
-      this.dbs.isMayUser$
-    ).pipe(
-      map(([product, user]) => {
-        this.price = product.priceMin
-        this.promo = product.promo
+    this.init$ = this.dbs.isMayUser$.pipe(
+      map((user) => {
+        this.price = this.product.priceMin
+        this.promo = this.product.promo
         if (user) {
-          this.price = product.priceMay
+          this.price = this.product.priceMay
           this.promo = false
         }
 
-        return product
+        return this.product
       })
     );
 

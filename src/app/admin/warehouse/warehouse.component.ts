@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -7,7 +7,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, startWith, tap } from 'rxjs/operators';
+import { map, startWith, takeUntil, tap } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -19,7 +19,7 @@ import { ListDialogComponent } from './list-dialog/list-dialog.component';
   templateUrl: './warehouse.component.html',
   styleUrls: ['./warehouse.component.scss']
 })
-export class WarehouseComponent implements OnInit {
+export class WarehouseComponent implements OnInit, OnDestroy {
 
   loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
@@ -57,7 +57,7 @@ export class WarehouseComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -75,6 +75,9 @@ export class WarehouseComponent implements OnInit {
   seriesList: Array<any> = [];
   entryStock: number = 0;
 
+  closeSubscriptions = new BehaviorSubject<boolean>(false);
+  closeSubscriptions$ = this.closeSubscriptions.asObservable();
+
   constructor(
     private fb: FormBuilder,
     public snackBar: MatSnackBar,
@@ -87,6 +90,20 @@ export class WarehouseComponent implements OnInit {
   ngOnInit(): void {
     this.initForms();
     this.initObservables();
+
+    this.entrySKUControl.valueChanges
+      .pipe(
+        takeUntil(this.closeSubscriptions$),
+        startWith(''),
+      )
+      .subscribe(res => {
+        console.log(res);
+        
+      })
+  }
+
+  ngOnDestroy(): void {
+    this.closeSubscriptions.next(true);
   }
 
   initForms() {
@@ -215,12 +232,13 @@ export class WarehouseComponent implements OnInit {
   }
 
   showEntrySKU(product: any): string | null {
-    console.log(product);
     return product ? product.sku + ' | ' + product.color.name : null
   }
 
   selectedEntrySKU(event: any): void {
     this.entryStock = event.option.value.stock;
+    console.log(event.option.value);
+    console.log(this.entryProductControl.value);
   }
 
   addSerie() {

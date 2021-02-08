@@ -7,7 +7,7 @@ import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
-
+import { Location } from "@angular/common";
 @Component({
   selector: 'app-sign-in',
   templateUrl: './sign-in.component.html',
@@ -32,7 +32,8 @@ export class SignInComponent implements OnInit {
     private dbs: DatabaseService,
     private snackbar: MatSnackBar,
     private fb: FormBuilder,
-    public router: Router
+    public router: Router,
+    private location: Location
   ) { }
 
   ngOnInit() {
@@ -66,7 +67,9 @@ export class SignInComponent implements OnInit {
   login(): void {
     this.auth.signInEmail(this.dataFormGroup.get('email').value, this.dataFormGroup.get('pass').value)
       .then(res => {
+        
         this.snackbar.open('¡Bienvenido!', 'Cerrar');
+        this.location.back()
         //this.router.navigateByUrl('/main');
 
       })
@@ -79,7 +82,8 @@ export class SignInComponent implements OnInit {
   signInProvider(type: "facebook"|"google") {
     this.auth.signIn(type).then(res => {
       this.snackbar.open('¡Bienvenido!', 'Cerrar');
-      this.router.navigateByUrl('/main');
+      this.location.back()
+      //this.router.navigateByUrl('/main');
 
     })
     .catch(error => {
@@ -116,7 +120,6 @@ export class SignInComponent implements OnInit {
           debounceTime(500),
           switchMap(res => from(this.auth.emailMethod(res))),
           map(res => {
-            console.log(res)
             control.parent.get('pass').enable()
             this.registerLogin$.next(false)
             switch(res[0]) {

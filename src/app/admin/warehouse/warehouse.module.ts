@@ -28,10 +28,18 @@ import { MatRadioModule } from '@angular/material/radio';
 import { WarehouseRoutingModule } from './warehouse-routing.module';
 import { WarehouseComponent } from './warehouse.component';
 import { ListDialogComponent } from './list-dialog/list-dialog.component';
+import { WarehouseListComponent } from './warehouse-list/warehouse-list.component';
+import { WarehouseInventoryComponent } from './warehouse-inventory/warehouse-inventory.component';
+import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-create-edit.component';
 
 
 @NgModule({
-  declarations: [WarehouseComponent, ListDialogComponent],
+  declarations: [
+    WarehouseComponent,
+    ListDialogComponent,
+    WarehouseListComponent,
+    WarehouseInventoryComponent,
+    WarehouseCreateEditComponent],
   imports: [
     CommonModule,
     WarehouseRoutingModule,

@@ -8,7 +8,7 @@
   color: #a2a2a2;
 }
 
-.mini-button{
+.mini-button {
   color: var(--primary-color);
 }
 
@@ -29,6 +29,7 @@
 .email-form {
   display: flex;
   margin: auto;
+  align-items: center;
   font-size: 1em;
   width: 100%;
   padding-left: 15px;
@@ -89,11 +90,16 @@
 }
 
 .menuContainer {
+  max-width: 500px;
+  margin: auto;
   display: flex;
   text-align: center;
   div {
-    width: 50%;
+    width: 35%;
     padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .activated {
     background: #ffffff;
@@ -112,30 +118,30 @@
   }
 }
 
-.ordItem{
+.ordItem {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   margin-bottom: 5px;
 }
 
-.store{
-  padding: 5px;
-  &__address{
+.store {
+  padding: 16px;
+  &__address {
     font-size: 0.9em;
     font-weight: 600;
     text-transform: uppercase;
   }
-  &__district{
+  &__district {
     font-size: 0.9em;
     text-transform: uppercase;
     color: #c4c4c4;
     font-weight: 500;
   }
-  &__schedule{
+  &__schedule {
     font-size: 1em;
   }
-  &__selected{
+  &__selected {
     background: #f1f1f1;
   }
 }

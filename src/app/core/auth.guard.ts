@@ -32,6 +32,7 @@ export class AuthGuard implements CanActivate {
         switch (childComponent) {
           case 'products':
             return true;
+            /*
           case 'products-history':
             return true;
           case 'customers':
@@ -47,7 +48,7 @@ export class AuthGuard implements CanActivate {
           case 'success':
               return true;
           default:
-            return true;
+            return true;*/
         }
       }),
       tap(res => {

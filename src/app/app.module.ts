@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AboutComponent } from './about/about.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule, MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -15,12 +14,15 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import * as firebase from 'firebase';
 
 import { DatePipe } from '@angular/common';
+<<<<<<< HEAD
 import { HttpClientModule } from '@angular/common/http';
+=======
+import { MatDialogModule } from '@angular/material/dialog';
+>>>>>>> develop
 
 @NgModule({
   declarations: [
-    AppComponent,
-    AboutComponent,
+    AppComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
@@ -30,7 +32,11 @@ import { HttpClientModule } from '@angular/common/http';
     MatSnackBarModule,
     LazyLoadImageModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
+<<<<<<< HEAD
     HttpClientModule,
+=======
+    MatDialogModule
+>>>>>>> develop
   ],
   providers: [
     //DatePipe,

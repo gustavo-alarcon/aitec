@@ -8,36 +8,30 @@
 </div>
 <mat-dialog-content style="max-width: 400px">
   <form [formGroup]="formGroup" class="w3-row">
+   
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Departamento</mat-label>
-      <input type="text" placeholder="Departamento" matInput formControlName="departamento" [matAutocomplete]="autoD" />
-      <mat-autocomplete #autoD="matAutocomplete" [displayWith]="showDepartamento">
-        <mat-option *ngFor="let option of filteredDepartamento$ | async" [value]="option">
-          {{ option.name | titlecase }}
+      <mat-select disableRipple formControlName="departamento">
+        <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept.id">
+          {{ dept.name | titlecase }}
         </mat-option>
-      </mat-autocomplete>
-      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+      </mat-select>
     </mat-form-field>
-    <mat-form-field class="w3-block" appearance="outline" *ngIf="provincias$ | async">
+    <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Provincia</mat-label>
-      <input type="text" placeholder="Provincia" matInput formControlName="provincia" [matAutocomplete]="autoP" />
-      <mat-autocomplete autoActiveFirstOption #autoP="matAutocomplete" [displayWith]="showProvincia">
-        <mat-option *ngFor="let option of filteredProvincia$ | async" [value]="option">
+      <mat-select disableRipple formControlName="provincia">
+        <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option.id">
           {{ option.name | titlecase }}
         </mat-option>
-      </mat-autocomplete>
-      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+      </mat-select>
     </mat-form-field>
-    <mat-form-field class="w3-block" appearance="outline" *ngIf="distritos$ | async">
+    <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Distrito</mat-label>
-      <input type="text" placeholder="Distrito" matInput formControlName="distrito" [matAutocomplete]="autoX" />
-      <mat-autocomplete autoActiveFirstOption #autoX="matAutocomplete" [displayWith]="showDistrito">
-        <mat-option *ngFor="let option of filteredDistrito$ | async" [value]="option"
-          (keyup.enter)="selectDelivery(option)">
+      <mat-select disableRipple formControlName="distrito">
+        <mat-option *ngFor="let option of distritos"  [value]="option.id">
           {{ option.name | titlecase }}
         </mat-option>
-      </mat-autocomplete>
-      <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+      </mat-select>
     </mat-form-field>
     <mat-form-field class="w3-block" appearance="outline">
       <mat-label>Dirección</mat-label>

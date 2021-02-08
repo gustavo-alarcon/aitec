@@ -29,12 +29,20 @@ export class LocationDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<LocationDialogComponent>,
     private af: AngularFirestore,
-    @Inject(MAT_DIALOG_DATA) public data: { user: User, ind: number, edit: boolean, distrito: string; departamento: string; provincia: string }
+    @Inject(MAT_DIALOG_DATA) public data: {
+      user: User;
+      ind: number;
+      edit: boolean;
+      distrito: string;
+      departamento: string;
+      provincia: string;
+      idDistrito: string;
+    }
   ) { }
 
   ngOnInit(): void {
     console.log(this.data);
-    
+
     if (this.data.edit) {
       this.firstFormGroup = this.fb.group({
         reference: [this.data.user.location[this.data.ind].reference, [Validators.required]],
@@ -73,9 +81,10 @@ export class LocationDialogComponent implements OnInit {
       address: this.firstFormGroup.get('name').value,
       reference: this.firstFormGroup.get('reference').value,
       coord: this.center,
-      distrito:this.data.distrito,
-      departamento:this.data.departamento,
-      provincia:this.data.provincia
+      distrito: this.data.distrito,
+      departamento: this.data.departamento,
+      provincia: this.data.provincia,
+      idDistrito: this.data.idDistrito
     }
 
     let savelocations = this.data.user.location ? this.data.user.location : []
@@ -84,9 +93,7 @@ export class LocationDialogComponent implements OnInit {
     } else {
       savelocations.push(newLoacation)
     }
-    console.log(userRef);
-    console.log(savelocations);
-    
+
     batch.update(userRef, {
       location: savelocations
     })

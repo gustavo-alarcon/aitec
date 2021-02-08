@@ -84,11 +84,18 @@ export class LandingComponent implements OnInit {
   ngOnInit(): void {
 
 
-    this.products$ = this.dbs.getLastProducts().pipe(
-      map(prods => prods.filter(el => el.published)),
-      tap(res => {
+    this.products$ = combineLatest(
+      this.dbs.getLastProducts(),
+      this.dbs.getSearchsProducts()
+    ).pipe(
+
+      map(([last, searched]) => {
+        let res = last.filter(prod => prod.published)
         this.allproducts = res
-        this.listproducts = res.filter(el => !el.promo).filter(el => el.searchNumber).sort((a, b) => b.searchNumber - a.searchNumber).slice(0, 4)
+        this.listproducts = searched.map(sr => {
+          let prod = res.find(pr => pr.id == sr.id)
+          return prod
+        }).filter(d => !!d).slice(0, 4)
         this.lastProducts = res.slice(0, 4)
         this.offers = res.filter(el => el.promo)
         this.offersProducts = this.offers.slice(0, 4)

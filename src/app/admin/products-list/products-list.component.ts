@@ -37,7 +37,7 @@ export class ProductsListComponent implements OnInit {
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'category', 'pricemin','pricemay',
+    'index', 'photoURL', 'description', 'sku', 'category', 'pricemin', 'pricemay',
     'realStock', 'published', 'actions'
   ]
 
@@ -57,7 +57,7 @@ export class ProductsListComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../assets/images/aitec-512x512.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -93,9 +93,9 @@ export class ProductsListComponent implements OnInit {
       this.promoFilterForm.valueChanges.pipe(startWith(false)),
       this.dbs.getProductsListValueChanges()).pipe(
         map(([promoFormValue, products]) => {
-          let prods = products.map(el=>{
-            
-            
+          let prods = products.map(el => {
+
+
             return el
           })
           return prods.filter(el => promoFormValue ? el.promo : true)
@@ -112,7 +112,7 @@ export class ProductsListComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.productsTableDataSource.filter = filterValue.trim().toLowerCase();
-    
+
     if (this.productsTableDataSource.paginator) {
       this.productsTableDataSource.paginator.firstPage();
     }
@@ -135,6 +135,7 @@ export class ProductsListComponent implements OnInit {
     )
 
   }
+
 
   increasePriority(product: Product) {
     let prod = { ...product };
@@ -167,7 +168,7 @@ export class ProductsListComponent implements OnInit {
   }
 
   onDeleteItem(product: Product) {
-    this.dialog.open(DeleteProductComponent,{
+    this.dialog.open(DeleteProductComponent, {
       width: '350px',
       data: product
     })
@@ -175,7 +176,7 @@ export class ProductsListComponent implements OnInit {
   }
 
   onPromo(product: Product) {
-    
+
     let dialogRef: MatDialogRef<ProductEditPromoComponent>;
     dialogRef = this.dialog.open(ProductEditPromoComponent, {
       width: '350px',
@@ -198,13 +199,13 @@ export class ProductsListComponent implements OnInit {
   }
 
   onCreateEditItem(edit: boolean, product?: Product) {
-    if(edit){
+    if (edit) {
       this.router.navigate(['/admin/products/edit', product.sku]);
-      
-    }else{
+
+    } else {
       this.router.navigate(['/admin/products/create']);
     }
-    
+
     /*
     let dialogRef: MatDialogRef<ProductCreateEditComponent>;
     if (edit == true) {

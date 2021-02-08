@@ -20,19 +20,21 @@ import { GeneralConfig } from '../models/generalConfig.model';
 import { Observable, concat, of, interval, BehaviorSubject, from, forkJoin } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Recipe } from '../models/recipe.model';
-import { Unit, PackageUnit } from '../models/unit.model';
 import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+<<<<<<< HEAD
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+=======
+import { Warehouse } from '../models/warehouse.model';
+>>>>>>> develop
 
 @Injectable({
   providedIn: 'root',
 })
 export class DatabaseService {
-  public version: string = 'V0.0.1r';
+  public version: string = 'V0.0.3r';
   public isOpen: boolean = false;
   public isAdmin: boolean = false;
 
@@ -111,20 +113,50 @@ export class DatabaseService {
         shareReplay(1)
       );
   }
+  /*
+    saveAll(products) {
+      const batch = this.afs.firestore.batch();
+  
+      products.forEach(el => {
+        let productRef = this.afs.firestore
+          .collection(`db/aitec/searchProducts`)
+          .doc(el.id);
+        batch.set(productRef, {
+          id:el.id,
+          searchNumber: el.searchNumber
+        });
+  
+      })
+  
+      batch.commit().then(() => {
+        console.log('all');
+  
+      })
+    }*/
 
-  /*saveAll() {
+  saveWarehouses(products, name) {
     const batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.collection(`db/aitec/warehouses`).doc();
+    batch.set(warehouseRef, {
+      id: warehouseRef.id,
+      name: name
+    })
+    products.forEach(el => {
+      let productRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseRef.id}/products`).doc(el.id);
 
-    this.products.forEach(el => {
-      let productRef = this.afs.firestore
-        .collection(`db/aitec/productsList`)
-        .doc(el.sku);
-      batch.update(productRef, {
-        priceMin:el.price,
-        model:'modelo',
-        virtualStock:el.realStock,
-        guarantee:false,
-        colors:[]
+      el.series.forEach(lo => {
+        const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/products/${el.id}/series`).doc();
+        batch.set(serieRef, {
+          id: serieRef.id,
+          idProduct: el.id,
+          skuProduct: el.sku,
+          serie: lo
+        })
+      })
+
+      batch.set(productRef, {
+        id: el.id,
+        series: el.series
       });
 
     })
@@ -133,7 +165,7 @@ export class DatabaseService {
       console.log('all');
 
     })
-  }*/
+  }
 
   getCurrentMonthOfViewDate(): { from: Date; to: Date } {
     const date = new Date();
@@ -321,6 +353,17 @@ export class DatabaseService {
       );
   }
 
+  getWarehouses(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/warehouses`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
+
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
   getProductsList(): Observable<Product[]> {
@@ -340,6 +383,19 @@ export class DatabaseService {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
         ref.orderBy('createdAt', 'desc')
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  }
+
+  getSearchsProducts(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(`db/aitec/searchProducts`, (ref) =>
+        ref.orderBy('searchNumber', 'desc')
       )
       .get()
       .pipe(
@@ -380,6 +436,23 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  getWarehouseList(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getWarehousesObservable(): Observable<Warehouse[]> {
+    return this.afs
+      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges();
+  }
+
   getWarehouseSeriesValueChanges(id): Observable<Product[]> {
     return this.afs
       .collection<Product>(`/db/aitec/warehouse/${id}/series`)
@@ -418,24 +491,6 @@ export class DatabaseService {
       })
     );
   }
-
-  getProductsListUnitsValueChanges(): Observable<Unit[]> {
-    return this.getGeneralConfigDoc().pipe(
-      map((res) => {
-        if (res) {
-          if (res.hasOwnProperty('units')) {
-            return res.units;
-          } else {
-            return [];
-          }
-        } else {
-          return [];
-        }
-      }),
-      shareReplay(1)
-    );
-  }
-
 
   /*
     createEditProduct(
@@ -589,22 +644,6 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  getPackagesListUnitsValueChanges(): Observable<PackageUnit[]> {
-    return this.getGeneralConfigDoc().pipe(
-      map((res) => {
-        if (res) {
-          if (res.hasOwnProperty('packagesUnits')) {
-            return res.packagesUnits;
-          } else {
-            return [];
-          }
-        } else {
-          return [];
-        }
-      }),
-      shareReplay(1)
-    );
-  }
 
   createEditPackage(
     edit: boolean,
@@ -718,35 +757,6 @@ export class DatabaseService {
     return st.delete().pipe(takeLast(1));
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
-  //Products//////////////////////////////////////////////////////////////////////
-  createEditRecipe(
-    recipe: Recipe,
-    edit: boolean
-  ): firebase.default.firestore.WriteBatch {
-    let recipeRef: DocumentReference;
-    let recipeData: Recipe = recipe;
-    let batch = this.afs.firestore.batch();
-    if (edit) {
-      recipeRef = this.afs.firestore.collection(this.recipesRef).doc(recipe.id);
-    } else {
-      recipeRef = this.afs.firestore.collection(this.recipesRef).doc();
-      recipeData.id = recipeRef.id;
-    }
-    batch.set(recipeRef, recipeData);
-    return batch;
-  }
-
-  getRecipes(): Observable<Recipe[]> {
-    return this.afs
-      .collection<Recipe>(this.recipesRef, (ref) => ref.orderBy('name', 'asc'))
-      .get()
-      .pipe(
-        map((snap) => {
-          return snap.docs.map((el) => <Recipe>el.data());
-        })
-      );
-  }
 
   /*sales*/
 
@@ -1271,5 +1281,93 @@ export class DatabaseService {
       await console.log(error);
     }
 
+<<<<<<< HEAD
   }
+=======
+  // WAREHOUSE
+  createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
+
+    let newData: Warehouse = {
+      id: warehouseRef.id,
+      department: data.department,
+      providence: data.providence,
+      district: data.district,
+      address: data.address,
+      name: data.name,
+      createdAt: new Date(),
+      createdBy: user,
+      editedAt: null,
+      editedBy: null
+    }
+
+    if (edit) {
+      warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+      batch.update(warehouseRef, newData);
+    } else {
+      batch.set(warehouseRef, newData);
+    }
+
+    return batch
+  }
+
+  deleteWarehouse(id: string): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
+    let warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
+
+    batch.delete(warehouseRef);
+
+    return batch;
+  }
+
+  uploadPhotoNews(file: File): Observable<string | number> {
+    console.log(file);
+
+    const path = `/news/${file.name}`;
+    console.log(path);
+
+
+    // Reference to storage bucket
+    const ref = this.storage.ref(path);
+
+    // The main task
+    let uploadingTask = this.storage.upload(path, file);
+
+    let snapshot$ = uploadingTask.percentageChanges();
+    let url$ = of('url!').pipe(
+      switchMap((res) => {
+        return <Observable<string>>ref.getDownloadURL();
+      })
+    );
+
+    let upload$ = concat(snapshot$, url$);
+    return upload$;
+  }
+
+  updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
+
+    if (!photo) {
+      let batch = this.afs.firestore.batch();
+      batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
+      return of(batch);
+    } else {
+      return this.uploadPhotoNews(photo)
+        .pipe(
+          switchMap(res => {
+            let batch = this.afs.firestore.batch();
+            if (typeof res == 'string') {
+              batch.update(this.generalConfigDoc.ref, { news: { visible: visible, imageURL: res } });
+            } else {
+              batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
+            }
+
+            return of(batch);
+          })
+        )
+    }
+
+  }
+
+>>>>>>> develop
 }

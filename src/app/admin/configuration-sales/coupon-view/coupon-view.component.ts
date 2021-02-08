@@ -9,11 +9,10 @@ import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-con
 import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.component';
 
 @Component({
-  selector: 'app-general',
-  templateUrl: './general.component.html',
-  styleUrls: ['./general.component.scss']
+  selector: 'app-coupon-view',
+  templateUrl: './coupon-view.component.html'
 })
-export class GeneralComponent implements OnInit {
+export class CouponViewComponent implements OnInit {
 
   dataCouponSource = new MatTableDataSource();
   displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'count', 'actions'];
@@ -24,9 +23,6 @@ export class GeneralComponent implements OnInit {
     this.dataCouponSource.paginator = paginator1;
   }
   initCoupon$: Observable<any>
-
-
-
 
   constructor(
     private dialog: MatDialog,
@@ -61,4 +57,5 @@ export class GeneralComponent implements OnInit {
       }
     })
   }
+
 }

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
-import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dialog.component';
+// import { DeliveryDialogComponent } from '../dialogs/delivery-dialog/delivery-dialog.component';
 import { StoreDialogComponent } from '../dialogs/store-dialog/store-dialog.component';
 
 @Component({

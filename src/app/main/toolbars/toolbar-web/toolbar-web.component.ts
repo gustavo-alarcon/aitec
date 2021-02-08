@@ -32,7 +32,7 @@ export class ToolbarWebComponent implements OnInit {
 
   @ViewChild("megaMenu") menu: ElementRef;
 
-  defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/images/aitec-512x512.png";
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -53,12 +53,14 @@ export class ToolbarWebComponent implements OnInit {
     this.filteredProducts$ = combineLatest(
       this.searchForm.valueChanges.pipe(
         filter((input) => input !== null),
+        map((value) => typeof value == 'string' ? value : value.description)
       ),
       this.dbs.getProductsList()
     ).pipe(
 
-      map(([value, products]) => {
-        let prod = products.filter(p=>p.published)
+      map(([val, products]) => {
+        let prod = products.filter(p => p.published)
+        let value = val.toLowerCase()
         return value.length
           ? prod.filter(
             (option) =>
@@ -114,7 +116,7 @@ export class ToolbarWebComponent implements OnInit {
       queryParams: { promo: true },
     });
     this.toggleMenu()
-    this.closeSection() 
+    this.closeSection()
   }
 
   navigateProduct(product) {
@@ -126,7 +128,7 @@ export class ToolbarWebComponent implements OnInit {
     let cat = category.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);
     this.toggleMenu()
-    this.closeSection() 
+    this.closeSection()
   }
 
   navigateCategory(category, subcategory) {
@@ -134,7 +136,7 @@ export class ToolbarWebComponent implements OnInit {
     let sub = subcategory.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub]);
     this.toggleMenu()
-    this.closeSection() 
+    this.closeSection()
   }
 
   navigateSubCategory(category, subcategory, subsubcategory) {
@@ -143,7 +145,7 @@ export class ToolbarWebComponent implements OnInit {
     let subsub = subsubcategory.split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub, subsub]);
     this.toggleMenu()
-    this.closeSection() 
+    this.closeSection()
   }
 
   navigateBrand(name) {
@@ -151,7 +153,7 @@ export class ToolbarWebComponent implements OnInit {
     this.router.navigate(['/main/productos'], {
       queryParams: { brand: name },
     });
-    this.closeSection() 
+    this.closeSection()
   }
 
   showSelectedUser(staff): string | undefined {

@@ -7,15 +7,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./configuration-sales.component.scss']
 })
 export class ConfigurationSalesComponent implements OnInit {
-  links = [
-    { name: 'Marcas', route: 'marcas' },
-    { name: 'Categorías', route: 'categorias' },
-    { name: 'Delivery - Tiendas', route: 'delivery' },
-    { name: 'General', route: 'general' },
-  ];
-
-  activeLink = this.links[0];
-
+  
   loadingRouteConfig: boolean;
   sidenav:boolean = true
   constructor(

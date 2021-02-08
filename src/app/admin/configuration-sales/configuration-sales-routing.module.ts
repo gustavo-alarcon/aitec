@@ -4,8 +4,7 @@ import { AdvisersComponent } from './advisers/advisers.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
-import { DeliveryStoresComponent } from './delivery-stores/delivery-stores.component';
-import { GeneralComponent } from './general/general.component';
+import { CouponViewComponent } from './coupon-view/coupon-view.component';
 import { PaymentViewComponent } from './payment-view/payment-view.component';
 import { StoresComponent } from './stores/stores.component';
 
@@ -19,12 +18,8 @@ const routes: Routes = [
         component: CategoriesComponent,
       },
       {
-        path: 'delivery',
-        component: DeliveryStoresComponent,
-      },
-      {
-        path: 'general',
-        component: GeneralComponent,
+        path: 'cupones',
+        component: CouponViewComponent,
       },
       {
         path: 'marcas',
