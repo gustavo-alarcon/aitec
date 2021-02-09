@@ -108,6 +108,12 @@ export class PaymentComponent implements OnInit {
   PayFinishError(){
     this.router.navigate(['main/carrito/error']);
   }
+
+  pay(){
+    
+    this.router.navigate(['main/carrito/success']);    
+
+  }
   
   
 
