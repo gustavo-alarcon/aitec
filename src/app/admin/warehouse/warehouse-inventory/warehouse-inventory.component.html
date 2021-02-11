@@ -197,12 +197,12 @@
                   <mat-label>Almacén</mat-label>
                   <mat-icon matPrefix class="w3-margin-right">corporate_fare</mat-icon>
                   <mat-select [formControl]="entryWarehouseControl">
-                    <mat-option value="Almacén 1">Almacén 1</mat-option>
-                    <mat-option value="Almacén 2">Almacén 2</mat-option>
-                    <mat-option value="Almacén 3">Almacén 3</mat-option>
-                    <mat-option value="Todos">Todos</mat-option>
+                    <mat-option *ngFor="let item of warehouses$ | async" [value]="item">
+                      {{item.name}}
+                    </mat-option>
                   </mat-select>
                   <mat-hint>Seleccione un almacén</mat-hint>
+                  <mat-error>* Campo requerido</mat-error>
                 </mat-form-field>
                 <!-- </div> -->
 
@@ -215,30 +215,39 @@
                   <mat-autocomplete #autoProducts="matAutocomplete" [displayWith]="showEntryProduct"
                     (optionSelected)="selectedEntryProduct($event)">
                     <mat-option *ngFor="let product of entryProducts$ | async" style="font-size: 12px;"
-                      [value]="product">{{product.product?.description}}</mat-option>
+                      [value]="product">{{product.description}}</mat-option>
                   </mat-autocomplete>
                   <mat-hint>Escriba y seleccione un producto</mat-hint>
+                  <mat-error>* Campo requerido</mat-error>
                 </mat-form-field>
 
-                <mat-form-field color="primary" class="content w3-small w3-margin-right w3-block" appearance="outline">
+                <!-- <mat-form-field color="primary" class="content w3-small w3-margin-right w3-block" appearance="outline">
                   <mat-label>SKU</mat-label>
                   <mat-icon matPrefix class="w3-margin-right">label</mat-icon>
                   <input [formControl]="entrySKUControl" matInput type="text" [matAutocomplete]="autoSKU"
                     placeholder="Escriba..." autocomplete="off">
-                  <mat-autocomplete #autoSKU="matAutocomplete" [displayWith]="showEntrySKU" (optionSelected)="selectedEntrySKU($event)">
+                  <mat-autocomplete #autoSKU="matAutocomplete" [displayWith]="showEntrySKU"
+                    (optionSelected)="selectedEntrySKU($event)">
                     <mat-option *ngFor="let product of (selectedProduct$ | async)?.products" style="font-size: 12px;"
                       [value]="product">{{product.sku}} | {{product.color.name}}</mat-option>
                   </mat-autocomplete>
-                  <mat-hint>Escriba y seleccione un producto</mat-hint>
-                </mat-form-field>
+                  <mat-hint>Escriba y seleccione un SKU</mat-hint>
+                  <mat-error>* Campo requerido</mat-error>
+                </mat-form-field> -->
 
                 <mat-form-field color="primary" class="content w3-small w3-margin-right w3-block" appearance="outline">
                   <mat-label>Código</mat-label>
                   <mat-icon matPrefix class="w3-margin-right" style="transform: rotateZ(90deg);">line_weight
                   </mat-icon>
                   <input [formControl]="entryScanControl" matInput type="text" placeholder="Escriba..."
-                    autocomplete="off" (keyup.enter)="addSerie()">
+                    autocomplete="off" (keyup.enter)="dispatchAddSerie()">
                   <mat-hint>Presione ENTER para agregar</mat-hint>
+                  <mat-progress-bar *ngIf="validatingScan$ | async" mode="indeterminate"></mat-progress-bar>
+                  <mat-error>
+                    <span>
+                      {{entryScanControl.value}} ya existe en este almacén.</span>
+                      {{scanValidation$ | async}}
+                  </mat-error>
                 </mat-form-field>
 
                 <ng-template #loadingInput>
@@ -254,13 +263,13 @@
                 <mat-icon class="w3-text-green">check_circle</mat-icon>
                 <ul>
                   <li class="w3-small"><strong>Descripción:</strong> {{product.description}}</li>
-                  <li class="w3-small" *ngIf="entryStock"><strong>SKU:</strong> {{entrySKUControl.value['sku']}} | {{entrySKUControl.value['color']['name']}}</li>
-                  <li class="w3-small" *ngIf="entryStock"><strong>Stock actual:</strong> {{entrySKUControl.value.stock}}</li>
+                  <li class="w3-small" *ngIf="entryStock"><strong>Stock actual:</strong>
+                  </li>
                   <li class="w3-small" *ngIf="entryStock"><strong>Ingresos:</strong> {{entryStock}}</li>
                 </ul>
               </div>
 
-              <div *ngIf="seriesList.length else scanDefault" class="info info--default ms-fill">
+              <div *ngIf="serialList.length else scanDefault" class="info info--default ms-fill">
                 <div *ngFor="let num of seriesList; let i=index" class="ms-flex ms-flex--center">
                   <div>{{num}}</div>
                   <div class="ms-fill"></div>
