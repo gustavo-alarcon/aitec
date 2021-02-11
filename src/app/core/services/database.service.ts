@@ -411,6 +411,45 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  /* getWarehouseValueChanges():  Observable<any[]> {    
+    return this.generalConfig$.pipe(map(res => {
+     if (res) {
+       return res.warehouses ? res.warehouses : []
+     } else {
+       return []
+     }
+     
+   }))  
+
+  } */
+
+  getWarehouseValueChanges1():  Observable<any[]> {    
+    return this.afs
+      .collection<any>(`/db/aitec/warehouses`)
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   getProductsListByCategory(category: string): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
@@ -441,6 +480,28 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
+
+  getProductsListByWarehouseName(warehouse): Observable<any[]> { 
+    console.log('db warehouse : ',warehouse)
+    return this.afs
+    .collection<any>(`/db/aitec/warehouses/${warehouse}/products/`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    )
+    .valueChanges()
+    .pipe(shareReplay(1));
+  }
+  /* getProductsListByWarehouseName(warehouse: string): Observable<any[]> {
+    return this.afs
+      .collection<any>(this.productsListRef, (ref) =>
+        ref.where('warehouse', '==', warehouse)
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  } */
 
   getWarehousesObservable(): Observable<Warehouse[]> {
     return this.afs

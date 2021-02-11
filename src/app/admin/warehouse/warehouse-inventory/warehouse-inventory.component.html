@@ -34,6 +34,10 @@
           <button mat-flat-button (click)="downloadXls()" color="primary">
             Descargar Excel
           </button>
+
+          <button (click)="referralGuide()">
+            Guia de remision 
+          </button>
         </div>
       </mat-card-content>
     </mat-card>
@@ -146,7 +150,7 @@
                 <td style="padding: 0px 24px" mat-cell *matCellDef="let raw" class="w3-border-left w3-border-lightgrey">
                   <ng-container>
                     <mat-menu #rawMenu="matMenu">
-                      <button class="w3-small" mat-menu-item>
+                      <button class="w3-small" mat-menu-item (click)="referralGuide()">
                         Generar GR
                       </button>
                       <button class="w3-small" mat-menu-item>
