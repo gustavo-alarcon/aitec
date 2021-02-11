@@ -2,9 +2,7 @@ import { Sale, saleStatusOptions } from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
-  AngularFirestoreCollection,
   DocumentReference,
-  AngularFirestoreDocument,
 } from '@angular/fire/firestore';
 import { Brand, Product } from '../models/product.model';
 import {
@@ -14,19 +12,18 @@ import {
   switchMap,
   take,
   mapTo,
-  tap,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, from, forkJoin } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, forkJoin } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Warehouse } from '../models/warehouse.model';
 import { WarehouseProduct } from '../models/warehouseProduct.model';
-import { SerialNumber } from '../models/SerialNumbermodel';
+import { SerialNumber } from '../models/SerialNumber.model';
+import { SerialItem } from '../models/SerialItem.model';
 
 @Injectable({
   providedIn: 'root',
@@ -1323,11 +1320,35 @@ export class DatabaseService {
   }
 
   getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
-    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`)
+    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/serials`)
       .valueChanges()
       .pipe(
         shareReplay(1)
       )
+  }
+
+  saveSerialNumbers(serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+    let batch = this.afs.firestore.batch();
+
+    serialList.forEach(serial => {
+      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/serials`).doc();
+
+      let data: SerialNumber = {
+        id: serialRef.id,
+        barcode: serial.barcode,
+        color: serial.color,
+        status: 'stored',
+        sku: serial.sku,
+        createdBy: user,
+        createdAt: new Date(),
+        editedBy: null,
+        editedAt: null
+      }
+
+      batch.set(serialRef, data);
+    })
+
+    return of(batch);
   }
 
 

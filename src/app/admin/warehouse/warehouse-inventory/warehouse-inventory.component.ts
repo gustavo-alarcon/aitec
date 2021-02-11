@@ -70,7 +70,7 @@ export class WarehouseInventoryComponent implements OnInit {
   selectedProduct = new BehaviorSubject<any>(null);
   selectedProduct$ = this.selectedProduct.asObservable();
 
-  seriesList: Array<any> = [];
+  serialList: Array<any> = [];
   entryStock: number = 0;
 
   closeSubscriptions = new BehaviorSubject<boolean>(false);
@@ -87,7 +87,7 @@ export class WarehouseInventoryComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    public snackBar: MatSnackBar,
+    public snackbar: MatSnackBar,
     private dbs: DatabaseService,
     public auth: AuthService,
     private dialog: MatDialog
@@ -162,7 +162,6 @@ export class WarehouseInventoryComponent implements OnInit {
       this.actionAddSerie$.pipe(distinctUntilChanged())
     ).pipe(
       map(([warehouse, product, scan, add]) => {
-        console.log('Init ', add);
 
         this.validatingScan.next(true);
         if (warehouse && product) {
@@ -175,7 +174,7 @@ export class WarehouseInventoryComponent implements OnInit {
               this.entryScanControl.setErrors({
                 repeated: true
               });
-              this.snackBar.open(`🚨 El código escaneado ya existe en este almacén!`, 'Aceptar', {
+              this.snackbar.open(`🚨 El código escaneado ya existe en este almacén!`, 'Aceptar', {
                 duration: 6000
               });
             } else {
@@ -276,15 +275,17 @@ export class WarehouseInventoryComponent implements OnInit {
     let scan = this.entryScanControl.value.trim();
 
     // First, lets check if the scanned code is part of our inventory
-    if (this.checkSKU(scan)) {
+    let validation = this.checkSKU(scan);
+    
+    if (validation.exists) {
       // If exist in our inventory, then check if the barcode already exists in the product serial numbers
       if (this.checkSerialList(scan)) {
-        this.snackBar.open(`🚨 El código escaneado ya se encuentra en la lista!`, 'Aceptar', {
+        this.snackbar.open(`🚨 El código escaneado ya se encuentra en la lista!`, 'Aceptar', {
           duration: 6000
         });
       } else {
-        this.seriesList.unshift(scan);
-        this.entryStock = this.seriesList.length;
+        this.serialList.unshift(scan);
+        this.entryStock = this.serialList.length;
         this.entryScanControl.setValue('');
       }
     } else {
@@ -298,26 +299,28 @@ export class WarehouseInventoryComponent implements OnInit {
   }
 
   removeSerie(i) {
-    this.seriesList.splice(i, 1)
-    this.entryStock = this.seriesList.length;
+    this.serialList.splice(i, 1)
+    this.entryStock = this.serialList.length;
   }
 
-  checkSKU(code: string): boolean {
+  checkSKU(code: string): {exists: boolean, sku: string} {
     let product = this.entryProductControl.value;
     let exist = false;
+    let sku: string;
 
     product.skuArray.every(sku => {
       exist = code.startsWith(sku);
+      sku = sku
       return !exist;
     });
 
-    return exist;
+    return {exists: exist, sku: sku};
   }
 
   checkSerialList(barcode: string): boolean {
     let exist = false;
 
-    this.seriesList.every(serie => {
+    this.serialList.every(serie => {
       exist = serie === barcode;
       return !exist
     })
@@ -327,11 +330,25 @@ export class WarehouseInventoryComponent implements OnInit {
 
   addNewSKUToProduct(product: WarehouseProduct): void {
     console.log('new sku');
-
   }
 
   save(): void {
-    //
+    this.loading.next(true);
+    if (this.serialList.length > 0) {
+
+      this.auth.user$
+        .pipe(
+          take(1)
+        )
+        .subscribe(user => {
+
+        })
+
+    } else {
+      this.snackbar.open('🚨 No hay números de serie!', 'Aceptar', {
+        duration: 6000
+      });
+    }
   }
 
 }
