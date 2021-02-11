@@ -17,13 +17,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule,FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { Ng2ImgMaxModule } from 'ng2-img-max';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatNativeDateModule } from '@angular/material/core';
+
 
 import { WarehouseRoutingModule } from './warehouse-routing.module';
 import { WarehouseComponent } from './warehouse.component';
@@ -31,6 +33,7 @@ import { ListDialogComponent } from './list-dialog/list-dialog.component';
 import { WarehouseListComponent } from './warehouse-list/warehouse-list.component';
 import { WarehouseInventoryComponent } from './warehouse-inventory/warehouse-inventory.component';
 import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-create-edit.component';
+import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-guide-dialog.component';
 
 
 @NgModule({
@@ -39,7 +42,8 @@ import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-
     ListDialogComponent,
     WarehouseListComponent,
     WarehouseInventoryComponent,
-    WarehouseCreateEditComponent],
+    WarehouseCreateEditComponent,
+    ReferralGuideDialogComponent],
   imports: [
     CommonModule,
     WarehouseRoutingModule,
@@ -65,7 +69,9 @@ import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-
     LazyLoadImageModule,
     MatCardModule,
     MatStepperModule,
-    MatRadioModule
+    MatRadioModule,
+    MatNativeDateModule,
+    FormsModule
   ]
 })
 export class WarehouseModule { }

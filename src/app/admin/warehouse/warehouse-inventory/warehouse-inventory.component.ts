@@ -11,6 +11,7 @@ import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ReferralGuideDialogComponent } from '../referral-guide-dialog/referral-guide-dialog.component';
 
 @Component({
   selector: 'app-warehouse-inventory',
@@ -266,6 +267,14 @@ export class WarehouseInventoryComponent implements OnInit {
 
   save(): void {
     // 
+  }
+  referralGuide(){
+    this.dialog.open(ReferralGuideDialogComponent, {
+      data: {
+      data:null
+      },
+      //maxWidth: 900
+    })
   }
 
 }

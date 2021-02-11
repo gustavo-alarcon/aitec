@@ -17,9 +17,9 @@ export class PaymentComponent implements OnInit {
 
   promiseError = null;
 
-  KR;
+  KR:any;
 
-  data;
+  data:any;
 
   private static readonly API_ENDPOINT = 'https://api.micuentaweb.pe';
   private static readonly API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
@@ -36,11 +36,11 @@ export class PaymentComponent implements OnInit {
     let totalPay =decimal.replace(/\./g,'');
     
     this.data = {
-      "amount": totalPay,
-      "currency": "PEN",
-      "orderId":  "myOrderId - Test - Prueba",
-      "customer": {
-          "email": "mhalanocca@meraki-s.com"
+      "amount"    :  totalPay,
+      "currency"  :  "PEN",
+      "orderId"   :  "myOrderId - Test - Prueba",
+      "customer"  :  {
+          "email" : "mhalanocca@meraki-s.com"
       }
     };
     await this.loadPaymentLibrary();
@@ -72,13 +72,13 @@ export class PaymentComponent implements OnInit {
       if (response.clientAnswer.orderStatus === 'PAID') {
         console.log('Payment success');
 
-        this.PayFinishSuccess(response);
-        return true;
+        return this.payFinishSuccess(response);
+        
       }
       else {
         console.error(`Payment status : ${response.clientAnswer.orderStatus}`);
-        return false;
-        //this.PayFinishError();
+       
+        return  this.payFinishError();
       }
     });
     this.KR.onError((error) => {
@@ -99,22 +99,14 @@ export class PaymentComponent implements OnInit {
   }
 
   
-  PayFinishSuccess(response){
+  payFinishSuccess(response){
     
-    this.router.navigate(['main/carrito/success']);    
+   return this.router.navigateByUrl('main/carrito/success');    
 
   }
   
-  PayFinishError(){
-    this.router.navigate(['main/carrito/error']);
-  }
-
-  pay(){
-    
-    this.router.navigate(['main/carrito/success']);    
-
-  }
-  
-  
+  payFinishError(){
+    return this.router.navigate(['main/carrito/error']);
+  }  
 
 }
