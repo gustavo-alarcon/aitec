@@ -1,6 +1,6 @@
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 <ng-container *ngIf="init$|async as init"></ng-container>
-<div class="w3-section w3-padding ms-container" >
+<div class="w3-section w3-padding ms-container">
 
   <div class="ms-flex ms-flex--center">
     <button mat-icon-button color="primary" (click)="goBack()">
@@ -43,15 +43,14 @@
               <mat-label>Categoría >> Subcategoría >> Subcategoría</mat-label>
               <input autocomplete="off" formControlName="category" [matAutocomplete]="categoryAutocomplete" type="text"
                 matInput>
-              <mat-autocomplete #categoryAutocomplete="matAutocomplete">
-
+              <mat-autocomplete autoActiveFirstOption #categoryAutocomplete="matAutocomplete" [displayWith]="showSelected">
                 <mat-option *ngFor="let category of category$ | async" [value]="category">
-                  {{category}}
+                  {{category.completeName}}
                 </mat-option>
               </mat-autocomplete>
               <mat-error>
                 <span *ngIf="firstFormGroup.get('category').errors?.required">Campo requerido</span>
-                <span *ngIf="firstFormGroup.get('category').errors?.validateCategory">Dato no válido</span>
+                <span *ngIf="firstFormGroup.get('category').errors?.validateName">Dato no válido</span>
               </mat-error>
             </mat-form-field>
           </div>
@@ -139,7 +138,7 @@
               </mat-autocomplete>
             </mat-form-field>
             <!--ng-container *ngIf="noColor$ | async"></ng-container-->
-            <mat-checkbox color='primary'  formControlName="noColors">No precisa color</mat-checkbox>
+            <mat-checkbox color='primary' formControlName="noColors">No precisa color</mat-checkbox>
           </div>
         </div>
         <div class="w3-row-padding w3-margin-top">
@@ -173,6 +172,55 @@
         </div>
       </form>
     </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Costos de envío</ng-template>
+      <form class="detail-form " [formGroup]="zoneForm">
+        <div class="w3-row-padding">
+          <div class="w3-col l6 m5">
+            <mat-form-field class="w3-block w3-small" appearance="outline">
+              <mat-icon matPrefix></mat-icon>
+              <mat-label>Zona de envío</mat-label>
+              <input matInput type="text" placeholder="Escriba..." formControlName="name" autocomplete="off">
+              <mat-error>
+                <span *ngIf="zoneForm.get('name').errors?.required">Campo requerido</span>
+                <span *ngIf="zoneForm.get('name').hasError('repeatedValidator')">
+                  Distrito Repetido
+                </span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="w3-col l4 m5">
+            <mat-form-field class="w3-block w3-small" appearance="outline">
+              <mat-icon matPrefix></mat-icon>
+              <mat-label>Costo</mat-label>
+              <input matInput type="number" placeholder="Costo (S/.)" formControlName="delivery" autocomplete="off">
+              <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="w3-col l2 m2">
+            <button mat-raised-button color="primary" class="w3-block w3-margin-top" (click)="addDistrict()"
+              [disabled]="!zoneForm.valid">
+              <mat-icon>add</mat-icon> Agregar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <mat-divider></mat-divider>
+      <h4>Resumen de zonas</h4>
+      <div class="w3-section">
+        <ng-container *ngFor="let item of existDistrict; let i = index">
+          <div style="display:flex; align-items: center">
+            <span style="width: 70%;">{{item['name']}}</span>
+            <span style="width: 20%;">S/.{{item['delivery'] | number: '.2'}}</span>
+            <mat-icon class="font--primary" style="cursor:pointer" (click)="removeDelivery(i)">remove_circle</mat-icon>
+          </div>
+        </ng-container>
+      </div>
+      <div class="w3-center">
+        <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
+      </div>
+    </mat-step>
     <mat-step [stepControl]="itemsFormArray">
       <ng-template matStepLabel>Imágenes</ng-template>
       <ng-container *ngIf="totalItems$ | async"></ng-container>
@@ -184,19 +232,20 @@
           <div class="w3-col m6 l6">
             <mat-form-field appearance="outline">
               <mat-label>SKU</mat-label>
-              <input type="text" matInput autocomplete="off" [formControl]="group"  />
+              <input type="text" matInput autocomplete="off" [formControl]="group" />
             </mat-form-field>
           </div>
 
         </div>
         <div class="w3-margin-bottom w3-row-padding">
           <div class="w3-margin-bottom w3-col s2 m4 l2" style="position: relative"
-            *ngFor="let image of filterPhotos(i); let f=index" >
-            <img (click)="selectPhoto(image)"  class="w3-block"
-              style="object-fit: contain;height: 150px;" [src]="image.img" alt="fotografía" />
+            *ngFor="let image of filterPhotos(i); let f=index">
+            <img (click)="selectPhoto(image)" class="w3-block" style="object-fit: contain;height: 150px;"
+              [src]="image.img" alt="fotografía" />
             <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
               <span class="ms-fill"></span>
-              <button type="button" mat-mini-fab color="primary" style="margin-left:8px" (click)="eliminatedphoto(i,f,image)">
+              <button type="button" mat-mini-fab color="primary" style="margin-left:8px"
+                (click)="eliminatedphoto(i,f,image)">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -225,7 +274,8 @@
         <button mat-flat-button color="primary" class="big-button" matStepperNext>Continuar</button>
       </div>
       <div class="w3-center w3-margin-top" *ngIf="edit">
-        <button mat-flat-button color="primary" [disabled]="loadSave" (click)="editProduct()" class="big-button">Editar producto</button>
+        <button mat-flat-button color="primary" [disabled]="loadSave" (click)="editProduct()" class="big-button">Editar
+          producto</button>
       </div>
     </mat-step>
     <mat-step *ngIf="!edit">
@@ -236,14 +286,12 @@
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Almacen</mat-label>
               <mat-select formControlName="warehouse">
-                <mat-option value="Almacén 1">Almacén 1</mat-option>
-                <mat-option value="Almacén 2">Almacén 2</mat-option>
-                <mat-option value="Almacén 3">Almacén 3</mat-option>
+                <mat-option *ngFor="let ware of warehouses" [value]="ware.id">{{ware.name}}</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
           <div class="w3-col m6 l6" *ngIf="skuArray | async as skus">
-            <mat-form-field class="w3-block"  appearance="outline">
+            <mat-form-field class="w3-block" appearance="outline">
               <mat-label> SKU</mat-label>
               <mat-select formControlName="sku">
                 <mat-option *ngFor="let sku of skus" [value]="sku">
@@ -263,14 +311,13 @@
             </mat-form-field>
             <mat-form-field class="w3-block" appearance="outline">
               <mat-label>Stock</mat-label>
-              <input readonly matInput placeholder="Stock" type="number" autocomplete="off" formControlName="stock"
-                required>
+              <input readonly matInput placeholder="Stock" type="number" autocomplete="off" formControlName="stock">
             </mat-form-field>
           </div>
           <div class="w3-col m6 l6">
             <div *ngIf="seriesList.length" class="serie">
               <div *ngFor="let num of seriesList; let i=index" class="ms-flex ms-flex--center">
-                <div>{{num}}</div>
+                <div>{{num.serie}}</div>
                 <div class="ms-fill"></div>
                 <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(i)">remove_circle</mat-icon>
 
@@ -293,7 +340,7 @@
               Almacén
             </th>
             <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="padding: 0px 10px">
-              {{element["warehouse"]}}
+              {{element["warehouse"]["name"]}}
             </td>
           </ng-container>
 
@@ -307,7 +354,7 @@
           <ng-container class="w3-center" matColumnDef="serie">
             <th *matHeaderCellDef class="w3-center ms-table__th">Número de serie</th>
             <td mat-cell *matCellDef="let element" class="ms-table__td w3-right-align" style="padding: 0px 10px">
-              <span *ngFor="let num of element.series">{{num}}; </span>
+              <span *ngFor="let num of element.series">{{num.serie}}; </span>
             </td>
           </ng-container>
 
@@ -328,7 +375,7 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
       </div>
-      
+
       <div class="w3-center w3-margin-top">
         <button mat-flat-button color="primary" [disabled]="loadSave || !warehouseList.length" (click)="saveProduct()"
           class="big-button">Guardar</button>
@@ -336,5 +383,5 @@
     </mat-step>
   </mat-vertical-stepper>
   <mat-progress-bar mode="indeterminate" *ngIf="loadSave"></mat-progress-bar>
-  
+
 </div>

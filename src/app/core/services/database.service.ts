@@ -25,6 +25,7 @@ import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Warehouse } from '../models/warehouse.model';
+import { Category } from '../models/category.model';
 
 @Injectable({
   providedIn: 'root',
@@ -108,26 +109,24 @@ export class DatabaseService {
         shareReplay(1)
       );
   }
-  /*
-    saveAll(products) {
-      const batch = this.afs.firestore.batch();
-  
-      products.forEach(el => {
-        let productRef = this.afs.firestore
-          .collection(`db/aitec/searchProducts`)
-          .doc(el.id);
-        batch.set(productRef, {
-          id:el.id,
-          searchNumber: el.searchNumber
-        });
-  
-      })
-  
-      batch.commit().then(() => {
-        console.log('all');
-  
-      })
-    }*/
+
+  saveAll(products) {
+    const batch = this.afs.firestore.batch();
+
+    products.forEach(el => {
+      let productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(el.id);
+
+      batch.update(productRef, {
+        idCategory: el.idCategory
+      });
+
+    })
+
+    batch.commit().then(() => {
+      console.log('all');
+
+    })
+  }
 
   saveWarehouses(products, name) {
     const batch = this.afs.firestore.batch();
@@ -240,13 +239,39 @@ export class DatabaseService {
 
   getCategoriesDoc(): Observable<any> {
     return this.afs
-      .collection<Brand>(`/db/aitec/config/generalConfig/categories`, (ref) =>
+      .collection(`/db/aitec/config/generalConfig/categories`, (ref) =>
         ref.orderBy('createdAt', 'desc')
       ).get().pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
       );
+  }
+
+  getAllCategories(): Observable<Category[]> {
+    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    ).valueChanges().pipe(shareReplay(1));
+  }
+
+  getAllCategoriesDoc(): Observable<Category[]> {
+    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`
+      , (ref) => ref.orderBy('createdAt', 'desc')).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Category>el.data());
+        })
+      );
+  }
+
+  getOneCategory(id: string): Observable<Category> {
+    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+      ref.where('id', '==', id)
+    ).valueChanges().pipe(
+      shareReplay(1),
+      map((snap) => {
+        return snap[0]
+      })
+    );
   }
 
   getBrands() {

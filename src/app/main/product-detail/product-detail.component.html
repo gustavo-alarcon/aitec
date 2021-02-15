@@ -2,24 +2,24 @@
 <div style="position: relative;">
   <div class="ms-container" style="position: relative;padding-top: 16px;" *ngIf="product$ | async as product">
   
-    <div style="padding:16px 0">
+    <div style="padding:16px 0" *ngIf="category$ | async as category">
       <a class="bradcumb" routerLink="/main">Inicio</a> >
       <a class="bradcumb" routerLink="/main/productos">Productos</a>
       >
-      <span class="bradcumb" (click)="navigateOnlyCategory(product.category)">
-        {{product.category}}
+      <span class="bradcumb" (click)="navigateOnlyCategory(category.category)">
+        {{category.category}}
       </span>
-      <span *ngIf="product.subcategory">
+      <span *ngIf="category.subcategory">
         >
-        <span class="bradcumb" (click)="navigateCategory(product.category, product.subcategory)">
-          {{ product.subcategory}}
+        <span class="bradcumb" (click)="navigateCategory(product.category, category.subcategory)">
+          {{ category.subcategory}}
         </span>
       </span>
-      <span *ngIf="product.subsubcategory">
+      <span *ngIf="category.subsubcategory">
         >
         <span class="bradcumb"
-          (click)="navigateSubCategory(product.category, product.subcategory,product.subsubcategory)">
-          {{product.subcategory }}
+          (click)="navigateSubCategory(category.category, category.subcategory,category.subsubcategory)">
+          {{category.subsubcategory }}
         </span>
       </span>
     </div>

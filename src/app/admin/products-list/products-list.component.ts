@@ -57,7 +57,7 @@ export class ProductsListComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/aitec-512x512.png";
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -65,7 +65,7 @@ export class ProductsListComponent implements OnInit {
 
   categorySelected: boolean = false;
 
-
+  categoriesList: Array<any> = []
 
   constructor(
     private fb: FormBuilder,
@@ -90,13 +90,14 @@ export class ProductsListComponent implements OnInit {
   initObservables() {
 
     this.productsObservable$ = combineLatest(
+      this.dbs.getAllCategoriesDoc(),
       this.promoFilterForm.valueChanges.pipe(startWith(false)),
       this.dbs.getProductsListValueChanges()).pipe(
-        map(([promoFormValue, products]) => {
-          let prods = products.map(el => {
-
-
-            return el
+        map(([categories, promoFormValue, products]) => {
+          this.categoriesList = categories
+          let prods = products.map(pr => {
+            pr['categoryName'] = pr.idCategory ? categories.find(ct => ct.id == pr.idCategory).completeName : ''
+            return pr
           })
           return prods.filter(el => promoFormValue ? el.promo : true)
         }),

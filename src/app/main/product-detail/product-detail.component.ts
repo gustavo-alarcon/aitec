@@ -23,10 +23,13 @@ export class ProductDetailComponent implements OnInit {
 
   @ViewChild("image") image: ElementRef;
 
-  defaultImage = "../../../assets/images/aitec-512x512.png";
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   colorSelected: any = null
   count: number = 1
+
+  category$: Observable<any>;
+
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
@@ -46,7 +49,6 @@ export class ProductDetailComponent implements OnInit {
           this.dbs.isMayUser$
         ).pipe(
           map(([product, user]) => {
-
             this.price = product.priceMin
             this.promo = product.promo
             if (user) {
@@ -64,7 +66,20 @@ export class ProductDetailComponent implements OnInit {
       })
     );
 
-
+    this.category$ = this.product$.pipe(
+      switchMap(prod => {
+        return this.dbs.getOneCategory(prod.idCategory).pipe(
+          map(cat => {
+            let div = cat.completeName.split(" >> ")
+            return {
+              category: div[0],
+              subcategory: div[1] || null,
+              subsubcategory: div[2] || null
+            }
+          })
+        )
+      })
+    )
 
 
   }
@@ -74,14 +89,14 @@ export class ProductDetailComponent implements OnInit {
       const ref = this.afs.firestore.collection(`/db/aitec/searchProducts`).doc(product.id);
       return transaction.get(ref).then((doc) => {
         if (!doc.exists) {
-          transaction.set(ref, { searchNumber: 1, id: product.id});
-        }else{
+          transaction.set(ref, { searchNumber: 1, id: product.id });
+        } else {
           let searchNumber = doc.data().searchNumber ? doc.data().searchNumber : 0;
           searchNumber++
           transaction.update(ref, { searchNumber: searchNumber });
         }
 
-        
+
       });
     }).then(() => {
       this.count++
@@ -101,20 +116,20 @@ export class ProductDetailComponent implements OnInit {
   }
 
   navigateOnlyCategory(category) {
-    let cat = category.split(' ').join('-').toLowerCase()
+    let cat = category.trim().split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat]);
   }
 
   navigateCategory(category, subcategory) {
-    let cat = category.split(' ').join('-').toLowerCase()
-    let sub = subcategory.split(' ').join('-').toLowerCase()
+    let cat = category.trim().split(' ').join('-').toLowerCase()
+    let sub = subcategory.trim().split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub]);
   }
 
   navigateSubCategory(category, subcategory, subsubcategory) {
-    let cat = category.split(' ').join('-').toLowerCase()
-    let sub = subcategory.split(' ').join('-').toLowerCase()
-    let subsub = subsubcategory.split(' ').join('-').toLowerCase()
+    let cat = category.trim().split(' ').join('-').toLowerCase()
+    let sub = subcategory.trim().split(' ').join('-').toLowerCase()
+    let subsub = subsubcategory.trim().split(' ').join('-').toLowerCase()
     this.router.navigate(['/main/productos', cat, sub, subsub]);
   }
 
