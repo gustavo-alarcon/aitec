@@ -358,8 +358,8 @@ export class LandingComponent implements OnInit {
     let productData = this.createForm.value
     let batch = this.afs.firestore.batch();
 
-    productData.photoURL = null;
     if (this.photos.data.photoURL) {
+      productData.photoURL = null;
       this.uploadPhoto(ref.id, this.photos.data.photoURL).pipe(
         takeLast(1),
       ).subscribe((photoUrl) => {

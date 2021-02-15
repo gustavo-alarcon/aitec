@@ -8,21 +8,18 @@ export interface Product {
   category: string;
   subcategory?: string;
   subsubcategory?: string;
+  idCategory?: string;
   guarantee: boolean;
   timeguarantee: number;
-  weight: number;
   sku: string;
   cost: number;
+  weight: number;
   model: string;
   brand: Brand;
   products: Array<unitProduct>;
-  price?: number;      //Should this price be with IGV?
+  price?: number;
   priceMin: number;
   priceMay: number;
-  realStock: number;  //Real stock will be amounted here after accepting a product in the log sect
-  virtualStock: number;  //To check the virtual we will use another collection
-  //sellMinimum: number;    //The minimum by which, we should top selling to the public
-  //alertMinimum: number;   //Minimum by which one should get an alert to request more 
   promo: boolean;           //Indicates wheter there is a promo
   promoData?: PromoData;
   published?: boolean;
@@ -35,25 +32,27 @@ export interface Product {
   colors: Array<Color>;
   gallery: Array<Gallery>;
   indCover: number;
-  searchNumber: number;
-  purchaseNumber: number;  //Número total de compras
-  warehouse: Array<any>;
   skuArray: Array<string>;
-  questions?:number;
+  warehouse: Array<string>;
+  questions?: number;
+  realStock: number;
+  zones?: Zone[]
 }
 
 interface unitProduct {
   sku: string;
   color: Color;
   gallery: Array<Gallery>;
-  stock: number;
+  stock?:number;
+  realStock?: number;
+  virtualStock?: number;
 }
 
 interface PromoData {
   quantity: number;
   promoPrice: number;
   offer?: number;
-  type?:string;
+  type?: string;
 }
 
 interface Gallery {
@@ -67,6 +66,10 @@ interface Color {
   color: string;
 }
 
+interface Zone {
+  name: string;
+  delivery: number;
+}
 export interface Brand {
   id: string;
   createdAt: Date;

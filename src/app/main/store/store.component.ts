@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PaginationInstance } from 'ngx-pagination';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, startWith, switchMap, tap } from 'rxjs/operators';
+import { Category } from 'src/app/core/models/category.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
@@ -18,6 +19,8 @@ export class StoreComponent implements OnInit {
   loading$ = this.loading.asObservable();
 
   category$: Observable<any>;
+  allCategories: Category[];
+
   config: PaginationInstance = {
     id: 'custom',
     itemsPerPage: 12,
@@ -51,7 +54,25 @@ export class StoreComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.category$ = this.dbs.getCategories()
+    this.category$ = this.dbs.getAllCategories().pipe(
+      map((categories) => {
+        this.allCategories = categories
+        let onlyCategory = categories.filter(ct => !ct.idCategory)
+        return onlyCategory.map(ct => {
+          let subcategories = categories.filter(ct => !ct.idSubCategory).filter(sb => sb.idCategory == ct.id).map(sub => {
+            return {
+              name: sub.name,
+              categories: categories.filter(sbb => sbb.idSubCategory == sub.id).map(sbb => sbb.name)
+            }
+          })
+          return {
+            category: ct.name,
+            subcategories: subcategories,
+            brands: ct.brands
+          }
+        })
+      })
+    )
 
     this.products$ = combineLatest(
       this.route.params,
@@ -77,7 +98,7 @@ export class StoreComponent implements OnInit {
 
             let listProd = []
             console.log(param);
-            
+
             if (param.search) {
               this.search = param.search;
               frag = param.search.toLowerCase()
@@ -107,22 +128,22 @@ export class StoreComponent implements OnInit {
             }
             if (id.cat) {
               sub = id.cat.split('-').join(' ')
+              cat += ' >> ' + sub
               this.searchSubCategory = sub;
               state = 'sub'
             }
             if (id.sub) {
               subsub = id.sub.split('-').join(' ')
               this.searchSubSubCategory = subsub;
+              cat += ' >> ' + subsub
               state = 'subsub'
             }
-
-            console.log(state);
-
+            
             if (promo) {
               return prods.filter((el) => el.promo)
             } else {
 
-              return this.filterProduct(state, prods, brand, cat, sub, subsub, word, frag, listProd)
+              return this.filterProduct(state, prods, brand, cat, word, frag, listProd)
             }
 
           }),
@@ -135,7 +156,8 @@ export class StoreComponent implements OnInit {
     );
   }
 
-  filterProduct(state, prod, brand, cat, sub, subsub, word, frag, listProd) {
+  filterProduct(state, prod, brand, cat, word, frag, listProd) {
+    
     switch (state) {
       case 'brand':
         return prod.filter(el => {
@@ -157,16 +179,18 @@ export class StoreComponent implements OnInit {
         );
         break;
       case 'cat':
-        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
+        let categ = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim()) 
+        let catList = this.allCategories.filter(ct => ct.idCategory == categ.id).map(ct => ct.id)
+        return prod.filter(el => categ ? el.idCategory == categ.id || catList.includes(el.idCategory) : false)
         break;
       case 'sub':
-        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
-          .filter(el => el.subcategory.toLowerCase().trim() == sub.toLowerCase().trim())
+        let catego = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim())
+        let subList = this.allCategories.filter(ct => ct.idSubCategory == catego.id).map(ct => ct.id)
+        return prod.filter(el => catego ? el.idCategory == catego.id || subList.includes(el.idCategory) : false)
         break;
       case 'subsub':
-        return prod.filter(el => el.category.toLowerCase().trim() == cat.toLowerCase().trim())
-          .filter(el => el.subcategory.toLowerCase().trim() == sub.toLowerCase().trim())
-          .filter(el => el.subsubcategory ? el.subsubcategory.toLowerCase().trim() == subsub.toLowerCase().trim() : false)
+        let category = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim()) 
+        return prod.filter(el => category ? el.idCategory == category.id : false)
         break;
 
       case 'productos':

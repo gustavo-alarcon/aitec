@@ -4,6 +4,7 @@ import { AdvisersComponent } from './advisers/advisers.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
+import { ContactSaleComponent } from './contact-sale/contact-sale.component';
 import { CouponViewComponent } from './coupon-view/coupon-view.component';
 import { PaymentViewComponent } from './payment-view/payment-view.component';
 import { StoresComponent } from './stores/stores.component';
@@ -36,6 +37,10 @@ const routes: Routes = [
       {
         path: 'asesores',
         component: AdvisersComponent
+      },
+      {
+        path: 'contacto-ventas',
+        component: ContactSaleComponent
       }
     ],
   },

@@ -1,1 +1,47 @@
-<p>category-dialog works!</p>
+<div mat-dialog-title>
+  <h2 style="font-size: 1.1em; font-family: Montserrat; font-weight: 600">
+    <mat-icon style="vertical-align: middle">edit</mat-icon>
+    {{ data.edit ? "Editar" : "Agregar" }} Categoría
+  </h2>
+  <mat-divider></mat-divider>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+</div>
+<mat-dialog-content style="max-width: 400px">
+  <form [formGroup]="formGroup" *ngIf="init$ | async">
+    <mat-form-field class="w3-block" appearance="outline" *ngIf="data.type!='category'">
+      <mat-label>Categoría Principal</mat-label>
+      <mat-select disableRipple formControlName="category">
+        <mat-option *ngFor="let dept of categories" (click)="selectCategory(dept.id)" [value]="dept.id">
+          {{ dept.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="w3-block" appearance="outline" *ngIf="data.type=='subsubcategory'">
+      <mat-label>SubCategoría</mat-label>
+      <mat-select disableRipple formControlName="subcategory">
+        <mat-option *ngFor="let option of subcategories" [value]="option.id">
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="w3-block" appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input #input autocomplete="off" formControlName="name" type="text" matInput />
+    </mat-form-field>
+  </form>
+
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
+    Cancelar
+  </button>
+  <div>
+    <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button"
+      [disabled]="formGroup.status != 'VALID'">
+      Guardar
+    </button>
+  </div>
+</mat-dialog-actions>

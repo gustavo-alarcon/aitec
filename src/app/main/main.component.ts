@@ -36,7 +36,7 @@ export class MainComponent implements OnInit {
   init$: Observable<any>
   footer: any
 
-  defaultImage = "../../assets/images/aitec-512x512.png";
+  defaultImage = "../../assets/images/icono-aitec-01.png";
 
   constructor(
     private auth: AuthService,
@@ -50,11 +50,24 @@ export class MainComponent implements OnInit {
 
   ngOnInit(): void {
     this.init$ = combineLatest(
-      this.dbs.getCategories(),
+      this.dbs.getAllCategories(),
       this.ld.getConfig()
     ).pipe(
       map(([categories, info]) => {
-        this.listCategories = categories
+        let onlyCategory = categories.filter(ct => !ct.idCategory)
+        this.listCategories = onlyCategory.map(ct => {
+          let subcategories = categories.filter(ct => !ct.idSubCategory).filter(sb => sb.idCategory == ct.id).map(sub => {
+            return {
+              name: sub.name,
+              categories: categories.filter(sbb => sbb.idSubCategory == sub.id).map(sbb => sbb.name)
+            }
+          })
+          return {
+            category: ct.name,
+            subcategories: subcategories,
+            brands: ct.brands
+          }
+        })
         return info
       })
     )

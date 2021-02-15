@@ -14,7 +14,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 export class ToolbarMobileComponent implements OnInit {
   @Input() categories: Array<any>
 
-  openSideNav:boolean = false
+  openSideNav: boolean = false
   searchForm: FormControl = new FormControl('');
   search$: Observable<any>;
   filteredProducts$: Observable<any>;
@@ -25,7 +25,7 @@ export class ToolbarMobileComponent implements OnInit {
     brands: Array<any>;
   } = null
 
- 
+
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -49,7 +49,7 @@ export class ToolbarMobileComponent implements OnInit {
     ).pipe(
 
       map(([val, products]) => {
-        let prod = products.filter(p=>p.published)
+        let prod = products.filter(p => p.published)
         let value = val.toLowerCase()
         return value.length
           ? prod.filter(
@@ -63,7 +63,7 @@ export class ToolbarMobileComponent implements OnInit {
     );
   }
 
-  openSide(){
+  openSide() {
     this.openSideNav = !this.openSideNav
   }
 
@@ -106,6 +106,7 @@ export class ToolbarMobileComponent implements OnInit {
         queryParams: { search: name },
       });
       this.clearInput();
+      this.toggleSearch();
     }
   }
 
@@ -117,7 +118,8 @@ export class ToolbarMobileComponent implements OnInit {
 
   navigateProduct(product) {
     this.router.navigate(['/main/producto', product['sku']]);
-      this.clearInput();
+    this.clearInput();
+    this.toggleSearch();
   }
 
   navigateOnlyCategory(category) {

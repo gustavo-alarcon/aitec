@@ -1,47 +1,71 @@
-<div style="max-width: 500px">
-  <div mat-dialog-title>
-    <div class="ms-flex">
-      <h2 style="font-size: 1em; font-weight: 700">Agregar dirección</h2>
-      <span class="ms-fill"></span>
-      <button style="align-self: center" mat-icon-button mat-dialog-close>
-        <mat-icon>close</mat-icon>
+<div mat-dialog-title>
+  <div class="ms-flex">
+    <h2 style="font-size: 1em; font-weight: 700">Agregar dirección</h2>
+    <span class="ms-fill"></span>
+    <button style="align-self: center" mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+</div>
+<mat-dialog-content style="width: 400px; max-width: 85vw">
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+  <form [formGroup]="firstFormGroup">
+    <mat-form-field class="w3-block w3-small" appearance="outline">
+      <mat-label>Departamento</mat-label>
+      <mat-select disableRipple formControlName="departamento">
+        <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept.id">
+          {{ dept.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="w3-block w3-small" appearance="outline">
+      <mat-label>Provincia</mat-label>
+      <mat-select disableRipple formControlName="provincia">
+        <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option.id">
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="w3-block w3-small" appearance="outline">
+      <mat-label>Distrito</mat-label>
+      <mat-select disableRipple formControlName="distrito">
+        <mat-option *ngFor="let option of distritos" [value]="option.id">
+          {{ option.name | titlecase }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="w3-block w3-small" appearance="outline">
+      <mat-label>Dirección</mat-label>
+      <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Dirección" />
+      <mat-error>Campo requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w3-block w3-small" appearance="outline">
+      <mat-label>Referencia</mat-label>
+      <input autocomplete="off" formControlName="reference" type="text" matInput placeholder="Referencia" />
+      <mat-error>Campo requerido</mat-error>
+    </mat-form-field>
+  </form>
+  <div class="w3-margin-bottom">
+    <div style="display: flex;align-items: flex-start; flex-wrap: wrap; justify-content: space-between;">
+      <div style="width: 70%">
+        Para especificar tu dirección en el mapa haz click en el botón. (opcional)
+      </div>
+      <button mat-flat-button color="primary" (click)="findMe()">
+        <mat-icon>gps_fixed</mat-icon> Ubicar
       </button>
     </div>
-    <mat-divider></mat-divider>
-  </div>
-  <div mat-dialog-content>
-    <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-    <form [formGroup]="firstFormGroup">
-      <mat-form-field class="w3-block w3-small" appearance="outline">
-        <mat-label>Dirección</mat-label>
-        <input autocomplete="off" formControlName="name" type="text" matInput placeholder="Dirección" />
-        <mat-error>Campo requerido</mat-error>
-      </mat-form-field>
+    <br />
+    <google-map height="280px" width="100%" [center]="center" [zoom]="zoom" (mapClick)="mapClicked($event)">
+      <map-marker [position]="center"></map-marker>
+    </google-map>
 
-      <mat-form-field class="w3-block w3-small" appearance="outline">
-        <mat-label>Referencia</mat-label>
-        <input autocomplete="off" formControlName="reference" type="text" matInput placeholder="Referencia" />
-        <mat-error>Campo requerido</mat-error>
-      </mat-form-field>
-    </form>
-    <div class="w3-margin-bottom">
-      <div style="display: flex; flex-wrap: wrap; justify-content: space-between">
-        <div style="width: 80%">
-          Especifica tu dirección en el mapa (Opcional)
-        </div>
-        <button mat-icon-button color="primary" (click)="findMe()">
-          <mat-icon>gps_fixed</mat-icon>
-        </button>
-      </div>
-      <br />
-      <google-map height="280px" width="100%" [center]="center" [zoom]="zoom" (mapClick)="mapClicked($event)">
-        <map-marker [position]="center"></map-marker>
-      </google-map>
-      <div style="display: flex; justify-content: flex-end">
-        <button mat-flat-button color="primary" [disabled]="!firstFormGroup.valid" (click)="save()">
-          Guardar
-        </button>
-      </div>
-    </div>
   </div>
-</div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" [disabled]="!firstFormGroup.valid" (click)="save()">
+    Guardar
+  </button>
+</mat-dialog-actions>

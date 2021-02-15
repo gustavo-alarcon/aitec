@@ -5,6 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { User } from 'src/app/core/models/user.model';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
+import { PlacesService } from 'src/app/core/services/places.service';
 
 @Component({
   selector: 'app-location-dialog',
@@ -24,37 +25,43 @@ export class LocationDialogComponent implements OnInit {
   zoom = 15;
   display?: google.maps.LatLngLiteral;
 
+  departamentos: Array<any> = [];
+  provincias: Array<any> = [];
+  distritos: Array<any> = [];
+
   constructor(
     private snackbar: MatSnackBar,
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<LocationDialogComponent>,
     private af: AngularFirestore,
-    @Inject(MAT_DIALOG_DATA) public data: {
-      user: User;
-      ind: number;
-      edit: boolean;
-      distrito: string;
-      departamento: string;
-      provincia: string;
-      idDistrito: string;
-    }
+    private pl: PlacesService,
+    @Inject(MAT_DIALOG_DATA) public data: { user: User; ind: number; edit: boolean; }
   ) { }
 
   ngOnInit(): void {
     console.log(this.data);
+    this.departamentos = this.pl.getDepartamentos()
+
 
     if (this.data.edit) {
       this.firstFormGroup = this.fb.group({
         reference: [this.data.user.location[this.data.ind].reference, [Validators.required]],
         name: [this.data.user.location[this.data.ind].address, [Validators.required]],
+        departamento: [null, Validators.required],
+        provincia: [null, Validators.required],
+        distrito: [null, Validators.required]
       });
       this.center = this.data.user.location[this.data.ind].coord
     } else {
       this.firstFormGroup = this.fb.group({
         reference: [null, [Validators.required]],
         name: [null, [Validators.required]],
+        departamento: [null, Validators.required],
+        provincia: [null, Validators.required],
+        distrito: [null, Validators.required]
       });
-
+      this.firstFormGroup.get('provincia').disable();
+      this.firstFormGroup.get('distrito').disable();
     }
   }
 
@@ -72,6 +79,20 @@ export class LocationDialogComponent implements OnInit {
     this.center = event.latLng.toJSON();
   }
 
+  selectProvincias(option) {
+    this.provincias = this.pl.getProvincias(option.id);
+    this.firstFormGroup.get('provincia').setValue(null);
+    this.firstFormGroup.get('provincia').enable();
+    this.firstFormGroup.get('distrito').setValue(null);
+    this.firstFormGroup.get('distrito').disable();
+  }
+
+  selectDistritos(option) {
+    this.distritos = this.pl.getDistritos(option.id);
+    this.firstFormGroup.get('distrito').enable();
+
+  }
+
   save() {
     this.firstFormGroup.disable()
     const userRef = this.af.firestore.collection(`/users`).doc(this.data.user.uid);
@@ -81,10 +102,10 @@ export class LocationDialogComponent implements OnInit {
       address: this.firstFormGroup.get('name').value,
       reference: this.firstFormGroup.get('reference').value,
       coord: this.center,
-      distrito: this.data.distrito,
-      departamento: this.data.departamento,
-      provincia: this.data.provincia,
-      idDistrito: this.data.idDistrito
+      departamento: this.departamentos.find(dep => dep.id == this.firstFormGroup.get('departamento').value),
+      provincia: this.provincias.find(prov => prov.id == this.firstFormGroup.get('provincia').value),
+      distrito: this.distritos.find(dis => dis.id == this.firstFormGroup.get('distrito').value),
+      idDistrito: this.firstFormGroup.get('distrito').value
     }
 
     let savelocations = this.data.user.location ? this.data.user.location : []
