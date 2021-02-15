@@ -6,9 +6,7 @@
     </h2>
 
     <mat-divider></mat-divider>
-
     
-
     <div class="actionsContainer" style="margin: 16px">
 
       <div class="container-date">
@@ -21,8 +19,6 @@
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
-        
-        
 
       </div>
      <!-- <div *ngIf="authService.user$ | async as user; ">
@@ -30,9 +26,8 @@
     </div> -->
 
     <div *ngIf="init$ | async as sales">
-   
-    <div style="margin-top: 20px" *ngFor="let question of sales"  >
 
+    <div style="margin-top: 20px" *ngFor="let question of sales"  >
       <mat-accordion  >
 
         <mat-expansion-panel hideToggle class="titulo-expansion-panel" *ngFor="let product of question['product']" >
@@ -59,11 +54,11 @@
           class="answer-body"        
 
         >  
+
          
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <p class="name-email"  *ngIf="question.createdBy.name">{{question.createdBy.name}}   {{question.createdBy.lastName}} ( {{question.createdBy.email}})</p>
-              <p class="name-email" *ngIf="question.createdBy.personData != null">{{question.createdBy.personData.name}}  {{question.createdBy.personData.lastName}} ( {{question.createdBy.email}})</p>
+              <p class="name-email" >{{question.createdBy.personData.name}}  {{question.createdBy.personData.lastName}} ( {{question.createdBy.email}})</p>
             </mat-panel-title>
             <mat-panel-description>
               <h4 class="questions">

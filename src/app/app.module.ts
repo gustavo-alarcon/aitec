@@ -14,6 +14,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import * as firebase from 'firebase';
 
 import { DatePipe } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
@@ -28,6 +29,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatSnackBarModule,
     LazyLoadImageModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
+    HttpClientModule,
     MatDialogModule
   ],
   providers: [

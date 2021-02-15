@@ -13,6 +13,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 
+
 @Component({
   selector: 'app-shopping-cart',
   templateUrl: './shopping-cart.component.html',
@@ -103,6 +104,8 @@ export class ShoppingCartComponent implements OnInit {
 
   initPayment$: Observable<any>
   firstTime: number = 1
+
+  
 
   constructor(
     private dbs: DatabaseService,
@@ -268,13 +271,11 @@ export class ShoppingCartComponent implements OnInit {
         return user
       })
     )
-  }
 
-  //Debuging start
-  pruebaPasarela() {
+
 
   }
-  //Debuging end
+
 
   firstView() {
     this.view.next(1);

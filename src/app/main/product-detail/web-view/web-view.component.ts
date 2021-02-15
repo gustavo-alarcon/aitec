@@ -138,7 +138,9 @@ export class WebViewComponent implements OnInit {
   }
 
   login() {
+    let title='¡Hola! Para comprar, ingresa a tu cuenta';
     this.dialog.open(NoLoginDialogComponent, {
+      data:{title},
       width: '300px'
     })
   }

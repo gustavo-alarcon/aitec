@@ -40,19 +40,19 @@
               [ngClass]="{'ms-expansion-panel-menu':confiOpenedFlag}" (opened)="confiOpened()" (closed)="confiClosed()">
               <mat-expansion-panel-header class="menu__button">
                 <mat-panel-title style="font-weight:500" [ngClass]="{'ms-expansion-panel-title':confiOpenedFlag}">
-                  <mat-icon class="menu__icon">settings</mat-icon> Configuración
+                  <mat-icon class="menu__icon">assignment</mat-icon> Ventas
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
               <button mat-button class="w3-block menu__button" routerLink="web/banners"
                 style="text-align:left;border-radius:0px 0px 0px 0px" (click)="toggleSideMenu()">
                 <mat-icon class="menu__icon">language</mat-icon>
-                Web
+                Ventas
               </button>
               <button mat-button class="w3-block menu__button" routerLink="sale-configuration"
                 style="text-align:left;border-radius:0px 0px 0px 0px;" (click)="toggleSideMenu()">
                 <mat-icon class="menu__icon">build</mat-icon>
-                Ventas
+                Caja
               </button>
               <p class="w3-margin-bottom"></p>
 

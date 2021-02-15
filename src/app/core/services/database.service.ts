@@ -2,9 +2,7 @@ import { Sale, saleStatusOptions } from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
-  AngularFirestoreCollection,
   DocumentReference,
-  AngularFirestoreDocument,
 } from '@angular/fire/firestore';
 import { Brand, Product } from '../models/product.model';
 import {
@@ -14,17 +12,19 @@ import {
   switchMap,
   take,
   mapTo,
-  tap,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, from, forkJoin } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, forkJoin } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Buy, BuyRequestedProduct } from '../models/buy.model';
 import * as firebase from 'firebase';
 import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Warehouse } from '../models/warehouse.model';
+import { WarehouseProduct } from '../models/warehouseProduct.model';
+import { SerialNumber } from '../models/SerialNumber.model';
+import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 
 @Injectable({
@@ -78,7 +78,8 @@ export class DatabaseService {
   constructor(
     private afs: AngularFirestore,
     private storage: AngularFireStorage,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private http: HttpClient
   ) {
     //this.opening$ = this.getOpening();
   }
@@ -434,6 +435,45 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
+  /* getWarehouseValueChanges():  Observable<any[]> {    
+    return this.generalConfig$.pipe(map(res => {
+     if (res) {
+       return res.warehouses ? res.warehouses : []
+     } else {
+       return []
+     }
+     
+   }))  
+
+  } */
+
+  getWarehouseValueChanges1():  Observable<any[]> {    
+    return this.afs
+      .collection<any>(`/db/aitec/warehouses`)
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   getProductsListByCategory(category: string): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
@@ -464,6 +504,28 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
+
+  getProductsListByWarehouseName(warehouse): Observable<any[]> { 
+    console.log('db warehouse : ',warehouse)
+    return this.afs
+    .collection<any>(`/db/aitec/warehouses/${warehouse}/products/`, (ref) =>
+      ref.orderBy('createdAt', 'desc')
+    )
+    .valueChanges()
+    .pipe(shareReplay(1));
+  }
+  /* getProductsListByWarehouseName(warehouse: string): Observable<any[]> {
+    return this.afs
+      .collection<any>(this.productsListRef, (ref) =>
+        ref.where('warehouse', '==', warehouse)
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs.map((el) => <Product>el.data());
+        })
+      );
+  } */
 
   getWarehousesObservable(): Observable<Warehouse[]> {
     return this.afs
@@ -1271,7 +1333,37 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
+  
+ //Payment
+  async methodPostAsync(data): Promise<any> {
 
+    try {
+
+      const username='13421879';
+      const password='testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
+      
+      var auth = 'Basic ' + btoa(username + ":" + password);
+      //var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
+       var url = "/api-payment/V4/Charge/CreatePayment";
+
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Access-Control-Allow-Origin':'*',
+          'Content-Type':  'application/json',
+           Authorization: `${auth}`,
+         
+        })
+       };
+      
+       let res = await this.http.post(url, JSON.stringify(data), httpOptions).toPromise();;
+
+       
+      return res;
+    } catch (error) {
+      await console.log(error);
+    }
+
+  }
   // WAREHOUSE
   createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
@@ -1333,6 +1425,52 @@ export class DatabaseService {
     return upload$;
   }
 
+  getWarehouseProducts(warehouse: Warehouse): Observable<WarehouseProduct[]> {
+    if (!warehouse.id) {
+      return of([])
+    }
+
+    return this.afs.collection<WarehouseProduct>(`/db/aitec/warehouses/${warehouse.id}/products`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+  getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
+    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/serials`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+  saveSerialNumbers(serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+    let batch = this.afs.firestore.batch();
+
+    serialList.forEach(serial => {
+      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/serials`).doc();
+
+      let data: SerialNumber = {
+        id: serialRef.id,
+        barcode: serial.barcode,
+        color: serial.color,
+        status: 'stored',
+        sku: serial.sku,
+        createdBy: user,
+        createdAt: new Date(),
+        editedBy: null,
+        editedAt: null
+      }
+
+      batch.set(serialRef, data);
+    })
+
+    return of(batch);
+  }
+
+
+  // NEWS CONFIGURATION
   updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
 
     if (!photo) {

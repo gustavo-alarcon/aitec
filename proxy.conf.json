@@ -1,0 +1,9 @@
+
+{
+  "/api-payment/*": {
+    "target": "https://api.micuentaweb.pe",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel":"debug"
+  }
+}
