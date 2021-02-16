@@ -33,13 +33,13 @@ export class WarehouseInventoryComponent implements OnInit {
   
 
   //Table
-  productsTableDataSource = new MatTableDataSource<WarehouseProduct>();
+  productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
     'index', 'photoURL', 'description', 'sku', 'category', 'virtualStock',
     'realStock', 'list', 'actions'
   ]
 
-  productsObservable$: Observable<WarehouseProduct[]>
+  productsObservable$: Observable<Product[]>
   @ViewChild('productsPaginator', { static: false }) set content(paginator1: MatPaginator) {
     this.productsTableDataSource.paginator = paginator1;
   }

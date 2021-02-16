@@ -1255,31 +1255,31 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
-  
- //Payment
+
+  //Payment
   async methodPostAsync(data): Promise<any> {
 
     try {
 
-      const username='13421879';
-      const password='testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
-      
+      const username = '13421879';
+      const password = 'testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
+
       var auth = 'Basic ' + btoa(username + ":" + password);
       //var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
-       var url = "/api-payment/V4/Charge/CreatePayment";
+      var url = "/api-payment/V4/Charge/CreatePayment";
 
       const httpOptions = {
         headers: new HttpHeaders({
-          'Access-Control-Allow-Origin':'*',
-          'Content-Type':  'application/json',
-           Authorization: `${auth}`,
-         
-        })
-       };
-      
-       let res = await this.http.post(url, JSON.stringify(data), httpOptions).toPromise();;
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+          Authorization: `${auth}`,
 
-       
+        })
+      };
+
+      let res = await this.http.post(url, JSON.stringify(data), httpOptions).toPromise();;
+
+
       return res;
     } catch (error) {
       await console.log(error);
@@ -1290,7 +1290,7 @@ export class DatabaseService {
   getWarehouses(): Observable<any> {
     return this.afs
       .collection(`/db/aitec/warehouses`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
+        ref.orderBy('name', 'asc')
       ).get().pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
@@ -1358,10 +1358,10 @@ export class DatabaseService {
       )
 
   }
-  getWarehouseProductSerial(warehouse,warehouseProduct): Observable<SerialItem[]> {
-    console.log('warehouse : ',warehouse);
-    console.log('warehouseProduct : ',warehouseProduct);
-    
+  getWarehouseProductSerial(warehouse, warehouseProduct): Observable<SerialItem[]> {
+    console.log('warehouse : ', warehouse);
+    console.log('warehouseProduct : ', warehouseProduct);
+
     if (!warehouse.id) {
       return of([])
     }
@@ -1372,17 +1372,17 @@ export class DatabaseService {
         shareReplay(1)
       )
   }
- /*  getWarehouseProductSerial(warehouse: Warehouse,warehouseProduct:WarehouseProduct): Observable<SerialItem[]> {
-    if (!warehouse.id) {
-      return of([])
-    }
-
-    return this.afs.collection<SerialItem>(`/db/aitec/warehouses/${warehouse.id}/products/${warehouseProduct.id}/series`)
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
-      )
-  } */
+  /*  getWarehouseProductSerial(warehouse: Warehouse,warehouseProduct:WarehouseProduct): Observable<SerialItem[]> {
+     if (!warehouse.id) {
+       return of([])
+     }
+ 
+     return this.afs.collection<SerialItem>(`/db/aitec/warehouses/${warehouse.id}/products/${warehouseProduct.id}/series`)
+       .valueChanges()
+       .pipe(
+         shareReplay(1)
+       )
+   } */
 
   getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
     return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`)
@@ -1499,30 +1499,46 @@ export class DatabaseService {
 
   }
 
-  // // working on
-  // updateProductListWithWarehouses(): void {
-  //   let warehouseIDs =
-  //   {
-  //     'Almacén 1': 'lujOB8TwOHuI2EuSUr9w',
-  //     'Almacén 2': 'oUiT4ia9QB9bIUbdha35'
-  //   };
+  // working on
+  updateProductListWithWarehouses(): void {
+    let warehouseIDs =
+    {
+      'Almacén 1': 'lujOB8TwOHuI2EuSUr9w',
+      'Almacén 2': 'oUiT4ia9QB9bIUbdha35',
+      'Almacén 3': 'oqOoCXqcRWNA8c8s4FB6'
+    };
 
-  //   let batch = this.afs.firestore.batch();
+    let batch = this.afs.firestore.batch();
 
-  //   this.afs.collection<Product>(this.productsListRef).valueChanges().subscribe(productList => {
-  //     productList.forEach(product => {
-  //       product.warehouse.forEach(warehouse => {
-  //         let warehouseProdRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseIDs[warehouse]}/products`).doc();
+    this.afs.collection<Product>(this.productsListRef).valueChanges().subscribe(productList => {
+      productList.forEach(product => {
+        product.warehouse.forEach(warehouse => {
+          let warehouseProdDoc = this.afs.collection(`db/aitec/warehouses/${warehouseIDs[warehouse]}/products`).doc(product.id);
 
-  //         let data: WarehouseProduct = {
-  //           editedAt: null,
-  //           editedBy: null,
-  //           id: warehouseProdRef.id,
-  //           sku: product.sku
-  //         }
-  //       })
-  //     })
-  //   })
-  // }
+          let data: WarehouseProduct = {
+            id: warehouseProdDoc.ref.id,
+            description: product.description,
+            editedAt: null,
+            editedBy: null,
+            sku: product.sku,
+            skuArray: product.products.map(product => { return { sku: product.sku, color: { color: product.color.color, name: product.color.name } } }),
+            createdAt: new Date(),
+            createdBy: null
+          }
+
+          batch.set(warehouseProdDoc.ref, data);
+        })
+      })
+
+      batch.commit().then(() => {
+        console.log('All good!');
+
+      })
+        .catch(err => {
+          console.log(err);
+
+        })
+    })
+  }
 
 }
