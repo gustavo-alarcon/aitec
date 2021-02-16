@@ -1290,7 +1290,7 @@ export class DatabaseService {
   getWarehouses(): Observable<any> {
     return this.afs
       .collection(`/db/aitec/warehouses`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
+        ref.orderBy('name', 'asc')
       ).get().pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());

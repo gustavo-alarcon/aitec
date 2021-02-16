@@ -71,13 +71,13 @@ export class WarehouseProductsEntryComponent implements OnInit {
   initObservables() {
     this.warehouses$ =
       this.dbs.getWarehouses()
-        .pipe(
-          tap(warehouses => {
-            if (warehouses.length) {
-              this.warehouseForm.setValue(warehouses[0])
-            }
-          })
-        )
+        // .pipe(
+        //   tap(warehouses => {
+        //     if (warehouses.length) {
+        //       this.warehouseForm.setValue(warehouses[0])
+        //     }
+        //   })
+        // )
 
     this.entryProducts$ = combineLatest(
       this.entryWarehouseControl.valueChanges
