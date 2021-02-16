@@ -25,6 +25,7 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatNativeDateModule } from '@angular/material/core';
+import { NgxPrintModule } from 'ngx-print';
 
 
 import { WarehouseRoutingModule } from './warehouse-routing.module';
@@ -71,7 +72,8 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     MatStepperModule,
     MatRadioModule,
     MatNativeDateModule,
-    FormsModule
+    FormsModule,
+    NgxPrintModule, 
   ]
 })
 export class WarehouseModule { }
