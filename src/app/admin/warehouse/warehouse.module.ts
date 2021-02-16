@@ -45,7 +45,7 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     WarehouseListComponent,
     WarehouseInventoryComponent,
     WarehouseCreateEditComponent,
-    WarehouseProductsEntryComponent],
+    WarehouseProductsEntryComponent,
     ReferralGuideDialogComponent],
   imports: [
     CommonModule,
