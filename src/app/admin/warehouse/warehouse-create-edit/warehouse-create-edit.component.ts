@@ -122,7 +122,7 @@ export class customValidator {
   static warehouseNameRepeatedValidator(dbs: DatabaseService) {
     return (control: AbstractControl) => {
       const value = control.value.toLowerCase();
-      return dbs.getWarehousesObservable().pipe(
+      return dbs.getWarehouses().pipe(
         debounceTime(500),
         map(warehouses => !!warehouses.find(whs => whs.name.toLowerCase() === value) ? { warehouseNameRepeatedValidator: true } : null),
         take(1)

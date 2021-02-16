@@ -24,6 +24,8 @@ import { Warehouse } from '../models/warehouse.model';
 import { WarehouseProduct } from '../models/warehouseProduct.model';
 import { SerialNumber } from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
+import { InvokeFunctionExpr } from '@angular/compiler';
+import { Kardex } from '../models/kardex.model';
 
 @Injectable({
   providedIn: 'root',
@@ -347,17 +349,6 @@ export class DatabaseService {
       );
   }
 
-  getWarehouses(): Observable<any> {
-    return this.afs
-      .collection(`/db/aitec/warehouses`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
-        map((snap) => {
-          return snap.docs.map((el) => el.data());
-        })
-      );
-  }
-
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
   getProductsList(): Observable<Product[]> {
@@ -437,14 +428,6 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
-  }
-
-  getWarehousesObservable(): Observable<Warehouse[]> {
-    return this.afs
-      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
-      )
-      .valueChanges();
   }
 
   getWarehouseSeriesValueChanges(id): Observable<Product[]> {
@@ -1247,6 +1230,17 @@ export class DatabaseService {
   }
 
   // WAREHOUSE
+  getWarehouses(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/warehouses`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
+
   createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
     let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
@@ -1283,6 +1277,96 @@ export class DatabaseService {
     return batch;
   }
 
+  getWarehouseProducts(warehouse: Warehouse): Observable<WarehouseProduct[]> {
+    if (!warehouse.id) {
+      return of([])
+    }
+
+    return this.afs.collection<WarehouseProduct>(`/db/aitec/warehouses/${warehouse.id}/products`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+  getProductsByWarehouse(warehouse: Warehouse): Observable<Product[]> {
+    if(!warehouse.id){
+      return of([])
+    }
+    
+    return this.afs.collection<Product>(`/db/aitec/productsList`, ref => ref.where('warehouse', 'array-contains', warehouse.name))
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+    
+  }
+
+  getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
+    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`)
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
+  saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+    /**
+     * IMPORTANT!
+     * This function assumes that only serial numbers of the same type (same product) will be processed.
+     * 
+     * */
+
+    let batch = this.afs.firestore.batch();
+
+    // Saving serial numbers to warehouse product
+    serialList.forEach(serial => {
+      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/series`).doc();
+
+      let data: SerialNumber = {
+        id: serialRef.id,
+        barcode: serial.barcode,
+        color: serial.color,
+        status: 'stored',
+        sku: serial.sku,
+        createdBy: user,
+        createdAt: new Date(),
+        editedBy: null,
+        editedAt: null
+      }
+
+      batch.set(serialRef, data);
+    });
+
+    // Adding quantity to product
+    let productRef = this.afs.firestore.doc(`db/aitec/productsList/${product.id}`);
+    batch.update(productRef, {virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length)});
+    batch.update(productRef, {realStock: firebase.default.firestore.FieldValue.increment(serialList.length)});
+
+    // Adding entry to product's kardex
+    let kardexProductRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/kardex`).doc();
+
+    let kardex: Kardex = {
+      id: kardexProductRef.id,
+      type: '1',
+      operationType: '1',
+      invoice: invoice,
+      waybill: waybill,
+      inflow: serialList.length,
+      outflow: 0,
+      createdBy: user,
+      createdAt: new Date(),
+      editedBy: null,
+      editedAt: null
+    }
+
+    batch.set(kardexProductRef, kardex);
+    
+    return of(batch);
+  }
+
+
+  // NEWS CONFIGURATION
   uploadPhotoNews(file: File): Observable<string | number> {
     console.log(file);
 
@@ -1307,52 +1391,6 @@ export class DatabaseService {
     return upload$;
   }
 
-  getWarehouseProducts(warehouse: Warehouse): Observable<WarehouseProduct[]> {
-    if (!warehouse.id) {
-      return of([])
-    }
-
-    return this.afs.collection<WarehouseProduct>(`/db/aitec/warehouses/${warehouse.id}/products`)
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
-      )
-  }
-
-  getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
-    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/serials`)
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
-      )
-  }
-
-  saveSerialNumbers(serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
-    let batch = this.afs.firestore.batch();
-
-    serialList.forEach(serial => {
-      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/serials`).doc();
-
-      let data: SerialNumber = {
-        id: serialRef.id,
-        barcode: serial.barcode,
-        color: serial.color,
-        status: 'stored',
-        sku: serial.sku,
-        createdBy: user,
-        createdAt: new Date(),
-        editedBy: null,
-        editedAt: null
-      }
-
-      batch.set(serialRef, data);
-    })
-
-    return of(batch);
-  }
-
-
-  // NEWS CONFIGURATION
   updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
 
     if (!photo) {

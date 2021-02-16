@@ -1,0 +1,44 @@
+.entry {
+  display: flex;
+  // flex-wrap: wrap;
+  align-items: flex-start;
+
+  &_container {
+  }
+
+  &_actions {
+    padding: 12px 6px;
+  }
+}
+
+.info {
+  padding: 1em;
+  border: dashed 1px lightgrey;
+  border-radius: 10px 10px;
+  margin: 2px 10px;
+
+  &_barcode {
+    min-width: 320px;
+    display: flex;
+  }
+
+  &--default {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+
+  p {
+    align-self: center;
+    justify-self: center;
+    color: grey;
+  }
+
+
+}
+
+@media (max-width: 601px) {
+  .entry {
+    flex-wrap: wrap;
+  }
+}
