@@ -77,18 +77,13 @@ export class ReferralGuideDialogComponent implements OnInit {
   ngOnInit(): void {
     this.guideFormGroup = this.fb.group({
       codigo: ['', Validators.required],
-      dateTranslate: ['', Validators.required],
       Addressee: ['', Validators.required],
       point: ['', Validators.required],
       dni: ['', Validators.required],
       arrivalPoint: ['', Validators.required],
       translate: ['', Validators.required],
       oservations: ['', Validators.required],
-      warehouse: ['', Validators.required],
-      product: ['', Validators.required],
-      acount: ['', Validators.required],
-      serie: ['', Validators.required],
-      startDate: ['', Validators.required],      
+      startDate: ['', Validators.required],     
     })
     this.entryWarehouseControl = this.fb.control('', Validators.required);
     this.entryProductControl = this.fb.control('', Validators.required);
@@ -186,7 +181,7 @@ export class ReferralGuideDialogComponent implements OnInit {
 
   existSerie = getBarcodeName.includes(barcode);
   
-  if (!existSerie) {
+  if (!existSerie&&barcode) {
     const series:ProductsSeries={name:barcode};
     this.arraySeries.push(series);
 
@@ -247,12 +242,6 @@ export class ReferralGuideDialogComponent implements OnInit {
         duration: 6000
         });
     }
-
-    
-    
-    
-
-
   }
   deleteProduct(product:ProductsWarehouse){
     this.arrayProducts = this.arrayProducts.filter(c =>c.code !== product.code);
@@ -287,7 +276,7 @@ export class ReferralGuideDialogComponent implements OnInit {
       batch.commit()
       .then(() => {
         this.dialogRef.close();
-        this.snackbar.open("guia de remision creada", "Cerrar");
+        this.snackbar.open("guia de remision guardado", "Cerrar");
       })
       .catch(err => {
         console.log(err);
