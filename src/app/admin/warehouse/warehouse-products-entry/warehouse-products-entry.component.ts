@@ -7,6 +7,7 @@ import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ProductCategoryComponent } from 'src/app/main/product-detail/product-category/product-category.component';
 
 @Component({
   selector: 'app-warehouse-products-entry',
@@ -181,11 +182,8 @@ export class WarehouseProductsEntryComponent implements OnInit {
         
         let data = {
           barcode: scan,
-          color: {
-            color: null,
-            name: null
-          },
-          sku: validation.sku
+          color: validation.product.color,
+          sku: validation.product.sku
         }
 
         this.serialList.unshift(data);
@@ -207,18 +205,18 @@ export class WarehouseProductsEntryComponent implements OnInit {
     this.entryStock = this.serialList.length;
   }
 
-  checkSKU(code: string): { exists: boolean, sku: string } {
+  checkSKU(code: string): { exists: boolean, product: {color: {color: string, name: string}, sku: string} } {
     let product = this.entryProductControl.value;
     let exist = false;
-    let skuData: string;
+    let skuData;
 
-    product.skuArray.every(sku => {
-      exist = code.startsWith(sku);
-      skuData = sku
+    product.skuArray.every(product => {
+      exist = code.startsWith(product.sku);
+      skuData = product
       return !exist;
     });
 
-    return { exists: exist, sku: skuData };
+    return { exists: exist, product: skuData };
   }
 
   checkSerialList(barcode: string): boolean {
