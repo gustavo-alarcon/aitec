@@ -70,8 +70,9 @@ export class ReferralGuideDialogComponent implements OnInit {
               public auth: AuthService,
               public dbs: DatabaseService,
               public snackbar: MatSnackBar,
-              @Inject(MAT_DIALOG_DATA) public data: { data },
-              public dialogRef: MatDialogRef<ReferralGuideDialogComponent>
+              //public dialogRef: MatDialogRef
+              /* @Inject(MAT_DIALOG_DATA) public data: { data },
+              public dialogRef: MatDialogRef<ReferralGuideDialogComponent> */
   ) { }
 
   ngOnInit(): void {
@@ -275,7 +276,7 @@ export class ReferralGuideDialogComponent implements OnInit {
 
       batch.commit()
       .then(() => {
-        this.dialogRef.close();
+        //this.dialogRef.close();
         this.snackbar.open("guia de remision guardado", "Cerrar");
       })
       .catch(err => {
