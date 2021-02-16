@@ -81,6 +81,7 @@ export class DatabaseService {
     private afAuth: AngularFireAuth
   ) {
     //this.opening$ = this.getOpening();
+    // this.updateProductListWithWarehouses();
   }
 
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
@@ -1290,16 +1291,16 @@ export class DatabaseService {
   }
 
   getProductsByWarehouse(warehouse: Warehouse): Observable<Product[]> {
-    if(!warehouse.id){
+    if (!warehouse.id) {
       return of([])
     }
-    
+
     return this.afs.collection<Product>(`/db/aitec/productsList`, ref => ref.where('warehouse', 'array-contains', warehouse.name))
       .valueChanges()
       .pipe(
         shareReplay(1)
       )
-    
+
   }
 
   getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
@@ -1340,8 +1341,8 @@ export class DatabaseService {
 
     // Adding quantity to product
     let productRef = this.afs.firestore.doc(`db/aitec/productsList/${product.id}`);
-    batch.update(productRef, {virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length)});
-    batch.update(productRef, {realStock: firebase.default.firestore.FieldValue.increment(serialList.length)});
+    batch.update(productRef, { virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
+    batch.update(productRef, { realStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
 
     // Adding entry to product's kardex
     let kardexProductRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/kardex`).doc();
@@ -1361,9 +1362,11 @@ export class DatabaseService {
     }
 
     batch.set(kardexProductRef, kardex);
-    
+
     return of(batch);
   }
+
+
 
 
   // NEWS CONFIGURATION
@@ -1414,5 +1417,31 @@ export class DatabaseService {
     }
 
   }
+
+  // // working on
+  // updateProductListWithWarehouses(): void {
+  //   let warehouseIDs =
+  //   {
+  //     'Almacén 1': 'lujOB8TwOHuI2EuSUr9w',
+  //     'Almacén 2': 'oUiT4ia9QB9bIUbdha35'
+  //   };
+
+  //   let batch = this.afs.firestore.batch();
+
+  //   this.afs.collection<Product>(this.productsListRef).valueChanges().subscribe(productList => {
+  //     productList.forEach(product => {
+  //       product.warehouse.forEach(warehouse => {
+  //         let warehouseProdRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseIDs[warehouse]}/products`).doc();
+
+  //         let data: WarehouseProduct = {
+  //           editedAt: null,
+  //           editedBy: null,
+  //           id: warehouseProdRef.id,
+  //           sku: product.sku
+  //         }
+  //       })
+  //     })
+  //   })
+  // }
 
 }
