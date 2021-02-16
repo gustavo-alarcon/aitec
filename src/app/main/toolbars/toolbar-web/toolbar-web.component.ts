@@ -32,7 +32,7 @@ export class ToolbarWebComponent implements OnInit {
 
   @ViewChild("megaMenu") menu: ElementRef;
 
-  defaultImage = "../../../../assets/images/aitec-512x512.png";
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
   constructor(
     public auth: AuthService,
     private router: Router,

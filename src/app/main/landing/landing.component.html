@@ -1,19 +1,11 @@
 <div *ngIf="init$ | async;else loader">
     
-    <ngx-slick-carousel class="carousel-web" #slickModal="slick-carousel" [config]="slideConfig">
+    <ngx-slick-carousel #slickModal="slick-carousel" [config]="slideConfig">
       <div ngxSlickItem class="slide" *ngFor="let ban of banners">
         <a (click)="navigateBrand(ban)">
           <img [src]="ban.photoURL" class="w3-block-banner" alt="" />
         </a>
       </div>   
-    </ngx-slick-carousel>
-
-    <ngx-slick-carousel class="carousel-movil" #slickModal="slick-carousel" [config]="slideConfig">
-      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-        <a (click)="navigateBrand(ban)">
-          <img [src]="ban.photomovilURL" class="w3-block-banner" alt="" />
-        </a>
-      </div>      
     </ngx-slick-carousel>
 
   <div class="w3-padding w3-center">
@@ -46,9 +38,7 @@
         <div class="w3-col m6 l6" style="display: flex; align-items: center">
           <div class="w3-center">
             <h2 class="section__title font--primary">{{middle.title}}</h2>
-            <p class="section__paragraph">
-              {{middle.descrip}}
-            </p>
+            <div class="section__paragraph" [innerHTML]="middle.descrip"></div>
           </div>
         </div>
         <div class="w3-col m6 l6">

@@ -99,9 +99,6 @@
             <div (click)="change(2)" [ngClass]="{'activated': viewDelivery==2, 'deactivated': viewDelivery!=2}">
               Recojo en tienda
             </div>
-            <div (click)="change(3)" [ngClass]="{'activated': viewDelivery==3, 'deactivated': viewDelivery!=3}">
-              Coordinar entrega
-            </div>
           </div>
           <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async;else loader">
             <ng-container [ngSwitch]="viewDelivery" class="w3-block delivery">
@@ -109,33 +106,20 @@
                 <h4 class="delivery__title w3-center">
                   Por favor registra tus datos y verifícalos
                 </h4>
-                <form [formGroup]="formGroup" class="w3-margin-top">
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>Departamento</mat-label>
-                    <mat-select disableRipple formControlName="departamento">
-                      <mat-option *ngFor="let dept of departamentos" (click)="selectProvincias(dept)" [value]="dept.id">
-                        {{ dept.name | titlecase }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>Provincia</mat-label>
-                    <mat-select disableRipple formControlName="provincia">
-                      <mat-option *ngFor="let option of provincias" (click)="selectDistritos(option)" [value]="option.id">
-                        {{ option.name | titlecase }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>Distrito</mat-label>
-                    <mat-select disableRipple formControlName="distrito">
-                      <mat-option *ngFor="let option of distritos" (click)="selectDelivery(option)" [value]="option.id">
-                        {{ option.name | titlecase }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                </form>
+                <mat-form-field class="w3-block" appearance="outline">
+                  <mat-label>Zona de envío</mat-label>
+                  <mat-select disableRipple [formControl]="deliveryForm">
+                    <mat-option (click)="selectDelivery(0)" [value]="-2">Coordina el delivery con la tienda</mat-option>
+                    <mat-option *ngFor="let dept of zones" (click)="selectDelivery(dept)" [value]="dept.id">
+                      {{ dept.name | titlecase }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
                 <div  *ngIf="selectedDelivery">
+                  <p>El costo de tu delivery es: <b>{{selectedDelivery | currency: 'S/. ':'symbol':'2.2-2'}}</b></p>
+                  <h4 class="delivery__title w3-center">
+                    Por favor registra tus datos y verifícalos
+                  </h4>
                   <div style="font-size: 1em">
                     <mat-icon style="vertical-align: middle">place</mat-icon>
                     ¿En dónde recibirás tu pedido?
@@ -166,6 +150,19 @@
                     </button>
                   </div>
                 </div>
+                <div *ngIf="deliveryForm.value == -2">
+                  <h4 class="delivery__title">
+                    Coordina el delivery con la tienda.
+                  </h4>
+                  <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
+                  <ul>
+                    <li>999 999 999</li>
+                    <li>999 999 999</li>
+                  </ul>
+                  <p>o enviarnos un correo con el número de tu pedido a:</p>
+                  <p>correo@aitec.com</p>
+                  <p>Luego de coordinar el delivery el precio se actualizará con el costo respectivo.</p>
+                </div>
               </mat-card-content>
               <mat-card-content *ngSwitchCase="2">
                 <h4 class="delivery__title">
@@ -182,19 +179,6 @@
                   </div>
                   <hr style="margin: 0" />
                 </div>
-              </mat-card-content>
-              <mat-card-content *ngSwitchCase="3">
-                <h4 class="delivery__title">
-                  Coordina el delivery con la tienda.
-                </h4>
-                <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
-                <ul>
-                  <li>999 999 999</li>
-                  <li>999 999 999</li>
-                </ul>
-                <p>o enviarnos un correo con el número de tu pedido a:</p>
-                <p>correo@aitec.com</p>
-                <p>Luego de coordinar el delivery el precio se actualizará con el costo respectivo.</p>
               </mat-card-content>
             </ng-container>
             

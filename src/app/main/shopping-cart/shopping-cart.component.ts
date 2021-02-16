@@ -48,16 +48,15 @@ export class ShoppingCartComponent implements OnInit {
 
   /*delivery*/
   initDelivery$: Observable<any>
-  formGroup: FormGroup;
   delivery: number = 1;
-  selectedDelivery: number;
+  selectedDelivery: number = 5;
+
   idDelivery = new BehaviorSubject<number>(1);
   idDelivery$ = this.idDelivery.asObservable();
 
-  places: Array<any> = [];
-  departamentos: Array<any> = [];
-  provincias: Array<any> = [];
-  distritos: Array<any> = [];
+  zones: Array<any> = [];
+
+  deliveryForm: FormControl = new FormControl('')
 
   stores: any[] = []
   locations: any[] = []
@@ -66,8 +65,8 @@ export class ShoppingCartComponent implements OnInit {
 
   viewDelivery: number = 1;
 
-  selectedLocation: any
-  selectedStore: number = 0
+  selectedLocation: number = 0;
+  selectedStore: number = 0;
 
   deliveryNumber: number = 0
 
@@ -191,11 +190,10 @@ export class ShoppingCartComponent implements OnInit {
 
     /*Delivery*/
     this.initDelivery$ = combineLatest(
-      this.dbs.getDelivery(),
       this.dbs.getStores(),
       this.dbs.getPaymentsChanges()
     ).pipe(
-      map(([del, stores, payments]) => {
+      map(([stores, payments]) => {
         this.stores = stores
         this.payments = payments.map(pay => {
           return {
@@ -204,40 +202,15 @@ export class ShoppingCartComponent implements OnInit {
             value: pay['voucher'] ? 3 : pay['name'].includes('arjeta') ? 2 : 1
           }
         })
-        return del
-      }),
-      tap(res => {
-        this.places = this.convertPlaces(res)
-        this.departamentos = res.map(el => el.departamento).filter((item, index, data) => {
-          return data.findIndex(i => i.id === item.id) === index;
-        })
+        return stores
       })
     )
 
-    this.formGroup = this.fb.group({
-      departamento: [null],
-      provincia: [null],
-      distrito: [null]
-    });
-
-    this.formGroup.get('provincia').disable();
-    this.formGroup.get('distrito').disable();
-
     this.chooseDelivery$ = combineLatest(
       this.idDelivery$,
-      this.dbs.delivery$,
-      this.formGroup.get('distrito').valueChanges.pipe(
-        startWith('')
-      )
+      this.dbs.delivery$
     ).pipe(
-      map(([id, del, dis]) => {
-
-        if (dis) {
-          this.locations = [...this.user.location].filter(loc => {
-            //let ubigeo = this.formGroup.value
-            return loc.idDistrito == dis
-          })
-        }
+      map(([id, del]) => {
         if (id == 1) {
           return del == 0 || this.locations.length == 0
         } else {
@@ -283,6 +256,7 @@ export class ShoppingCartComponent implements OnInit {
         })
 
         this.user = user
+        this.locations = user.location
 
         if (user.personData.type == 'natural') {
           this.boletaForm.get('dni').setValue(user.personData['dni'])
@@ -542,66 +516,25 @@ export class ShoppingCartComponent implements OnInit {
     }
   }
 
-  selectProvincias(option) {
-    this.provincias = this.places.filter(pl => pl.provincia.department_id == option.id).map(pl => pl.provincia).filter((item, index, data) => {
-      return data.findIndex(i => i.id === item.id) === index;
-    });
-    this.formGroup.get('provincia').setValue(null);
-    this.formGroup.get('provincia').enable();
-    this.formGroup.get('distrito').setValue(null);
-    this.formGroup.get('distrito').disable();
-    this.selectedDelivery = 0
-    this.dbs.delivery.next(0);
-  }
-
-  selectDistritos(option) {
-    this.distritos = this.places.filter(pl => pl.provincia.id == option.id).map(pl => pl.distritos).reduce((a, b) => a.concat(b), []);
-    this.formGroup.get('distrito').setValue(null);
-    this.formGroup.get('distrito').enable();
-    this.selectedDelivery = 0
-    this.dbs.delivery.next(0);
-
-  }
 
   selectDelivery(option) {
-    this.selectedDelivery = option.delivery
-    if (this.user.location) {
-      this.selectedLocation = 0
-    }
-    if (this.delivery == 1) {
-      this.dbs.delivery.next(this.selectedDelivery);
-    }
+    if (option) {
+      this.selectedDelivery = option.delivery
 
+      if (this.delivery == 1) {
+        this.dbs.delivery.next(this.selectedDelivery);
+      }
+    }
 
   }
 
-  convertPlaces(array: Array<any>) {
-
-    let convert = array.map(el => {
-      el.distritos = el.distritos.map(dis => {
-        return {
-          id: dis.id,
-          name: dis.name,
-          province_id: dis.province_id,
-          delivery: el.delivery
-        }
-      })
-      return el
-    })
-
-    return convert
-  }
 
   openMap(user, index, edit) {
     this.dialog.open(LocationDialogComponent, {
       data: {
         user: user,
         edit: edit,
-        ind: index,
-        departamento: this.departamentos.find(dt => dt.id == this.formGroup.value['departamento']).name,
-        provincia: this.provincias.find(pv => pv.id == this.formGroup.value['provincia']).name,
-        distrito: this.distritos.find(ds => ds.id == this.formGroup.value['distrito']).name,
-        idDistrito: this.formGroup.value['distrito']
+        ind: index
       }
     })
   }

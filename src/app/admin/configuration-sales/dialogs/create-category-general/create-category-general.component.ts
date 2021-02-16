@@ -9,11 +9,12 @@ import { Category } from 'src/app/core/models/category.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
-  selector: 'app-create-edit-categories',
-  templateUrl: './create-edit-categories.component.html',
-  styleUrls: ['./create-edit-categories.component.scss'],
+  selector: 'app-create-category-general',
+  templateUrl: './create-category-general.component.html',
+  styleUrls: ['./create-category-general.component.scss']
 })
-export class CreateEditCategoriesComponent implements OnInit {
+export class CreateCategoryGeneralComponent implements OnInit {
+
   //Variables
   packageForm: FormGroup;
   itemsFormArray: FormArray;
@@ -28,7 +29,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   selectBrand: Array<any> = []
 
   constructor(
-    private dialogRef: MatDialogRef<CreateEditCategoriesComponent>,
+    private dialogRef: MatDialogRef<CreateCategoryGeneralComponent>,
     private fb: FormBuilder,
     private dbs: DatabaseService,
     private snackBar: MatSnackBar,

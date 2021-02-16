@@ -2,56 +2,15 @@
 <div>
   <div class="w3-section">
     <h4 style="font-size: 1.2em;font-weight: 600;">Ofertas</h4>
-    <button mat-raised-button class="w3-margin-bottom" color="primary" (click)="openDialog(false)">
-      <span>Agregar</span>
-      <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
-    </button>
+    <p>Haga click en la imagen para editarlo</p>
 
     <div *ngIf="banner$ | async as images">
 
       <div class="img-oferta">
-        <img [src]="banner.photoURL" *ngFor="let banner of images ; let i = index" class="w3-block-{{i}}" alt="" />
+        <img [src]="banner.photoURL" *ngFor="let banner of images ; let i = index"
+          (click)="editDialog('carousel', true, banner)" class="w3-block-{{i}}" alt="" />
       </div>
 
-      <div *ngIf="images.length" class="w3-margin-top w3-block w3-margin-bottom">
-        <mat-progress-bar mode="indeterminate" *ngIf="loadingPos$ | async"></mat-progress-bar>
-        <div class="row-category" style="justify-content: space-between; padding: 10px 0" *ngIf="images.length > 1">
-
-          <span style="font-weight: 700">Ordenar posición</span>
-          <button mat-raised-button color="primary" (click)="savePosition(images)" [disabled]="loadingPos$ | async">
-            <span>Guardar</span>
-          </button>
-        </div>
-        <div cdkDropList class="banner__list border--primary" (cdkDropListDropped)="drop(images, $event)">
-          <mat-card class="banner__box" *ngFor="let image of images" cdkDrag>
-            <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
-            <div class="ms-flex ms-flex--center" style="justify-content: space-between">
-              <img [src]="image.photoURL" style="width: 30%" class="img-order" alt="" />
-              <div style="width: 25%">
-                <div><strong>Redirige a:</strong></div>
-                <div>{{ image.redirectTo }}</div>
-              </div>
-              <div *ngIf="image.redirectTo == 'Categoría/subcategoría'" style="width: 25%">
-                <div>{{ image.category }}</div>
-              </div>
-              <div *ngIf="image.redirectTo == 'Marca'" style="width: 25%">
-                <div>{{ image.brand }}</div>
-              </div>
-              <div *ngIf="image.redirectTo == 'Link externo'" style="width: 25%">
-                <div>{{ image.link }}</div>
-              </div>
-              <div style="width: fit-content">
-                <button mat-icon-button color="primary" (click)="editDialog('carousel', true, image)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="primary" style="margin-left: 10px" (click)="deleteBDialog(image)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </div>
-          </mat-card>
-        </div>
-      </div>
     </div>
   </div>
   <hr />
@@ -68,27 +27,23 @@
             <input autocomplete="off" formControlName="title" type="text" matInput placeholder="Título" />
             <mat-error>Campo requerido</mat-error>
           </mat-form-field>
-          <mat-form-field class="w3-block" appearance="outline">
-            <mat-label>Descripción</mat-label>
-            <textarea autocomplete="off" formControlName="descrip" type="text" matInput placeholder="Descripción"
-              rows="6"></textarea>
-          </mat-form-field>
+          <div>
+            <textarea formControlName="descrip" [ngxSummernote]="config" rows="20" required></textarea>
+          </div>
 
 
         </div>
         <div class="w3-col m6 l6 w3-padding">
           <!-- Photo  -->
           <div style="margin: 16px 0;text-align: center; ">
-            <img class="w3-card-4" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value!=null"
-              style="max-width:100%;max-height: 200px; object-fit: contain;" [src]="createForm.get('photoURL').value"
-              alt="fotografía">
-            <img class="w3-card-4" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value==null"
-              style="max-width:100%;max-height: 200px; object-fit: contain;" [src]="noImage" alt="sin fotografía">
+            <img class="w3-card-4 w3-block" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value!=null"
+              [src]="createForm.get('photoURL').value" alt="fotografía">
+            <img class="w3-card-4 w3-block" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value==null"
+              [src]="noImage" alt="sin fotografía">
 
             <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width:100%" mode="indeterminate">
             </mat-progress-bar>
-            <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
-              style="width:100%">*comprimiendo</span>
+            <span *ngIf="photos.resizing$.photoURL | async" class="w3-small" style="width:100%">*comprimiendo</span>
             <input style="display: none" #photoURL type="file" accept='image/*'
               (change)="addNewPhoto('photoURL', photoURL.files)" />
           </div>
@@ -119,7 +74,7 @@
             <th *matHeaderCellDef class="w3-center">Nº</th>
             <td mat-cell *matCellDef="let element; let i = index">
               {{
-                1 + i + productsPaginator.pageIndex * productsPaginator.pageSize
+              1 + i + productsPaginator.pageIndex * productsPaginator.pageSize
               }}
             </td>
           </ng-container>

@@ -95,6 +95,20 @@ export class CreateEditBannerComponent implements OnInit {
       })
     )
 
+    /*this.category$ = combineLatest(
+      this.createForm.get('category').valueChanges.pipe(
+        map(el => typeof el == 'string' ? el : el ? el['completeName'] : null),
+        startWith<any>('')
+      ),
+      this.dbs.getAllCategories()
+    ).pipe(
+
+      map(([value, categories]) => {
+
+        return categories.filter(el => value ? el.completeName.toLowerCase().includes(value.toLowerCase()) : true)
+      })
+    )*/
+
     this.category$ = combineLatest(
       this.createForm.get('category').valueChanges.pipe(
         startWith<any>('')
