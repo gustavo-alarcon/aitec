@@ -34,6 +34,7 @@ import { ListDialogComponent } from './list-dialog/list-dialog.component';
 import { WarehouseListComponent } from './warehouse-list/warehouse-list.component';
 import { WarehouseInventoryComponent } from './warehouse-inventory/warehouse-inventory.component';
 import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-create-edit.component';
+import { WarehouseProductsEntryComponent } from './warehouse-products-entry/warehouse-products-entry.component';
 import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-guide-dialog.component';
 
 
@@ -44,6 +45,7 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     WarehouseListComponent,
     WarehouseInventoryComponent,
     WarehouseCreateEditComponent,
+    WarehouseProductsEntryComponent],
     ReferralGuideDialogComponent],
   imports: [
     CommonModule,

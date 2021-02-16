@@ -26,6 +26,7 @@ import { WarehouseProduct } from '../models/warehouseProduct.model';
 import { SerialNumber } from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
+import { Kardex } from '../models/kardex.model';
 
 @Injectable({
   providedIn: 'root',
@@ -82,6 +83,7 @@ export class DatabaseService {
     private http: HttpClient
   ) {
     //this.opening$ = this.getOpening();
+    // this.updateProductListWithWarehouses();
   }
 
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
@@ -374,17 +376,6 @@ export class DatabaseService {
       );
   }
 
-  getWarehouses(): Observable<any> {
-    return this.afs
-      .collection(`/db/aitec/warehouses`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
-        map((snap) => {
-          return snap.docs.map((el) => el.data());
-        })
-      );
-  }
-
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
   getProductsList(): Observable<Product[]> {
@@ -464,14 +455,6 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
-  }
-
-  getWarehousesObservable(): Observable<Warehouse[]> {
-    return this.afs
-      .collection<Warehouse>(`/db/aitec/warehouses/`, (ref) =>
-        ref.orderBy('createdAt', 'desc')
-      )
-      .valueChanges();
   }
 
   getWarehouseSeriesValueChanges(id): Observable<Product[]> {
@@ -1304,6 +1287,17 @@ export class DatabaseService {
 
   }
   // WAREHOUSE
+  getWarehouses(): Observable<any> {
+    return this.afs
+      .collection(`/db/aitec/warehouses`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => el.data());
+        })
+      );
+  }
+
   createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
     let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
@@ -1340,30 +1334,6 @@ export class DatabaseService {
     return batch;
   }
 
-  uploadPhotoNews(file: File): Observable<string | number> {
-    console.log(file);
-
-    const path = `/news/${file.name}`;
-    console.log(path);
-
-
-    // Reference to storage bucket
-    const ref = this.storage.ref(path);
-
-    // The main task
-    let uploadingTask = this.storage.upload(path, file);
-
-    let snapshot$ = uploadingTask.percentageChanges();
-    let url$ = of('url!').pipe(
-      switchMap((res) => {
-        return <Observable<string>>ref.getDownloadURL();
-      })
-    );
-
-    let upload$ = concat(snapshot$, url$);
-    return upload$;
-  }
-
   getWarehouseProducts(warehouse: Warehouse): Observable<WarehouseProduct[]> {
     if (!warehouse.id) {
       return of([])
@@ -1374,6 +1344,19 @@ export class DatabaseService {
       .pipe(
         shareReplay(1)
       )
+  }
+
+  getProductsByWarehouse(warehouse: Warehouse): Observable<Product[]> {
+    if (!warehouse.id) {
+      return of([])
+    }
+
+    return this.afs.collection<Product>(`/db/aitec/productsList`, ref => ref.where('warehouse', 'array-contains', warehouse.name))
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+
   }
   getWarehouseProductSerial(warehouse,warehouseProduct): Observable<SerialItem[]> {
     console.log('warehouse : ',warehouse);
@@ -1409,11 +1392,18 @@ export class DatabaseService {
       )
   }
 
-  saveSerialNumbers(serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+  saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+    /**
+     * IMPORTANT!
+     * This function assumes that only serial numbers of the same type (same product) will be processed.
+     * 
+     * */
+
     let batch = this.afs.firestore.batch();
 
+    // Saving serial numbers to warehouse product
     serialList.forEach(serial => {
-      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/serials`).doc();
+      let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/series`).doc();
 
       let data: SerialNumber = {
         id: serialRef.id,
@@ -1428,13 +1418,63 @@ export class DatabaseService {
       }
 
       batch.set(serialRef, data);
-    })
+    });
+
+    // Adding quantity to product
+    let productRef = this.afs.firestore.doc(`db/aitec/productsList/${product.id}`);
+    batch.update(productRef, { virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
+    batch.update(productRef, { realStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
+
+    // Adding entry to product's kardex
+    let kardexProductRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/kardex`).doc();
+
+    let kardex: Kardex = {
+      id: kardexProductRef.id,
+      type: '1',
+      operationType: '1',
+      invoice: invoice,
+      waybill: waybill,
+      inflow: serialList.length,
+      outflow: 0,
+      createdBy: user,
+      createdAt: new Date(),
+      editedBy: null,
+      editedAt: null
+    }
+
+    batch.set(kardexProductRef, kardex);
 
     return of(batch);
   }
 
 
+
+
   // NEWS CONFIGURATION
+  uploadPhotoNews(file: File): Observable<string | number> {
+    console.log(file);
+
+    const path = `/news/${file.name}`;
+    console.log(path);
+
+
+    // Reference to storage bucket
+    const ref = this.storage.ref(path);
+
+    // The main task
+    let uploadingTask = this.storage.upload(path, file);
+
+    let snapshot$ = uploadingTask.percentageChanges();
+    let url$ = of('url!').pipe(
+      switchMap((res) => {
+        return <Observable<string>>ref.getDownloadURL();
+      })
+    );
+
+    let upload$ = concat(snapshot$, url$);
+    return upload$;
+  }
+
   updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
 
     if (!photo) {
@@ -1458,5 +1498,31 @@ export class DatabaseService {
     }
 
   }
+
+  // // working on
+  // updateProductListWithWarehouses(): void {
+  //   let warehouseIDs =
+  //   {
+  //     'Almacén 1': 'lujOB8TwOHuI2EuSUr9w',
+  //     'Almacén 2': 'oUiT4ia9QB9bIUbdha35'
+  //   };
+
+  //   let batch = this.afs.firestore.batch();
+
+  //   this.afs.collection<Product>(this.productsListRef).valueChanges().subscribe(productList => {
+  //     productList.forEach(product => {
+  //       product.warehouse.forEach(warehouse => {
+  //         let warehouseProdRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseIDs[warehouse]}/products`).doc();
+
+  //         let data: WarehouseProduct = {
+  //           editedAt: null,
+  //           editedBy: null,
+  //           id: warehouseProdRef.id,
+  //           sku: product.sku
+  //         }
+  //       })
+  //     })
+  //   })
+  // }
 
 }
