@@ -14,25 +14,25 @@
     <div [formGroup]="guideFormGroup">
 
       <div class="arrival">
-        <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item" appearance="outline">
           <mat-label>Codigo de pedido / operación</mat-label>
           <input matInput type="text" formControlName="codigo" placeholder="Codigo de pedido" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
         </mat-form-field>
 
-        <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item" appearance="outline">
           <mat-label>Destinatario</mat-label>
           <input matInput type="text" formControlName="Addressee" placeholder="Destinatario" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
         </mat-form-field>
 
-        <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item" appearance="outline">
           <mat-label>RUC / DNI</mat-label>
           <input matInput type="number" formControlName="dni" placeholder="RUC / DNI" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
         </mat-form-field>
 
-        <mat-form-field class="w3-block w3-medium size-item"  appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item"  appearance="outline">
           <mat-label>Fecha de Translado</mat-label>
           <input matInput [matDatepicker]="picker" [formControl]="guideFormGroup.get('startDate')">
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -40,13 +40,13 @@
         </mat-form-field>
         
         
-        <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item" appearance="outline">
           <mat-label>Punto de partida </mat-label>
           <input matInput type="text" formControlName="point" placeholder="Punto de partida" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
         </mat-form-field>
         
-        <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+        <mat-form-field class="w3-block w3-small size-item" appearance="outline">
           <mat-label>Punto de llegada</mat-label>
           <input matInput type="text" formControlName="arrivalPoint" placeholder="Punto de llegada" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
@@ -82,7 +82,7 @@
       <br>
       <div class="observations">
         <p>Observaciones</p>
-        <mat-form-field class="w3-block w3-medium " appearance="outline">
+        <mat-form-field class="w3-block w3-small " appearance="outline">
           <mat-label>Observaciones</mat-label>
           <input matInput type="text" formControlName="oservations" placeholder="Observaciones" autocomplete="off">
           <mat-error>  Requerido * </mat-error>
@@ -92,68 +92,92 @@
       <div class="transported">
         <p>Datos del bien transportados</p>
 
-        <form>
-          <div *ngIf="warehouse$ | async as warehouses" class="select-item-warehouse">      
-            <mat-form-field appearance="outline" class="" >
-              <mat-label>Selecione almacén </mat-label>
-              <mat-select [formControl]="warehouseForm"  name="warehouse" >
-                <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id">{{warehouse.name}}</mat-option >           
-              </mat-select>
-            </mat-form-field>   
-          </div>
-          <p>Selected: {{warehouseForm.value}}</p>
-
-        </form>
+        <mat-form-field color="primary" class="w3-block w3-small size-item" appearance="outline">
+          <mat-label>Almacén</mat-label>
+          <mat-select [formControl]="entryWarehouseControl">
+            <mat-option *ngFor="let item of warehouses$ | async" [value]="item">
+              {{item.name}}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Seleccione un almacén</mat-hint>
+          <mat-error>* Campo requerido</mat-error>
+        </mat-form-field>
 
         <div class="products">
-          <!-- <mat-form-field color="primary" class="content w3-small w3-margin-right w3-block" appearance="outline">
+          
+          <mat-form-field *ngIf=" entryProducts$ | async as products" color="primary" class="w3-block w3-small " appearance="outline">
             <mat-label>Producto</mat-label>
-            <mat-icon matPrefix class="w3-margin-right">local_offer</mat-icon>
             <input [formControl]="entryProductControl" matInput type="text" [matAutocomplete]="autoProducts"
               placeholder="Escriba..." autocomplete="off">
-            <mat-autocomplete #autoProducts="matAutocomplete" [displayWith]="showEntryProduct"
-              (optionSelected)="selectedEntryProduct($event)">
-              <mat-option *ngFor="let product of entryProducts$ | async" style="font-size: 12px;"
-                [value]="product">{{product.product?.description}}</mat-option>
+            <mat-autocomplete #autoProducts="matAutocomplete" [displayWith]="showEntryProduct" 
+              (optionSelected)="selectedEntryProduct($event)" > 
+              <mat-option *ngFor="let product of products" style="font-size: 12px;" [value]="product">{{product.description}}
+              </mat-option>
             </mat-autocomplete>
             <mat-hint>Escriba y seleccione un producto</mat-hint>
-          </mat-form-field> -->
-          <mat-form-field *ngIf="product$ | async as products" style="margin-bottom: 8px; display:block"
-          appearance="outline">
-          <mat-label>Producto</mat-label>
-          <input autocomplete="off" formControlName="product" [matAutocomplete]="productAutocomplete" type="text"
-            matInput>
-          <mat-autocomplete autoActiveFirstOption #productAutocomplete="matAutocomplete">
-            <mat-option *ngFor="let product of products" [value]="product">
-              {{product}}
-            </mat-option>
-          </mat-autocomplete>
-          <mat-error>
-            <span *ngIf="guideFormGroup.get('product').errors?.required">Por favor, complete el campo.</span>
-            <span *ngIf="guideFormGroup.get('product').errors?.invalid">Dato inválido. Complete con alguna opción
-              válida.</span>
-          </mat-error>
-          </mat-form-field>
+            <mat-error>* Campo requerido</mat-error>
+          </mat-form-field>          
 
-          <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
+          <mat-form-field class="w3-block w3-small size-item" appearance="outline"> 
             <mat-label>Cantidad</mat-label>
-            <input matInput type="number" formControlName="acount" placeholder="cantidad" autocomplete="off">
-            <mat-error>  Requerido * </mat-error>
+            <input [formControl]="entryQuantitycontrol" matInput type="number" readonly placeholder="Escriba..." autocomplete="off">
           </mat-form-field>
 
-          <mat-form-field class="w3-block w3-medium size-item" appearance="outline">
-            <mat-label>numero de series disponibles</mat-label>
-            <input matInput type="number" formControlName="serie" placeholder="numero de series disponibles" autocomplete="off">
-            <mat-error>  Requerido * </mat-error>
+          <mat-form-field *ngIf=" entrySeries$ | async as series" color="primary" class="w3-block w3-small " appearance="outline">
+            <mat-label>Series</mat-label>
+            <input [formControl]="entrySeries" matInput type="text" [matAutocomplete]="autoSeries"
+              placeholder="Escriba..." autocomplete="off" (keyup.enter)="addSeries(entrySeries.value)">
+            <mat-autocomplete #autoSeries="matAutocomplete" [displayWith]="showEntrySerial"
+               > <!-- (optionSelected)="selectedEntryProduct($event)" -->
+              <mat-option *ngFor="let serie of series" style="font-size: 12px;"
+                [value]="serie">{{serie.barcode}}</mat-option>
+            </mat-autocomplete>
+            <mat-hint>Escriba y seleccione un serie</mat-hint>
+            <mat-hint>Presione ENTER para agregar</mat-hint>
+            <!-- <mat-error>* Campo requerido</mat-error> -->
+            <!-- <mat-error *ngIf="existSerie">
+              asdadasd
+              <span>
+                 ya existe en este almacén.
+              </span>                
+            </mat-error> -->
+            <mat-error>
+              <span>
+                {{entrySeries.value}} ya existe en este almacén.</span>
+                {{entrySeries$ | async}}
+            </mat-error>
           </mat-form-field>
+           
+          <div>
+            <div *ngIf="selectedProduct$ | async as product;" style="display: block;" class="info info--default ms-fill">
+              <strong> {{product.description}}</strong>
+            </div> 
+
+            <table class="table table-striped">
+              <thead>
+                <tr class="grid-listProduct">
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of arraySeries; let i=index" class="grid-listProduct">
+                  <td> {{i}} </td>
+                  <td> {{item.name}} </td>        
+                  <td> <i class="material-icons" (click)="deleteSerie(item)" style="cursor: pointer;">remove_circle</i></td>                      
+                </tr>		      
+              </tbody>
+            </table>
+          </div>                
         </div>
 
       </div>
-
-      <mat-dialog-actions align="center" >
-        <button mat-raised-button color="primary" class="btn">Agregar</button>
-      </mat-dialog-actions>
-
+      <div *ngIf="selectedProduct$ | async as product;" style="display: block;" class="info info--default ms-fill">
+        <mat-dialog-actions align="center" >
+          <button mat-raised-button color="primary" class="btn" (click)="addProducts(product)">Agregar</button>
+        </mat-dialog-actions>
+      </div>
     </div>
   </div>
   <br/>
@@ -161,23 +185,113 @@
 
   <div class="listProduct">
   <p style="font-weight: bold;">Lista de productos</p>
-  <div class="grid-listProduct">
-      <p>memoria ram</p>
-      <p>Nro de serie1 Nro de serie2 Nro de serie3 </p>
-      <p>3 unid</p>
-      <p>unidades</p>
-      <p>100 gramos</p>
-      <div class="icon">
-        <i class="material-icons">remove_circle</i>
-      </div>
-  </div>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr class="grid-listProduct">
+        <th>Nr°</th>
+        <th>Codigo de Producto</th>
+        <th>Producto</th>
+        <th>Nr° de Series</th>
+        <th>unidades</th>
+        <th>und de medida</th>
+        <th>total</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of arrayProducts; let i=index" class="grid-listProduct">
+        <td> {{i}} </td>
+        <td>{{item.code}}</td>
+        <td> {{item.name}} </td>
+        <td >{{item.series}}</td>
+        <td> {{ item.quantity }} und</td>
+        <td>{{item.und}}</td>
+        <td>{{item.weight}}</td>
+
+        <td> <i class="material-icons" (click)="deleteProduct(item)" style="cursor: pointer;">remove_circle</i></td>                           
+      </tr>		      
+    </tbody>
+  </table>
   </div>  
+
+  
+
   
 </mat-dialog-content>
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
+<div *ngIf="arrayProducts.length>0">
+  <mat-dialog-actions align="center" > 
+      <button mat-raised-button color="primary" class="btn" (click)="saveReferral()">Guardar</button>
+      <button mat-raised-button color="primary" class="btn" printSectionId="print-section" ngxPrint > Imprimir</button> <!-- [disabled]="!guideFormGroup.valid" (click)="save()" --> 
+  </mat-dialog-actions> 
+</div>
 
-<mat-dialog-actions align="center" >
-    <button mat-raised-button color="primary" class="btn">Guardar</button>
-    <button mat-raised-button color="primary" class="btn" (click)="save()"> Imprimir</button> <!-- [disabled]="!guideFormGroup.valid" --> 
-</mat-dialog-actions> 
+<div id="print-section" style="transform: scale(0.01); margin: 10px 30px 10px 30px;">
+  <div style="margin: 20px 10px 10px 10px;">
+    <div style="height: 200px;">
+       <h2 style="position: absolute; top: 150px; right: 150px;">{{this.guideFormGroup.get('codigo').value}}</h2>
+      
+    </div>
+    <div style="margin-left: 270px; display: grid; grid-column-gap: 2em; grid-template-columns: 1fr 1fr;">
+      <p>{{this.guideFormGroup.get('Addressee').value}}</p>
+      <p>{{this.guideFormGroup.get('dni').value}}</p>
+      <p>{{this.guideFormGroup.get('arrivalPoint').value}}</p>
+      <p>{{this.guideFormGroup.get('startDate').value * 1000 | date: "dd/MM/yyyy"}}</p>
+      <p>{{this.guideFormGroup.get('point').value}}</p>
+      <p>{{this.guideFormGroup.get('startDate').value * 1000 | date: "dd/MM/yyyy"}}</p>       
+    </div>
+  </div>
+  <div style="margin: 20px 10px 10px 10px; ">
+    <div >
+     <table >
+       <thead>
+         <tr >
+           <th>Nr°</th>
+           <th>Codigo de Producto</th>
+           <th>Producto</th>
+           <th>Nr° de Series</th>
+           <th>unidades</th>
+           <th>und de medida</th>
+           <th>total</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr *ngFor="let item of arrayProducts; let i=index">
+           <td> {{i}} </td>
+           <td>{{item.code}}</td>
+           <td> {{item.name}} </td>
+           <td >{{item.series}}</td>
+           <td> {{ item.quantity }} und</td>
+           <td>{{item.und}}</td>
+           <td>{{item.weight}}</td>                       
+         </tr>		      
+       </tbody>
+     </table>
+    </div>
+  </div>
+  <div style="margin: 20px 10px 10px 10px;">
+    <div style="margin-left: 100px; display: grid; grid-column-gap: 1em; grid-template-columns: 1fr 1fr 1fr;">
+      <p > {{this.guideFormGroup.get('translate').value=== '1' ? 'X': ' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '2' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '3' ? 'X' :' '}}  </p>       
+      <p > {{this.guideFormGroup.get('translate').value=== '4' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '5' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '6' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '7' ? 'X' :' '}}  </p>       
+      <p > {{this.guideFormGroup.get('translate').value=== '8' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value=== '9' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value==='10' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value==='11' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value==='12' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value==='13' ? 'X' :' '}}  </p>      
+      <p > {{this.guideFormGroup.get('translate').value==='14' ? 'X' :' '}}  </p>      
+    </div>
+    <p>footer</p>
+    <div> 
+      <p>{{this.guideFormGroup.get('oservations').value}}</p>
+    </div>
+    
+  </div>
+</div>    
