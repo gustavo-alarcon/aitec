@@ -1,16 +1,5 @@
-<div class="ms-flex">
-  <h2 mat-dialog-title style="margin: 0px 0px">
-    <mat-icon style="vertical-align:middle; margin-right: 8px">list_alt</mat-icon>Guia de remision
-  </h2>
-  <span class="ms-fill"></span>
-  <button mat-icon-button mat-dialog-close>
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
-<mat-divider></mat-divider>
 
-<mat-dialog-content>
-  <div class="w3-row">
+ <div class="w3-row">
     <div [formGroup]="guideFormGroup">
 
       <div class="arrival">
@@ -214,11 +203,6 @@
     </tbody>
   </table>
   </div>  
-
-  
-
-  
-</mat-dialog-content>
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
 <div *ngIf="arrayProducts.length>0">
