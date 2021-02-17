@@ -177,6 +177,7 @@ export class CreateEditProductComponent implements OnInit {
               this.secondFormGroup.get('guarantee').setValue(prod.guarantee)
               this.colorSelect = prod.colors
               this.colorCount.next(prod.colors.length)
+              this.existDistrict = prod.zones ? prod.zones : []
 
               this.photosList = prod.gallery.map((gal, g) => {
                 return {
@@ -701,7 +702,12 @@ export class CreateEditProductComponent implements OnInit {
             editedBy: user,
             sku: newProduct.sku,
             weight: newProduct.weight,
-            skuArray: newProduct.skuArray
+            skuArray: newProduct.colors.map((col, k) => {
+              return {
+                color: col,
+                sku: newProduct.skuArray[k]
+              }
+            })
           })
 
           el.series.forEach(lo => {
@@ -735,8 +741,6 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   editProduct() {
-
-
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
 
     let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
@@ -764,7 +768,8 @@ export class CreateEditProductComponent implements OnInit {
       guarantee: this.secondFormGroup.get('guarantee').value,
       timeguarantee: this.secondFormGroup.get('timeguarantee').value,
       gallery: originP,
-      indCover: this.choosePicture
+      indCover: this.choosePicture,
+      zones: this.existDistrict
     }
 
     let oldP = {
@@ -782,7 +787,8 @@ export class CreateEditProductComponent implements OnInit {
       guarantee: this.data.guarantee,
       timeguarantee: this.data.timeguarantee,
       gallery: this.data.gallery,
-      indCover: this.data.indCover
+      indCover: this.data.indCover,
+      zones: this.data.zones ? this.data.zones : []
     }
 
     let change = JSON.stringify(newProduct) === JSON.stringify(oldP)
@@ -862,7 +868,6 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   onKeydown(event) {
-
     let permit =
       event.keyCode === 8 ||
       event.keyCode === 46 ||

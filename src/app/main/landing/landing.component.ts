@@ -69,7 +69,6 @@ export class LandingComponent implements OnInit {
 
   banners: Array<any> = []
 
-
   promo: Array<any> = []
   testimonies: Array<any> = []
 

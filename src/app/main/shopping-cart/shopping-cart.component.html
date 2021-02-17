@@ -5,7 +5,7 @@
   </div>
   <div class="w3-margin-top w3-row">
     <div class="w3-container w3-col l8 col-md-7">
-
+      <ng-container *ngIf="initDelivery$ | async"></ng-container>
       <div *ngIf="(view$|async) != 4">
         <div class="ms-flex w3-hide-small w3-hide-medium w3-margin-bottom w3-padding"
           style="justify-content: space-between">
@@ -34,7 +34,7 @@
             Método de Pago
           </button>
           <ng-template #thirdButton>
-            <button mat-button class="button--desactive" [disabled]="chooseDelivery$ | async" (click)="thirdView()">
+            <button mat-button class="button--desactive" [disabled]="validatedSecondButton" (click)="thirdView()">
               <mat-icon>request_page</mat-icon>
               Método de Pago
             </button>
@@ -100,7 +100,7 @@
               Recojo en tienda
             </div>
           </div>
-          <mat-card class="w3-block delivery" *ngIf="initDelivery$ | async;else loader">
+          <mat-card class="w3-block delivery">
             <ng-container [ngSwitch]="viewDelivery" class="w3-block delivery">
               <mat-card-content *ngSwitchCase="1">
                 <h4 class="delivery__title w3-center">
@@ -110,12 +110,12 @@
                   <mat-label>Zona de envío</mat-label>
                   <mat-select disableRipple [formControl]="deliveryForm">
                     <mat-option (click)="selectDelivery(0)" [value]="-2">Coordina el delivery con la tienda</mat-option>
-                    <mat-option *ngFor="let dept of zones" (click)="selectDelivery(dept)" [value]="dept.id">
+                    <mat-option *ngFor="let dept of zones;let ind=index" (click)="selectDelivery(dept)" [value]="ind+1">
                       {{ dept.name | titlecase }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <div  *ngIf="selectedDelivery">
+                <div *ngIf="selectedDelivery">
                   <p>El costo de tu delivery es: <b>{{selectedDelivery | currency: 'S/. ':'symbol':'2.2-2'}}</b></p>
                   <h4 class="delivery__title w3-center">
                     Por favor registra tus datos y verifícalos
@@ -156,17 +156,16 @@
                   </h4>
                   <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
                   <ul>
-                    <li>999 999 999</li>
-                    <li>999 999 999</li>
+                    <li *ngFor="let num of contactNumbers" style="color: #828282;font-weight: 600;">{{num}}</li>
                   </ul>
                   <p>o enviarnos un correo con el número de tu pedido a:</p>
-                  <p>correo@aitec.com</p>
-                  <p>Luego de coordinar el delivery el precio se actualizará con el costo respectivo.</p>
+                  <p *ngFor="let em of contactEmails" style="color: #828282;font-weight: 600;">{{em}}</p>
+                  <p>Luego de coordinar el delivery, el precio se actualizará con el costo respectivo.</p>
                 </div>
               </mat-card-content>
               <mat-card-content *ngSwitchCase="2">
                 <h4 class="delivery__title">
-                  Ubica nuestras tiendas en: 
+                  Ubica nuestras tiendas en:
                 </h4>
                 <div *ngFor="let store of stores;let i=index" (click)="selectStore(i)"
                   [ngClass]="{'store__selected': selectedStore == i}">
@@ -181,7 +180,7 @@
                 </div>
               </mat-card-content>
             </ng-container>
-            
+
           </mat-card>
 
         </div>
@@ -199,119 +198,56 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <div *ngIf="method.value==3">
-                <div class="w3-margin-bottom">
-                  <strong>{{method.account}}</strong>
-                </div>
-                <div class="w3-margin-bottom">
-                  <div class="w3-margin-bottom" style="position: relative"
-                    *ngFor="let image of photosList; let ind = index">
-                    <img class="voucher" style="object-fit: cover" [src]="image.img" alt="fotografía" />
-                    <div class="ms-flex w3-block" style="position: absolute; top: 0">
-                      <span class="ms-fill"></span>
-                      <button type="button" *ngIf="!image.show" mat-icon-button (click)="image.show = true">
-                        <mat-icon>zoom_in</mat-icon>
-                      </button>
-                      <button type="button" *ngIf="image.show" mat-icon-button (click)="image.show = false">
-                        <mat-icon>zoom_out</mat-icon>
-                      </button>
-                      <button type="button" mat-icon-button (click)="eliminatedphoto(ind)">
-                        <mat-icon>close</mat-icon>
-                      </button>
-                    </div>
-                    <div style="text-align: center; border: 1px solid silver" *ngIf="image.show">
-                      <div class="ms-flex w3-block">
+              <div *ngIf="deliveryForm.value!=-2">
+                <div *ngIf="method.value==3">
+                  <div class="w3-margin-bottom">
+                    <strong>{{method.account}}</strong>
+                  </div>
+                  <div class="w3-margin-bottom">
+                    <div class="w3-margin-bottom" style="position: relative"
+                      *ngFor="let image of photosList; let ind = index">
+                      <img class="voucher" style="object-fit: cover" [src]="image.img" alt="fotografía" />
+                      <div class="ms-flex w3-block" style="position: absolute; top: 0">
                         <span class="ms-fill"></span>
-                        <button mat-icon-button (click)="image.show = false">
+                        <button type="button" *ngIf="!image.show" mat-icon-button (click)="image.show = true">
+                          <mat-icon>zoom_in</mat-icon>
+                        </button>
+                        <button type="button" *ngIf="image.show" mat-icon-button (click)="image.show = false">
+                          <mat-icon>zoom_out</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button (click)="eliminatedphoto(ind)">
                           <mat-icon>close</mat-icon>
                         </button>
                       </div>
-                      <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
+                      <div style="text-align: center; border: 1px solid silver" *ngIf="image.show">
+                        <div class="ms-flex w3-block">
+                          <span class="ms-fill"></span>
+                          <button mat-icon-button (click)="image.show = false">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        </div>
+                        <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
+                      </div>
                     </div>
+  
+                    <div class="voucher" (click)="photoURL.click()">
+                      Agregar foto de voucher de pago
+                    </div>
+                    <mat-hint>*Campo requerido</mat-hint>
+  
+                    <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%" mode="indeterminate">
+                    </mat-progress-bar>
+                    <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
+                      style="width: 100%">*comprimiendo</span>
+                    <input style="display: none" #photoURL type="file" accept="image/*"
+                      (change)="addNewPhoto('photoURL', photoURL.files)" />
                   </div>
-
-                  <div class="voucher" (click)="photoURL.click()">
-                    Agregar foto de voucher de pago
-                  </div>
-                  <mat-hint>*Campo requerido</mat-hint>
-
-                  <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%" mode="indeterminate">
-                  </mat-progress-bar>
-                  <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
-                    style="width: 100%">*comprimiendo</span>
-                  <input style="display: none" #photoURL type="file" accept="image/*"
-                    (change)="addNewPhoto('photoURL', photoURL.files)" />
+                </div>
+                <div *ngIf="method.value==2">
+                  <app-payment [total]="total"></app-payment>
                 </div>
               </div>
-              <div *ngIf="method.value==2">
-                <!-- <form [formGroup]="cardForm" class="w3-margin-top">
-                  <div>Elige el tipo de tarjeta:</div>
-                  <div class="w3-center w3-section">
-                    <button mat-button (click)="chooseType('visa')"
-                      [style.background-color]="cardForm.get('type').value =='visa'?'#E0E0E0':''">
-                      <img src="../../../../assets/images/visa.png" class="mini-img" alt="">
-                    </button>
-                    <button mat-button (click)="chooseType('mastercard')"
-                      [style.background-color]="cardForm.get('type').value =='mastercard'?'#E0E0E0':''">
-                      <img src="../../../../assets/images/mastercad.png" class="mini-img" alt="">
-                    </button>
-                    <button mat-button (click)="chooseType('visa_electron')"
-                      [style.background-color]="cardForm.get('type').value =='visa_electron'?'#E0E0E0':''">
-                      <img src="../../../../assets/images/visa_electron.png" class="mini-img" alt="">
-                    </button>
-                    <button mat-button (click)="chooseType('america express')"
-                      [style.background-color]="cardForm.get('type').value =='america express'?'#E0E0E0':''">
-                      <img src="../../../../assets/images/american.png" class="mini-img" alt="">
-                    </button>
-                  </div>
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>Nro de tarjeta</mat-label>
-                    <input autocomplete="off" formControlName="numero" type="tel" matInput
-                      placeholder="Nro de tarjeta*" />
-                    <mat-error>Campo requerido</mat-error>
-                  </mat-form-field>
-
-                  <div class="ms-flex" style="justify-content:space-between">
-                    <div style="width:40%">Fecha de Caducidad:</div>
-                    <mat-form-field style="width:25%" appearance="outline">
-                      <mat-label>Mes</mat-label>
-                      <mat-select formControlName="month">
-                        <mat-option *ngFor="let pay of months" [value]="pay">
-                          {{pay}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field style="width:30%" appearance="outline">
-                      <mat-label>Año</mat-label>
-                      <mat-select formControlName="year">
-                        <mat-option *ngFor="let pay of years" [value]="pay">
-                          {{pay}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>CVV</mat-label>
-                    <input autocomplete="off" formControlName="numero" type="number" matInput placeholder="CVV" />
-                    <mat-error>Campo requerido</mat-error>
-                  </mat-form-field>
-                  <mat-form-field class="w3-block" appearance="outline">
-                    <mat-label>Titular de la tarjeta</mat-label>
-                    <input autocomplete="off" formControlName="titular" type="tel" matInput
-                      placeholder="Titular de la tarjeta" />
-                    <mat-error>Campo requerido</mat-error>
-                  </mat-form-field>   
-                  
-                </form> -->
-
-                <!-- Payment -->
-
-                <div *ngIf="totalAll$ | async  as total">
-                 <app-payment [total]="total" ></app-payment>
-                 
-               </div>
-
-              </div>
+              
             </div>
             <div class="w3-margin-top">
               <h4 class="delivery__title">
@@ -440,7 +376,7 @@
                 <button mat-icon-button [style.visibility]="couponVerified?'visible':'hidden'" (click)="clearCoupon()">
                   <mat-icon>close</mat-icon>
                 </button>
-                <button mat-button class="email-form__button"  *ngIf="couponVerified;else noCoupon">
+                <button mat-button class="email-form__button" *ngIf="couponVerified;else noCoupon">
                   <mat-icon>check_circle_outline</mat-icon>
                 </button>
                 <ng-template #noCoupon>
@@ -486,7 +422,7 @@
               </p>
             </div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button [disabled]="chooseDelivery$ | async" (click)="thirdView()" color="primary"
+              <button mat-raised-button [disabled]="validatedSecondButton" (click)="thirdView()" color="primary"
                 class="resume__button">Generar orden de
                 pedido</button>
             </div>
