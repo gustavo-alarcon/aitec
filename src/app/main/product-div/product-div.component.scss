@@ -104,6 +104,11 @@
     &__title {
       height: 3em;
     }
+    &__price {
+      &--number {
+        font-size: 1em;
+      }
+    }
   }
 }
 
