@@ -12,6 +12,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
+import { LandingService } from 'src/app/core/services/landing.service';
 
 
 @Component({
@@ -49,21 +50,18 @@ export class ShoppingCartComponent implements OnInit {
   /*delivery*/
   initDelivery$: Observable<any>
   delivery: number = 1;
-  selectedDelivery: number = 5;
-
-  idDelivery = new BehaviorSubject<number>(1);
-  idDelivery$ = this.idDelivery.asObservable();
-
+  selectedDelivery: number = 0;
   zones: Array<any> = [];
 
-  deliveryForm: FormControl = new FormControl('')
+  deliveryForm: FormControl = new FormControl(null)
 
   stores: any[] = []
   locations: any[] = []
-
-  chooseDelivery$: Observable<any>
+  contactNumbers: Array<string> = []
+  contactEmails: Array<string> = []
 
   viewDelivery: number = 1;
+  validatedSecondButton: boolean = true
 
   selectedLocation: number = 0;
   selectedStore: number = 0;
@@ -105,7 +103,7 @@ export class ShoppingCartComponent implements OnInit {
   initPayment$: Observable<any>
   firstTime: number = 1
 
-  
+
 
   constructor(
     private dbs: DatabaseService,
@@ -114,7 +112,8 @@ export class ShoppingCartComponent implements OnInit {
     private ng2ImgMax: Ng2ImgMaxService,
     private router: Router,
     private dialog: MatDialog,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private ld: LandingService
   ) { }
 
   ngOnInit(): void {
@@ -123,12 +122,28 @@ export class ShoppingCartComponent implements OnInit {
         this.deliveryNumber = del
       })
     )
+
     this.products = this.dbs.order;
     this.sum$ = combineLatest(
       this.dbs.orderObs$,
       this.dbs.delivery$
     ).pipe(
       map(([ord, del]) => {
+        if (ord.length == 1) {
+          if (ord[0].quantity == 1) {
+            this.zones = ord[0].product.zones ? ord[0].product.zones : []
+            if (this.deliveryForm.disabled) {
+              this.deliveryForm.setValue(null)
+              this.deliveryForm.enable()
+            }
+          } else {
+            this.deliveryForm.setValue(-2)
+            this.deliveryForm.disable()
+          }
+        } else {
+          this.deliveryForm.setValue(-2)
+          this.deliveryForm.disable()
+        }
         if (ord.length) {
           let suma = [...ord]
             .map((el) => this.giveProductPrice(el))
@@ -191,9 +206,14 @@ export class ShoppingCartComponent implements OnInit {
     /*Delivery*/
     this.initDelivery$ = combineLatest(
       this.dbs.getStores(),
-      this.dbs.getPaymentsChanges()
+      this.dbs.getPaymentsChanges(),
+      this.ld.getConfig()
     ).pipe(
-      map(([stores, payments]) => {
+      map(([stores, payments, confi]) => {
+        if (confi['contactSale']) {
+          this.contactNumbers = confi['contactSale']['numbers']
+          this.contactEmails = confi['contactSale']['emails']
+        }
         this.stores = stores
         this.payments = payments.map(pay => {
           return {
@@ -203,19 +223,6 @@ export class ShoppingCartComponent implements OnInit {
           }
         })
         return stores
-      })
-    )
-
-    this.chooseDelivery$ = combineLatest(
-      this.idDelivery$,
-      this.dbs.delivery$
-    ).pipe(
-      map(([id, del]) => {
-        if (id == 1) {
-          return del == 0 || this.locations.length == 0
-        } else {
-          return false
-        }
       })
     )
 
@@ -283,16 +290,31 @@ export class ShoppingCartComponent implements OnInit {
 
   secondView() {
     this.view.next(2);
+    this.validatedSecondButton = false
   }
 
   thirdView() {
-    let check = this.chooseDelivery$.pipe(take(1))
-    check.subscribe(ch => {
-      if (!ch) {
-        this.view.next(3);
-      }
-    })
+    console.log(this.deliveryForm.value)
+    let valid = false
+    if (this.delivery == 1) {
+      if (this.deliveryForm.value) {
+        if (this.deliveryForm.value == -2) {
+          valid = true
+        } else {
+          valid = this.locations.length != 0
+        }
+      } else {
+        this.snackbar.open('Por favor, escoga una zona de envio', 'Aceptar');
 
+      }
+    } else {
+      valid = true
+    }
+    if (valid) {
+      this.view.next(3);
+    } else {
+      this.snackbar.open('Por favor, agregue una dirección', 'Aceptar');
+    }
   }
 
   validatedThirdButton() {
@@ -330,7 +352,7 @@ export class ShoppingCartComponent implements OnInit {
 
   finish() {
     if (this.validatedFinishButton()) {
-      this.view.next(4);
+      //this.view.next(4);
 
       let info = {
         location: this.user.location[this.selectedLocation],
@@ -508,7 +530,6 @@ export class ShoppingCartComponent implements OnInit {
   change(id) {
     this.viewDelivery = id
     this.delivery = id
-    this.idDelivery.next(id)
     if (id == 1) {
       this.dbs.delivery.next(this.selectedDelivery);
     } else {
@@ -524,6 +545,9 @@ export class ShoppingCartComponent implements OnInit {
       if (this.delivery == 1) {
         this.dbs.delivery.next(this.selectedDelivery);
       }
+    } else {
+      this.selectedDelivery = 0
+      this.dbs.delivery.next(this.selectedDelivery);
     }
 
   }

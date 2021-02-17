@@ -45,6 +45,8 @@ import { CouponViewComponent } from './coupon-view/coupon-view.component';
 import { CategoryDialogComponent } from './dialogs/category-dialog/category-dialog.component';
 import { ContactSaleComponent } from './contact-sale/contact-sale.component';
 import { CreateCategoryGeneralComponent } from './dialogs/create-category-general/create-category-general.component';
+import { DeleteCategoryComponent } from './dialogs/delete-category/delete-category.component';
+import { BrandsCategoryComponent } from './dialogs/brands-category/brands-category.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +64,9 @@ import { CreateCategoryGeneralComponent } from './dialogs/create-category-genera
     CouponViewComponent,
     CategoryDialogComponent,
     ContactSaleComponent,
-    CreateCategoryGeneralComponent
+    CreateCategoryGeneralComponent,
+    DeleteCategoryComponent,
+    BrandsCategoryComponent
   ],
   imports: [
     CommonModule,
