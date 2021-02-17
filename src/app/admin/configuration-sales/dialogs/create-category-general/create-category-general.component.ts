@@ -1,14 +1,6 @@
-import { keyframes } from '@angular/animations';
 import { Component, Inject, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import {
-  AbstractControl,
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators, } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
@@ -17,11 +9,12 @@ import { Category } from 'src/app/core/models/category.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
-  selector: 'app-create-edit-categories',
-  templateUrl: './create-edit-categories.component.html',
-  styleUrls: ['./create-edit-categories.component.scss'],
+  selector: 'app-create-category-general',
+  templateUrl: './create-category-general.component.html',
+  styleUrls: ['./create-category-general.component.scss']
 })
-export class CreateEditCategoriesComponent implements OnInit {
+export class CreateCategoryGeneralComponent implements OnInit {
+
   //Variables
   packageForm: FormGroup;
   itemsFormArray: FormArray;
@@ -36,7 +29,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   selectBrand: Array<any> = []
 
   constructor(
-    private dialogRef: MatDialogRef<CreateEditCategoriesComponent>,
+    private dialogRef: MatDialogRef<CreateCategoryGeneralComponent>,
     private fb: FormBuilder,
     private dbs: DatabaseService,
     private snackBar: MatSnackBar,
@@ -129,7 +122,7 @@ export class CreateEditCategoriesComponent implements OnInit {
   }
 
   onSelectProduct(formGroup: FormGroup) {
-   
+
     let product = formGroup.get('sub').value;
 
     if (product) {
@@ -186,27 +179,57 @@ export class CreateEditCategoriesComponent implements OnInit {
       categories: el.get('categories').value,
     }));
 
-    let newCategory:Category = {
+    let newCategory: Category = {
       id: '',
-      idCategory:null,
-      idSubCategory:null,
+      idCategory: null,
+      idSubCategory: null,
       name: this.packageForm.get('category').value,
       completeName: this.packageForm.get('category').value,
       brands: this.selectBrand,
-      createdAt: new Date()
+      createdAt: new Date(),
+      editedAt: new Date()
     };
 
-    this.create(newCategory);
+    this.create(newCategory, subs);
   }
 
-  create(newCategory) {
-    let productRef = this.afs.firestore
-      .collection(`/db/aitec/config/generalConfig/allCategories`)
-      .doc();
+  create(newCategory, subs) {
+    let productRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc();
 
-    let batch = this.afs.firestore.batch();
+    const batch = this.afs.firestore.batch();
 
     newCategory.id = productRef.id;
+
+    subs.forEach(sb => {
+      let subRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc();
+      let newSub: Category = {
+        id: subRef.id,
+        idCategory: productRef.id,
+        idSubCategory: null,
+        name: sb.name,
+        completeName: newCategory.name + ' >> ' + sb.name,
+        brands: [],
+        createdAt: new Date(),
+        editedAt: new Date()
+      }
+
+      sb.categories.forEach(sbb => {
+        let subbRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc();
+        let newSubb: Category = {
+          id: subbRef.id,
+          idCategory: productRef.id,
+          idSubCategory: subRef.id,
+          name: sbb,
+          completeName: newCategory.name + ' >> ' + sb.name + ' >> ' + sbb,
+          brands: [],
+          createdAt: new Date(),
+          editedAt: new Date()
+        }
+        batch.set(subbRef, newSubb);
+      })
+
+      batch.set(subRef, newSub);
+    })
 
     batch.set(productRef, newCategory);
 

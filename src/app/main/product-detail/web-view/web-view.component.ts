@@ -30,7 +30,7 @@ export class WebViewComponent implements OnInit {
   selected = new FormControl('')
   changeColor$: Observable<any>
 
-  defaultImage = "../../../../assets/images/aitec-512x512.png";
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
   favorite$: Observable<any>
 
@@ -138,7 +138,9 @@ export class WebViewComponent implements OnInit {
   }
 
   login() {
+    let title='¡Hola! Para comprar, ingresa a tu cuenta';
     this.dialog.open(NoLoginDialogComponent, {
+      data:{title},
       width: '300px'
     })
   }

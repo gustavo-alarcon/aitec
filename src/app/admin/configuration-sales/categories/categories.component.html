@@ -8,21 +8,32 @@
     </h2>
   </div>
   <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-  <button mat-raised-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
-    <span>Agregar</span>
-    <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
-  </button>
+  
+  <mat-card>
+    <mat-card-content>
+      <div class="w3-block ms-flex ms-flex--center"
+        style="justify-content: space-between; align-items: baseline;">
+        <button mat-flat-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
+          <span>Agregar</span>
+          <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
+        </button>
 
-  <mat-accordion *ngIf="init$|async as categories" multi>
+        <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
+          <mat-label>Buscar</mat-label>
+          <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
+          <input (keyup)="applyFilter($event)" matInput type="text" placeholder="Escriba..." autocomplete="off" />
+        </mat-form-field>
+        
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <!--mat-accordion *ngIf="init$|async as categories" multi>
     <mat-expansion-panel *ngFor="let cat of categories; let ind = index" (opened)="panelOpenState[ind] = true"
       (closed)="panelOpenState[ind] = false" hideToggle>
       <mat-expansion-panel-header>
         <div class="ms-flex w3-block" style="justify-content: space-between; align-items: center">
           <div>{{ cat.category }}</div>
           <div class="ms-flex panel-icons">
-            <button mat-icon-button (click)="openDialog(true,cat)">
-              <mat-icon>edit</mat-icon>
-            </button>
             <button mat-icon-button>
               <mat-icon *ngIf="panelOpenState[ind]">keyboard_arrow_up</mat-icon>
               <mat-icon *ngIf="!panelOpenState[ind]">keyboard_arrow_down</mat-icon>
@@ -33,17 +44,22 @@
           </div>
         </div>
       </mat-expansion-panel-header>
-
+      <h4>Categoría: {{cat.category}} <mat-icon class="button-icon" (click)="openEditDialog()">edit</mat-icon>
+      </h4>
       <div class="nav-categs-detail__body w3-padding">
         <div class="nav-categs-detail__body-content">
           <article class="nav-categs-detail__categ" *ngFor="let sub of cat.subcategories">
             <h4 style="font-size: 1em; font-weight: 500;">
               {{ sub.name | titlecase }}
+              <mat-icon class="button-icon" (click)="openEditDialog()">edit</mat-icon>
+              <mat-icon class="button-icon">delete</mat-icon>
             </h4>
             <div class="footer-list">
               <ul>
                 <li *ngFor="let s of sub.categories">
                   {{ s | titlecase }}
+                  <mat-icon class="button-icon" (click)="openEditDialog()">edit</mat-icon>
+                  <mat-icon class="button-icon">delete</mat-icon>
                 </li>
               </ul>
             </div>
@@ -57,5 +73,83 @@
         </div>
       </div>
     </mat-expansion-panel>
-  </mat-accordion>
+  </mat-accordion-->
+  <div class="mat-elevation-z8" *ngIf="init$|async as categories">
+    <table mat-table [dataSource]="dataSource" multiTemplateDataRows>
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef class="w3-center" style="width: 90px;">N°</th>
+        <td mat-cell *matCellDef="let row; let i = index"> {{row.id}}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Categoría </th>
+        <td mat-cell *matCellDef="let row"> {{ row.name }} </td>
+      </ng-container>
+
+      <!-- Color Column -->
+      <ng-container matColumnDef="delete">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-button style="margin-right: 5px;" mat-icon-button matTooltip="Agregar Subcategoría" (click)="openEditDialog('subcategory', row.category, false)">
+            <mat-icon>add_circle_outline</mat-icon>
+          </mat-button>
+          <mat-button style="margin-right: 5px;" mat-icon-button  matTooltip="Editar Marcas">
+            <mat-icon>label_important</mat-icon>
+          </mat-button>
+          <mat-button style="margin-right: 5px;" mat-icon-button  matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </mat-button>
+          <mat-button mat-icon-button matTooltip="Eliminar">
+            <mat-icon>delete</mat-icon>
+          </mat-button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="expandedDetail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+          <div class="example-element-detail" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <div class="nav-categs-detail__body w3-padding">
+              <div class="nav-categs-detail__body-content">
+                <article class="nav-categs-detail__categ" *ngFor="let sub of element.subcategories">
+                  <h4 style="font-size: 1em; font-weight: 500;">
+                    {{ sub.name | titlecase }}
+                    <mat-icon class="button-icon" matTooltip="Agregar" (click)="openEditDialog('subsubcategory', sub.category, false)">add_circle_outline</mat-icon>
+                    <mat-icon class="button-icon" matTooltip="Editar" (click)="openEditDialog('subcategory', sub.category, true)">edit
+                    </mat-icon>
+                    <mat-icon class="button-icon" matTooltip="Eliminar">delete</mat-icon>
+                  </h4>
+                  <div class="footer-list">
+                    <ul>
+                      <li *ngFor="let s of sub.categories">
+                        {{ s.name | titlecase }}
+                        <mat-icon class="button-icon" matTooltip="Editar" (click)="openEditDialog('subsubcategory', s, true)">edit
+                        </mat-icon>
+                        <mat-icon class="button-icon" matTooltip="Eliminar">delete</mat-icon>
+                      </li>
+                    </ul>
+                  </div>
+                </article>
+              </div>
+
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="example-element-row"
+        [class.example-expanded-row]="expandedElement === row"
+        (click)="expandedElement = expandedElement === row ? null : row">
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+      <!-- Row shown when there is no matching data. -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">Sin Resultados</td>
+      </tr>
+    </table>
+
+    <mat-paginator #categoryPaginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+  </div>
 </div>

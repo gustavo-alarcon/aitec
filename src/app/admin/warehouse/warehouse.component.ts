@@ -57,7 +57,7 @@ export class WarehouseComponent implements OnInit, OnDestroy {
 
 
   //Variables
-  defaultImage = "../../../assets/images/aitec-512x512.png";
+  defaultImage = "../../../assets/images/icono-aitec-01.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -88,7 +88,7 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.initForms();
+    // this.initForms();
     this.initObservables();
 
     this.entrySKUControl.valueChanges

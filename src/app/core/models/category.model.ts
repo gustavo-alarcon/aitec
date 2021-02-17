@@ -6,6 +6,7 @@ export interface Category {
   idSubCategory: string;
   name: string;
   createdAt: Date;
+  editedAt: Date;
   completeName?: string;
   brands?: Brand[]
 }

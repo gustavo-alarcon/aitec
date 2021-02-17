@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { map, startWith, switchMap, take, takeLast, tap } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Product } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { Location } from "@angular/common";
+import { Category } from 'src/app/core/models/category.model';
 
 @Component({
   selector: 'app-create-edit-product',
@@ -36,6 +37,9 @@ export class CreateEditProductComponent implements OnInit {
   firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
   thirdFormGroup: FormGroup;
+  zoneForm: FormGroup;
+
+  existDistrict: Array<any> = []
 
   photosList: Array<any> = [];
   photos: Array<{
@@ -46,11 +50,11 @@ export class CreateEditProductComponent implements OnInit {
 
   choosePicture: number = 0
 
-  category$: Observable<string[]>
+  category$: Observable<Category[]>
   brand$: Observable<any>
   guarantee$: Observable<any>
 
-  categories: Array<string> = []
+  categories: Array<Category> = []
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
   @ViewChild('colorInput', { static: false }) colorInput: ElementRef<HTMLInputElement>;
@@ -65,8 +69,10 @@ export class CreateEditProductComponent implements OnInit {
   itemsFormArray: FormArray;
   totalItems$: Observable<number>;
 
+  warehouses: Array<any> = []
+
   warehouseList: Array<any> = []
-  seriesList: Array<string> = []
+  seriesList: Array<any> = []
 
   dataSource = new MatTableDataSource();
   displayedColumns: string[] = ['warehouse', 'stock', 'serie', 'actions'];
@@ -109,7 +115,7 @@ export class CreateEditProductComponent implements OnInit {
     this.firstFormGroup = this.fb.group({
       description: [null, Validators.required],
       code: [null, [Validators.required], [this.nameRepeatedValidator()]],
-      category: [null, [Validators.required], [this.validateCategory()]],
+      category: [null, [Validators.required, this.autocompleteObjectValidator()]],
       priceMax: [null, [Validators.required, Validators.min(0)]],
       cost: [null, [Validators.required, Validators.min(0)]],
       priceMin: [null, [Validators.required, Validators.min(0)]]
@@ -118,8 +124,8 @@ export class CreateEditProductComponent implements OnInit {
     this.secondFormGroup = this.fb.group({
       brand: [null, Validators.required],
       model: [null, Validators.required],
-      additionalDescription: [null, Validators.required],
       weight: [null, [Validators.required, Validators.min(0)]],
+      additionalDescription: [null, Validators.required],
       colors: [null],
       noColors: [false],
       guarantee: [null, Validators.required],
@@ -135,28 +141,13 @@ export class CreateEditProductComponent implements OnInit {
 
     this.init$ = combineLatest(
       this.route.params,
-      this.dbs.getCategories(),
+      this.dbs.getAllCategories(),
       this.dbs.getWarehouses()
     ).pipe(
       switchMap(([id, categories, warehouses]) => {
-        console.log(warehouses)
-        let fil = categories.map(el => {
-          let first = [el['category']]
-          let subs = el['subcategories'].map(lo => {
-            let sub = [el['category'] + ' >> ' + lo.name]
-            if (lo.categories.length) {
-              let secs = lo.categories.map(sec => {
-                return el['category'] + ' >> ' + lo.name + ' >> ' + sec
-              })
-              return sub.concat(secs)
-            } else {
-              return sub
-            }
+        this.warehouses = warehouses
+        this.categories = categories
 
-          })
-          return first.concat(subs).reduce((a, b) => a.concat(b), [])
-        }).reduce((a, b) => a.concat(b), [])
-        this.categories = fil
         if (id.id) {
           this.edit = true
           return this.dbs.getProduct(id.id).pipe(
@@ -165,7 +156,7 @@ export class CreateEditProductComponent implements OnInit {
               this.edit = true
               this.firstFormGroup.setValue({
                 description: prod.description,
-                category: this.getCategory(prod),
+                category: prod.idCategory ? categories.find(ct => ct.id === prod.idCategory) : null,
                 priceMax: prod.priceMay,
                 cost: prod.cost,
                 code: prod.sku,
@@ -186,6 +177,7 @@ export class CreateEditProductComponent implements OnInit {
               this.secondFormGroup.get('guarantee').setValue(prod.guarantee)
               this.colorSelect = prod.colors
               this.colorCount.next(prod.colors.length)
+              this.existDistrict = prod.zones ? prod.zones : []
 
               this.photosList = prod.gallery.map((gal, g) => {
                 return {
@@ -213,30 +205,15 @@ export class CreateEditProductComponent implements OnInit {
 
     this.category$ = combineLatest(
       this.firstFormGroup.get('category').valueChanges.pipe(
+        map(el => typeof el == 'string' ? el : el ? el['completeName'] : null),
         startWith<any>('')
       ),
-      this.dbs.getCategories()
+      this.dbs.getAllCategories()
     ).pipe(
 
       map(([value, categories]) => {
 
-        let fil = categories.map(el => {
-          let first = [el['category']]
-          let subs = el['subcategories'].map(lo => {
-            let sub = [el['category'] + ' >> ' + lo.name]
-            if (lo.categories.length) {
-              let secs = lo.categories.map(sec => {
-                return el['category'] + ' >> ' + lo.name + ' >> ' + sec
-              })
-              return sub.concat(secs)
-            } else {
-              return sub
-            }
-
-          })
-          return first.concat(subs).reduce((a, b) => a.concat(b), [])
-        }).reduce((a, b) => a.concat(b), [])
-        return fil.filter(el => value ? el.toLowerCase().includes(value.toLowerCase()) : true)
+        return categories.filter(el => value ? el.completeName.toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
 
@@ -298,6 +275,12 @@ export class CreateEditProductComponent implements OnInit {
       })
     )
 
+    this.zoneForm = this.fb.group({
+      name: ['', [Validators.required], [this.repeatedValidator()]],
+      delivery: ['', [Validators.required]]
+    })
+
+
     this.skuArray = this.itemsFormArray.valueChanges.pipe(
       tap(res => {
         this.skuList = res
@@ -337,18 +320,8 @@ export class CreateEditProductComponent implements OnInit {
     return staff ? staff['name'] : undefined;
   }
 
-  getCategory(data) {
-    let cat = data.category
-    let sub = data.subcategory
-    let subsub = data.subsubcategory
-    if (subsub) {
-      return cat + ' >> ' + sub + ' >> ' + subsub
-    } else if (sub) {
-      return cat + ' >> ' + sub
-    } else {
-      return cat
-    }
-
+  showSelected(staff): string | undefined {
+    return staff ? staff['completeName'] : undefined;
   }
 
   add(event: MatChipInputEvent): void {
@@ -390,6 +363,26 @@ export class CreateEditProductComponent implements OnInit {
     this.colorInput.nativeElement.value = '';
   }
 
+  //zonas
+
+  addDistrict() {
+    let district = this.zoneForm.value
+    let min = [district]
+    let before = [...this.existDistrict]
+    this.existDistrict = min.concat(before)
+
+    this.zoneForm = this.fb.group({
+      name: ['', [Validators.required], [this.repeatedValidator()]],
+      delivery: ['', [Validators.required]]
+    })
+
+  }
+
+  removeDelivery(ind) {
+    this.existDistrict.splice(ind, 1)
+  }
+
+  //fotos
   addNewPhoto(formControlName: string, image: File[], ind) {
     if (image.length === 0) return;
     let reader = new FileReader();
@@ -438,16 +431,13 @@ export class CreateEditProductComponent implements OnInit {
       this.photos[id].data.splice(f, 1);
     } else {
       let inx = this.filterPhotos(id).filter(el => el.img.includes('data')).findIndex(el => el.img == imag.img)
-
       if (inx >= 0) {
         this.photos[id].data.splice(inx, 1);
       }
-
       this.deletePhotos.push(imag.img)
     }
 
     if (this.choosePicture >= this.photosList.length) {
-
       this.choosePicture = this.photosList.length - 1
     }
 
@@ -465,6 +455,7 @@ export class CreateEditProductComponent implements OnInit {
     return inx == this.choosePicture
   }
 
+  //validadores
   nameRepeatedValidator() {
 
     return (control: AbstractControl): Observable<{ 'nameRepeatedValidator': boolean }> => {
@@ -486,7 +477,6 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   skuRepeatedValidator(ind) {
-
     return (control: AbstractControl): Observable<{ 'skuRepeatedValidator': boolean }> => {
       const value = control.value.toUpperCase().trim();
       if (this.edit) {
@@ -511,26 +501,53 @@ export class CreateEditProductComponent implements OnInit {
     }
   }
 
-  validateCategory() {
-    return (control: AbstractControl): Observable<{ 'validateCategory': boolean }> => {
-      const value = control.value.toUpperCase().trim();
-      return of(this.categories).pipe(
-        map(res => res.find(el => el.toUpperCase() == value) ? null : { validateCategory: true }))
+  autocompleteObjectValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      if (typeof control.value === 'string') {
+        return { 'validateName': { value: control.value } }
+      }
+      return null
     }
   }
 
+  repeatedValidator() {
+    return (control: AbstractControl) => {
+      const value = control.value.toLowerCase();
+      return of(this.existDistrict).pipe(
+        map(res => {
+          return res.findIndex(el => el['name'].toLowerCase() == value) >= 0 ? { repeatedValidator: true } : null
+        }))
+    }
+  }
+
+  //guardar en almacenes
+
   addSerie() {
     let sku = this.thirdFormGroup.get('sku').value
+    let ind = this.skuList.indexOf(sku)
     if (sku) {
-      let value = this.thirdFormGroup.get('series').value
-      if (value.toLowerCase().includes(sku.toLowerCase())) {
-
-        this.seriesList.push(value)
-      } else {
-        let real = sku + value
-        this.seriesList.push(real)
+      let newSerie = {
+        sku: this.thirdFormGroup.get('sku').value,
+        serie: '',
+        color: this.colorSelect[ind]
       }
 
+      let value = this.thirdFormGroup.get('series').value
+      if (value.toLowerCase().includes(sku.toLowerCase())) {
+        newSerie.serie = value
+        let exist = this.seriesList.findIndex(sr => sr.serie == value)
+        if (exist == -1) {
+          this.seriesList.push(newSerie)
+        }
+
+      } else {
+        let real = sku + value
+        newSerie.serie = real
+        let exist = this.seriesList.findIndex(sr => sr.serie == real)
+        if (exist == -1) {
+          this.seriesList.push(newSerie)
+        }
+      }
 
       this.thirdFormGroup.get('stock').setValue(this.seriesList.length)
       this.thirdFormGroup.get('series').setValue('')
@@ -548,14 +565,14 @@ export class CreateEditProductComponent implements OnInit {
     this.thirdFormGroup.markAsPristine();
     this.thirdFormGroup.markAsUntouched();
 
-    let ind = this.warehouseList.findIndex(el => el.warehouse == this.thirdFormGroup.get('warehouse').value)
+    let ind = this.warehouseList.findIndex(el => el.warehouse.id == this.thirdFormGroup.get('warehouse').value)
     if (ind >= 0) {
 
       this.warehouseList[ind]['stock'] += this.thirdFormGroup.get('stock').value
       this.warehouseList[ind]['series'] = this.warehouseList[ind]['series'].concat(this.seriesList)
     } else {
       this.warehouseList.push({
-        warehouse: this.thirdFormGroup.get('warehouse').value,
+        warehouse: this.warehouses.find(wr => wr.id == this.thirdFormGroup.get('warehouse').value),
         stock: this.thirdFormGroup.get('stock').value,
         series: this.seriesList
       })
@@ -574,24 +591,31 @@ export class CreateEditProductComponent implements OnInit {
 
   editWarehouse(i) {
     let data = this.warehouseList[i]
-    this.thirdFormGroup.get('warehouse').setValue(data['warehouse'])
+    this.thirdFormGroup.get('warehouse').setValue(data['warehouse']['id'])
     this.thirdFormGroup.get('stock').setValue(data['stock'])
     this.seriesList = data.series
     this.warehouseList.splice(i, 1)
   }
 
   saveProduct() {
+    let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
+
+    if (!phots.length) {
+      this.snackBar.open('Agregue una imagen', 'Aceptar', { duration: 5000 });
+      return;
+    }
     this.loading.next(true)
     this.loadSave = true
-    let cat = this.firstFormGroup.get('category').value.split(' >> ')
+    let cat = this.firstFormGroup.get('category').value.completeName.split(' >> ')
     let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
 
     let newProduct: Product = {
       additionalDescription: this.secondFormGroup.get('additionalDescription').value,
-      category: cat[0],
       colors: this.colorSelect,
+      category: cat[0],
       subcategory: cat.length > 1 ? cat[1] : null,
       subsubcategory: cat.length > 2 ? cat[2] : null,
+      idCategory: this.firstFormGroup.get('category').value.id,
       brand: this.secondFormGroup.get('brand').value,
       createdAt: new Date(),
       createdBy: null,
@@ -609,18 +633,16 @@ export class CreateEditProductComponent implements OnInit {
       promo: false,
       promoData: null,
       published: true,
-      realStock: stock,
-      virtualStock: stock,
-      warehouse: this.warehouseList.map(el => el.warehouse),
       sku: this.firstFormGroup.get('code').value,
       weight: this.secondFormGroup.get('weight').value,
       model: this.secondFormGroup.get('model').value,
       guarantee: this.secondFormGroup.get('guarantee').value,
       timeguarantee: this.secondFormGroup.get('timeguarantee').value,
-      purchaseNumber: 0,
-      searchNumber: 0,
       noColor: this.secondFormGroup.get('noColors').value,
-      skuArray: this.skuList
+      realStock: stock,
+      skuArray: this.skuList,
+      warehouse: [],
+      zones: this.existDistrict
     }
 
     this.createProduct(newProduct)
@@ -661,7 +683,7 @@ export class CreateEditProductComponent implements OnInit {
             sku: this.skuList[ind],
             color: col,
             gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
-            stock: serList.filter(ser => ser.includes(this.skuList[ind])).length
+            stock: serList.filter(ser => ser.sku == this.skuList[ind]).length
           }
         })]
 
@@ -670,24 +692,36 @@ export class CreateEditProductComponent implements OnInit {
         newProduct.createdBy = user
 
         this.warehouseList.forEach(el => {
-          const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouse`).doc();
+          const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouses/${el.warehouse.id}/products`).doc(newProduct.id);
           batch.set(warehouseRef, {
-            id: warehouseRef.id,
-            idProduct: newProduct.id,
-            skuProduct: newProduct.sku,
-            warehouse: el.warehouse,
-            realStock: el.stock,
-            virtualStock: el.stock
+            id: newProduct.id,
+            description: newProduct.description,
+            createdAt: new Date(),
+            createdBy: user,
+            editedAt: new Date(),
+            editedBy: user,
+            sku: newProduct.sku,
+            weight: newProduct.weight,
+            skuArray: newProduct.colors.map((col, k) => {
+              return {
+                color: col,
+                sku: newProduct.skuArray[k]
+              }
+            })
           })
 
           el.series.forEach(lo => {
-            const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/series`).doc();
+            const serieRef = this.afs.firestore.collection(`/db/aitec/warehouses/${el.warehouse.id}/products/${newProduct.id}/series`).doc();
             batch.set(serieRef, {
               id: serieRef.id,
-              idWarehouse: warehouseRef.id,
-              idProduct: newProduct.id,
-              skuProduct: newProduct.sku,
-              serie: lo
+              createdAt: new Date(),
+              createdBy: user,
+              editedAt: new Date(),
+              editedBy: user,
+              sku: lo.sku,
+              barcode: lo.serie,
+              color: lo.color,
+              status: 'stored'
             })
           })
         })
@@ -707,8 +741,6 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   editProduct() {
-
-
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
 
     let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
@@ -719,48 +751,44 @@ export class CreateEditProductComponent implements OnInit {
     })
 
     let deleteP = this.data.gallery.filter(gal => this.deletePhotos.includes(gal.photoURL))
-
     let originP = this.data.gallery.filter(gal => !this.deletePhotos.includes(gal.photoURL))
 
-    let cat = this.firstFormGroup.get('category').value.split(' >> ')
     let newProduct = {
       additionalDescription: this.secondFormGroup.get('additionalDescription').value,
-      category: cat[0],
       colors: this.colorSelect,
-      subcategory: cat.length > 1 ? cat[1] : null,
-      subsubcategory: cat.length > 2 ? cat[2] : null,
+      idCategory: this.firstFormGroup.get('category').value.id,
       brand: this.secondFormGroup.get('brand').value,
       description: this.firstFormGroup.get('description').value,
       cost: this.firstFormGroup.get('cost').value,
       priceMin: this.firstFormGroup.get('priceMin').value,
       priceMay: this.firstFormGroup.get('priceMax').value,
-      weight: this.secondFormGroup.get('weight').value,
       sku: this.firstFormGroup.get('code').value,
+      weight: this.secondFormGroup.get('weight').value,
       model: this.secondFormGroup.get('model').value,
       guarantee: this.secondFormGroup.get('guarantee').value,
       timeguarantee: this.secondFormGroup.get('timeguarantee').value,
       gallery: originP,
-      indCover: this.choosePicture
+      indCover: this.choosePicture,
+      zones: this.existDistrict
     }
 
     let oldP = {
       additionalDescription: this.data.additionalDescription,
-      category: this.data.category,
       colors: this.data.colors,
-      subcategory: this.data.subcategory,
-      subsubcategory: this.data.subsubcategory,
+      idCategory: this.data.idCategory ? this.data.idCategory : null,
       brand: this.data.brand,
       description: this.data.description,
       cost: this.data.cost,
       priceMin: this.data.priceMin,
       priceMay: this.data.priceMay,
-      weight: this.data.weight,
       sku: this.data.sku,
+      weight: this.data.weight,
       model: this.data.model,
       guarantee: this.data.guarantee,
       timeguarantee: this.data.timeguarantee,
       gallery: this.data.gallery,
-      indCover: this.data.indCover
+      indCover: this.data.indCover,
+      zones: this.data.zones ? this.data.zones : []
     }
 
     let change = JSON.stringify(newProduct) === JSON.stringify(oldP)
@@ -840,7 +868,6 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   onKeydown(event) {
-
     let permit =
       event.keyCode === 8 ||
       event.keyCode === 46 ||

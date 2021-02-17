@@ -28,6 +28,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { NgxSummernoteModule } from 'ngx-summernote';
+import { HttpClientModule } from '@angular/common/http';
 
 import { WebRoutingModule } from './web-routing.module';
 import { WebComponent } from './web.component';
@@ -78,7 +80,9 @@ import { NewsComponent } from './news/news.component';
     MatTableModule,
     MatPaginatorModule,
     MatCardModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    NgxSummernoteModule,
+    HttpClientModule
   ],
 })
 export class WebModule { }

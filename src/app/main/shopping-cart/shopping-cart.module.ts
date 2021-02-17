@@ -34,6 +34,11 @@ import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 import { ShoppingListMobileComponent } from './shopping-list-mobile/shopping-list-mobile.component';
 import { LocationDialogComponent } from './location-dialog/location-dialog.component';
+import { PaymentComponent } from './payment/payment.component';
+
+import { HttpClientModule } from '@angular/common/http';
+import { PaymentErrorComponent } from './payment-error/payment-error.component';
+
 @NgModule({
   declarations: [
     ShoppingCartComponent,
@@ -41,6 +46,8 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
     SaleDialogComponent,
     ShoppingListMobileComponent,
     LocationDialogComponent,
+    PaymentComponent,
+    PaymentErrorComponent,
   ],
   imports: [
     CommonModule,
@@ -71,7 +78,8 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
     LazyLoadImageModule,
     MatProgressSpinnerModule,
     NgxPaginationModule,
-    MatStepperModule
+    MatStepperModule,
+    HttpClientModule
   ],
 })
 export class ShoppingCartModule { }

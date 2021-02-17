@@ -1,4 +1,9 @@
 <div class="w3-section ms-container">
+  <h2 class="title">
+    <mat-icon>corporate_fare</mat-icon>
+    Lista de almacenes
+  </h2>
+  <mat-divider></mat-divider>
   <!-- Actions -->
   <mat-card>
     <mat-card-content>
@@ -11,6 +16,7 @@
           <mat-label>Buscar</mat-label>
           <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
           <input matInput type="text" [formControl]="searchFormControl" placeholder="Escriba..." autocomplete="off" />
+          <mat-hint>La tabla se filtrará mientras escribe</mat-hint>
         </mat-form-field>
       </div>
     </mat-card-content>

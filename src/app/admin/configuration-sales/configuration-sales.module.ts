@@ -26,13 +26,14 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
 
 import { ConfigurationSalesRoutingModule } from './configuration-sales-routing.module';
 import { ConfigurationSalesComponent } from './configuration-sales.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { StoreDialogComponent } from './dialogs/store-dialog/store-dialog.component';
 import { BrandComponent } from './dialogs/brand/brand.component';
-import { CreateEditCategoriesComponent } from './dialogs/create-edit-categories/create-edit-categories.component';
 import { BrandsViewComponent } from './brands-view/brands-view.component';
 import { CuponDialogComponent } from './dialogs/cupon-dialog/cupon-dialog.component';
 import { AsesoresDialogComponent } from './dialogs/asesores-dialog/asesores-dialog.component';
@@ -42,6 +43,10 @@ import { AdvisersComponent } from './advisers/advisers.component';
 import { PaymentViewComponent } from './payment-view/payment-view.component';
 import { CouponViewComponent } from './coupon-view/coupon-view.component';
 import { CategoryDialogComponent } from './dialogs/category-dialog/category-dialog.component';
+import { ContactSaleComponent } from './contact-sale/contact-sale.component';
+import { CreateCategoryGeneralComponent } from './dialogs/create-category-general/create-category-general.component';
+import { DeleteCategoryComponent } from './dialogs/delete-category/delete-category.component';
+import { BrandsCategoryComponent } from './dialogs/brands-category/brands-category.component';
 
 @NgModule({
   declarations: [
@@ -49,7 +54,6 @@ import { CategoryDialogComponent } from './dialogs/category-dialog/category-dial
     CategoriesComponent,
     StoreDialogComponent,
     BrandComponent,
-    CreateEditCategoriesComponent,
     BrandsViewComponent,
     CuponDialogComponent,
     AsesoresDialogComponent,
@@ -58,7 +62,11 @@ import { CategoryDialogComponent } from './dialogs/category-dialog/category-dial
     AdvisersComponent,
     PaymentViewComponent,
     CouponViewComponent,
-    CategoryDialogComponent
+    CategoryDialogComponent,
+    ContactSaleComponent,
+    CreateCategoryGeneralComponent,
+    DeleteCategoryComponent,
+    BrandsCategoryComponent
   ],
   imports: [
     CommonModule,
@@ -89,7 +97,9 @@ import { CategoryDialogComponent } from './dialogs/category-dialog/category-dial
     LazyLoadImageModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatRadioModule
+    MatRadioModule,
+    MatTooltipModule,
+    MatCardModule
   ],
   providers: [
     DatePipe

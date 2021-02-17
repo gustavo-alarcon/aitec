@@ -1,16 +1,18 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, startWith, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, take, takeUntil, tap, timeout } from 'rxjs/operators';
 import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
+import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ReferralGuideDialogComponent } from '../referral-guide-dialog/referral-guide-dialog.component';
 
 @Component({
   selector: 'app-warehouse-inventory',
@@ -18,7 +20,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
   styleUrls: ['./warehouse-inventory.component.scss']
 })
 export class WarehouseInventoryComponent implements OnInit {
-  loading = new BehaviorSubject<boolean>(true);
+  loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
   //Forms
@@ -26,15 +28,14 @@ export class WarehouseInventoryComponent implements OnInit {
   itemsFilterForm: FormControl;
   promoFilterForm: FormControl;
   warehouseForm: FormControl = new FormControl('');
-  entryWarehouseControl: FormControl;
-  entryProductControl: FormControl;
-  entrySKUControl: FormControl;
-  entryScanControl: FormControl;
+  actionsForm: FormControl;
+  
+  
 
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'warehouse', 'category', 'virtualStock',
+    'index', 'photoURL', 'description', 'sku', 'category', 'virtualStock',
     'realStock', 'list', 'actions'
   ]
 
@@ -54,7 +55,7 @@ export class WarehouseInventoryComponent implements OnInit {
 
 
   //Variables
-  defaultImage = "../../../assets/images/icono-aitec-01.png";
+  defaultImage = "../../../../assets/icons/aitec-192x192.png";
 
   //noResult
   noResult$: Observable<string>;
@@ -62,99 +63,61 @@ export class WarehouseInventoryComponent implements OnInit {
 
   categorySelected: boolean = false;
 
-  view: string = "products";
-  warehouses$: Observable<Warehouse>;
-  entryProducts$: Observable<Product[]>;
+  view: string = "Existencias";
+  warehouses$: Observable<Warehouse[]>;
 
-  selectedProduct = new BehaviorSubject<any>(null);
-  selectedProduct$ = this.selectedProduct.asObservable();
-
-  seriesList: Array<any> = [];
-  entryStock: number = 0;
-
-  closeSubscriptions = new BehaviorSubject<boolean>(false);
-  closeSubscriptions$ = this.closeSubscriptions.asObservable();
+  actions: Array<string> = [
+    'Existencias',
+    'Ingresar productos',
+    'Generar guía de remisión',
+    'Ajustar inventario'
+  ]
 
   constructor(
     private fb: FormBuilder,
-    public snackBar: MatSnackBar,
+    public snackbar: MatSnackBar,
     private dbs: DatabaseService,
-    public auth: AuthService,
-    private dialog: MatDialog
+    public auth: AuthService
   ) { }
 
   ngOnInit(): void {
+
     this.initForms();
     this.initObservables();
-
-    this.entrySKUControl.valueChanges
-      .pipe(
-        takeUntil(this.closeSubscriptions$),
-        startWith(''),
-      )
-      .subscribe(res => {
-        console.log(res);
-        
-      })
-  }
-
-  ngOnDestroy(): void {
-    this.closeSubscriptions.next(true);
   }
 
   initForms() {
     this.categoryForm = this.fb.control("");
     this.itemsFilterForm = this.fb.control("");
     this.promoFilterForm = this.fb.control(false);
-    this.entryWarehouseControl = this.fb.control('');
-    this.entryProductControl = this.fb.control('');
-    this.entrySKUControl = this.fb.control('');
-    this.entryScanControl = this.fb.control('');
+    this.actionsForm = this.fb.control('Existencias');
   }
 
   initObservables() {
-    this.productsObservable$ = combineLatest(
-      this.dbs.getWarehouseListValueChanges(),
-      this.dbs.getProductsListValueChanges(),
+    this.warehouses$ =
+      this.dbs.getWarehouses()
+        // .pipe(
+        //   tap(warehouses => {
+        //     if (warehouses.length) {
+        //       this.warehouseForm.setValue(warehouses[0])
+        //     }
+        //   })
+        // )
+
+    this.productsObservable$ =
       this.warehouseForm.valueChanges.pipe(
-        startWith('Todos')
-      )).pipe(
-        map(([warehouse, products, filt]) => {
-          return warehouse.map(el => {
-            el['product'] = products.filter(li => li.id == el['idProduct'])[0]
-            return el
-          }).filter(wr => wr['product']).filter(ol => {
-            return filt != 'Todos' ? ol.warehouse == filt : true
-          })
+        startWith(''),
+        switchMap(warehouseSelected => {
+          this.loading.next(true);
+          // return of(null);
+          return this.dbs.getProductsByWarehouse(warehouseSelected)
         }),
         tap(res => {
-          this.productsTableDataSource.data = res
-          this.loading.next(false)
+          this.productsTableDataSource.data = res;
+          this.loading.next(false);
         })
       )
 
-    this.entryProducts$ = combineLatest(
-      this.dbs.getWarehouseListValueChanges(),
-      this.dbs.getProductsListValueChanges(),
-      this.entryWarehouseControl.valueChanges.pipe(startWith('')),
-      this.entryProductControl.valueChanges.pipe(startWith(''), map(product => product.product ? product.product.description : product))
-    ).pipe(
-      map(([warehouses, products, selection, product]) => {
-        return warehouses.map(warehouse => {
-          // Adding product property to warehouse object
-          warehouse['product'] = products.filter(product => product.sku == warehouse['skuProduct'])[0];
-          return warehouse
-        }).filter(ol => {
-          return selection != 'Todos' ? ol.warehouse == selection : true;
-        }).filter(el => {
-          if (el['product']) {
-            return el['product'].description.toLowerCase().includes(product.toLowerCase());
-          } else {
-            return false
-          }
-        })
-      })
-    )
   }
 
   applyFilter(event: Event) {
@@ -169,15 +132,6 @@ export class WarehouseInventoryComponent implements OnInit {
   showCategory(category: any): string | null {
     return category ? category.name : null
   }
-
-  // openDialog(row) {
-  //   this.dialog.open(ListDialogComponent, {
-  //     data: {
-  //       name: row.product.description,
-  //       id: row.id
-  //     }
-  //   })
-  // }
 
 
   downloadXls(): void {
@@ -217,55 +171,6 @@ export class WarehouseInventoryComponent implements OnInit {
 
   changeView(view): void {
     this.view = view;
-  }
-
-  showEntryProduct(product: any): string | null {
-    return product.product ? product.product.description : null;
-  }
-
-  selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value.product);
-  }
-
-  showEntrySKU(product: any): string | null {
-    return product ? product.sku + ' | ' + product.color.name : null
-  }
-
-  selectedEntrySKU(event: any): void {
-    this.entryStock = event.option.value.stock;
-    console.log(event.option.value);
-    console.log(this.entryProductControl.value);
-  }
-
-  addSerie() {
-    let sku = this.entrySKUControl.value.sku
-    console.log(sku);
-
-    if (sku) {
-      let scan = this.entryScanControl.value
-      if (scan.toLowerCase().includes(sku.toLowerCase())) {
-
-        this.seriesList.push(scan)
-      } else {
-        let real = sku + scan
-        this.seriesList.push(real)
-      }
-
-
-      this.entryStock = this.seriesList.length;
-      this.entryScanControl.setValue('')
-    } else {
-      this.snackBar.open('Por favor, elija SKU', 'Aceptar');
-    }
-  }
-
-  removeSerie(i) {
-    this.seriesList.splice(i, 1)
-    this.entryStock = this.seriesList.length;
-  }
-
-  save(): void {
-    // 
   }
 
 }

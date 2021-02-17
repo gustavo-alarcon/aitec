@@ -9,6 +9,8 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { PushService } from '../../../core/services/push.service';
 import { User } from '../../../core/models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NoLoginDialogComponent } from '../no-login-dialog/no-login-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-questions',
@@ -44,11 +46,6 @@ export class QuestionsComponent implements OnInit {
 
     this.ngOnInit();
   }
-
- 
-
-
-
   constructor(
     public questionsService:QuestionsService,
     private formbuilder:FormBuilder,
@@ -56,35 +53,32 @@ export class QuestionsComponent implements OnInit {
     public afs: AngularFirestore,     
     private pushService: PushService,
     private snackbar: MatSnackBar,
+    private dialog: MatDialog
 
     ) { 
-    
         this.questionForm = this.formbuilder.group({
           question:['',Validators.required]
         });
-    
-
   }
 
-  ngOnInit(): void {
-
-    
+  ngOnInit(): void {    
     this.questionsService.getQuestions(this.idProduct).subscribe(
       (questions:any) =>      
         {
           this.questions =  questions;
           
         }
-
-    ); 
-
-    
+    );     
   }
-  
-  get frm(){
-    
-    return this.questionForm.controls;
-    
+  login(){
+    let title='¡Hola! Para preguntar, ingresa a tu cuenta';
+    this.dialog.open(NoLoginDialogComponent, {
+      data:{title},
+      width: '300px'
+    })
+  }
+  get frm(){    
+    return this.questionForm.controls;    
   }
 
   openSnackBar(){

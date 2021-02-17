@@ -1,0 +1,79 @@
+
+.arrival{
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-top: 40px;
+}
+
+.size-item{
+  width: 300px;
+}
+
+.container-relocated{
+  border:  solid 1px #828282;
+}
+
+.grid-relocated{
+  margin: 20px;
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.item{
+  height: 30px;
+}
+
+.products{
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.grid-listProduct{
+  margin-left: 20px;
+  margin-right: 20px;
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+ .icon{
+  padding-top: 15px;
+} 
+
+.material-icons{
+  color: blue;
+  font-size: 1.7em;
+}
+
+.btn{
+  padding: 1px 30px 1px 30px;
+  font-size: 1.2em;
+}
+
+//guide referral
+.container-guide-refereral{
+
+}
+.guide-header{
+
+}
+.guide-body{
+
+}
+.guide-footer{
+  margin-left: 20px;
+  margin-right: 20px;
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr;
+}
+.send-date{
+  margin-left: 20px;
+  margin-right: 20px;
+  display: grid;
+  grid-column-gap: 1em;
+  grid-template-columns: 1fr 1fr;
+}
