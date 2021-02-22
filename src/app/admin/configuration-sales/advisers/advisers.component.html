@@ -1,65 +1,75 @@
-<div class="w3-section" *ngIf="initAdviser$ | async">
-  <div class="ms-flex ms-flex--center">
-    <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
-      <mat-icon>keyboard_return</mat-icon>
-    </button>
-    <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.5em;">
-      Asesores Virtuales
-    </h2>
-  </div>
-  <button mat-raised-button class="w3-margin-bottom" (click)="openUser(false,null)" color="primary">
-    <span>Agregar Asesor</span>
-    <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
+<div class="ms-flex ms-flex--center title-sidenav">
+  <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
+    <mat-icon>keyboard_return</mat-icon>
   </button>
-  <div *ngIf="dataAdviserSource.data.length">
+  <h2 style="font-family: Montserrat;">Asesores Virtuales</h2>
+</div>
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<mat-card>
+  <mat-card-content>
+    <div class="w3-block ms-flex ms-flex--center" style="justify-content: space-between; align-items: baseline;">
+      <button mat-flat-button class="w3-margin-bottom" (click)="openUser(false,null)" color="primary">
+        <span>Agregar</span>
+        <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
+      </button>
+
+      <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
+        <mat-label>Buscar</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
+        <input (keyup)="applyFilter($event)" matInput type="text" placeholder="Escriba..." autocomplete="off" />
+      </mat-form-field>
+
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="w3-margin-top" *ngIf="initAdviser$ | async">
+  <div style="overflow: auto">
     <table mat-table [dataSource]="dataAdviserSource" matSort style="width:100%">
       <ng-container class="w3-center" matColumnDef="index">
-        <th *matHeaderCellDef class="w3-center">Nº</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Nº</th>
         <td mat-cell *matCellDef="let element; let i = index">
-          {{
-            1 + i + adviserPaginator.pageIndex * adviserPaginator.pageSize
-          }}
+          {{ 1 + i + adviserPaginator.pageIndex * adviserPaginator.pageSize }}
         </td>
       </ng-container>
 
       <ng-container class="w3-center" matColumnDef="code">
-        <th *matHeaderCellDef class="w3-center">Código</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Código</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['code'] }}
         </td>
       </ng-container>
 
       <ng-container class="w3-center" matColumnDef="name">
-        <th *matHeaderCellDef class="w3-center">Nombres</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Nombres</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['name'] | titlecase }}
         </td>
       </ng-container>
 
       <ng-container class="w3-center" matColumnDef="lastname">
-        <th *matHeaderCellDef class="w3-center">Apellidos</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Apellidos</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['lastname'] }}
         </td>
       </ng-container>
 
       <ng-container class="w3-center" matColumnDef="email">
-        <th *matHeaderCellDef class="w3-center">Correo</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Correo</th>
         <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
           {{ element['email'] }}
 
         </td>
       </ng-container>
       <ng-container class="w3-center" matColumnDef="phone">
-        <th *matHeaderCellDef class="w3-center">Número de contacto</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Número de contacto</th>
         <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
           {{ element['phone'] }}
 
         </td>
       </ng-container>
-      
+
       <ng-container class="w3-center" matColumnDef="actions" sticky>
-        <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
+        <th mat-header-cell *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
           Acciones
         </th>
         <td mat-cell *matCellDef="let element; let ind = index" class="w3-center">
@@ -82,7 +92,8 @@
       <tr mat-header-row *matHeaderRowDef="displayedAdviserColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedAdviserColumns"></tr>
     </table>
-    <mat-paginator #adviserPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons></mat-paginator>
   </div>
-</div>
+
+  <mat-paginator #adviserPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+    showFirstLastButtons></mat-paginator>
+</mat-card>

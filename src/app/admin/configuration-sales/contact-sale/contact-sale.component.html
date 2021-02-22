@@ -1,51 +1,50 @@
-<div class="w3-section">
-  <div class="ms-flex ms-flex--center">
-    <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
-      <mat-icon>keyboard_return</mat-icon>
-    </button>
-    <h2 style="font-size:1.5em;">
-      Contacto Ventas
-    </h2>
-  </div>
-  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-  <div class="w3-section" *ngIf="init$|async">
-    <div class="w3-row-padding">
-      <div class="w3-col m6 l6">
-        <h4 style="font-size: 1em;">Número de contacto</h4>
-        <mat-form-field class="w3-block w3-small" appearance="outline">
-          <mat-label>Celular</mat-label>
-          <input autocomplete="off" [formControl]="numberForm" type="text" matInput />
-        </mat-form-field>
-        <div style="text-align: right;">
-          <button mat-flat-button color="primary" (click)="addNumber()">Agregar</button>
-        </div>
-        <div *ngFor="let num of numberList; let i=index" class="ms-flex ms-flex--center w3-section">
-          <div>{{num}}</div>
-          <div class="ms-fill"></div>
-          <mat-icon class="font--primary" style="cursor:pointer" (click)="removeNumber(i)">remove_circle</mat-icon>
-
-        </div>
-      </div>
-      <div class="w3-col m6 l6">
-        <h4 style="font-size: 1em;">Email de contacto</h4>
-        <mat-form-field class="w3-block w3-small" appearance="outline">
-          <mat-label>Email</mat-label>
-          <input autocomplete="off" [formControl]="emailForm" type="text" matInput />
-        </mat-form-field>
-        <div style="text-align: right;">
-          <button mat-flat-button color="primary" (click)="addEmail()">Agregar</button>
-        </div>
-        <div *ngFor="let num of emailList; let i=index" class="ms-flex ms-flex--center w3-section">
-          <div>{{num}}</div>
-          <div class="ms-fill"></div>
-          <mat-icon class="font--primary" style="cursor:pointer" (click)="removeEmail(i)">remove_circle</mat-icon>
-
-        </div>
-      </div>
-    </div>
-    <div style="text-align: center;">
-      <button mat-raised-button color="primary" style="min-width: 200px;" (click)="saveContact()">Guardar</button>
-    </div>
-  </div>
-
+<div class="ms-flex ms-flex--center title-sidenav">
+  <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
+    <mat-icon>keyboard_return</mat-icon>
+  </button>
+  <h2 style="font-family: Montserrat;">Contacto Ventas</h2>
 </div>
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<mat-card>
+  <mat-card-content>
+    <div *ngIf="init$|async">
+      <div class="w3-row-padding">
+        <div class="w3-col m6 l6">
+          <h4 style="font-size: 1em;">Número de contacto</h4>
+          <mat-form-field class="w3-block w3-small" appearance="outline">
+            <mat-label>Celular</mat-label>
+            <input autocomplete="off" [formControl]="numberForm" type="text" matInput />
+          </mat-form-field>
+          <div style="text-align: right;">
+            <button mat-flat-button color="primary" (click)="addNumber()">Agregar</button>
+          </div>
+          <div *ngFor="let num of numberList; let i=index" class="ms-flex ms-flex--center w3-section">
+            <div>{{num}}</div>
+            <div class="ms-fill"></div>
+            <mat-icon class="font--primary" style="cursor:pointer" (click)="removeNumber(i)">remove_circle</mat-icon>
+
+          </div>
+        </div>
+        <div class="w3-col m6 l6">
+          <h4 style="font-size: 1em;">Email de contacto</h4>
+          <mat-form-field class="w3-block w3-small" appearance="outline">
+            <mat-label>Email</mat-label>
+            <input autocomplete="off" [formControl]="emailForm" type="text" matInput />
+          </mat-form-field>
+          <div style="text-align: right;">
+            <button mat-flat-button color="primary" (click)="addEmail()">Agregar</button>
+          </div>
+          <div *ngFor="let num of emailList; let i=index" class="ms-flex ms-flex--center w3-section">
+            <div>{{num}}</div>
+            <div class="ms-fill"></div>
+            <mat-icon class="font--primary" style="cursor:pointer" (click)="removeEmail(i)">remove_circle</mat-icon>
+
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <button mat-raised-button color="primary" style="min-width: 200px;" (click)="saveContact()">Guardar</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

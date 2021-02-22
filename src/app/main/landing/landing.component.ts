@@ -67,6 +67,8 @@ export class LandingComponent implements OnInit {
   offersProducts: Array<any> = []
   offers: Array<any>
 
+  allCategories: Array<any> = []
+
   banners: Array<any> = []
 
   promo: Array<any> = []
@@ -85,10 +87,12 @@ export class LandingComponent implements OnInit {
 
     this.products$ = combineLatest(
       this.dbs.getLastProducts(),
-      this.dbs.getSearchsProducts()
+      this.dbs.getSearchsProducts(),
+      this.dbs.getAllCategoriesDoc()
     ).pipe(
 
-      map(([last, searched]) => {
+      map(([last, searched, cat]) => {
+        this.allCategories = cat
         let res = last.filter(prod => prod.published)
         this.allproducts = res
         this.listproducts = searched.map(sr => {
@@ -127,13 +131,12 @@ export class LandingComponent implements OnInit {
   }
 
   navigateBrand(banner) {
-    console.log(banner);
-
+    console.log(banner)
+   
     switch (banner['redirectTo']) {
       case 'Categoría/subcategoría':
-        console.log(banner.category.split(' >> '));
-
-        let category = banner['category'].split(' >> ')
+        let category = this.allCategories.find(ct => ct.id == banner['category']).completeName.split(' >> ')
+        console.log(category)
         switch (category.length) {
           case 1:
             this.router.navigate(['/main/productos', category[0].split(' ').join('-').toLowerCase()]);

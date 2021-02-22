@@ -58,7 +58,7 @@ export class QuantityDivComponent implements OnInit {
     };
     this.dbs.order.push(newproduct);
     this.dbs.orderObs.next(this.dbs.order);
-    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   increase(item) {
@@ -68,7 +68,7 @@ export class QuantityDivComponent implements OnInit {
 
     this.dbs.order[index]['quantity']++;
     this.dbs.orderObs.next(this.dbs.order);
-    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   decrease(item) {
@@ -77,7 +77,7 @@ export class QuantityDivComponent implements OnInit {
     );
     this.dbs.order[index]['quantity']--;
     this.dbs.orderObs.next(this.dbs.order);
-    localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
+    //localStorage.setItem(this.dbs.uidUser, JSON.stringify(this.dbs.order));
   }
 
   view(event) {

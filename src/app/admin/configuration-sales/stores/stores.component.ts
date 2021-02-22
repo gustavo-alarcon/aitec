@@ -3,7 +3,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
@@ -12,12 +12,15 @@ import { StoreDialogComponent } from '../dialogs/store-dialog/store-dialog.compo
 
 @Component({
   selector: 'app-stores',
-  templateUrl: './stores.component.html',
-  styleUrls: ['./stores.component.scss']
+  templateUrl: './stores.component.html'
 })
 export class StoresComponent implements OnInit {
+
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
+
   dataStoreSource = new MatTableDataSource();
-  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address','schedule', 'actions'];
+  displayedStoreColumns: string[] = ['index', 'departamento', 'provincia', 'distritos', 'address', 'schedule', 'actions'];
 
   @ViewChild('storePaginator', { static: false }) set content2(
     paginator1: MatPaginator
@@ -36,6 +39,7 @@ export class StoresComponent implements OnInit {
     this.initStore$ = this.dbs.getStores().pipe(
       tap((res) => {
         this.dataStoreSource.data = res;
+        this.loading.next(false)
       })
     );
   }
@@ -58,5 +62,14 @@ export class StoresComponent implements OnInit {
         image: false
       }
     })
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataStoreSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataStoreSource.paginator) {
+      this.dataStoreSource.paginator.firstPage();
+    }
   }
 }

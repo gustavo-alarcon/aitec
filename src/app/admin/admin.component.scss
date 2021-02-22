@@ -3,6 +3,16 @@
   width: 300px;
 }
 
+.main-container {
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-widht: 599px) {
+  .main-container {
+    min-height: calc(100vh - 56px);
+  }
+}
+
 .main__toolbar {
   background-image: linear-gradient(90deg, #1c31ea 0%, #270059 100%);
   color: white;
@@ -70,7 +80,6 @@
   margin-right: 15px;
 }
 
-
 .menu__title {
   font-weight: 900;
   font-size: 1.2em;
@@ -117,7 +126,6 @@
   }
 }
 
-
 @media (min-width: 602px) {
   .main__toolbar {
     padding-right: 8.333333%;
@@ -127,8 +135,7 @@
     width: 150px;
   }
 
-  .search-div{
+  .search-div {
     display: none;
   }
 }
-

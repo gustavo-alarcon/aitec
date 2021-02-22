@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
@@ -13,6 +13,9 @@ import { CuponDialogComponent } from '../dialogs/cupon-dialog/cupon-dialog.compo
   templateUrl: './coupon-view.component.html'
 })
 export class CouponViewComponent implements OnInit {
+
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
 
   dataCouponSource = new MatTableDataSource();
   displayedCouponColumns: string[] = ['index', 'name', 'discount', 'period', 'to', 'count', 'actions'];
@@ -33,6 +36,7 @@ export class CouponViewComponent implements OnInit {
     this.initCoupon$ = this.dbs.getCoupons().pipe(
       tap((res) => {
         this.dataCouponSource.data = res;
+        this.loading.next(false)
       })
     );
   }
@@ -56,6 +60,15 @@ export class CouponViewComponent implements OnInit {
         image: false
       }
     })
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataCouponSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataCouponSource.paginator) {
+      this.dataCouponSource.paginator.firstPage();
+    }
   }
 
 }

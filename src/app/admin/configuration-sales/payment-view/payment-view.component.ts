@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
@@ -10,10 +10,12 @@ import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/p
 
 @Component({
   selector: 'app-payment-view',
-  templateUrl: './payment-view.component.html',
-  styleUrls: ['./payment-view.component.scss']
+  templateUrl: './payment-view.component.html'
 })
 export class PaymentViewComponent implements OnInit {
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
+
   dataPaymentSource = new MatTableDataSource();
   displayedPaymentColumns: string[] = ['index', 'name', 'account', 'actions'];
 
@@ -34,6 +36,7 @@ export class PaymentViewComponent implements OnInit {
     this.initPay$ = this.dbs.getPaymentsChanges().pipe(
       tap((res) => {
         this.dataPaymentSource.data = res;
+        this.loading.next(false)
       })
     );
   }
@@ -58,4 +61,12 @@ export class PaymentViewComponent implements OnInit {
     })
   }
 
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataPaymentSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataPaymentSource.paginator) {
+      this.dataPaymentSource.paginator.firstPage();
+    }
+  }
 }

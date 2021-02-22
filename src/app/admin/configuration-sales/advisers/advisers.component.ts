@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
@@ -12,10 +12,12 @@ import { PaymentMethodDialogComponent } from '../dialogs/payment-method-dialog/p
 
 @Component({
   selector: 'app-advisers',
-  templateUrl: './advisers.component.html',
-  styleUrls: ['./advisers.component.scss']
+  templateUrl: './advisers.component.html'
 })
 export class AdvisersComponent implements OnInit {
+
+  loading = new BehaviorSubject<boolean>(true);
+  loading$ = this.loading.asObservable();
 
   dataAdviserSource = new MatTableDataSource();
   displayedAdviserColumns: string[] = ['index', 'code', 'name', 'lastname', 'email', 'phone', 'actions'];
@@ -37,6 +39,7 @@ export class AdvisersComponent implements OnInit {
     this.initAdviser$ = this.dbs.getAdvisers().pipe(
       tap((res) => {
         this.dataAdviserSource.data = res;
+        this.loading.next(false)
       })
     );
 
@@ -63,4 +66,12 @@ export class AdvisersComponent implements OnInit {
     })
   }
 
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataAdviserSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataAdviserSource.paginator) {
+      this.dataAdviserSource.paginator.firstPage();
+    }
+  }
 }
