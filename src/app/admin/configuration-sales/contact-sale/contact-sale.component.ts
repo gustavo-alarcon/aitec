@@ -9,8 +9,7 @@ import { LandingService } from 'src/app/core/services/landing.service';
 
 @Component({
   selector: 'app-contact-sale',
-  templateUrl: './contact-sale.component.html',
-  styleUrls: ['./contact-sale.component.scss']
+  templateUrl: './contact-sale.component.html'
 })
 export class ContactSaleComponent implements OnInit {
 

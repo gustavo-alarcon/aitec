@@ -606,15 +606,12 @@ export class CreateEditProductComponent implements OnInit {
     }
     this.loading.next(true)
     this.loadSave = true
-    let cat = this.firstFormGroup.get('category').value.completeName.split(' >> ')
+
     let stock = this.warehouseList.map(el => el.stock).reduce((a, b) => a + b, 0)
 
     let newProduct: Product = {
       additionalDescription: this.secondFormGroup.get('additionalDescription').value,
       colors: this.colorSelect,
-      category: cat[0],
-      subcategory: cat.length > 1 ? cat[1] : null,
-      subsubcategory: cat.length > 2 ? cat[2] : null,
       idCategory: this.firstFormGroup.get('category').value.id,
       brand: this.secondFormGroup.get('brand').value,
       createdAt: new Date(),
@@ -683,7 +680,9 @@ export class CreateEditProductComponent implements OnInit {
             sku: this.skuList[ind],
             color: col,
             gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
-            stock: serList.filter(ser => ser.sku == this.skuList[ind]).length
+            stock: serList.filter(ser => ser.sku == this.skuList[ind]).length,
+            realStock: serList.filter(ser => ser.sku == this.skuList[ind]).length,
+            virtualStock: serList.filter(ser => ser.sku == this.skuList[ind]).length
           }
         })]
 
@@ -769,7 +768,8 @@ export class CreateEditProductComponent implements OnInit {
       timeguarantee: this.secondFormGroup.get('timeguarantee').value,
       gallery: originP,
       indCover: this.choosePicture,
-      zones: this.existDistrict
+      zones: this.existDistrict,
+      products: []
     }
 
     let oldP = {
@@ -788,7 +788,8 @@ export class CreateEditProductComponent implements OnInit {
       timeguarantee: this.data.timeguarantee,
       gallery: this.data.gallery,
       indCover: this.data.indCover,
-      zones: this.data.zones ? this.data.zones : []
+      zones: this.data.zones ? this.data.zones : [],
+      products: []
     }
 
     let change = JSON.stringify(newProduct) === JSON.stringify(oldP)
@@ -815,10 +816,23 @@ export class CreateEditProductComponent implements OnInit {
 
             newProduct.gallery = newProduct.gallery.concat(newPhotos)
 
+            newProduct.products = [...this.colorSelect.map((col, ind) => {
+              let back = this.data.products.find(pr => pr.sku == this.skuList[ind])
+              return {
+                sku: this.skuList[ind],
+                color: col,
+                gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
+                stock: back ? back.realStock : 0,
+                realStock: back ? back.realStock : 0,
+                virtualStock: back ? back.virtualStock : 0
+              }
+            })]
+
             if (deleteP.length > 0) {
               let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
               forkJoin(phot$).subscribe(res => {
                 batch.update(productRef, newProduct)
+
 
                 batch.commit().then(() => {
                   this.loading.next(false)
@@ -828,6 +842,7 @@ export class CreateEditProductComponent implements OnInit {
                 })
               })
             } else {
+
               batch.update(productRef, newProduct)
 
               batch.commit().then(() => {
@@ -839,6 +854,18 @@ export class CreateEditProductComponent implements OnInit {
             }
           })
         } else {
+          newProduct.products = [...this.colorSelect.map((col, ind) => {
+            let back = this.data.products.find(pr => pr.sku == this.skuList[ind])
+            return {
+              sku: this.skuList[ind],
+              color: col,
+              gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
+              stock: back ? back.realStock : 0,
+              realStock: back ? back.realStock : 0,
+              virtualStock: back ? back.virtualStock : 0
+            }
+          })]
+
           if (deleteP.length > 0) {
             let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
             forkJoin(phot$).subscribe(res => {
@@ -852,6 +879,7 @@ export class CreateEditProductComponent implements OnInit {
               })
             })
           } else {
+
             batch.update(productRef, newProduct)
 
             batch.commit().then(() => {

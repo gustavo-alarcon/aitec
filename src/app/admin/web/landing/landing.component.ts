@@ -118,10 +118,10 @@ export class LandingComponent implements OnInit {
       this.category.valueChanges.pipe(
         startWith<any>(''),
       ),
-      this.dbs.getCategories()
+      this.dbs.getAllCategories()
     ).pipe(
       map(([value, categories]) => {
-        let fil = categories.map((el) => el['category']);
+        let fil = categories.filter(ct => !ct.idCategory).map((el) => el.completeName);
         this.categories = categories
         return fil.filter((el) =>
           value ? el.toLowerCase().includes(value.toLowerCase()) : true
@@ -280,9 +280,7 @@ export class LandingComponent implements OnInit {
   saveFooter() {
     this.loadingFooter.next(true);
 
-    const ref = this.afs.firestore
-      .collection(`/db/aitec/config`)
-      .doc('generalConfig');
+    const ref = this.afs.firestore.collection(`/db/aitec/config`).doc('generalConfig');
     const batch = this.afs.firestore.batch();
 
     batch.update(ref, {
@@ -352,9 +350,7 @@ export class LandingComponent implements OnInit {
 
   create() {
     this.loadingMid.next(true)
-    const ref = this.afs.firestore
-      .collection(`/db/aitec/config`)
-      .doc('generalConfig');
+    const ref = this.afs.firestore.collection(`/db/aitec/config`).doc('generalConfig');
     let productData = this.createForm.value
     let batch = this.afs.firestore.batch();
 

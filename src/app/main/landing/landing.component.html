@@ -2,9 +2,14 @@
     
     <ngx-slick-carousel #slickModal="slick-carousel" [config]="slideConfig">
       <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-        <a (click)="navigateBrand(ban)">
-          <img [src]="ban.photoURL" class="w3-block-banner" alt="" />
+        <a *ngIf="ban.redirectTo == 'Link externo';else noLink" [href]="ban.link" target="_blank">
+          <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
         </a>
+        <ng-template #noLink>
+          <a (click)="navigateBrand(ban)" style="cursor: pointer;">
+            <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
+          </a>
+        </ng-template>
       </div>   
     </ngx-slick-carousel>
 

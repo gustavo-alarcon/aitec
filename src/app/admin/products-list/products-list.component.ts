@@ -66,6 +66,7 @@ export class ProductsListComponent implements OnInit {
   categorySelected: boolean = false;
 
   categoriesList: Array<any> = []
+  all: Array<any> = []
 
   constructor(
     private fb: FormBuilder,
@@ -87,6 +88,9 @@ export class ProductsListComponent implements OnInit {
     this.promoFilterForm = this.fb.control(false);
   }
 
+  saveAll(){
+    this.dbs.saveAll(this.all)
+  }
   initObservables() {
 
     this.productsObservable$ = combineLatest(
@@ -94,6 +98,7 @@ export class ProductsListComponent implements OnInit {
       this.promoFilterForm.valueChanges.pipe(startWith(false)),
       this.dbs.getProductsListValueChanges()).pipe(
         map(([categories, promoFormValue, products]) => {
+          this.all = products
           this.categoriesList = categories
           let prods = products.map(pr => {
             pr['categoryName'] = pr.idCategory ? categories.find(ct => ct.id == pr.idCategory).completeName : ''

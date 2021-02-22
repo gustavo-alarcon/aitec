@@ -1,1 +1,43 @@
-<p>brands-category works!</p>
+<div mat-dialog-title>
+  <h2 style="font-size: 1.2em; font-family: Montserrat; font-weight: 900">
+    Marcas - Categoría {{data.name}}
+  </h2>
+  <mat-divider></mat-divider>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+</div>
+<mat-dialog-content style="width: 400px; max-width: 85vw">
+  <mat-form-field style="margin-bottom: 8px; display: block" appearance="outline">
+    <mat-label>Marcas</mat-label>
+    <input autocomplete="off" [formControl]="brandForm" [matAutocomplete]="brandAutocomplete" type="text" matInput />
+    <mat-autocomplete autoActiveFirstOption [displayWith]="showBrand" #brandAutocomplete="matAutocomplete">
+      <mat-option *ngFor="let brand of brand$ | async" [value]="brand" (click)="addBrand(brand)"
+        (onSelectionChange)="addBrand(brand)">
+        {{ brand['name'] }}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-hint> Presione ENTER para agregar </mat-hint>
+  </mat-form-field>
+  <div class="w3-section">
+    <ng-container *ngFor="let item of selectBrand">
+      <div class="w3-border-bottom w3-border-lightgray w3-padding" style="display: flex; align-items: center">
+        <span>{{ item["name"] }}</span>
+        <button mat-icon-button (click)="removeProduct(item)" type="button">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+  <div *ngIf="!selectBrand.length" class="w3-center">
+    <p style="font-size: 14px">Agregue una marca a la lista</p>
+  </div>
+  <mat-divider></mat-divider>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button class="w3-margin-right" mat-dialog-close>
+    Cancelar
+  </button>
+  <button mat-raised-button color="primary" (click)="onSubmitForm()" type="button">
+    Guardar
+  </button>
+</mat-dialog-actions>

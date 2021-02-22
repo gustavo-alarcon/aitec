@@ -5,9 +5,6 @@ export interface Product {
   id: string;
   description: string;
   additionalDescription: string;
-  category: string;
-  subcategory?: string;
-  subsubcategory?: string;
   idCategory?: string;
   guarantee: boolean;
   timeguarantee: number;

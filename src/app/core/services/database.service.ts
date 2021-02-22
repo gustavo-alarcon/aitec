@@ -113,14 +113,19 @@ export class DatabaseService {
       );
   }
 
-  saveAll(products) {
+  saveAll(products:Product[]) {
     const batch = this.afs.firestore.batch();
 
     products.forEach(el => {
       let productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(el.id);
 
+      let prods = el.products.map(pr=>{
+        pr.realStock = pr.stock
+        pr.virtualStock = pr.stock
+        return pr
+      })
       batch.update(productRef, {
-        idCategory: el.idCategory
+        products: prods
       });
 
     })
@@ -130,6 +135,27 @@ export class DatabaseService {
 
     })
   }
+
+  saveCategoriesAll(products: Category[]) {
+    const batch = this.afs.firestore.batch();
+    
+    products.forEach(el => {
+      let productRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc(el.id);
+
+      batch.update(productRef, {
+        name: el.name.trim(),
+        completeName: el.completeName.trim()
+      });
+
+    })
+
+    batch.commit().then(() => {
+      console.log('all');
+
+    })
+  }
+
+
 
   saveWarehouses(products, name) {
     const batch = this.afs.firestore.batch();
@@ -257,6 +283,18 @@ export class DatabaseService {
     ).valueChanges().pipe(shareReplay(1));
   }
 
+  getSubCategories(id): Observable<Category[]> {
+    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+      ref.where('idCategory', '==', id)
+    ).valueChanges().pipe(shareReplay(1));
+  }
+
+  getSubSubCategories(id): Observable<Category[]> {
+    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+      ref.where('idSubCategory', '==', id)
+    ).valueChanges().pipe(shareReplay(1));
+  }
+
   getAllCategoriesDoc(): Observable<Category[]> {
     return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`
       , (ref) => ref.orderBy('createdAt', 'desc')).get().pipe(
@@ -275,6 +313,13 @@ export class DatabaseService {
         return snap[0]
       })
     );
+  }
+
+  getListProductsByCategory(list): Observable<Product[]> {
+    return this.afs.collection<Product>(this.productsListRef).valueChanges().pipe
+      (map((products) => {
+        return products.filter(pr => list.includes(pr.idCategory))
+      }));
   }
 
   getBrands() {
@@ -1062,6 +1107,50 @@ export class DatabaseService {
 
   }
 
+  sendEmail(newSale){
+    const batch = this.afs.firestore.batch()
+    const emailRef = this.afs.firestore.collection(`/mail`).doc();
+
+    let newOrder = [...this.order].map(ord => {
+      ord['subtotal'] = ord.price * ord.quantity
+      return ord
+    })
+
+    let mess = {
+      order: newOrder,
+      correlative: '#R',
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
+      payment: newSale.payType.name,/*metodo de pago*/
+      document: newSale.document,/*boleta/facturacion*/
+      boleta: newSale.idDocument == 1,
+      factura: newSale.idDocument == 2,
+      info: newSale.documentInfo,/*document info*/
+      subtotal: (newSale.total * 0.82).toFixed(2),
+      igv: (newSale.total * 0.18).toFixed(2),
+      envio: newSale.deliveryPrice.toFixed(2),
+      total: newSale.total.toFixed(2),
+      asesor: newSale.adviser,
+      deliveryType: newSale.deliveryType,
+      location: newSale.deliveryInfo,
+      isDelivery: newSale.idDelivery == 1,
+      isStore: newSale.idDelivery == 2,
+      store: newSale.deliveryInfo
+    }
+
+    let message = {
+      to: ['mocharan@meraki-s.com'],
+      template: {
+        name: 'pedidoUser',
+        data: mess
+      }
+    }
+
+    batch.set(emailRef, message);
+    batch.commit().then(()=>{
+      console.log('save')
+    })
+
+  }
   saveSale(user: User, newSale, phot?: any) {
     console.log('here');
 

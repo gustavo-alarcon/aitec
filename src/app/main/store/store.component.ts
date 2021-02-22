@@ -164,7 +164,7 @@ export class StoreComponent implements OnInit {
           if (typeof el.brand == 'string') {
             return el.brand.toLowerCase().trim().includes(brand)
           } else {
-            el.brand.name.toLowerCase().trim().includes(brand)
+            return el.brand.name.toLowerCase().trim().includes(brand)
           }
         })
         break;

@@ -1,62 +1,74 @@
-<div class="w3-section" *ngIf="initCoupon$ | async">
-  <div class="ms-flex ms-flex--center">
-    <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
-      <mat-icon>keyboard_return</mat-icon>
-    </button>
-    <h2 style="font-size:1.5em;">
-      Cupones
-    </h2>
-  </div>
-  <button mat-raised-button class="w3-margin-bottom" (click)="openCupon(false,null)" color="primary">
-    <span>Agregar Cupón</span>
-    <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
+<div class="ms-flex ms-flex--center title-sidenav">
+  <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
+    <mat-icon>keyboard_return</mat-icon>
   </button>
-  <div *ngIf="dataCouponSource.data.length">
+  <h2 style="font-family: Montserrat;">Cupones</h2>
+</div>
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<mat-card>
+  <mat-card-content>
+    <div class="w3-block ms-flex ms-flex--center" style="justify-content: space-between; align-items: baseline;">
+      <button mat-flat-button class="w3-margin-bottom" (click)="openCupon(false,null)" color="primary">
+        <span>Agregar</span>
+        <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
+      </button>
+
+      <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
+        <mat-label>Buscar</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
+        <input (keyup)="applyFilter($event)" matInput type="text" placeholder="Escriba..." autocomplete="off" />
+      </mat-form-field>
+
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="w3-margin-top" *ngIf="initCoupon$ | async">
+  <div style="overflow: auto">
     <table mat-table [dataSource]="dataCouponSource" matSort style="width:100%">
       <ng-container class="w3-center" matColumnDef="index">
-        <th *matHeaderCellDef class="w3-center">Nº</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Nº</th>
         <td mat-cell *matCellDef="let element; let i = index">
-          {{
-            1 + i + couponPaginator.pageIndex * couponPaginator.pageSize
-          }}
+          {{1 + i + couponPaginator.pageIndex * couponPaginator.pageSize}}
         </td>
       </ng-container>
-
+  
       <ng-container class="w3-center" matColumnDef="name">
-        <th *matHeaderCellDef class="w3-center">Cupón</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Cupón</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['name']}}
         </td>
       </ng-container>
-
+  
       <ng-container class="w3-center" matColumnDef="discount">
-        <th *matHeaderCellDef class="w3-center">Descuento</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Descuento</th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
-          <span *ngIf="element['type']==1">S/ .</span> {{ element['discount'] }} <span *ngIf="element['type']==2"> %</span>
+          <span *ngIf="element['type']==1">S/ .</span> {{ element['discount'] }} <span *ngIf="element['type']==2">
+            %</span>
         </td>
       </ng-container>
-
+  
       <ng-container class="w3-center" matColumnDef="period">
-        <th *matHeaderCellDef class="w3-center">Fecha/Periodo de validez</th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Fecha/Periodo de validez</th>
         <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
-         <span *ngIf="element['startDate'];else noDate"> {{element['startDate'].toMillis() | date: "d/MM/yy"}} - {{element['endDate'].toMillis() | date: "d/MM/yy"}}</span>
+          <span *ngIf="element['startDate'];else noDate"> {{element['startDate'].toMillis() | date: "d/MM/yy"}} -
+            {{element['endDate'].toMillis() | date: "d/MM/yy"}}</span>
           <ng-template #noDate>Sin límite</ng-template>
         </td>
       </ng-container>
       <ng-container class="w3-center" matColumnDef="to">
-        <th *matHeaderCellDef class="w3-center">Descuento en: </th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Descuento en: </th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['redirectTo'] }}
         </td>
       </ng-container>
       <ng-container class="w3-center" matColumnDef="count">
-        <th *matHeaderCellDef class="w3-center">Usados </th>
+        <th mat-header-cell *matHeaderCellDef class="w3-center">Usados </th>
         <td mat-cell *matCellDef="let element" class="w3-center" style="padding: 0px 10px">
           {{ element['count'] }}
         </td>
       </ng-container>
       <ng-container class="w3-center" matColumnDef="actions" sticky>
-        <th *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
+        <th mat-header-cell *matHeaderCellDef style="padding-left: 0.5em" class="w3-center">
           Acciones
         </th>
         <td mat-cell *matCellDef="let element; let ind = index" class="w3-center">
@@ -69,7 +81,7 @@
                 <mat-icon>delete</mat-icon> Borrar
               </button>
             </mat-menu>
-
+  
             <button mat-icon-button [matMenuTriggerFor]="rawMenu">
               <mat-icon>more_vert</mat-icon>
             </button>
@@ -79,7 +91,8 @@
       <tr mat-header-row *matHeaderRowDef="displayedCouponColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedCouponColumns"></tr>
     </table>
-    <mat-paginator #couponPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
-      showFirstLastButtons></mat-paginator>
   </div>
-</div>
+  
+  <mat-paginator #couponPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+    showFirstLastButtons></mat-paginator>
+</mat-card>
