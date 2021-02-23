@@ -18,7 +18,6 @@ export class WarehouseProductsEntryComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
-  warehouseForm: FormControl;
   entryInvoiceControl: FormControl;
   entryWaybillControl: FormControl;
   entryWarehouseControl: FormControl;
@@ -34,9 +33,6 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   serialList: Array<any> = [];
   entryStock: number = 0;
-
-  closeSubscriptions = new BehaviorSubject<boolean>(false);
-  closeSubscriptions$ = this.closeSubscriptions.asObservable();
 
   scanValidation = new BehaviorSubject<boolean>(false);
   scanValidation$ = this.scanValidation.asObservable();
@@ -62,7 +58,6 @@ export class WarehouseProductsEntryComponent implements OnInit {
   initForms() {
     this.entryInvoiceControl = this.fb.control('');
     this.entryWaybillControl = this.fb.control('');
-    this.warehouseForm = this.fb.control('');
     this.entryWarehouseControl = this.fb.control('', Validators.required);
     this.entryProductControl = this.fb.control('', Validators.required);
     this.entryScanControl = this.fb.control('');
@@ -70,14 +65,7 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   initObservables() {
     this.warehouses$ =
-      this.dbs.getWarehouses()
-        // .pipe(
-        //   tap(warehouses => {
-        //     if (warehouses.length) {
-        //       this.warehouseForm.setValue(warehouses[0])
-        //     }
-        //   })
-        // )
+      this.dbs.getWarehouses();
 
     this.entryProducts$ = combineLatest(
       this.entryWarehouseControl.valueChanges
@@ -158,8 +146,6 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   selectedEntrySKU(event: any): void {
     this.entryStock = event.option.value.stock;
-    console.log(event.option.value);
-    console.log(this.entryProductControl.value);
   }
 
   addSerie() {
