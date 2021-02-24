@@ -33,7 +33,7 @@ import { Waybill, WaybillProductList } from '../models/waybill.model';
   providedIn: 'root',
 })
 export class DatabaseService {
-  public version: string = 'V0.0.4r';
+  public version: string = 'V0.0.5r';
   public isOpen: boolean = false;
   public isAdmin: boolean = false;
 
