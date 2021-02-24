@@ -6,10 +6,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Category } from 'src/app/core/models/category.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { DeleteConfiDialogComponent } from '../../delete-confi-dialog/delete-confi-dialog.component';
 import { CategoryDialogComponent } from '../dialogs/category-dialog/category-dialog.component';
 import { CreateCategoryGeneralComponent } from '../dialogs/create-category-general/create-category-general.component';
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { BrandsCategoryComponent } from '../dialogs/brands-category/brands-category.component';
+import { DeleteCategoryComponent } from '../dialogs/delete-category/delete-category.component';
 
 @Component({
   selector: 'app-categories',
@@ -48,7 +49,7 @@ export class CategoriesComponent implements OnInit {
   ngOnInit(): void {
     this.init$ = this.dbs.getAllCategories().pipe(
       map((categories) => {
-
+        this.categories = categories
         let onlyCategory = categories.filter(ct => !ct.idCategory)
         return onlyCategory.map(ct => {
           let subcategories = categories.filter(ct => !ct.idSubCategory).filter(sb => sb.idCategory == ct.id).map(sub => {
@@ -72,10 +73,6 @@ export class CategoriesComponent implements OnInit {
           ct.id = ind + 1
           return ct
         })
-        /*
-        res.forEach(el => {
-          this.panelOpenState.push(false);
-        })*/
       })
     )
 
@@ -100,13 +97,17 @@ export class CategoriesComponent implements OnInit {
     })
   }
 
-  deleteDialog(id: string) {
-    this.dialog.open(DeleteConfiDialogComponent, {
+  openBrandDialog(category) {
+    this.dialog.open(BrandsCategoryComponent, {
+      data: category
+    })
+  }
+
+  deleteDialog(type, category) {
+    this.dialog.open(DeleteCategoryComponent, {
       data: {
-        id: id,
-        title: 'Categoría',
-        type: 'categories',
-        image: false
+        type: type,
+        data: category
       }
     })
   }
@@ -119,4 +120,5 @@ export class CategoriesComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   }
+
 }

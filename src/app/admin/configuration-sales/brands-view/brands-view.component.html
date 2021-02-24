@@ -1,32 +1,73 @@
-<div class="w3-section">
-  <div class="ms-flex ms-flex--center">
-    <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
-      <mat-icon>keyboard_return</mat-icon>
-    </button>
-    <h2 style="font-size:1.5em;">
-      Marcas
-    </h2>
-  </div>
-  <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
-  <button mat-raised-button (click)="openDialog(false,null)" color="primary">
-    <span>Agregar</span>
-    <mat-icon style="vertical-align: middle;margin-left: 5px;">add</mat-icon>
+<div class="ms-flex ms-flex--center title-sidenav">
+  <button mat-icon-button (click)="dbs.changeOpenSide()" class="w3-margin-right">
+    <mat-icon>keyboard_return</mat-icon>
   </button>
-  <div class="w3-margin-top ms-flex w3-margin-bottom" *ngIf="init$|async as carousel">
-    <div *ngFor="let image of carousel" class="banner__category">
-      <img [defaultImage]="defaultImage" [lazyLoad]="image.photoURL" [offset]="100" class="banner__image">
-      <div><strong>{{image.name | titlecase}}</strong></div>
-      <div class="ms-flex w3-margin-top">
-        <span class="ms-fill"></span>
-        <div>
-          <button mat-icon-button color="primary" (click)="openDialog(true,image)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="primary" (click)="deleteDialog(image)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <h2 style="font-family: Montserrat;">Marcas</h2>
 </div>
+<mat-progress-bar mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+<mat-card>
+  <mat-card-content>
+    <div class="w3-block ms-flex ms-flex--center" style="justify-content: space-between; align-items: baseline;">
+      <button mat-flat-button class="w3-margin-bottom" (click)="openDialog(false,null)" color="primary">
+        <span>Agregar</span>
+        <mat-icon style="vertical-align: middle; margin-left: 5px">add</mat-icon>
+      </button>
+
+      <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
+        <mat-label>Buscar</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">search</mat-icon>
+        <input (keyup)="applyFilter($event)" matInput type="text" placeholder="Escriba..." autocomplete="off" />
+      </mat-form-field>
+
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="w3-margin-top" *ngIf="init$ | async">
+  <table mat-table [dataSource]="dataSource" matSort style="width:100%">
+    <ng-container class="w3-center" matColumnDef="index">
+      <th mat-header-cell *matHeaderCellDef class="w3-center">Nº</th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        {{ 1 + i + brandPaginator.pageIndex * brandPaginator.pageSize}}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="photo">
+      <th mat-header-cell *matHeaderCellDef class="w3-center">
+        Imagen
+      </th>
+      <td mat-cell *matCellDef="let raw" class="w3-center">
+        <img *ngIf="raw.photoURL; else defaultPicture" [defaultImage]="defaultImage" [lazyLoad]="raw.photoURL"
+          [offset]="100" style="object-fit: contain; width: 90px; height: 90px" />
+        <ng-template #defaultPicture>
+          <div style="height: 120px; padding: 6px 6px">
+            <img src="../../../assets/images/no-image.png" style="max-width: 100%; height: 100%" />
+          </div>
+        </ng-template>
+      </td>
+    </ng-container>
+    <ng-container class="w3-center" matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef class="w3-center">Nombre</th>
+      <td mat-cell *matCellDef="let element" style="padding: 0px 10px">
+        {{ element['name']}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef> Acciones </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-button style="margin-right: 5px;" (click)="openDialog(true,row)" mat-icon-button>
+          <mat-icon>edit</mat-icon>
+        </mat-button>
+        <mat-button mat-icon-button (click)="deleteDialog(row)">
+          <mat-icon>delete</mat-icon>
+        </mat-button>
+      </td>
+    </ng-container>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell w3-center" colspan="4">Sin resultado de búsqueda</td>
+    </tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+  <mat-paginator #brandPaginator style="border-radius: 0px 0px 10px 10px" [pageSizeOptions]="[5, 10, 20]"
+    showFirstLastButtons></mat-paginator>
+</mat-card>

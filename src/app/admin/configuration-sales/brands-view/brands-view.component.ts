@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -9,7 +11,6 @@ import { BrandComponent } from '../dialogs/brand/brand.component';
 @Component({
   selector: 'app-brands-view',
   templateUrl: './brands-view.component.html',
-  styleUrls: ['./brands-view.component.scss'],
 })
 export class BrandsViewComponent implements OnInit {
 
@@ -20,16 +21,24 @@ export class BrandsViewComponent implements OnInit {
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
+  dataSource = new MatTableDataSource<any>();
+  displayedColumns: string[] = ['index', 'photo', 'name', 'actions']
+  @ViewChild('brandPaginator', { static: false }) set content(paginator1: MatPaginator) {
+    this.dataSource.paginator = paginator1;
+  }
+
   constructor(
-    private dialog: MatDialog, 
+    private dialog: MatDialog,
     public dbs: DatabaseService) { }
 
   ngOnInit(): void {
     this.init$ = this.dbs.getBrands().pipe(
-      tap(()=>{
+      tap(res => {
+        this.dataSource.data = res
         this.loading.next(false)
       })
     )
+
   }
 
   openDialog(movil: boolean, data) {
@@ -51,5 +60,14 @@ export class BrandsViewComponent implements OnInit {
         path: brand.photoPath
       }
     })
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 }

@@ -95,14 +95,7 @@ export class WarehouseInventoryComponent implements OnInit {
 
   initObservables() {
     this.warehouses$ =
-      this.dbs.getWarehouses()
-        // .pipe(
-        //   tap(warehouses => {
-        //     if (warehouses.length) {
-        //       this.warehouseForm.setValue(warehouses[0])
-        //     }
-        //   })
-        // )
+      this.dbs.getWarehouses();
 
     this.productsObservable$ =
       this.warehouseForm.valueChanges.pipe(

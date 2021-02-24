@@ -390,6 +390,8 @@ export class ShoppingCartComponent implements OnInit {
       console.log(newSale);
 
       let phot = this.photos.data.length ? this.photos : null
+      
+      //this.dbs.sendEmail(newSale)
       /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
         this.view.next(1)
         this.dbs.order = []
