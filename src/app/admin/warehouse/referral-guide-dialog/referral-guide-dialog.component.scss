@@ -31,11 +31,16 @@
 }
 
 .grid-listProduct {
-  margin-left: 20px;
-  margin-right: 20px;
+  border: 1px dashed lightgrey;
+  margin: 8px 20px 8px 20px;
   display: grid;
   grid-column-gap: 1em;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+
+  td {
+    align-self: center;
+    justify-self: center;
+  }
 }
 
 .icon {
@@ -52,13 +57,6 @@
   font-size: 1.2em;
 }
 
-//guide referral
-.container-guide-refereral {
-}
-.guide-header {
-}
-.guide-body {
-}
 .guide-footer {
   margin-left: 20px;
   margin-right: 20px;

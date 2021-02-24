@@ -8,9 +8,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter } from 'rxjs/operators';
 import { Warehouse } from '../../../core/models/warehouse.model';
 import { WarehouseProduct } from '../../../core/models/warehouseProduct.model';
-import { SerialItem } from '../../../core/models/SerialItem.model';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
+import { Product } from 'src/app/core/models/product.model';
+import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',
@@ -37,9 +38,10 @@ export class ReferralGuideDialogComponent implements OnInit {
 
   selectedProduct = new BehaviorSubject<any>(null);
   selectedProduct$ = this.selectedProduct.asObservable();
+  actualProduct: Product = null;
 
   serialList: Array<SerialNumber> = [];
-  arrayProducts: Array<any> = [];
+  arrayProducts: Array<WaybillProductList> = [];
   entryStock: number = 0;
 
   scanValidation = new BehaviorSubject<boolean>(false);
@@ -50,6 +52,23 @@ export class ReferralGuideDialogComponent implements OnInit {
 
   actionAddSerie = new BehaviorSubject<boolean>(false);
   actionAddSerie$ = this.actionAddSerie.asObservable();
+
+  radioOptions = {
+    "1": "Ventas",
+    "2": "Translado de establecimiento de la misma empresa",
+    "3": "Importación",
+    "4": "Venta sujeto a confirmacion del comprador",
+    "5": "Translado de bienes para transformacion",
+    "6": "Exportación",
+    "7": "Compra",
+    "8": "Recojo de bines",
+    "9": "Venta con entrega a terceros",
+    "10": "Consignación",
+    "11": "Translado por emison de itenerante de comprobante de pago",
+    "12": "Otros no incluidos en los puntos anteriores tales como exhibición, demostración, etc.",
+    "13": "Devolución",
+    "14": "Translado de zona primaria",
+  };
 
   constructor(
     public places: PlacesService,
@@ -117,19 +136,19 @@ export class ReferralGuideDialogComponent implements OnInit {
 
         this.validatingScan.next(true);
         if (warehouse && product && add) {
-          return this.dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
-            map(serials => { return !!serials.find(serial => serial.barcode === scan) ? true : false }),
-            tap(res => {
+          return this.dbs.getStoredSerialNumbers(warehouse.id, product.id).pipe(
+            map(serials => { return serials.find(serial => serial.barcode === scan) }),
+            tap(serial => {
 
-              if (res) {
-                this.addSerie();
+              if (serial) {
+                this.addSerie(serial.id);
               } else {
                 this.entryScanControl.setErrors(null)
                 this.entryScanControl.markAsTouched()
                 this.entryScanControl.setErrors({
                   repeated: true
                 });
-                this.snackbar.open(`🚨 El código escaneado no es parte de este almacén!`, 'Aceptar', {
+                this.snackbar.open(`🚨 El código escaneado no es parte de este almacén o está vendido!`, 'Aceptar', {
                   duration: 6000
                 });
               }
@@ -137,7 +156,7 @@ export class ReferralGuideDialogComponent implements OnInit {
               this.validatingScan.next(false);
               this.actionAddSerie.next(false);
 
-              return res;
+              return !!serial;
             })
           )
         } else {
@@ -154,7 +173,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.actionAddSerie.next(true);
   }
 
-  addSerie() {
+  addSerie(id: string) {
     let scan = this.entryScanControl.value.trim();
 
     // First, lets check if the scanned code is part of our inventory
@@ -173,7 +192,7 @@ export class ReferralGuideDialogComponent implements OnInit {
       } else {
 
         let data: SerialNumber = {
-          id: null,
+          id: id,
           barcode: scan,
           color: validation.product.color,
           sku: validation.product.sku,
@@ -227,105 +246,131 @@ export class ReferralGuideDialogComponent implements OnInit {
     return exist;
   }
 
-
-
-
-// AQUUIIIII ME QUEDE, AGREGANDO LA LISTA DE SERIES A LA LISTA DE PRODUCTOS
-
-  addProducts(itemProduct: WarehouseProduct) {
-
-    console.log('itemProduct: ', itemProduct)
-
-    let namesSeries = [];
-    let productsNameSeries = [];
-    let productsNamesSerials = [];
-
-    var existname: boolean = false;
-
-    this.arraySeries.forEach((i) => namesSeries.push(i.name));
-
-    this.arrayProducts.forEach((i) => productsNameSeries.push(i.series));
-
-    productsNameSeries.forEach(pd => {
-      pd.forEach(p => {
-        productsNamesSerials.push(p);
-      })
-    })
-
-    for (let i = 0; i < productsNamesSerials.length; i++) {
-      for (let j = 0; j < namesSeries.length; j++) {
-        if (productsNamesSerials[i] === namesSeries[j]) {
-          existname = true;
-          console.log('existname', existname)
-        }
-      }
-    }
-
-    if (!existname) {
-      const weight: number = 100;
-      const products: ProductsWarehouse = { code: itemProduct.sku, name: itemProduct.description, series: namesSeries, quantity: this.entryQuantitycontrol.value, und: 'unidades', weight: this.entryQuantitycontrol.value * weight };
-      this.arrayProducts.push(products);
-    } else {
-      this.snackbar.open(`🚨 El el serie agregado ya existe en la lista de productos!`, 'Aceptar', {
-        duration: 6000
-      });
-    }
-  }
-
-  deleteProduct(product: WarehouseProduct) {
-    this.arrayProducts = this.arrayProducts.filter(c => c.barcode !== product.code);
-  }
-
-  saveReferral() {
-    this.auth.user$
-      .pipe(
-        take(1)
-      )
-      .subscribe(user => {
-
-        const batch = this.afs.firestore.batch()
-        const referralRef = this.afs.firestore.collection(`/db/aitec/referralSlips`).doc();
-
-        const data = {
-          uid: referralRef.id,
-          orderCode: this.guideFormGroup.value['codigo'],
-          addressee: this.guideFormGroup.value['Addressee'],
-          DNI: this.guideFormGroup.value['dni'],
-          dateTranfer: this.guideFormGroup.get('startDate').value,
-          startingPoint: this.guideFormGroup.value['point'],
-          arrivalPoint: this.guideFormGroup.value['arrivalPoint'],
-          reasonTransfer: this.guideFormGroup.get('translate').value,
-          observations: this.guideFormGroup.value['oservations'],
-          warehouse: this.entryWarehouseControl.value,
-          productList: this.arrayProducts,
-          createdAt: new Date(),
-          createBy: user
-        }
-
-        batch.set(referralRef, data)
-
-        batch.commit()
-          .then(() => {
-            //this.dialogRef.close();
-            this.snackbar.open("guia de remision guardado", "Cerrar");
-          })
-          .catch(err => {
-            console.log(err);
-            this.snackbar.open("Ups! parece que hubo un error ...", "Cerrar");
-          })
-
-      })
-
-
-  }
-
   showEntryProduct(product: WarehouseProduct): string | null {
     return product.description ? product.description : null;
   }
 
   selectedEntryProduct(event: any): void {
     this.selectedProduct.next(event.option.value);
+    this.actualProduct = event.option.value;
   }
 
+
+
+
+  // AQUUIIIII ME QUEDE, AGREGANDO LA LISTA DE SERIES A LA LISTA DE PRODUCTOS
+  checkIfExistOnProducts(product: Product): boolean {
+    let exist = false;
+
+    this.arrayProducts.every(list => {
+      exist = list.mainCode === product.sku;
+      return !exist
+    });
+
+    return exist;
+  }
+
+
+  addProducts() {
+
+    if (this.checkIfExistOnProducts(this.actualProduct)) {
+      this.snackbar.open(`🚨 Este producto ya se encuentra en la lista de emisión!`, 'Aceptar', {
+        duration: 6000
+      });
+      return;
+    }
+
+    let data: WaybillProductList = {
+      mainCode: this.actualProduct.sku,
+      description: this.actualProduct.description,
+      invoice: this.guideFormGroup.value['orderCode'],
+      waybill: this.guideFormGroup.value['orderCode'],
+      productId: this.actualProduct.id,
+      warehouseId: this.entryWarehouseControl.value.id,
+      serialList: this.serialList,
+      quantity: this.serialList.length,
+      unit: 'unidades',
+      totalWeight: this.actualProduct.weight ? (this.actualProduct.weight * this.serialList.length) : 0
+    };
+
+    this.arrayProducts.push(data);
+    this.serialList = [];
+
+  }
+
+  deleteProduct(index: number) {
+    this.arrayProducts.splice(index, 1);
+  }
+
+  saveWaybill() {
+    if (!this.arrayProducts.length) {
+      this.snackbar.open(`🚨 La lista de productos de emisión esta vacía!`, 'Aceptar', {
+        duration: 6000
+      });
+      return
+    }
+
+    this.loading.next(true);
+
+    this.auth.user$
+      .pipe(
+        take(1)
+      )
+      .subscribe(user => {
+
+        const data: Waybill = {
+          id: '',
+          orderCode: this.guideFormGroup.value['orderCode'],
+          addressee: this.guideFormGroup.value['addressee'],
+          dni: this.guideFormGroup.value['dni'],
+          transferDate: this.guideFormGroup.value['transferDate'],
+          startingPoint: this.guideFormGroup.value['startingPoint'],
+          arrivalPoint: this.guideFormGroup.value['arrivalPoint'],
+          transferReason: this.radioOptions[this.guideFormGroup.value['transferReason']],
+          observations: this.guideFormGroup.value['observations'],
+          warehouse: this.entryWarehouseControl.value,
+          productList: this.arrayProducts,
+          createdAt: new Date(),
+          createdBy: user,
+          editedAt: null,
+          editedBy: null
+        }
+
+        this.dbs.createWaybill(data, user)
+          .pipe(
+            take(1)
+          ).subscribe(batch => {
+            batch.commit()
+              .then(() => {
+                this.snackbar.open(`☑️ Actualizando números de serie`, 'Aceptar', {
+                  duration: 6000
+                });
+
+                this.dbs.waybillSerialNumbers(this.arrayProducts, user)
+                  .then(res => {
+                    if (res) {
+                      res.pipe(
+                        take(1)
+                      ).subscribe(batch => {
+                        batch.commit()
+                          .then(() => {
+                            this.loading.next(false);
+                            this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
+                              duration: 6000
+                            });
+                          })
+                      })
+                    }
+                  })
+              })
+              .catch(err => {
+                console.log(err);
+                this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
+                  duration: 6000
+                });
+              })
+          })
+      })
+  }
 
 }

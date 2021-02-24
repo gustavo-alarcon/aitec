@@ -150,8 +150,8 @@
       </ng-template>
 
     </div>
-    <div *ngIf="serialList.length > 0" class="ms-fill">
-      <button mat-raised-button color="primary" class="btn" (click)="addProducts(product)">Agregar</button>
+    <div *ngIf="serialList.length > 0" class="w3-margin-left">
+      <button mat-raised-button color="primary" class="btn" (click)="addProducts()">Agregar</button>
     </div>
   </div>
 </div>
@@ -162,7 +162,7 @@
   <p style="font-weight: bold;">Lista de productos</p>
 
   <table class="table table-striped">
-    <thead>
+    <thead class="w3-border-bottom w3-margin-bottom">
       <tr class="grid-listProduct">
         <th>N°</th>
         <th>Código de producto</th>
@@ -170,33 +170,28 @@
         <th>N° de Serie</th>
         <th>Unidades</th>
         <th>Medida</th>
-        <th>total</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of arrayProducts; let i=index" class="grid-listProduct">
-        <td> {{i}} </td>
-        <td>{{item.code}}</td>
-        <td> {{item.name}} </td>
-        <td>{{item.series}}</td>
-        <td> {{ item.quantity }} und</td>
-        <td>{{item.und}}</td>
-        <td>{{item.weight}}</td>
+        <td> {{i + 1}} </td>
+        <td>{{item.mainCode}}</td>
+        <td> {{item.description}} </td>
+        <td><span *ngFor="let serial of item.serialList" class="w3-small">{{serial.barcode}}, </span></td>
+        <td> {{ item.quantity }}</td>
+        <td>{{item.unit}}</td>
 
-        <td> <i class="material-icons" (click)="deleteProduct(item)" style="cursor: pointer;">remove_circle</i></td>
+        <td> <i class="material-icons" (click)="deleteProduct(i)" style="cursor: pointer;">remove_circle</i></td>
       </tr>
     </tbody>
   </table>
 </div>
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
-<div *ngIf="arrayProducts.length>0">
-  <mat-dialog-actions align="center">
-    <button mat-raised-button color="primary" class="btn" [disabled]="!guideFormGroup.valid"
-      (click)="saveReferral()">Guardar</button>
-    <button mat-raised-button color="primary" class="btn" printSectionId="print-section" ngxPrint> Imprimir</button>
-  </mat-dialog-actions>
+<div *ngIf="arrayProducts.length>0" class="w3-margin-left">
+  <button mat-raised-button color="primary" class="btn w3-margin-right" (click)="saveWaybill()">Guardar</button>
+  <button mat-raised-button color="primary" class="btn" printSectionId="print-section" ngxPrint> Imprimir</button>
 </div>
 
 <div id="print-section" style="transform: scale(0.01); margin: 10px 10px 10px 30px;">
@@ -229,13 +224,13 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of arrayProducts; let i=index">
-            <td style="width:30px"> {{i}} </td>
-            <td style="width:80px">{{item.code}}</td>
-            <td style="width:200px"> {{item.name}} </td>
-            <td style="width:150px">{{item.series}}</td>
-            <td style="width:50px"> {{ item.quantity }} und</td>
-            <td style="width:50px">{{item.und}}</td>
-            <td style="width:50px">{{item.weight}}</td>
+            <td style="width:30px"> {{i + 1}} </td>
+            <td style="width:80px">{{item.mainCode}}</td>
+            <td style="width:200px"> {{item.description}} </td>
+            <td style="width:150px"><span *ngFor="let serial of item.serialList" style="font-size: 0.8rem;">{{serial.barcode}}, </span></td>
+            <td style="width:50px"> {{ item.quantity | number : '2.'}}</td>
+            <td style="width:50px">{{item.unit}}</td>
+            <td style="width:50px">---</td>
           </tr>
         </tbody>
       </table>

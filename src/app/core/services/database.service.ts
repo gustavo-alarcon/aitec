@@ -27,6 +27,7 @@ import { SerialNumber } from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
+import { Waybill, WaybillProductList } from '../models/waybill.model';
 
 @Injectable({
   providedIn: 'root',
@@ -113,13 +114,13 @@ export class DatabaseService {
       );
   }
 
-  saveAll(products:Product[]) {
+  saveAll(products: Product[]) {
     const batch = this.afs.firestore.batch();
 
     products.forEach(el => {
       let productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(el.id);
 
-      let prods = el.products.map(pr=>{
+      let prods = el.products.map(pr => {
         pr.realStock = pr.stock
         pr.virtualStock = pr.stock
         return pr
@@ -138,7 +139,7 @@ export class DatabaseService {
 
   saveCategoriesAll(products: Category[]) {
     const batch = this.afs.firestore.batch();
-    
+
     products.forEach(el => {
       let productRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc(el.id);
 
@@ -1107,7 +1108,7 @@ export class DatabaseService {
 
   }
 
-  sendEmail(newSale){
+  sendEmail(newSale) {
     const batch = this.afs.firestore.batch()
     const emailRef = this.afs.firestore.collection(`/mail`).doc();
 
@@ -1146,7 +1147,7 @@ export class DatabaseService {
     }
 
     batch.set(emailRef, message);
-    batch.commit().then(()=>{
+    batch.commit().then(() => {
       console.log('save')
     })
 
@@ -1481,6 +1482,14 @@ export class DatabaseService {
       )
   }
 
+  getStoredSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
+    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`, ref => ref.where('status', '==', 'stored'))
+      .valueChanges()
+      .pipe(
+        shareReplay(1)
+      )
+  }
+
   saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
     /**
      * IMPORTANT!
@@ -1628,6 +1637,115 @@ export class DatabaseService {
 
         })
     })
+  }
+
+  /**
+   * Creates a waybill based in the products registered
+   * @param {Waybill} products - Content of the form used to generate waybills
+   */
+  createWaybill(waybill: Waybill, user: User): Observable<firebase.default.firestore.WriteBatch> {
+    const batch = this.afs.firestore.batch();
+    const referralRef = this.afs.firestore.collection(`/db/aitec/waybills`).doc();
+
+    waybill.id = referralRef.id;
+
+    batch.set(referralRef, waybill);
+
+    return of(batch);
+  }
+
+  /**
+   * Update product's realStock and serial numbers to "sold" status
+   * Create a kardex entry
+   * @param {WaybillProductList} products - List of products registered in waybill
+   */
+  waybillSerialNumbers(products: WaybillProductList[], user: User): Promise<Observable<firebase.default.firestore.WriteBatch>> {
+    let transactionsArray = [];
+
+    products.forEach(product => {
+      // update product's realStock for every SKU
+      let productDocRef = this.afs.firestore.doc(`db/aitec/productsList/${product.productId}`);
+
+      transactionsArray.push(
+        this.afs.firestore.runTransaction(t => {
+          return t.get(productDocRef)
+            .then(doc => {
+              if (doc) {
+                let productDoc = doc.data();
+
+                // checking sku fraquency in serialList array
+                let frequencySerialList = {};
+
+                product.serialList.forEach(element => {
+                  if (frequencySerialList[element.sku]) {
+                    frequencySerialList[element.sku] = frequencySerialList[element.sku] + 1;
+                  } else {
+                    frequencySerialList[element.sku] = 1;
+                  }
+                });
+
+                // construct update data based in frequency
+                let updateData = [];
+                productDoc.products.forEach(element => {
+                  if (frequencySerialList[element.sku]) {
+                    element.realStock = element.realStock - frequencySerialList[element.sku];
+                    updateData.push(element)
+                  } else {
+                    updateData.push(element)
+                  }
+                });
+
+                // set updated data to product's reference
+                t.set(productDocRef, { products: updateData }, { merge: true });
+
+                return updateData
+              }
+            })
+        })
+      )
+    });
+
+    return Promise.all(transactionsArray)
+      .then(res => {
+        // console.log(res);
+
+        let batch = this.afs.firestore.batch();
+
+        products.forEach(product => {
+          // update product's general realStock
+          let productDocRef = this.afs.firestore.doc(`db/aitec/productsList/${product.productId}`);
+          batch.update(productDocRef, { realStock: firebase.default.firestore.FieldValue.increment(-product.serialList.length) });
+
+          // create a kardex entry
+          let kardexDocRef = this.afs.firestore.collection(`db/aitec/warehouses/${product.warehouseId}/products/${product.productId}/kardex`).doc();
+
+          let kardexData: Kardex = {
+            id: kardexDocRef.id,
+            type: '2',
+            operationType: '2',
+            invoice: product.invoice,
+            waybill: product.waybill,
+            inflow: 0,
+            outflow: product.serialList.length,
+            createdBy: user,
+            createdAt: new Date(),
+            editedBy: null,
+            editedAt: null
+          };
+
+          batch.set(kardexDocRef, kardexData);
+
+          // update serial numbers to "sold" status
+          product.serialList.forEach(serial => {
+            let serialnumberRef =
+              this.afs.firestore.doc(`db/aitec/warehouses/${product.warehouseId}/products/${product.productId}/series/${serial.id}`);
+
+            batch.update(serialnumberRef, { waybill: product.waybill, status: 'sold', editedBy: user, editedAt: new Date() });
+          });
+        })
+
+        return of(batch);
+      })
   }
 
 }

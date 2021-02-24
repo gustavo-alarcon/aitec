@@ -9,6 +9,7 @@ export interface SerialNumber {
     name: string
   };
   status: string;
+  waybill?: string;
   createdAt: Date;
   createdBy: User;
   editedAt: Date;
