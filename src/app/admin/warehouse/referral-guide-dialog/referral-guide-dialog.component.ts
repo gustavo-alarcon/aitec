@@ -20,7 +20,7 @@ import { Push } from '../../../core/models/push.model';
   styleUrls: ['./referral-guide-dialog.component.scss']
 })
 export class ReferralGuideDialogComponent implements OnInit {
-  
+  currentDate: number = Date.now();
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
   guideFormGroup: FormGroup;
@@ -234,12 +234,12 @@ export class ReferralGuideDialogComponent implements OnInit {
       }      
     }
 
-    if (!existname) {
+    if (!existname && this.arraySeries.length>0) {
       const weight:number=100;
       const products:ProductsWarehouse = {code:itemProduct.sku, name:itemProduct.description,series: namesSeries,quantity:this.entryQuantitycontrol.value,und:'unidades',weight:this.entryQuantitycontrol.value*weight};
       this.arrayProducts.push(products);      
     }else{
-      this.snackbar.open(`🚨 El el serie agregado ya existe en la lista de productos!`, 'Aceptar', {
+      this.snackbar.open(`🚨 El el serie agregado ya existe en la lista de productos o no agrego serie!`, 'Aceptar', {
         duration: 6000
         });
     }
