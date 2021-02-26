@@ -66,6 +66,8 @@ export class AppComponent {
         this.dbs.uidUser = user.uid
         if (user.customerType == 'Mayorista') {
           this.dbs.isMayUser.next(true)
+        }else{
+          this.dbs.isMayUser.next(false)
         }
         return this.push.getPermission(user)
       })

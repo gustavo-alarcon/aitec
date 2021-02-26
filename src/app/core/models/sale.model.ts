@@ -54,7 +54,7 @@ export interface Sale {
   idDelivery: number;
   deliveryType: string;
   deliveryInfo: any;
-
+  payDelivery:boolean;
   observation: string;
 
   adviser:any;

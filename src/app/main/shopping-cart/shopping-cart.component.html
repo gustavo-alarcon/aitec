@@ -198,11 +198,12 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
-              <div *ngIf="deliveryForm.value!=-2">
+              <div class="w3-margin-bottom" *ngIf="method.account">
+                <strong>{{method.account}}</strong>
+              </div>
+              <div *ngIf="deliveryForm.value!=-2 || viewDelivery == 2">
                 <div *ngIf="method.value==3">
-                  <div class="w3-margin-bottom">
-                    <strong>{{method.account}}</strong>
-                  </div>
+                  
                   <div class="w3-margin-bottom">
                     <div class="w3-margin-bottom" style="position: relative"
                       *ngFor="let image of photosList; let ind = index">
@@ -229,13 +230,14 @@
                         <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
                       </div>
                     </div>
-  
+
                     <div class="voucher" (click)="photoURL.click()">
                       Agregar foto de voucher de pago
                     </div>
                     <mat-hint>*Campo requerido</mat-hint>
-  
-                    <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%" mode="indeterminate">
+
+                    <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%"
+                      mode="indeterminate">
                     </mat-progress-bar>
                     <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
                       style="width: 100%">*comprimiendo</span>
@@ -247,7 +249,7 @@
                   <app-payment [total]="total"></app-payment>
                 </div>
               </div>
-              
+
             </div>
             <div class="w3-margin-top">
               <h4 class="delivery__title">

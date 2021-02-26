@@ -17,7 +17,7 @@ export class CuponDialogComponent implements OnInit {
 
   types: Array<any> = [{ id: 1, name: 'En soles' }, { id: 2, name: 'Porcentaje' }]
   redirects: Array<string> = ['Toda la compra', 'Categoría/subcategoría', 'Marca']
-  category$: Observable<string[]>
+  category$: Observable<any[]>
   brand$: Observable<any>
   name$: Observable<any>
   date$: Observable<any>
@@ -81,33 +81,17 @@ export class CuponDialogComponent implements OnInit {
 
     this.category$ = combineLatest(
       this.createForm.get('category').valueChanges.pipe(
+        map(el => typeof el == 'string' ? el : el ? el['completeName'] : null),
         startWith<any>('')
       ),
-      this.dbs.getCategories()
+      this.dbs.getAllCategories()
     ).pipe(
 
       map(([value, categories]) => {
-        let fil = categories.map(el => {
-          let first = [el['category']]
-          let subs = el['subcategories'].map(lo => {
-            let sub = [el['category'] + ' >> ' + lo.name]
-            if (lo.categories.length) {
-              let secs = lo.categories.map(sec => {
-                return el['category'] + ' >> ' + lo.name + ' >> ' + sec
-              })
-              return sub.concat(secs)
-            } else {
-              return sub
-            }
 
-          })
-          return first.concat(subs).reduce((a, b) => a.concat(b), [])
-        }).reduce((a, b) => a.concat(b), [])
-
-        return fil.filter(el => value ? el.toLowerCase().includes(value.toLowerCase()) : true)
+        return categories.filter(el => value ? el.completeName.toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
-
     this.brand$ = combineLatest(
       this.createForm.get('brand').valueChanges.pipe(
         startWith<any>('')
@@ -130,7 +114,10 @@ export class CuponDialogComponent implements OnInit {
     return staff ? staff['description'] : undefined;
   }
 
-
+  showCategory(staff): string | undefined {
+    return staff ? staff['completeName'] : undefined;
+  }
+  
   onSubmitForm() {
     if (this.createForm.get('limitDate').value) {
       let startDate = this.createForm.get('start').value

@@ -94,10 +94,10 @@ export class QuantityDivComponent implements OnInit {
     if (number == 0 || isNaN(number)) {
       this.dbs.order[index]['quantity'] = 1;
     } else {
-      if (number >= this.chosen['stock']) {
-        this.dbs.order[index]['quantity'] = this.chosen['stock'];
+      if (number >= this.chosen['virtualStock']) {
+        this.dbs.order[index]['quantity'] = this.chosen['virtualStock'];
         this.snackBar.open(
-          'Stock disponible del producto:' + this.chosen['stock'],
+          'Stock disponible del producto:' + this.chosen['virtualStock'],
           'Aceptar',
           {
             duration: 6000,
