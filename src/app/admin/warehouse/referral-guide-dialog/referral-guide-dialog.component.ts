@@ -19,7 +19,7 @@ import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
   styleUrls: ['./referral-guide-dialog.component.scss']
 })
 export class ReferralGuideDialogComponent implements OnInit {
-
+  currentDate: number = Date.now();
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
   guideFormGroup: FormGroup;
@@ -173,7 +173,110 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.actionAddSerie.next(true);
   }
 
-  addSerie(id: string) {
+  }
+  
+  showEntrySerial(serie: SerialItem): string | null {
+    return serie.barcode ? serie.barcode : null;
+  }
+
+  addProducts(itemProduct:WarehouseProduct){  
+
+    console.log('itemProduct: ', itemProduct)
+    
+    let namesSeries = []; 
+    let productsNameSeries=[]; 
+    let  productsNamesSerials=[];
+
+    var existname:boolean=false;
+    
+    this.arraySeries.forEach((i) => namesSeries.push(i.name));
+
+    this.arrayProducts.forEach((i) => productsNameSeries.push(i.series));
+
+   productsNameSeries.forEach(pd=>{
+     pd.forEach(p=>{       
+      productsNamesSerials.push(p);
+     })
+   })
+
+    for (let i = 0; i < productsNamesSerials.length; i++) {
+      for (let j = 0; j < namesSeries.length; j++) {
+         if (productsNamesSerials[i]===namesSeries[j]) {
+             existname=true ;         
+             console.log('existname',existname)
+          }       
+      }      
+    }
+
+    if (!existname && this.arraySeries.length>0) {
+      const weight:number=100;
+      const products:ProductsWarehouse = {code:itemProduct.sku, name:itemProduct.description,series: namesSeries,quantity:this.entryQuantitycontrol.value,und:'unidades',weight:this.entryQuantitycontrol.value*weight};
+      this.arrayProducts.push(products);      
+    }else{
+      this.snackbar.open(`🚨 El el serie agregado ya existe en la lista de productos o no agrego serie!`, 'Aceptar', {
+        duration: 6000
+        });
+    }
+  }
+  deleteProduct(product:ProductsWarehouse){
+    this.arrayProducts = this.arrayProducts.filter(c =>c.code !== product.code);
+  }
+
+  saveReferral(){
+   
+    this.auth.user$.pipe(take(1)).subscribe(user => {    
+              
+      const batch = this.afs.firestore.batch()
+      const referralRef = this.afs.firestore.collection(`/db/aitec/referralSlips`).doc();    
+
+      const data = {
+        uid: referralRef.id,
+        orderCode:this.guideFormGroup.value['codigo'],
+        addressee:this.guideFormGroup.value['Addressee'],
+        DNI:this.guideFormGroup.value['dni'],
+        dateTranfer:this.guideFormGroup.get('startDate').value,
+        startingPoint:this.guideFormGroup.value['point'],
+        arrivalPoint:this.guideFormGroup.value['arrivalPoint'],
+        reasonTransfer:this.guideFormGroup.get('translate').value,
+        observations:this.guideFormGroup.value['oservations'],
+        warehouse:this.entryWarehouseControl.value,
+        productList:this.arrayProducts,
+        createdAt:new Date(),
+        createBy:user,
+
+      }
+
+      batch.set(referralRef, data)
+
+      batch.commit()
+      .then(() => {
+        //this.dialogRef.close();
+        this.snackbar.open("guia de remision guardado", "Cerrar");
+      })
+      .catch(err => {
+        console.log(err);
+        this.snackbar.open("Ups! parece que hubo un error ...", "Cerrar");
+      })
+      
+    })
+    
+
+  }  
+
+  changeView(view): void {
+    this.view = view;
+  }
+
+  showEntryProduct(product: WarehouseProduct): string | null {
+    return product.description ? product.description : null;
+  }
+
+  selectedEntryProduct(event: any): void {
+    this.selectedProduct.next(event.option.value);
+  }
+
+
+  addSerie() {
     let scan = this.entryScanControl.value.trim();
 
     // First, lets check if the scanned code is part of our inventory
