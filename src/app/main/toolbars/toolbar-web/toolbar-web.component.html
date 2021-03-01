@@ -9,7 +9,7 @@
           autocomplete="off" [matAutocomplete]="autoProduct" class="search-form__input" (keyup.enter)="navigate()"
           style="border: none" />
         <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="showSelectedUser" [panelWidth]="450">
-          <mat-option *ngFor="let option of filteredProducts$ | async" [value]="option"
+          <mat-option *ngFor="let option of filteredProducts$ | async | slice: 0:10" [value]="option"
             (click)="navigateProduct(option)" (onSelectionChange)="navigateProduct(option)">
             <span>{{ option["description"] | titlecase }}</span>
           </mat-option>

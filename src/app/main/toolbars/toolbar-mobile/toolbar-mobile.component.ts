@@ -42,7 +42,6 @@ export class ToolbarMobileComponent implements OnInit {
 
     this.filteredProducts$ = combineLatest(
       this.searchForm.valueChanges.pipe(
-        filter((input) => input !== null),
         map((value) => typeof value == 'string' ? value : value.description)
       ),
       this.dbs.getProductsList()
@@ -54,9 +53,9 @@ export class ToolbarMobileComponent implements OnInit {
         return value.length
           ? prod.filter(
             (option) =>
-              option['description'].toLowerCase().includes(value) ||
-              option['sku'].toLowerCase().includes(value) ||
-              option['category'].toLowerCase().includes(value)
+              option['description']?.toLowerCase().includes(value) ||
+              option['sku']?.toLowerCase().includes(value) ||
+              option['category']?.toLowerCase().includes(value)
           )
           : [];
       })

@@ -52,21 +52,21 @@ export class ToolbarWebComponent implements OnInit {
 
     this.filteredProducts$ = combineLatest(
       this.searchForm.valueChanges.pipe(
-        filter((input) => input !== null),
         map((value) => typeof value == 'string' ? value : value.description)
       ),
       this.dbs.getProductsList()
     ).pipe(
 
       map(([val, products]) => {
+        
         let prod = products.filter(p => p.published)
         let value = val.toLowerCase()
         return value.length
           ? prod.filter(
             (option) =>
-              option['description'].toLowerCase().includes(value) ||
-              option['sku'].toLowerCase().includes(value) ||
-              option['category'].toLowerCase().includes(value)
+              option['description']?.toLowerCase().includes(value) ||
+              option['sku']?.toLowerCase().includes(value) ||
+              option['category']?.toLowerCase().includes(value)
           )
           : [];
       })
