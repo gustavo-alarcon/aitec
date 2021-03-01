@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PaginationInstance } from 'ngx-pagination';
+import { take } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
@@ -20,6 +21,7 @@ export class ShoppingListMobileComponent implements OnInit {
   @Input() purchase: boolean
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  mayorista:boolean = false
 
   constructor(
     private snackBar: MatSnackBar,
@@ -28,7 +30,9 @@ export class ShoppingListMobileComponent implements OnInit {
 
   ngOnInit(): void {
     this.order = this.dbs.order
-
+    this.dbs.isMayUser$.pipe(take(1)).subscribe(my=>{
+      this.mayorista = my
+    })
   }
 
 
@@ -45,7 +49,7 @@ export class ShoppingListMobileComponent implements OnInit {
 
 
   giveProductPrice(item): number {
-    if (item.product.promo) {
+    if (item.product.promo && !this.mayorista) {
       let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
       let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
       let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;

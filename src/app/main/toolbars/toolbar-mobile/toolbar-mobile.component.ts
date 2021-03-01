@@ -49,7 +49,7 @@ export class ToolbarMobileComponent implements OnInit {
 
       map(([val, products]) => {
         let prod = products.filter(p => p.published)
-        let value = val.toLowerCase()
+        let value = val ? val.toLowerCase() : ''
         return value.length
           ? prod.filter(
             (option) =>
@@ -105,7 +105,7 @@ export class ToolbarMobileComponent implements OnInit {
         queryParams: { search: name },
       });
       this.clearInput();
-      this.toggleSearch();
+      this.openedSearch = false
     }
   }
 

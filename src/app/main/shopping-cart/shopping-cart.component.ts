@@ -82,9 +82,6 @@ export class ShoppingCartComponent implements OnInit {
 
   payments: Array<any> = [];
 
-  months: Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  years: Array<number> = [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028];
-
   observation: FormControl = new FormControl('')
 
   photosList: Array<any> = [];
@@ -125,10 +122,12 @@ export class ShoppingCartComponent implements OnInit {
 
     this.products = this.dbs.order;
     this.sum$ = combineLatest(
+      this.dbs.isMayUser$,
       this.dbs.orderObs$,
       this.dbs.delivery$
     ).pipe(
-      map(([ord, del]) => {
+      map(([may, ord, del]) => {
+
         if (ord.length == 1) {
           if (ord[0].quantity == 1) {
             this.zones = ord[0].product.zones ? ord[0].product.zones : []
@@ -146,7 +145,7 @@ export class ShoppingCartComponent implements OnInit {
         }
         if (ord.length) {
           let suma = [...ord]
-            .map((el) => this.giveProductPrice(el))
+            .map((el) => this.giveProductPrice(el, may))
             .reduce((a, b) => a + b, 0);
           this.total = suma + del;
           return (suma + del).toFixed(2);
@@ -206,22 +205,14 @@ export class ShoppingCartComponent implements OnInit {
     /*Delivery*/
     this.initDelivery$ = combineLatest(
       this.dbs.getStores(),
-      this.dbs.getPaymentsChanges(),
       this.ld.getConfig()
     ).pipe(
-      map(([stores, payments, confi]) => {
+      map(([stores, confi]) => {
         if (confi['contactSale']) {
           this.contactNumbers = confi['contactSale']['numbers']
           this.contactEmails = confi['contactSale']['emails']
         }
         this.stores = stores
-        this.payments = payments.map(pay => {
-          return {
-            name: pay['name'],
-            account: pay['account'],
-            value: pay['voucher'] ? 3 : pay['name'].includes('arjeta') ? 2 : 1
-          }
-        })
         return stores
       })
     )
@@ -253,7 +244,6 @@ export class ShoppingCartComponent implements OnInit {
       this.dbs.getPaymentsChanges()
     ).pipe(
       map(([user, payments]) => {
-
         this.payments = payments.map(pay => {
           return {
             name: pay['name'],
@@ -339,8 +329,13 @@ export class ShoppingCartComponent implements OnInit {
     if (!doc) {
       this.snackbar.open('Por favor, complete la información del comprobante de pago', 'Aceptar');
     }
+
+    if (!this.method.value) {
+      this.snackbar.open('Por favor, indique el método de pago', 'Aceptar');
+    }
     let meth = true;
-    if (this.method.value == 3) {
+    let del = this.viewDelivery == 1 && this.deliveryForm.value != -2
+    if (this.method.value == 3 && del) {
       meth = this.photosList.length > 0
     }
 
@@ -371,6 +366,7 @@ export class ShoppingCartComponent implements OnInit {
         idDelivery: this.delivery,
         deliveryType: this.delivery == 1 ? 'Entrega en domicilio' : 'Recojo en tienda',
         deliveryInfo: info,
+        payDelivery: this.delivery == 1 ? this.deliveryForm.value != -2 : true,
         requestDate: null,
         createdAt: new Date(),
         createdBy: null,
@@ -390,7 +386,7 @@ export class ShoppingCartComponent implements OnInit {
       console.log(newSale);
 
       let phot = this.photos.data.length ? this.photos : null
-      
+
       //this.dbs.sendEmail(newSale)
       /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
         this.view.next(1)
@@ -414,8 +410,8 @@ export class ShoppingCartComponent implements OnInit {
 
 
 
-  giveProductPrice(item): number {
-    if (item.product.promo) {
+  giveProductPrice(item, mayorista): number {
+    if (!mayorista && item.product.promo) {
       let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
       let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
       let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
@@ -433,25 +429,7 @@ export class ShoppingCartComponent implements OnInit {
         return coupon.type == 2 ? this.total * (coupon.discount / 100) : coupon.discount
         break;
       case 'Categoría/subcategoría':
-        let ord = [...this.dbs.order].filter(orde => {
-          let cat = coupon.category.split(' >> ')
-          switch (cat.length) {
-            case 1:
-              return orde.product.category == cat[0]
-              break;
-            case 2:
-              return orde.product.category == cat[0]
-                && (orde.product.subcategory ? orde.product.subcategory == cat[1] : false)
-              break;
-            case 3:
-              return orde.product.category == cat[0]
-                && (orde.product.subcategory ? orde.product.subcategory == cat[1] : false)
-                && (orde.product.subsubcategory ? orde.product.subsubcategory == cat[2] : false)
-              break;
-            default:
-              break;
-          }
-        }).reduce((a, b) => a + b.price, 0)
+        let ord = [...this.dbs.order].filter(orde => orde.product.idCategory == coupon.category).reduce((a, b) => a + b.price, 0)
         return coupon.type == 2 ? ord * (coupon.discount / 100) : ord > coupon.discount ? coupon.discount : ord
         break;
       case 'Marca':

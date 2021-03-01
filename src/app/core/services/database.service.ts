@@ -475,7 +475,7 @@ export class DatabaseService {
   getProductsListByCategory(category: string): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
-        ref.where('category', '==', category)
+        ref.where('idCategory', '==', category)
       )
       .get()
       .pipe(

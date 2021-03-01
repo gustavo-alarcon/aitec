@@ -56,11 +56,10 @@ export class ToolbarWebComponent implements OnInit {
       ),
       this.dbs.getProductsList()
     ).pipe(
-
       map(([val, products]) => {
         
         let prod = products.filter(p => p.published)
-        let value = val.toLowerCase()
+        let value = val ? val.toLowerCase() : ''
         return value.length
           ? prod.filter(
             (option) =>

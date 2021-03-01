@@ -12,7 +12,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
   styleUrls: ['./product-detail.component.scss'],
 })
 export class ProductDetailComponent implements OnInit {
-  loading = new BehaviorSubject<boolean>(false);
+  loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
@@ -29,6 +29,7 @@ export class ProductDetailComponent implements OnInit {
   count: number = 1
 
   category$: Observable<any>;
+  category:any = null
 
   constructor(
     private dbs: DatabaseService,
@@ -43,7 +44,6 @@ export class ProductDetailComponent implements OnInit {
     this.product$ = this.route.params.pipe(
       switchMap((param) => {
         window.scroll(0, 0);
-        this.loading.next(true)
         return combineLatest(
           this.dbs.getProduct(param.id),
           this.dbs.isMayUser$
