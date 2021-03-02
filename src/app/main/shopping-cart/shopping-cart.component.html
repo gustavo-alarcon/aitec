@@ -431,8 +431,9 @@
             <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
           </div>
           <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
-            <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
-              Compra</button>
+            <button mat-raised-button (click)="finish()" color="primary" class="resume__button">
+              Finalizar Compra
+            </button>
           </div>
 
         </div>

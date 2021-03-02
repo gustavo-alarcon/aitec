@@ -1,5 +1,5 @@
 import { User } from 'src/app/core/models/user.model';
-import { Product } from './product.model';
+import { Product, unitProduct } from './product.model';
 import { Package } from './package.model';
 
 export class saleStatusOptions {
@@ -18,12 +18,15 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product | Package;
+  product: Product;
+  //Product can contain many colors, so we use
+  //chosenProduct to get the color
+  //This means, a sale can have many products with same id
+  //inside requested products, but with different colro (chosen)
   quantity: number;
-  //If "product" is a package, we will have to specify the chosen products
-  //for each field in package.items. chosenOptions will contain the
-  //chosen products in the same order as each field in package.items.
-  chosenOptions?: Product[];
+  chosenProduct: unitProduct;
+  color: boolean;
+  price: number;
 }
 
 export interface Sale {

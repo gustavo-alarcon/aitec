@@ -253,6 +253,7 @@ export class ShoppingCartComponent implements OnInit {
         })
 
         this.user = user
+        console.log(this.user)
         this.locations = user.location
 
         if (user.personData.type == 'natural') {
@@ -348,9 +349,9 @@ export class ShoppingCartComponent implements OnInit {
   finish() {
     if (this.validatedFinishButton()) {
       //this.view.next(4);
-
+      console.log(this.selectedLocation)
       let info = {
-        location: this.user.location[this.selectedLocation],
+        location: !!this.user.location ? this.user.location[this.selectedLocation] : null,
         store: this.delivery == 2 ? this.stores[this.selectedStore] : null
       }
 
@@ -387,6 +388,7 @@ export class ShoppingCartComponent implements OnInit {
 
       let phot = this.photos.data.length ? this.photos : null
 
+      this.dbs.finishPurshase(newSale);
       //this.dbs.sendEmail(newSale)
       /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
         this.view.next(1)

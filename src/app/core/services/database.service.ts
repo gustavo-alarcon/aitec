@@ -14,7 +14,7 @@ import {
   mapTo,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, forkJoin } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase';
@@ -28,6 +28,7 @@ import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
 import { Waybill, WaybillProductList } from '../models/waybill.model';
+import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 
 @Injectable({
   providedIn: 'root',
@@ -88,6 +89,7 @@ export class DatabaseService {
   }
 
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
+  productsListColl = this.afs.firestore.collection(this.productsListRef)
   packagesListRef: `db/aitec/packagesList` = `db/aitec/packagesList`;
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
@@ -1085,16 +1087,11 @@ export class DatabaseService {
 
         }).catch((error) => {
           console.log("Transaction failed: ", error);
-
-
         }));
-
-
       })
       return Promise.all(promises);
     }).then(res => {
       console.log(res);
-
       //localStorage.removeItem(this.uidUser)
       return this.saveSale(user, newSale, phot)
 
@@ -1107,6 +1104,59 @@ export class DatabaseService {
     })
 
   }
+
+  finishPurshase(newSale: Sale){
+
+    this.afs.firestore.runTransaction((transaction) => {
+      console.log("transaction executed")
+      let productArrayGet = newSale.requestedProducts.map(prod => {
+        //Should be updated if we consider packages
+        if(prod.hasOwnProperty("chosenOptions")){
+          throwError("Error eleccion de paquete")
+        }
+        return transaction.get(this.productsListColl.doc(prod.product.id))
+      })
+    
+    return Promise.all(productArrayGet).then((transArray)=> {
+      console.log("promise all executed")
+      if(transArray.some(el => !el.exists)){
+        throw "Document does not exist!"
+      }
+      setInterval(()=> {
+        console.log("Waiting 10 seconds")
+      }, 10000)
+      
+      console.log("check availability")
+      //We check availability
+      if(transArray.some(el => {
+        //product refers to producto from DB
+        let productDB: Product = <Product>(el.data())
+        
+        //el2 refers to product in newSale
+        return newSale.requestedProducts.filter(el2 => 
+          //We get the requested products (in sale) that matches
+          //the current product from DB
+          el2.product.id == productDB.id
+        ).some(el2 =>{
+          //We now check if there is at least one requested product
+          //whose color does not have enough stock
+          return productDB.products.find(prod => 
+            //We find the product corresponding to the color
+            prod.sku == el2.chosenProduct.sku
+            ).virtualStock - el2.quantity < 0
+        })
+
+      })){
+        //This happends when there is not enough stock
+        throw "Error"
+      }
+
+    })
+  }).catch(err => {
+    console.log("error: ", err)
+  })
+  }
+  
 
   sendEmail(newSale) {
     const batch = this.afs.firestore.batch()
@@ -1746,6 +1796,10 @@ export class DatabaseService {
 
         return of(batch);
       })
+  }
+
+  sell(Sale){
+
   }
 
 }

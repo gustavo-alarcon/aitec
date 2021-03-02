@@ -142,7 +142,7 @@ export class ReferralGuideDialogComponent implements OnInit {
             tap(serial => {
 
               if (serial) {
-                this.addSerie(serial.id);
+                this.addSerie();
               } else {
                 this.entryScanControl.setErrors(null)
                 this.entryScanControl.markAsTouched()
@@ -222,9 +222,9 @@ export class ReferralGuideDialogComponent implements OnInit {
 
   }  
 
-  changeView(view): void {
-    this.view = view;
-  }
+  // changeView(view): void {
+  //   this.view = view;
+  // }
 
 
   addSerie() {

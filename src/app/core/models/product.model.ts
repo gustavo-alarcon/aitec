@@ -8,12 +8,12 @@ export interface Product {
   idCategory?: string;
   guarantee: boolean;
   timeguarantee: number;
-  sku: string;
+  sku: string;                //Codigo de existencia
   cost: number;
   weight: number;
   model: string;
   brand: Brand;
-  products: Array<unitProduct>;
+  products: Array<unitProduct>;       //Diferenciados por color
   price?: number;
   priceMin: number;
   priceMay: number;
@@ -29,18 +29,19 @@ export interface Product {
   colors: Array<Color>;
   gallery: Array<Gallery>;
   indCover: number;
-  skuArray: Array<string>;
+  skuArray: Array<string>;        //SKU por unidad por mismo producto
   warehouse: Array<string>;
   questions?: number;
   realStock: number;
   zones?: Zone[]
 }
 
-interface unitProduct {
+export interface unitProduct {
+  //This SKU refers to the color code, not the SKU of the product
   sku: string;
   color: Color;
   gallery: Array<Gallery>;
-  stock?:number;
+  stock?:number;          //NO FUNCIONA
   realStock?: number;
   virtualStock?: number;
 }
