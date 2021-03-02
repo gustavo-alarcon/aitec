@@ -8,7 +8,7 @@ export class saleStatusOptions {
   confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid
   confirmedDocument = 'Comprobante Confirmado';
   // confirmedDelivery = 'Delivery Confirmado';
-  // driverAssigned = 'Conductor Asignado';
+  // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
   cancelled = 'Anulado'
 }

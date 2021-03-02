@@ -12,6 +12,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
 import { Product } from 'src/app/core/models/product.model';
 import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
+import { SerialItem } from 'src/app/core/models/SerialItem.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',
@@ -173,54 +174,12 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.actionAddSerie.next(true);
   }
 
-  }
+  
   
   showEntrySerial(serie: SerialItem): string | null {
     return serie.barcode ? serie.barcode : null;
   }
 
-  addProducts(itemProduct:WarehouseProduct){  
-
-    console.log('itemProduct: ', itemProduct)
-    
-    let namesSeries = []; 
-    let productsNameSeries=[]; 
-    let  productsNamesSerials=[];
-
-    var existname:boolean=false;
-    
-    this.arraySeries.forEach((i) => namesSeries.push(i.name));
-
-    this.arrayProducts.forEach((i) => productsNameSeries.push(i.series));
-
-   productsNameSeries.forEach(pd=>{
-     pd.forEach(p=>{       
-      productsNamesSerials.push(p);
-     })
-   })
-
-    for (let i = 0; i < productsNamesSerials.length; i++) {
-      for (let j = 0; j < namesSeries.length; j++) {
-         if (productsNamesSerials[i]===namesSeries[j]) {
-             existname=true ;         
-             console.log('existname',existname)
-          }       
-      }      
-    }
-
-    if (!existname && this.arraySeries.length>0) {
-      const weight:number=100;
-      const products:ProductsWarehouse = {code:itemProduct.sku, name:itemProduct.description,series: namesSeries,quantity:this.entryQuantitycontrol.value,und:'unidades',weight:this.entryQuantitycontrol.value*weight};
-      this.arrayProducts.push(products);      
-    }else{
-      this.snackbar.open(`🚨 El el serie agregado ya existe en la lista de productos o no agrego serie!`, 'Aceptar', {
-        duration: 6000
-        });
-    }
-  }
-  deleteProduct(product:ProductsWarehouse){
-    this.arrayProducts = this.arrayProducts.filter(c =>c.code !== product.code);
-  }
 
   saveReferral(){
    
@@ -265,14 +224,6 @@ export class ReferralGuideDialogComponent implements OnInit {
 
   changeView(view): void {
     this.view = view;
-  }
-
-  showEntryProduct(product: WarehouseProduct): string | null {
-    return product.description ? product.description : null;
-  }
-
-  selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value);
   }
 
 
