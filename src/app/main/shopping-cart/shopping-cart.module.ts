@@ -42,7 +42,7 @@ import { PaymentErrorComponent } from './payment-error/payment-error.component';
 @NgModule({
   declarations: [
     ShoppingCartComponent,
-    ShoppingListComponent,
+    //ShoppingListComponent,
     SaleDialogComponent,
     ShoppingListMobileComponent,
     LocationDialogComponent,

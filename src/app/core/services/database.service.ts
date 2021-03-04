@@ -2,6 +2,7 @@ import { Sale, saleStatusOptions } from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
+  AngularFirestoreDocument,
   DocumentReference,
 } from '@angular/fire/firestore';
 import { Brand, Product } from '../models/product.model';
@@ -1065,7 +1066,7 @@ export class DatabaseService {
   }
 
   /*purchase*/
-
+/*
   reduceStock(user, newSale, phot) {
     return this.afs.firestore.runTransaction((transaction) => {
       let promises = []
@@ -1103,61 +1104,20 @@ export class DatabaseService {
 
     })
 
-  }
+  }*/
 
-  finishPurshase(newSale: Sale){
+  finishPurshase(newSale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
 
-    this.afs.firestore.runTransaction((transaction) => {
-      console.log("transaction executed")
-      let productArrayGet = newSale.requestedProducts.map(prod => {
-        //Should be updated if we consider packages
-        if(prod.hasOwnProperty("chosenOptions")){
-          throwError("Error eleccion de paquete")
-        }
-        return transaction.get(this.productsListColl.doc(prod.product.id))
-      })
-    
-    return Promise.all(productArrayGet).then((transArray)=> {
-      console.log("promise all executed")
-      if(transArray.some(el => !el.exists)){
-        throw "Document does not exist!"
-      }
-      setInterval(()=> {
-        console.log("Waiting 10 seconds")
-      }, 10000)
-      
-      console.log("check availability")
-      //We check availability
-      if(transArray.some(el => {
-        //product refers to producto from DB
-        let productDB: Product = <Product>(el.data())
-        
-        //el2 refers to product in newSale
-        return newSale.requestedProducts.filter(el2 => 
-          //We get the requested products (in sale) that matches
-          //the current product from DB
-          el2.product.id == productDB.id
-        ).some(el2 =>{
-          //We now check if there is at least one requested product
-          //whose color does not have enough stock
-          return productDB.products.find(prod => 
-            //We find the product corresponding to the color
-            prod.sku == el2.chosenProduct.sku
-            ).virtualStock - el2.quantity < 0
-        })
+    const batch = this.afs.firestore.batch()
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
 
-      })){
-        //This happends when there is not enough stock
-        throw "Error"
-      }
+    newSale.id = saleRef.id
 
-    })
-  }).catch(err => {
-    console.log("error: ", err)
-  })
+    batch.set(saleRef, newSale);
+    return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
   }
   
-
+/*
   sendEmail(newSale) {
     const batch = this.afs.firestore.batch()
     const emailRef = this.afs.firestore.collection(`/mail`).doc();
@@ -1170,12 +1130,12 @@ export class DatabaseService {
     let mess = {
       order: newOrder,
       correlative: '#R',
-      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
-      payment: newSale.payType.name,/*metodo de pago*/
-      document: newSale.document,/*boleta/facturacion*/
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, //string date
+      payment: newSale.payType.name,//metodo de pago
+      document: newSale.document,//boleta/facturacion
       boleta: newSale.idDocument == 1,
       factura: newSale.idDocument == 2,
-      info: newSale.documentInfo,/*document info*/
+      info: newSale.documentInfo,//document info
       subtotal: (newSale.total * 0.82).toFixed(2),
       igv: (newSale.total * 0.18).toFixed(2),
       envio: newSale.deliveryPrice.toFixed(2),
@@ -1202,6 +1162,8 @@ export class DatabaseService {
     })
 
   }
+
+
   saveSale(user: User, newSale, phot?: any) {
     console.log('here');
 
@@ -1220,12 +1182,12 @@ export class DatabaseService {
     let mess = {
       order: newOrder,
       correlative: '#R',
-      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
-      payment: newSale.payType.name,/*metodo de pago*/
-      document: newSale.document,/*boleta/facturacion*/
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, //string date
+      payment: newSale.payType.name,//metodo de pago
+      document: newSale.document,//boleta/facturacion
       boleta: newSale.idDocument == 1,
       factura: newSale.idDocument == 2,
-      info: newSale.documentInfo,/*document info*/
+      info: newSale.documentInfo,//document info
       subtotal: (newSale.total * 0.82).toFixed(2),
       igv: (newSale.total * 0.18).toFixed(2),
       envio: newSale.deliveryPrice.toFixed(2),
@@ -1322,7 +1284,7 @@ export class DatabaseService {
     }
 
   }
-
+*/
   //products
 
   uploadPhotoProduct(id: string, file: File): Observable<string | number> {

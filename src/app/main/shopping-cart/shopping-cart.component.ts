@@ -4,9 +4,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, startWith, take, tap } from 'rxjs/operators';
-import { Sale } from 'src/app/core/models/sale.model';
+import { BehaviorSubject, combineLatest, empty, Observable } from 'rxjs';
+import { finalize, map, startWith, switchMap, take, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { Sale, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
@@ -33,6 +33,8 @@ export class ShoppingCartComponent implements OnInit {
   igv$: Observable<string>;
   delivery$: Observable<any>;
   totalAll$: Observable<string>;
+
+  uploadingSale$: BehaviorSubject<boolean> | Observable<Sale> = null;
 
   products: Array<any>;
   total: number = 0
@@ -239,10 +241,10 @@ export class ShoppingCartComponent implements OnInit {
       address: [null, Validators.required],
     });
 
-    this.initPayment$ = combineLatest(
+    this.initPayment$ = combineLatest([
       this.auth.user$,
       this.dbs.getPaymentsChanges()
-    ).pipe(
+    ]).pipe(
       map(([user, payments]) => {
         this.payments = payments.map(pay => {
           return {
@@ -348,7 +350,8 @@ export class ShoppingCartComponent implements OnInit {
 
   finish() {
     if (this.validatedFinishButton()) {
-      //this.view.next(4);
+      this.uploadingSale$ = new BehaviorSubject(true)
+
       console.log(this.selectedLocation)
       let info = {
         location: !!this.user.location ? this.user.location[this.selectedLocation] : null,
@@ -373,7 +376,7 @@ export class ShoppingCartComponent implements OnInit {
         createdBy: null,
         user: this.user,
         requestedProducts: this.dbs.order,
-        status: 'Solicitado',
+        status: 'Solicitando',
         total: this.total,
         deliveryPrice: this.delivery == 1 ? this.selectedDelivery : 0,
         observation: this.observation.value,
@@ -386,9 +389,36 @@ export class ShoppingCartComponent implements OnInit {
 
       console.log(newSale);
 
-      let phot = this.photos.data.length ? this.photos : null
+      let phot = this.photos.data.length ? this.photos : null;
 
-      this.dbs.finishPurshase(newSale);
+      let [batch, saleRef] = this.dbs.finishPurshase(newSale);
+
+      batch.commit()
+        .then(res => {
+          console.log('Writing Sale successfull')
+          this.snackbar.open("Validando Stock")
+          this.uploadingSale$ = saleRef.valueChanges().pipe(
+            takeWhile(sale => {
+              let statuses = new saleStatusOptions()
+              console.log(sale.status)
+              switch(sale.status){
+                case statuses.failed:
+                  this.snackbar.open("Error. Falta de Stock.", "Aceptar")
+                  return false;
+                case statuses.requested:
+                  this.snackbar.open("Compra registrada!", "Aceptar")
+                  return false;
+                default:
+                  return true;
+              }
+            })
+          )
+        }).catch(err => {
+          console.log('Writing Sale unsuccessfull')
+          this.snackbar.open("Error en conexión. Vuelva a intentarlo.")
+        });
+
+
       //this.dbs.sendEmail(newSale)
       /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
         this.view.next(1)

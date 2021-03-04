@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
+//Not USED?
 @Component({
   selector: 'app-shopping-list',
   templateUrl: './shopping-list.component.html',

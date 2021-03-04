@@ -20,8 +20,10 @@
         </div>
         <span class="ms-fill"></span>
         <div class="product__small w3-hide-small">
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
-            [price]="element['price']" [color]="element['color']" size="md"></app-quantity-div>
+          <app-quantity-div 
+            [product]="element['product']" [chosen]="element['chosenProduct']"
+            [price]="element['price']" [color]="element['color']" size="md">
+          </app-quantity-div>
           <p class="product__price">
             {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
           </p>

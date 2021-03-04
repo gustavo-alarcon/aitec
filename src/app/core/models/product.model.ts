@@ -26,7 +26,7 @@ export interface Product {
   editedAt: Date;
   editedBy: User;
   noColor: boolean;
-  colors: Array<Color>;
+  colors: Array<Color>;//Even if it does not have color, it will still have 1 in products
   gallery: Array<Gallery>;
   indCover: number;
   skuArray: Array<string>;        //SKU por unidad por mismo producto

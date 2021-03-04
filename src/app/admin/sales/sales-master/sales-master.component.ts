@@ -286,7 +286,7 @@ console.log(this.getCurrentMonthOfViewDate());
         (this.giveTotalPrice(sale) + sale.deliveryPrice).toFixed(2),*/
       ];
       //      'Producto', 'Cantidad', 'Precio'
-
+/*
       sale.requestedProducts.forEach(prod => {       
         // console.log(prod);
 
@@ -328,7 +328,7 @@ console.log(this.getCurrentMonthOfViewDate());
             }
           })
         }
-      })
+      })*/
     })
 
     /* generate worksheet */
