@@ -135,7 +135,7 @@
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
             <!-- ngIf si existe y si no solo aparece agregar nuevo -->
-            <ng-container *ngIf="reqProdObservable$ | async as reqProd else emptyProd">
+            <ng-container *ngIf="reqProdObservable$ | async as reqProd; else emptyProd">
               <app-quantity-div-improved 
                 [product]="selectedProduct" [price]="price" [chosen]="productSelected"
                 [color]="selectedProduct.products.length > 1" size="md">

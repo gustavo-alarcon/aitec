@@ -4,7 +4,7 @@ import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { debounceTime, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
 import { SaleRequestedProducts } from 'src/app/core/models/sale.model';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -45,6 +45,7 @@ export class WebViewComponent implements OnInit {
   };
 
   reqProdObservable$: Observable<SaleRequestedProducts>
+  verifyStock$: Observable<boolean>
 
   constructor(
     public auth: AuthService,
@@ -56,11 +57,22 @@ export class WebViewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log("init")
     this.reqProdObservable$ = this.changeColor$.pipe(
       switchMap(color => {
-        return this.ShopCar.getReqProductObservable(this.product.sku, color.sku)
+        console.log("changing color")
+        return this.ShopCar.getReqProductObservable(this.product.sku, color.sku).pipe(
+          debounceTime(100),
+          startWith(null),
+        )
       })
     )
+    // this.verifyStock$ = this.changeColor$.pipe(
+    //   switchMap(color => {
+    //     return this.ShopCar.getProductDbObservable(this.product.sku)
+    //     }
+    //   )
+    // )
   }
 
   ngOnChanges() {
@@ -73,7 +85,8 @@ export class WebViewComponent implements OnInit {
         this.productSelected = res
         this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
         this.selectImage = this.galleryImg[0]
-      })
+      }),
+      shareReplay(1)
     )
 
     this.favorite$ = this.auth.user$.pipe(

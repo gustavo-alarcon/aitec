@@ -77,31 +77,31 @@ export class ShoppingCarService {
   }
 
   //Verifying online stock. You should change this for a pipe
-  getProductDbObservable(prod: SaleRequestedProducts): Observable<Product>{
-    let found = this.productsObservables.find(el => (el.id == prod.product.id))
+  getProductDbObservable(prodId: string): Observable<Product>{
+    let found = this.productsObservables.find(el => (el.id == prodId))
       
     if(!!found){
       return found.observable
     } else {
-      let obs = this.productsListColl.doc<Product>(prod.product.id).valueChanges().pipe(shareReplay())
-      this.productsObservables.push({id: prod.product.id, observable: obs})
+      let obs = this.productsListColl.doc<Product>(prodId).valueChanges().pipe(shareReplay(1))
+      this.productsObservables.push({id: prodId, observable: obs})
       //We search again for the observable
-      return this.getProductDbObservable(prod)
+      return this.getProductDbObservable(prodId)
     }
   }
 
   //Gets product from car
   getReqProductObservable(prodSku: string, prodColSku: string): Observable<SaleRequestedProducts>{
     return this.reqProdListObservable.pipe(map(reqProdList => {
-      console.log(prodSku +"-"+prodColSku)
-      console.log("Product change")
-      console.log(reqProdList)
-      console.log(this.reqProdListSubject.getValue())
+      // console.log(prodSku +"-"+prodColSku)
+      // console.log("Product change")
+      // console.log(reqProdList)
+      // console.log(this.reqProdListSubject.getValue())
       let found = reqProdList.find(res => 
         (res.product.sku == prodSku) && (res.chosenProduct.sku == prodColSku)
         )
-      console.log("returning")
-      console.log(found)
+      // console.log("returning")
+      // console.log(found)
       return !!found ? found : null
 
       }))
