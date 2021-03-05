@@ -34,8 +34,8 @@ import { GoogleMapsModule } from '@angular/google-maps';
 @NgModule({
   declarations: [
     SalesComponent,
-    SalesMasterComponent,
-    SalesDetailComponent,
+    //SalesMasterComponent,
+    //SalesDetailComponent,
     SalesPhotoDialogComponent,
     SalesAddressDialogComponent
   ],

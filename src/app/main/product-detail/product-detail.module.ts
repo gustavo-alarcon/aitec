@@ -24,6 +24,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { NoLoginDialogComponent } from './no-login-dialog/no-login-dialog.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductCategoryComponent } from './product-category/product-category.component';
+import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { ProductCategoryComponent } from './product-category/product-category.co
     GalleryModule,
     SlickCarouselModule,
     QuantityDivModule,
+    QuantityDivImprovedModule,
     LazyLoadImageModule,
     MatSelectModule,
     LayoutModule,

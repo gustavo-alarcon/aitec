@@ -134,8 +134,21 @@
         <p *ngIf="selectedProduct.guarantee">Garantia: <strong>{{selectedProduct.timeguarantee}} meses</strong></p>
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
-            <app-quantity-div [product]="selectedProduct" [price]="price" [chosen]="productSelected"
-              [color]="selectedProduct.products.length > 1" size="md"></app-quantity-div>
+            <!-- ngIf si existe y si no solo aparece agregar nuevo -->
+            <ng-container *ngIf="reqProdObservable$ | async as reqProd else emptyProd">
+              <app-quantity-div-improved 
+                [product]="selectedProduct" [price]="price" [chosen]="productSelected"
+                [color]="selectedProduct.products.length > 1" size="md">
+              </app-quantity-div-improved>
+            </ng-container>
+            <ng-template #emptyProd>
+              <!-- I have to modify it to reflect stock. With no stock should not be shown -->
+              <button mat-flat-button color="primary" (click)="addProd()" class="product__add" 
+                [style.visibility]="true ? 'visible' : 'hidden'">
+                <mat-icon>shopping_cart</mat-icon>
+                <span> Agregar al Carritoo</span>
+              </button>
+            </ng-template>
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"

@@ -38,6 +38,7 @@ import { PaymentComponent } from './payment/payment.component';
 
 import { HttpClientModule } from '@angular/common/http';
 import { PaymentErrorComponent } from './payment-error/payment-error.component';
+import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
 
 @NgModule({
   declarations: [
@@ -75,6 +76,7 @@ import { PaymentErrorComponent } from './payment-error/payment-error.component';
     Ng2ImgMaxModule,
     MatDatepickerModule,
     QuantityDivModule,
+    QuantityDivImprovedModule,
     LazyLoadImageModule,
     MatProgressSpinnerModule,
     NgxPaginationModule,

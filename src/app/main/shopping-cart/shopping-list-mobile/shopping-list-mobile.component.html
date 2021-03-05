@@ -31,8 +31,10 @@
       </div>
       <div class="w3-padding w3-hide-large w3-hide-medium" style="display: flex; align-items: flex-end">
         <div>
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
-            [color]="element['color']" [price]="element['price']" size="md"></app-quantity-div>
+          <app-quantity-div 
+            [product]="element['product']" [chosen]="element['chosenProduct']"
+            [color]="element['color']" [price]="element['price']" size="md">
+          </app-quantity-div>
         </div>
         <span class="ms-fill"></span>
         <div class="w3-right-align w3-margin-top">

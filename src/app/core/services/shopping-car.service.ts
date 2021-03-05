@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { Product } from '../models/product.model';
 import { SaleRequestedProducts } from '../models/sale.model';
 
@@ -16,36 +16,43 @@ export class ShoppingCarService {
   private productsObservables: {id: string, observable: Observable<Product>}[] = []
 
   //Requeted products
-  private reqProdSubject: BehaviorSubject<SaleRequestedProducts[]>
-  public reqProdObservable: Observable<SaleRequestedProducts[]>
+  private reqProdListSubject: BehaviorSubject<SaleRequestedProducts[]>
+  public reqProdListObservable: Observable<SaleRequestedProducts[]>
 
   
 
   constructor(
     private afs: AngularFirestore,
   ) {
-      this.reqProdSubject = new BehaviorSubject([])
-      this.reqProdObservable = this.reqProdSubject.asObservable()
+      this.reqProdListSubject = new BehaviorSubject([])
+      this.reqProdListObservable = this.reqProdListSubject.asObservable().pipe(shareReplay(1))
     }
   
   private getProdList(): SaleRequestedProducts[]{
-    return this.reqProdSubject.getValue()
+    return this.reqProdListSubject.getValue()
   }
 
   //Varying quantity
   setProdNumber(prodSku: string, prodColSku: string, numb: number){
     let prodList = [...this.getProdList()]
     prodList.find(el => 
+      (el.product.sku == prodSku) && (el.chosenProduct.sku == prodColSku)).quantity = numb
+    this.reqProdListSubject.next(prodList)
+  }
+
+  varyProdNumber(prodSku: string, prodColSku: string, numb: number){
+    let prodList = [...this.getProdList()]
+    prodList.find(el => 
       (el.product.sku == prodSku) && (el.chosenProduct.sku == prodColSku)).quantity += numb
-    this.reqProdSubject.next(prodList)
+    this.reqProdListSubject.next(prodList)
   }
 
   incProdNumber(prodSku: string, prodColSku: string){
-    this.setProdNumber(prodSku, prodColSku, 1)
+    this.varyProdNumber(prodSku, prodColSku, 1)
   }
 
   decProdNumber(prodSku: string, prodColSku: string){
-    this.setProdNumber(prodSku, prodColSku, -1)
+    this.varyProdNumber(prodSku, prodColSku, -1)
   }
 
   //Adding or deleting product
@@ -55,21 +62,22 @@ export class ShoppingCarService {
       (el.product.sku == prod.product.sku) && (el.chosenProduct.sku == prod.chosenProduct.sku))
 
     if(!!product){
+      //If it already exist, it only increases current number
       this.incProdNumber(product.product.sku, product.chosenProduct.sku)
     } else {
-      prodList.push({...prod})
-      this.reqProdSubject.next(prodList)
+      prodList.push({...prod, quantity: 1})
+      this.reqProdListSubject.next(prodList)
     }
   }
 
   delProd(prod: SaleRequestedProducts){
     let prodList = [...this.getProdList()].filter(el => 
       (el.product.sku != prod.product.sku) || (el.chosenProduct.sku != prod.chosenProduct.sku))
-    this.reqProdSubject.next(prodList)
+    this.reqProdListSubject.next(prodList)
   }
 
   //Verifying online stock. You should change this for a pipe
-  getDbProduct(prod: SaleRequestedProducts){
+  getProductDbObservable(prod: SaleRequestedProducts): Observable<Product>{
     let found = this.productsObservables.find(el => (el.id == prod.product.id))
       
     if(!!found){
@@ -78,8 +86,26 @@ export class ShoppingCarService {
       let obs = this.productsListColl.doc<Product>(prod.product.id).valueChanges().pipe(shareReplay())
       this.productsObservables.push({id: prod.product.id, observable: obs})
       //We search again for the observable
-      return this.getDbProduct(prod)
+      return this.getProductDbObservable(prod)
     }
+  }
+
+  //Gets product from car
+  getReqProductObservable(prodSku: string, prodColSku: string): Observable<SaleRequestedProducts>{
+    return this.reqProdListObservable.pipe(map(reqProdList => {
+      console.log(prodSku +"-"+prodColSku)
+      console.log("Product change")
+      console.log(reqProdList)
+      console.log(this.reqProdListSubject.getValue())
+      let found = reqProdList.find(res => 
+        (res.product.sku == prodSku) && (res.chosenProduct.sku == prodColSku)
+        )
+      console.log("returning")
+      console.log(found)
+      return !!found ? found : null
+
+      }))
+    
   }
   
 }

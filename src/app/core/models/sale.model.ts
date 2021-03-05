@@ -1,7 +1,6 @@
 import { User } from 'src/app/core/models/user.model';
 import { Product, unitProduct } from './product.model';
 import { Package } from './package.model';
-import { AnySrvRecord } from 'dns';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
