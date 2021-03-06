@@ -1,4 +1,4 @@
-<div *ngIf="dataSource.data.length>0;else nothing">
+<div *ngIf="(reqProdListObservable$ | async)?.length; else nothing">
   <table mat-table [dataSource]="dataSource" matSort class="ms-table">
     <ng-container class="w3-center" matColumnDef="index">
       <th *matHeaderCellDef class="w3-center ms-table__th">Nº</th>

@@ -1,3 +1,5 @@
+import { SaleRequestedProducts } from "./sale.model";
+
 export interface User {
   uid?: string;
   email: string;
@@ -23,6 +25,8 @@ export interface User {
     [token: string]: true
   };
   favorites?:string[]
+
+  shoppingCar?: SaleRequestedProducts[]
 }
 interface naturalPerson {
   type:"natural";

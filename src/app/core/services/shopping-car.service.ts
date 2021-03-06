@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { Product } from '../models/product.model';
 import { SaleRequestedProducts } from '../models/sale.model';
+import { User } from '../models/user.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,9 +26,46 @@ export class ShoppingCarService {
 
   constructor(
     private afs: AngularFirestore,
+    private afAuth: AngularFireAuth,
   ) {
       this.reqProdListSubject = new BehaviorSubject([])
-      this.reqProdListObservable = this.reqProdListSubject.asObservable().pipe(shareReplay(1))
+      this.reqProdListObservable = this.afAuth.authState.pipe(
+        switchMap(authUser => {
+          console.log("called complete observable")
+          console.log(authUser)
+          if(!!authUser){
+            return this.afs.collection<User>('users').doc(authUser.uid).get({ source: "server" }).pipe(
+              map(res => {
+                console.log("after requesting user info")
+                if (res.exists) {
+                  this.reqProdListSubject.next((<User>res.data()).shoppingCar)
+                  return <User>res.data()
+                } else {
+                  return null
+                }
+              }), 
+              switchMap(res => {
+                if(res){
+                  return this.reqProdListSubject.asObservable().pipe(
+                    tap(reqProdList => {
+                      if(reqProdList){
+                        if(reqProdList.length){
+                          this.afs.collection('users').doc((<User>res).uid).update({shoppingCar: reqProdList})
+                            .catch(err => {console.log("error while saving car")})
+                        }
+                      }
+                    })
+                  )
+                } else {
+                  return of(null)
+                }
+              }))
+          } else {
+            return of(null)
+          }
+        }),
+        shareReplay(1)
+      )
     }
   
   private getProdList(): SaleRequestedProducts[]{
@@ -70,9 +110,9 @@ export class ShoppingCarService {
     }
   }
 
-  delProd(prod: SaleRequestedProducts){
+  delProd(prodSku: string, colorSku: string){
     let prodList = [...this.getProdList()].filter(el => 
-      (el.product.sku != prod.product.sku) || (el.chosenProduct.sku != prod.chosenProduct.sku))
+      (el.product.sku != prodSku) || (el.chosenProduct.sku != colorSku))
     this.reqProdListSubject.next(prodList)
   }
 
@@ -106,6 +146,9 @@ export class ShoppingCarService {
 
       }))
     
+  }
+  clearCar(){
+    this.reqProdListSubject.next([])
   }
   
 }

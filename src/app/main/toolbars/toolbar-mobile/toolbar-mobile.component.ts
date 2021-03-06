@@ -5,6 +5,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 
 @Component({
   selector: 'app-toolbar-mobile',
@@ -25,14 +26,27 @@ export class ToolbarMobileComponent implements OnInit {
     brands: Array<any>;
   } = null
 
+  shopCarNumber$: Observable<number>
 
   constructor(
     public auth: AuthService,
     private router: Router,
-    public dbs: DatabaseService
+    public dbs: DatabaseService,
+    public shopCar: ShoppingCarService,
   ) { }
 
   ngOnInit(): void {
+    this.shopCarNumber$ = this.shopCar.reqProdListObservable.pipe(
+      map(list => {
+        if(list){
+          return list.length
+        } else {
+          return null
+        }
+
+      })
+    )
+
     this.search$ = this.searchForm.valueChanges.pipe(
       startWith(''),
       map((word) => {

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
@@ -39,8 +39,9 @@ export class QuantityDivImprovedComponent implements OnInit {
 
     this.quantityForm$ = this.quantityForm.valueChanges.pipe(
       distinctUntilChanged(),
+      // debounceTime(100),
       tap(quant => {
-        console.log("quantity form: ",quant)
+        // console.log("quantity form: ",quant)
         this.shopCar.setProdNumber(this.product.sku, this.chosen.sku, quant)
       })
     )
@@ -49,47 +50,35 @@ export class QuantityDivImprovedComponent implements OnInit {
     this.reqProductObservable$ = this.shopCar.getReqProductObservable(this.product.sku, this.chosen.sku)
       .pipe(
         tap(reqProd => {
-          console.log("change: "+reqProd.quantity)
-          console.log("sku: "+this.chosen.sku)
-          console.log("prod: "+reqProd.chosenProduct.sku)
-          this.quantityForm.setValue(reqProd.quantity)
+          //If was used to solve bug when products are deleted
+          if(reqProd){
+            this.quantityForm.setValue(reqProd.quantity)
+          }
         }, shareReplay(1)))
 
     // The following checks the stock on DB
     this.prodStock$ = this.reqProductObservable$.pipe(
       switchMap(reqProd => {
-        return this.shopCar.getProductDbObservable(reqProd.product.id).pipe(
-          map(prodDB => {
-            let prodDbStock = prodDB.products.find(prod => prod.sku == reqProd.chosenProduct.sku).virtualStock
-            if(reqProd.quantity > prodDbStock){
-              this.quantityForm.setErrors({stock: true})
-            }
-            return prodDbStock
-          })
-        )
+        //If was used to solve bug when products are deleted
+        if(reqProd){
+          return this.shopCar.getProductDbObservable(reqProd.product.id).pipe(
+            map(prodDB => {
+              let prodDbStock = prodDB.products.find(prod => prod.sku == reqProd.chosenProduct.sku).virtualStock
+              if(reqProd.quantity > prodDbStock){
+                console.log("setting error")
+                this.quantityForm.markAsTouched()
+                this.quantityForm.setErrors({stock: true})
+              }
+              return prodDbStock
+            })
+          )
+        } else {
+          return of(null)
+        }
+        
       }), shareReplay(1)
     )
   }
-
-  ngOnChanges() {
-    // this.quantity$ = this.dbs.orderObs$.pipe(
-    //   map((order) => {
-    //     let index = order.length ? order.findIndex(el => el['chosenProduct']['sku'] == this.chosen['sku']) : -1
-    //     if (index >= 0) {
-    //       let orderProduct = order[index];
-    //       return orderProduct['quantity'];
-    //     } else {
-    //       return null
-    //     }
-    //   }),
-    //   tap((res) => {
-    //     if (res) {
-    //       this.quantityForm.setValue(res);
-    //     }
-    //   })
-    // );
-  }
-
 
   incProdNumber(){
     //Change to change in form
@@ -100,55 +89,4 @@ export class QuantityDivImprovedComponent implements OnInit {
     this.quantityForm.setValue(this.quantityForm.value-1)
   }
 
-  change(event: KeyboardEvent){
-    event.preventDefault()
-    console.log(event)
-    if(event.key in "0123456789".split("")){
-      console.log("number!")
-    }
-    alert(this.quantityForm.value)
-  }
-
-  view(event) {
-    //console.log(event);
-
-    let number = event.target.valueAsNumber;
-    this.changeQuantity(number);
-  }
-
-  changeQuantity(number) {
-    let index = this.dbs.order.findIndex(
-      (el) => el['chosenProduct']['sku'] == this.chosen['sku']
-    );
-    if (number == 0 || isNaN(number)) {
-      this.dbs.order[index]['quantity'] = 1;
-    } else {
-      if (number >= this.chosen['virtualStock']) {
-        this.dbs.order[index]['quantity'] = this.chosen['virtualStock'];
-        this.snackBar.open(
-          'Stock disponible del producto:' + this.chosen['virtualStock'],
-          'Aceptar',
-          {
-            duration: 6000,
-          }
-        );
-      } else {
-        this.dbs.order[index]['quantity'] = number;
-      }
-    }
-
-    this.dbs.orderObs.next(this.dbs.order);
-  }
-
-  onKeydown(event) {
-    if (event.keyCode === 13) {
-      this.changeQuantity(event.target.valueAsNumber);
-    }
-    let permit =
-      event.keyCode === 8 ||
-      event.keyCode === 46 ||
-      event.keyCode === 37 ||
-      event.keyCode === 39;
-    return permit ? true : !isNaN(Number(event.key));
-  }
 }

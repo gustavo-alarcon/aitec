@@ -57,22 +57,34 @@ export class WebViewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log("init")
+    //console.log("init")
     this.reqProdObservable$ = this.changeColor$.pipe(
       switchMap(color => {
-        console.log("changing color")
+        //console.log("changing color")
         return this.ShopCar.getReqProductObservable(this.product.sku, color.sku).pipe(
           debounceTime(100),
           startWith(null),
         )
       })
     )
-    // this.verifyStock$ = this.changeColor$.pipe(
-    //   switchMap(color => {
-    //     return this.ShopCar.getProductDbObservable(this.product.sku)
-    //     }
-    //   )
-    // )
+    this.verifyStock$ = this.changeColor$.pipe(
+      switchMap(color => {
+        return this.ShopCar.getProductDbObservable(this.product.id).pipe(
+          map(prodDb => {
+            // console.log(this.product.id)
+            // console.log(prodDb)
+            let prodColor = prodDb.products.find(el => el.sku == color.sku)
+            // console.log(prodColor)
+            if(!!prodColor){
+              return prodColor.virtualStock > 0
+            } else {
+              return false
+            }
+          })
+        )
+        }
+      )
+    )
   }
 
   ngOnChanges() {
@@ -102,7 +114,6 @@ export class WebViewComponent implements OnInit {
   }
 
   addProd() {
-    console.log("Adding new")
 
     let newProduct: SaleRequestedProducts = {
       product: this.product,
@@ -112,7 +123,6 @@ export class WebViewComponent implements OnInit {
       price: this.price
     };
 
-    console.log(newProduct)
     this.ShopCar.addProd(newProduct)
     
   }

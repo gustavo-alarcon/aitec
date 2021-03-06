@@ -6,13 +6,14 @@ import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, empty, Observable } from 'rxjs';
 import { finalize, map, startWith, switchMap, take, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import { Sale, saleStatusOptions } from 'src/app/core/models/sale.model';
+import { Sale, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { LocationDialogComponent } from './location-dialog/location-dialog.component';
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 import { LandingService } from 'src/app/core/services/landing.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 
 
 @Component({
@@ -102,7 +103,7 @@ export class ShoppingCartComponent implements OnInit {
   initPayment$: Observable<any>
   firstTime: number = 1
 
-
+  reqProdListObservable$: Observable<SaleRequestedProducts[]>
 
   constructor(
     private dbs: DatabaseService,
@@ -112,10 +113,14 @@ export class ShoppingCartComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
-    private ld: LandingService
+    private ld: LandingService,
+    public shopCar: ShoppingCarService,
   ) { }
 
   ngOnInit(): void {
+
+    this.reqProdListObservable$ = this.shopCar.reqProdListObservable
+
     this.delivery$ = this.dbs.delivery$.pipe(
       tap(del => {
         this.deliveryNumber = del
@@ -123,11 +128,11 @@ export class ShoppingCartComponent implements OnInit {
     )
 
     this.products = this.dbs.order;
-    this.sum$ = combineLatest(
+    this.sum$ = combineLatest([
       this.dbs.isMayUser$,
-      this.dbs.orderObs$,
+      this.reqProdListObservable$,
       this.dbs.delivery$
-    ).pipe(
+    ]).pipe(
       map(([may, ord, del]) => {
 
         if (ord.length == 1) {
@@ -183,10 +188,10 @@ export class ShoppingCartComponent implements OnInit {
 
 
     this.advisers$ = combineLatest(
-      this.adviserForm.valueChanges.pipe(
+      [this.adviserForm.valueChanges.pipe(
         startWith(''),
       ),
-      this.dbs.getAdvisers()
+      this.dbs.getAdvisers()]
     ).pipe(
 
       map(([value, advisers]) => {
@@ -348,7 +353,7 @@ export class ShoppingCartComponent implements OnInit {
     return doc && meth
   }
 
-  finish() {
+  finish(reqProdList: SaleRequestedProducts[]) {
     if (this.validatedFinishButton()) {
       this.uploadingSale$ = new BehaviorSubject(true)
 
@@ -375,7 +380,7 @@ export class ShoppingCartComponent implements OnInit {
         createdAt: new Date(),
         createdBy: null,
         user: this.user,
-        requestedProducts: this.dbs.order,
+        requestedProducts: reqProdList,
         status: 'Solicitando',
         total: this.total,
         deliveryPrice: this.delivery == 1 ? this.selectedDelivery : 0,

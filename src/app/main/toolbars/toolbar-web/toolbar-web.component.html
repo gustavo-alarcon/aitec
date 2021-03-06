@@ -77,8 +77,8 @@
             <span>Mis Preguntas</span>
           </button>
         </mat-menu>
-        <button mat-button routerLink="/main/carrito" matTooltip="Carrito" *ngIf="dbs.order.length;else noOrder">
-          <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
+        <button mat-button routerLink="/main/carrito" matTooltip="Carrito" *ngIf="shopCarNumber$ | async as number; else noOrder">
+          <mat-icon [matBadge]="number" matBadgeColor="warn">
             shopping_cart</mat-icon>
         </button>
         <ng-template #noOrder>
