@@ -34,19 +34,24 @@ export class CreateEditBannerComponent implements OnInit {
   noImage = '../../../../assets/images/no-image.png';
   photos: {
     resizing$: {
-      photoURL: Observable<boolean>
+      photoURL: Observable<boolean>,
+      photomovilURL: Observable<boolean>
     },
     data: {
-      photoURL: File
+      photoURL: File,
+      photomovilURL: File,
     }
   } = {
       resizing$: {
-        photoURL: new BehaviorSubject<boolean>(false)
+        photoURL: new BehaviorSubject<boolean>(false),
+        photomovilURL: new BehaviorSubject<boolean>(false),
       },
       data: {
-        photoURL: null
+        photoURL: null,
+        photomovilURL: null
       }
     }
+
   constructor(
     private fb: FormBuilder,
     private dbs: DatabaseService,
@@ -65,6 +70,7 @@ export class CreateEditBannerComponent implements OnInit {
       brand: [this.data.edit ? this.data.data.brand : null],
       link: [this.data.edit ? this.data.data.link : null],
       photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
+      photomovilURL: [this.data.edit ? this.data.data.photomovilURL : null, Validators.required],
       product: [null]
     })
 
@@ -104,7 +110,7 @@ export class CreateEditBannerComponent implements OnInit {
         return categories.filter(el => value ? el.completeName.toLowerCase().includes(value.toLowerCase()) : true)
       })
     )
-    
+
     this.brand$ = combineLatest(
       this.createForm.get('brand').valueChanges.pipe(
         startWith<any>('')
@@ -156,7 +162,7 @@ export class CreateEditBannerComponent implements OnInit {
     let reader = new FileReader();
     this.photos.resizing$[formControlName].next(true);
 
-    this.ng2ImgMax.resizeImage(image[0], 1000, 426)
+    this.ng2ImgMax.resizeImage(image[0], 10000, 426)
       .pipe(
         take(1)
       ).subscribe(result => {
@@ -199,7 +205,7 @@ export class CreateEditBannerComponent implements OnInit {
     return upload$;
   }
 
-  createBanner(producto, photo?: File) {
+  createBanner(producto, photo?: File, photomovil?: File) {
     let productRef: DocumentReference = this.afs.firestore.collection(`/db/aitec/config/generalConfig/banners`).doc();
     let productData = producto;
     let batch = this.afs.firestore.batch();
@@ -207,11 +213,16 @@ export class CreateEditBannerComponent implements OnInit {
     productData.id = productRef.id;
     productData.photoURL = null;
 
-    this.uploadPhoto(productRef.id, photo).pipe(
+    forkJoin(
+      this.uploadPhoto(productRef.id, photo),
+      this.uploadPhoto(productRef.id, photomovil),
+    ).pipe(
       takeLast(1),
-    ).subscribe((res: string) => {
-      productData.photoURL = res;
+    ).subscribe(([photoUrl, movilUrl]) => {
+      productData.photoURL = <string>photoUrl
       productData.photoPath = `/banners/pictures/${productRef.id}-${photo.name}`;
+      productData.photomovilURL = <string>movilUrl
+      productData.photomovilPath = `/banners/pictures/${productRef.id}-${photomovil.name}`;
       batch.set(productRef, productData);
 
       batch.commit().then(() => {
@@ -226,18 +237,45 @@ export class CreateEditBannerComponent implements OnInit {
 
   }
 
-  editBanner(product: any, photo?: File) {
+  editBanner(product: any, type: string, photo?: File, photomovil?: File) {
     let productRef: DocumentReference = this.afs.firestore.collection(`/db/aitec/config/generalConfig/banners`).doc(product.id);
     let productData = product;
     let batch = this.afs.firestore.batch();
 
-    if (photo) {
+    if (photomovil && photo) {
+      forkJoin(
+        this.uploadPhoto(productRef.id, photo),
+        this.uploadPhoto(productRef.id, photomovil),
+      ).pipe(
+        takeLast(1),
+      ).subscribe(([photoUrl, movilUrl]) => {
+        productData.photoURL = <string>photoUrl
+        productData.photoPath = `/banners/pictures/${productRef.id}-${photo.name}`;
+        productData.photomovilURL = <string>movilUrl
+        productData.photomovilPath = `/banners/pictures/${productRef.id}-${photomovil.name}`;
+        batch.update(productRef, productData);
+
+        batch.commit().then(() => {
+          this.dialogRef.close(true);
+          this.loading.next(false)
+          this.snackBar.open("Cambios Guardados", "Cerrar", {
+            duration: 6000
+          })
+        })
+      })
+
+    } else if (photo) {
 
       this.uploadPhoto(productRef.id, photo).pipe(
         takeLast(1),
       ).subscribe((res: string) => {
-        productData.photoURL = res;
-        productData.photoPath = `/banners/pictures/${productRef.id}-${photo.name}`;
+        if (type == 'photo') {
+          productData.photoURL = res;
+          productData.photoPath = `/banners/pictures/${productRef.id}-${photo.name}`;
+        } else {
+          productData.photomovilURL = res;
+          productData.photomovilPath = `/banners/pictures/${productRef.id}-${photo.name}`;
+        }
         batch.update(productRef, productData);
 
         batch.commit().then(() => {
@@ -263,6 +301,7 @@ export class CreateEditBannerComponent implements OnInit {
 
   }
 
+
   onSubmitForm() {
     this.createForm.markAsPending();
     this.createForm.disable()
@@ -273,7 +312,7 @@ export class CreateEditBannerComponent implements OnInit {
       id: '',
       redirectTo: this.createForm.get('redirectTo').value,
       link: this.createForm.get('link').value,
-      category: this.createForm.get('category').value.id,
+      category: this.createForm.get('category').value ? this.createForm.get('category').value.id : null,
       brand: this.createForm.get('brand').value,
       type: this.data.type,
       photoURL: '',
@@ -283,7 +322,7 @@ export class CreateEditBannerComponent implements OnInit {
       products: this.products.map(el => { return { id: el['sku'], description: el['description'] } }),
       position: this.data.index
     }
-    this.createBanner(newBanner, this.photos.data.photoURL)
+    this.createBanner(newBanner, this.photos.data.photoURL, this.photos.data.photomovilURL)
   }
 
   editSubmit() {
@@ -293,8 +332,9 @@ export class CreateEditBannerComponent implements OnInit {
 
     let update: object = {}
     update['id'] = this.data.data.id
+    let movil: boolean = false
     let photo: boolean = false
-
+    let category = this.createForm.get('category').value ? this.createForm.get('category').value.id : null
     if (this.createForm.get('photoURL').value != this.data.data.photoURL) {
       update['photoURL'] = ''
       update['photoPath'] = ''
@@ -304,10 +344,9 @@ export class CreateEditBannerComponent implements OnInit {
       update['redirectTo'] = this.createForm.get('redirectTo').value
     }
 
-    if (this.createForm.get('category').value.id != this.data.data.category) {
-      update['category'] = this.createForm.get('category').value.id
+    if (category != this.data.data.category) {
+      update['category'] = category
     }
-
 
     if (this.createForm.get('brand').value != this.data.data.brand) {
       update['brand'] = this.createForm.get('brand').value
@@ -317,6 +356,11 @@ export class CreateEditBannerComponent implements OnInit {
       update['link'] = this.createForm.get('link').value
     }
 
+    if (this.createForm.get('photomovilURL').value != this.data.data.photomovilURL) {
+      update['photomovilURL'] = ''
+      update['photomovilPath'] = ''
+      movil = true
+    }
 
     let preData = [...this.data.data.products]
 
@@ -331,10 +375,18 @@ export class CreateEditBannerComponent implements OnInit {
       update['products'] = this.products.map(el => { return { id: el['id'], description: el['description'] } })
     }
 
-    if (photo) {
-      this.editBanner(update, this.photos.data.photoURL)
+    if (photo && movil) {
+      this.editBanner(update, 'edit', this.photos.data.photoURL, this.photos.data.photomovilURL)
+    } else if (photo || movil) {
+      if (photo) {
+        this.editBanner(update, 'photo', this.photos.data.photoURL)
+      }
+
+      if (movil) {
+        this.editBanner(update, 'movil', this.photos.data.photomovilURL)
+      }
     } else {
-      this.editBanner(update)
+      this.editBanner(update, 'any')
     }
 
 

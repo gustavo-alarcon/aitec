@@ -1,18 +1,30 @@
 <div *ngIf="init$ | async;else loader">
-    
-    <ngx-slick-carousel #slickModal="slick-carousel" [config]="slideConfig">
-      <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-        <a *ngIf="ban.redirectTo == 'Link externo';else noLink" [href]="ban.link" target="_blank">
+
+  <ngx-slick-carousel class="carousel-web" #slickModal="slick-carousel" [config]="slideConfig">
+    <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+      <a *ngIf="ban.redirectTo == 'Link externo';else noLink" [href]="ban.link" target="_blank">
+        <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
+      </a>
+      <ng-template #noLink>
+        <a (click)="navigateBrand(ban)" style="cursor: pointer;">
           <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
         </a>
-        <ng-template #noLink>
-          <a (click)="navigateBrand(ban)" style="cursor: pointer;">
-            <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
-          </a>
-        </ng-template>
-      </div>   
-    </ngx-slick-carousel>
+      </ng-template>
+    </div>
+  </ngx-slick-carousel>
 
+  <ngx-slick-carousel class="carousel-movil" #slickModal="slick-carousel" [config]="slideConfig">
+    <div ngxSlickItem class="slide" *ngFor="let ban of banners">
+      <a *ngIf="ban.redirectTo == 'Link externo';else noLinkMovil" [href]="ban.link" target="_blank">
+        <img [src]="ban.photomovilURL" class="w3-block-banner" alt="banner" />
+      </a>
+      <ng-template #noLinkMovil>
+        <a (click)="navigateBrand(ban)" style="cursor: pointer;">
+          <img [src]="ban.photomovilURL" class="w3-block-banner" alt="banner" />
+        </a>
+      </ng-template>
+    </div>
+  </ngx-slick-carousel>
   <div class="w3-padding w3-center">
     <div class="font--primary">
       <mat-icon fontSet="material-icons-outlined" class="section__icon">offline_bolt</mat-icon>
@@ -25,7 +37,7 @@
       <img [src]="pro.photoURL" class="w3-block-{{i}}" alt="promo" />
     </a>
   </div>
-  
+
 
 
   <div class="w3-section ms-container">

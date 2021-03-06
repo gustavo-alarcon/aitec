@@ -131,12 +131,9 @@ export class LandingComponent implements OnInit {
   }
 
   navigateBrand(banner) {
-    console.log(banner)
-   
     switch (banner['redirectTo']) {
       case 'Categoría/subcategoría':
         let category = this.allCategories.find(ct => ct.id == banner['category']).completeName.split(' >> ')
-        console.log(category)
         switch (category.length) {
           case 1:
             this.router.navigate(['/main/productos', category[0].split(' ').join('-').toLowerCase()]);
@@ -146,7 +143,7 @@ export class LandingComponent implements OnInit {
             break;
           case 3:
             let subsub = category[2].split(' ').join('-').toLowerCase()
-            this.router.navigate(['/main/productos', category[0].split(' ').join('-').toLowerCase(), category[0].split(' ').join('-').toLowerCase(), category[1].split(' ').join('-').toLowerCase(), subsub]);
+            this.router.navigate(['/main/productos', category[0].split(' ').join('-').toLowerCase(), category[1].split(' ').join('-').toLowerCase(), subsub]);
             break;
           default:
             break;
