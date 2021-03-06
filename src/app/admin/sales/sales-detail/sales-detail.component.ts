@@ -146,31 +146,31 @@ export class SalesDetailComponent implements OnInit {
             return products.filter(el => el.description.match(new RegExp(formValue, 'ig')))
           } else {
 
-            let product: SaleRequestedProducts = {
-              product: (<Product | Package>formValue),
-              quantity: 1,
-              chosenOptions: !(<Product | Package>formValue).package ? null :
-                new Array((<Package>formValue).totalItems)
-            };
+            // let product: SaleRequestedProducts = {
+            //   product: (<Product | Package>formValue),
+            //   quantity: 1,
+            //   chosenOptions: !(<Product | Package>formValue).package ? null :
+            //     new Array((<Package>formValue).totalItems)
+            // };
 
 
-              (<FormArray>this.productForm.get('productList')).insert(0,
-                product.product.package ?
-                  this.fb.group({
-                    product: [product.product, Validators.required],
-                    quantity: [product.quantity, Validators.required],
-                    chosenOptions: this.fb.array(
-                      product.product.items.map(item =>
-                        item.productsOptions.length != 1 ? new FormControl()
-                          : new FormControl(item.productsOptions[0])
-                      )
-                    )
-                  }) :
-                  this.fb.group({
-                    product: [product.product, Validators.required],
-                    quantity: [product.quantity, Validators.required],
-                  })
-              )
+            //   (<FormArray>this.productForm.get('productList')).insert(0,
+            //     product.product.package ?
+            //       this.fb.group({
+            //         product: [product.product, Validators.required],
+            //         quantity: [product.quantity, Validators.required],
+            //         chosenOptions: this.fb.array(
+            //           product.product.items.map(item =>
+            //             item.productsOptions.length != 1 ? new FormControl()
+            //               : new FormControl(item.productsOptions[0])
+            //           )
+            //         )
+            //       }) :
+            //       this.fb.group({
+            //         product: [product.product, Validators.required],
+            //         quantity: [product.quantity, Validators.required],
+            //       })
+            //   )
 
               this.searchProductControl.setValue("")
               return productsList.filter(el => !this.productForm.get('productList').value.find(
@@ -536,7 +536,7 @@ export class SalesDetailComponent implements OnInit {
       finishedData: null
     };
 
-    sale.requestedProducts = this.getSaleRequestedProducts();
+    // sale.requestedProducts = this.getSaleRequestedProducts();
     if (newStatus == this.saleStatusOptions.cancelled) {
       sale.cancelledData = {
         cancelledAt: date,
@@ -603,28 +603,28 @@ export class SalesDetailComponent implements OnInit {
   onUpdateStock(requestedProducts: Sale['requestedProducts'], batch: firebase.firestore.WriteBatch, decrease: boolean) {
     this.dbs.onUpdateStock(requestedProducts, batch, decrease)
   }*/
-
-  getSaleRequestedProducts(): Sale['requestedProducts'] {
-    let requestedProducts: Sale['requestedProducts'] = [];
-    (<FormArray>this.productForm.get('productList')).controls.forEach(formGroup => {
-      //If product quantity is 0, we don't need to save it again
-      if (formGroup.get('quantity').value) {
-        if (!(<Product | Package>formGroup.get('product').value).package) {
-          requestedProducts.push({
-            quantity: formGroup.get('quantity').value,
-            product: formGroup.get('product').value
-          });
-        } else {
-          requestedProducts.push({
-            quantity: formGroup.get('quantity').value,
-            product: formGroup.get('product').value,
-            chosenOptions: formGroup.get('chosenOptions').value
-          });
-        }
-      }
-    });
-    return requestedProducts
-  }
+//ELIMINADOOOOOOOOOOOOOO
+  // getSaleRequestedProducts(): Sale['requestedProducts'] {
+  //   let requestedProducts: Sale['requestedProducts'] = [];
+  //   (<FormArray>this.productForm.get('productList')).controls.forEach(formGroup => {
+  //     //If product quantity is 0, we don't need to save it again
+  //     if (formGroup.get('quantity').value) {
+  //       if (!(<Product | Package>formGroup.get('product').value).package) {
+  //         requestedProducts.push({
+  //           quantity: formGroup.get('quantity').value,
+  //           product: formGroup.get('product').value
+  //         });
+  //       } else {
+  //         requestedProducts.push({
+  //           quantity: formGroup.get('quantity').value,
+  //           product: formGroup.get('product').value,
+  //           chosenOptions: formGroup.get('chosenOptions').value
+  //         });
+  //       }
+  //     }
+  //   });
+  //   return requestedProducts
+  // }
 
   giveProductPrice(item: SaleRequestedProducts): number {
     if (item.product.promo) {

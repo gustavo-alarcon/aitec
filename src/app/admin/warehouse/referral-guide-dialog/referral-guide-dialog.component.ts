@@ -246,7 +246,8 @@ export class ReferralGuideDialogComponent implements OnInit {
       } else {
 
         let data: SerialNumber = {
-          id: id,
+          //ANTES HABIAAAAAAAAAAAAAAAAAAAAAAAAAAA id: id
+          id: null,
           barcode: scan,
           color: validation.product.color,
           sku: validation.product.sku,

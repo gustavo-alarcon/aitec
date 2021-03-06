@@ -137,7 +137,7 @@ export class ShoppingCartComponent implements OnInit {
 
         if (ord.length == 1) {
           if (ord[0].quantity == 1) {
-            this.zones = ord[0].product.zones ? ord[0].product.zones : []
+            this.zones = ord[0].product["zones"] ? ord[0].product["zones"] : []
             if (this.deliveryForm.disabled) {
               this.deliveryForm.setValue(null)
               this.deliveryForm.enable()

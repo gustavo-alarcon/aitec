@@ -27,7 +27,7 @@ export interface SaleRequestedProducts {
   //inside requested products, but with different colro (chosen)
   quantity: number;
   chosenProduct: unitProduct;
-  //chosenOptions: any;
+  chosenOptions?: any;      //I included it only to avoid type errors. Will be fixed when doing sales section
   color: boolean;
   price: number;
 }
