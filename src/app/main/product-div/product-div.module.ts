@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatDialogModule } from '@angular/material/dialog';
+import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatButtonModule,
     MatIconModule,
     QuantityDivModule,
+    QuantityDivImprovedModule,
     LazyLoadImageModule,
     MatDialogModule 
   ],

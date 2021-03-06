@@ -112,12 +112,12 @@
         <div *ngIf="promo && selectedProduct.promoData.quantity > 1" class="w3-center product__promoDiv">
           OFERTA: {{selectedProduct.promoData.quantity}} x {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
         </div>
-        <div class="product__stock" *ngIf="productSelected.stock==1;else stock">
+        <div class="product__stock" *ngIf="productSelected.virtualStock==1;else stock">
           Último stock disponible
         </div>
         <ng-template #stock>
           <div class="product__stock">
-            {{ productSelected.stock }} Unidades disponibles
+            {{ productSelected.virtualStock }} Unidades disponibles
           </div>
         </ng-template>
 
@@ -134,8 +134,22 @@
         <p *ngIf="selectedProduct.guarantee">Garantia: <strong>{{selectedProduct.timeguarantee}} meses</strong></p>
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
-            <app-quantity-div [product]="selectedProduct" [price]="price" [chosen]="productSelected"
-              [color]="selectedProduct.products.length > 1" size="md"></app-quantity-div>
+            <!-- ngIf si existe y si no solo aparece agregar nuevo -->
+            <ng-container *ngIf="reqProdObservable$ | async as reqProd; else emptyProd">
+              <app-quantity-div-improved 
+                [product]="selectedProduct" [price]="price" [chosen]="productSelected"
+                [color]="selectedProduct.products.length > 1" size="md">
+              </app-quantity-div-improved>
+            </ng-container>
+            <ng-template #emptyProd>
+              <!-- I have to modify it to reflect stock. With no stock should not be shown -->
+              <button *ngIf="verifyStock$ | async" mat-flat-button color="primary" 
+                (click)="addProd()" class="product__add" 
+                [style.visibility]="true ? 'visible' : 'hidden'">
+                <mat-icon>shopping_cart</mat-icon>
+                <span> Agregar al Carrito</span>
+              </button>
+            </ng-template>
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"

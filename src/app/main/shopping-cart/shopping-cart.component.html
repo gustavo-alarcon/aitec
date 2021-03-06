@@ -115,7 +115,7 @@
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <div *ngIf="selectedDelivery">
+                <div *ngIf="selectedDelivery && ((reqProdListObservable$|async).length ==1)">
                   <p>El costo de tu delivery es: <b>{{selectedDelivery | currency: 'S/. ':'symbol':'2.2-2'}}</b></p>
                   <h4 class="delivery__title w3-center">
                     Por favor registra tus datos y verifícalos
@@ -317,7 +317,7 @@
                 <div style="width: 55%">Descripción</div>
                 <div style="width: 25%">Precio</div>
               </div>
-              <div *ngFor="let prod of products" class="ordItem">
+              <div *ngFor="let prod of (reqProdListObservable$|async)" class="ordItem">
                 <div style="width: 20%" class="w3-center">
                   {{prod.quantity | number:'2.'}}
                 </div>
@@ -431,8 +431,12 @@
             <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
           </div>
           <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
-            <button mat-raised-button (click)="finish()" color="primary" class="resume__button">Finalizar
-              Compra</button>
+            <button 
+              *ngIf="reqProdListObservable$|async as reqProdList"
+              [disabled]="(uploadingSale$ | async)" mat-raised-button 
+              (click)="finish(reqProdList)" color="primary" class="resume__button">
+              Finalizar Compra
+            </button>
           </div>
 
         </div>

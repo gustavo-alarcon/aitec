@@ -2,6 +2,7 @@ import { Sale, saleStatusOptions } from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
+  AngularFirestoreDocument,
   DocumentReference,
 } from '@angular/fire/firestore';
 import { Brand, Product } from '../models/product.model';
@@ -14,7 +15,7 @@ import {
   mapTo,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, forkJoin } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase';
@@ -28,6 +29,7 @@ import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
 import { Waybill, WaybillProductList } from '../models/waybill.model';
+import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 
 @Injectable({
   providedIn: 'root',
@@ -88,6 +90,7 @@ export class DatabaseService {
   }
 
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
+  productsListColl = this.afs.firestore.collection(this.productsListRef)
   packagesListRef: `db/aitec/packagesList` = `db/aitec/packagesList`;
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
@@ -1063,7 +1066,7 @@ export class DatabaseService {
   }
 
   /*purchase*/
-
+/*
   reduceStock(user, newSale, phot) {
     return this.afs.firestore.runTransaction((transaction) => {
       let promises = []
@@ -1085,16 +1088,11 @@ export class DatabaseService {
 
         }).catch((error) => {
           console.log("Transaction failed: ", error);
-
-
         }));
-
-
       })
       return Promise.all(promises);
     }).then(res => {
       console.log(res);
-
       //localStorage.removeItem(this.uidUser)
       return this.saveSale(user, newSale, phot)
 
@@ -1106,8 +1104,20 @@ export class DatabaseService {
 
     })
 
-  }
+  }*/
 
+  finishPurshase(newSale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
+
+    const batch = this.afs.firestore.batch()
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
+
+    newSale.id = saleRef.id
+
+    batch.set(saleRef, newSale);
+    return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
+  }
+  
+/*
   sendEmail(newSale) {
     const batch = this.afs.firestore.batch()
     const emailRef = this.afs.firestore.collection(`/mail`).doc();
@@ -1120,12 +1130,12 @@ export class DatabaseService {
     let mess = {
       order: newOrder,
       correlative: '#R',
-      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
-      payment: newSale.payType.name,/*metodo de pago*/
-      document: newSale.document,/*boleta/facturacion*/
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, //string date
+      payment: newSale.payType.name,//metodo de pago
+      document: newSale.document,//boleta/facturacion
       boleta: newSale.idDocument == 1,
       factura: newSale.idDocument == 2,
-      info: newSale.documentInfo,/*document info*/
+      info: newSale.documentInfo,//document info
       subtotal: (newSale.total * 0.82).toFixed(2),
       igv: (newSale.total * 0.18).toFixed(2),
       envio: newSale.deliveryPrice.toFixed(2),
@@ -1152,6 +1162,8 @@ export class DatabaseService {
     })
 
   }
+
+
   saveSale(user: User, newSale, phot?: any) {
     console.log('here');
 
@@ -1170,12 +1182,12 @@ export class DatabaseService {
     let mess = {
       order: newOrder,
       correlative: '#R',
-      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, /*string date*/
-      payment: newSale.payType.name,/*metodo de pago*/
-      document: newSale.document,/*boleta/facturacion*/
+      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, //string date
+      payment: newSale.payType.name,//metodo de pago
+      document: newSale.document,//boleta/facturacion
       boleta: newSale.idDocument == 1,
       factura: newSale.idDocument == 2,
-      info: newSale.documentInfo,/*document info*/
+      info: newSale.documentInfo,//document info
       subtotal: (newSale.total * 0.82).toFixed(2),
       igv: (newSale.total * 0.18).toFixed(2),
       envio: newSale.deliveryPrice.toFixed(2),
@@ -1272,7 +1284,7 @@ export class DatabaseService {
     }
 
   }
-
+*/
   //products
 
   uploadPhotoProduct(id: string, file: File): Observable<string | number> {
@@ -1746,6 +1758,10 @@ export class DatabaseService {
 
         return of(batch);
       })
+  }
+
+  sell(Sale){
+
   }
 
 }

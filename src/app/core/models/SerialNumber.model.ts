@@ -1,15 +1,18 @@
 import { User } from "./user.model";
+//Dentro de cada warehouseproduct
+///db/aitec/warehouses/lujOB8TwOHuI2EuSUr9w/products/N1mAlubvitsj76J9emPv/series
 
-export interface SerialNumber {
+//El numero de serie solo esta figurando en barcode
+export interface SerialNumber {     
   id: string;
-  barcode: string;
-  sku: string;
+  barcode: string;  //SKU+NUM serie
+  sku: string;      //codigo de color
   color: {
     color: string,
     name: string
   };
-  status: string;
-  waybill?: string;
+  status: "stored"|"sold";
+  waybill?: string;       //Guia de remision
   createdAt: Date;
   createdBy: User;
   editedAt: Date;

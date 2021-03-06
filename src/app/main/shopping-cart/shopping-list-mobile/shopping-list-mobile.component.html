@@ -1,76 +1,81 @@
-<div *ngIf="order.length>0;else nothing">
-
-  <div *ngFor="let element of order | paginate: config; let ind = index">
-    <div>
-      <div class="product ms-flex ms-flex--center">
-        <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]['photoURL']"
-          [offset]="100" class="border--primary" class="product__image" />
-        <div class="product__big">
-          <h4 class="product__name">
-            {{ element["product"]["description"] | titlecase }}
-          </h4>
-          <p class="product__etiquet">SKU: {{ element["chosenProduct"]["sku"] }}</p>
-          <div>
-            <span *ngIf="element['color']">
-              <mat-icon [style.color]="element.chosenProduct.color.color">brightness_1</mat-icon>
-              {{element.chosenProduct.color.name}}
-            </span>
-            <button (click)="delete(element['chosenProduct'])" mat-button color="warn">Eliminar</button>
+<ng-container *ngIf="reqProdListObservable$ | async as reqProdList; else nothing">
+  <div *ngIf="reqProdList.length>0; else nothing">
+    <div *ngFor="let element of reqProdList | paginate: config; let ind = index">
+      <div>
+        <div class="product ms-flex ms-flex--center">
+          <img [defaultImage]="defaultImage" [lazyLoad]="element['chosenProduct']['gallery'][0]['photoURL']"
+            [offset]="100" class="border--primary" class="product__image" />
+          <div class="product__big">
+            <h4 class="product__name">
+              {{ element["product"]["description"] | titlecase }}
+            </h4>
+            <p class="product__etiquet">SKU: {{ element["chosenProduct"]["sku"] }}</p>
+            <div>
+              <span *ngIf="element['color']">
+                <mat-icon [style.color]="element.chosenProduct.color.color">brightness_1</mat-icon>
+                {{element.chosenProduct.color.name}}
+              </span>
+              <button (click)="delete(element.product.sku, element.chosenProduct.sku)" mat-button color="warn">Eliminar</button>
+            </div>
+          </div>
+          <span class="ms-fill"></span>
+          <div class="product__small w3-hide-small">
+            <app-quantity-div-improved 
+              [product]="element['product']" [chosen]="element['chosenProduct']"
+              [price]="element['price']" [color]="element['color']" size="md">
+            </app-quantity-div-improved>
+            <p class="product__price">
+              {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
+            </p>
           </div>
         </div>
-        <span class="ms-fill"></span>
-        <div class="product__small w3-hide-small">
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
-            [price]="element['price']" [color]="element['color']" size="md"></app-quantity-div>
-          <p class="product__price">
-            {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
-          </p>
+        <div class="w3-padding w3-hide-large w3-hide-medium" style="display: flex; align-items: flex-end">
+          <div>
+            <app-quantity-div-improved  
+              [product]="element['product']" [chosen]="element['chosenProduct']"
+              [color]="element['color']" [price]="element['price']" size="md">
+            </app-quantity-div-improved >
+          </div>
+          <span class="ms-fill"></span>
+          <div class="w3-right-align w3-margin-top">
+            <div class="product__price">
+              {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
+            </div>
+          </div>
         </div>
       </div>
-      <div class="w3-padding w3-hide-large w3-hide-medium" style="display: flex; align-items: flex-end">
-        <div>
-          <app-quantity-div [product]="element['product']" [chosen]="element['chosenProduct']"
-            [color]="element['color']" [price]="element['price']" size="md"></app-quantity-div>
-        </div>
+      <hr style="margin:0" />
+    </div>
+    <div *ngIf="reqProdList.length > 4">
+      <div class="ms-flex">
         <span class="ms-fill"></span>
-        <div class="w3-right-align w3-margin-top">
-          <div class="product__price">
-            {{giveProductPrice(element) | currency: 'S/. ':'symbol':'2.2-2'}}
+        <pagination-template #p="paginationApi" [id]="config.id" maxSize="4" (pageChange)="config.currentPage = $event">
+          <div class="ms-flex ms-flex--center">
+            <button mat-button class="paginator__button" (click)="p.previous()" [disabled]="p.isFirstPage()">
+              <mat-icon>keyboard_arrow_left</mat-icon>
+            </button>
+
+            <div>
+              <span class="paginator__number">{{
+                p.getCurrent() * p.maxSize - (p.maxSize - 1)
+                }}</span>
+              -
+              <span class="paginator__number">{{
+                p.isLastPage() ? p.getTotalItems() : p.getCurrent() * p.maxSize
+                }}</span>
+              de
+              <span class="paginator__number">{{ p.getTotalItems() }}</span>
+            </div>
+            <button mat-button class="paginator__button" (click)="p.next()" [disabled]="p.isLastPage()">
+              <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
           </div>
-        </div>
+        </pagination-template>
       </div>
     </div>
-    <hr style="margin:0" />
-  </div>
-  <div *ngIf="order.length > 4">
-    <div class="ms-flex">
-      <span class="ms-fill"></span>
-      <pagination-template #p="paginationApi" [id]="config.id" maxSize="4" (pageChange)="config.currentPage = $event">
-        <div class="ms-flex ms-flex--center">
-          <button mat-button class="paginator__button" (click)="p.previous()" [disabled]="p.isFirstPage()">
-            <mat-icon>keyboard_arrow_left</mat-icon>
-          </button>
 
-          <div>
-            <span class="paginator__number">{{
-              p.getCurrent() * p.maxSize - (p.maxSize - 1)
-              }}</span>
-            -
-            <span class="paginator__number">{{
-              p.isLastPage() ? p.getTotalItems() : p.getCurrent() * p.maxSize
-              }}</span>
-            de
-            <span class="paginator__number">{{ p.getTotalItems() }}</span>
-          </div>
-          <button mat-button class="paginator__button" (click)="p.next()" [disabled]="p.isLastPage()">
-            <mat-icon>keyboard_arrow_right</mat-icon>
-          </button>
-        </div>
-      </pagination-template>
-    </div>
   </div>
-
-</div>
+</ng-container>
 <ng-template #nothing>
   <mat-card>
     <div class="w3-center">No hay elementos añadidos</div>

@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LandingService } from 'src/app/core/services/landing.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 @Component({
   selector: 'app-toolbar-web',
   templateUrl: './toolbar-web.component.html',
@@ -32,6 +33,8 @@ export class ToolbarWebComponent implements OnInit {
 
   @ViewChild("megaMenu") menu: ElementRef;
 
+  shopCarNumber$: Observable<number>
+
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
   constructor(
     public auth: AuthService,
@@ -39,10 +42,21 @@ export class ToolbarWebComponent implements OnInit {
     public dbs: DatabaseService,
     private ld: LandingService,
     private renderer: Renderer2,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public shopCar: ShoppingCarService,
   ) { }
 
   ngOnInit(): void {
+    this.shopCarNumber$ = this.shopCar.reqProdListObservable.pipe(
+      map(list => {
+        if(list){
+          return list.length
+        } else {
+          return null
+        }
+      })
+    )
+
     this.search$ = this.searchForm.valueChanges.pipe(
       startWith(''),
       map((word) => {

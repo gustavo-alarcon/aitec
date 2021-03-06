@@ -13,6 +13,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import { Platform } from '@angular/cdk/platform';
 import { Location } from "@angular/common";
+import { ShoppingCarService } from './shopping-car.service';
 
 // export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
 export const googleProvider = new firebase.default.auth.GoogleAuthProvider();
@@ -29,6 +30,7 @@ export class AuthService {
 
 
   public authLoader: boolean = false;
+  public uid: string = null;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -37,7 +39,7 @@ export class AuthService {
     public snackbar: MatSnackBar,
     private platform: Platform,
     private dbs: DatabaseService,
-    private location: Location
+    private location: Location,
   ) {
 
     this.afAuth.setPersistence('local');
@@ -46,8 +48,10 @@ export class AuthService {
     this.user$ = this.afAuth.user.pipe(
       switchMap(user => {
         if (user) {
+          this.uid = user.uid
           return this.afs.collection('users').doc<User>(user.uid).valueChanges()
         } else {
+          this.uid = null
           return of(null)
         }
       })
@@ -58,6 +62,7 @@ export class AuthService {
   private getUserObservable(): Observable<{ authUser: firebase.default.User, dbUser: User, type: "registered" | "unregistered" | "unexistent" }> {
     return this.afAuth.authState.pipe(
       switchMap(authUser => {
+        console.log("called")
         // console.log(authUser)
         if (authUser) {
           // console.log(authUser);
@@ -135,9 +140,7 @@ export class AuthService {
   }
 
   public logout(): void {
-    this.dbs.order = []
-    this.dbs.orderObs.next([])
-    localStorage.clear()
+    //localStorage.clear()
     this.dbs.isMayUser.next(false)
     this.afAuth.signOut().finally(() => {
       this.router.navigateByUrl('/main');
