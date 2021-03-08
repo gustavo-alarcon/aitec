@@ -98,7 +98,7 @@ export class LocationDialogComponent implements OnInit {
     const userRef = this.af.firestore.collection(`/users`).doc(this.data.user.uid);
     const batch = this.af.firestore.batch()
     this.loading.next(true)
-    let newLoacation = {
+    let newLoacation/*: User["location"] */= {
       address: this.firstFormGroup.get('name').value,
       reference: this.firstFormGroup.get('reference').value,
       coord: this.center,

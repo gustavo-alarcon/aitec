@@ -4,15 +4,27 @@ export interface User {
   uid?: string;
   email: string;
   role?:string;
-  customerType?:string;
+  customerType?:string;         //'Mayorista'
   orders?:number;
   location?: {
     address: string;
     reference: string;
     coord: { lat: number; lng: number };
-    departamento:string;
-    provincia:string;
-    distrito:string;
+    departamento:{
+      id: string
+      name: string
+    };
+    provincia:{
+      department_id: string
+      id: string
+      name: string
+    };
+    distrito:{
+      department_id: string
+      id: string
+      name: string
+      province_id: string
+    };
     idDistrito:string;
   }[];
 

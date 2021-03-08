@@ -30,6 +30,7 @@ import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
 import { Waybill, WaybillProductList } from '../models/waybill.model';
 import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
+import { Stores } from '../models/stores.model';
 
 @Injectable({
   providedIn: 'root',
@@ -346,19 +347,9 @@ export class DatabaseService {
       );
   }
 
-  getDelivery() {
+  getStores(): Observable<Stores[]> {
     return this.afs
-      .collection(`/db/aitec/config/generalConfig/delivery`, (ref) =>
-        ref.orderBy('createdAt', 'asc')
-      )
-      .valueChanges()
-      .pipe(shareReplay(1));
-  }
-
-
-  getStores() {
-    return this.afs
-      .collection(`/db/aitec/config/generalConfig/stores`, (ref) =>
+      .collection<Stores>(`/db/aitec/config/generalConfig/stores`, (ref) =>
         ref.orderBy('createdAt', 'desc')
       )
       .valueChanges()

@@ -91,39 +91,32 @@
         <div *ngIf="(view$|async) == 1">
           <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
         </div>
-        <!-- Delivery -->
         <div *ngIf="(view$|async) == 2">
           <div class="menuContainer">
-            <div 
-              (click)="this.deliveryForm.get('deliveryPickUp').setValue(false)" 
-              [ngClass]="{'activated': !this.deliveryForm.get('deliveryPickUp').value, 
-                          'deactivated': this.deliveryForm.get('deliveryPickUp').value}">
+            <div (click)="change(1)" [ngClass]="{'activated': viewDelivery==1, 'deactivated': viewDelivery!=1}">
               Entrega en domicilio
             </div>
-            <div 
-              (click)="this.deliveryForm.get('deliveryPickUp').setValue(true)" 
-              [ngClass]="{'activated': this.deliveryForm.get('deliveryPickUp').value, 
-                          'deactivated': !this.deliveryForm.get('deliveryPickUp').value}">
+            <div (click)="change(2)" [ngClass]="{'activated': viewDelivery==2, 'deactivated': viewDelivery!=2}">
               Recojo en tienda
             </div>
           </div>
           <mat-card class="w3-block delivery">
-            <ng-container [ngSwitch]="this.deliveryForm.get('deliveryPickUp').value" class="w3-block delivery">
-              <mat-card-content *ngSwitchCase="false">
+            <ng-container [ngSwitch]="viewDelivery" class="w3-block delivery">
+              <mat-card-content *ngSwitchCase="1">
                 <h4 class="delivery__title w3-center">
                   Por favor registra tus datos y verifícalos
                 </h4>
                 <mat-form-field class="w3-block" appearance="outline">
                   <mat-label>Zona de envío</mat-label>
-                  <mat-select disableRipple [formControl]="this.deliveryForm.get('delivery')">
-                    <mat-option *ngFor="let dept of (deliveryList$ | async)" [value]="dept">
+                  <mat-select disableRipple [formControl]="deliveryForm">
+                    <mat-option (click)="selectDelivery(0)" [value]="-2">Coordina el delivery con la tienda</mat-option>
+                    <mat-option *ngFor="let dept of zones;let ind=index" (click)="selectDelivery(dept)" [value]="ind+1">
                       {{ dept.name | titlecase }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <!-- In case delivery == 0 whe show coordina delivery -->
-                <div *ngIf="delivery$|async as delivery; else contact">
-                  <p>El costo de tu delivery es: <b>{{delivery | currency: 'S/. ':'symbol':'2.2-2'}}</b></p>
+                <div *ngIf="selectedDelivery && ((reqProdListObservable$|async).length ==1)">
+                  <p>El costo de tu delivery es: <b>{{selectedDelivery | currency: 'S/. ':'symbol':'2.2-2'}}</b></p>
                   <h4 class="delivery__title w3-center">
                     Por favor registra tus datos y verifícalos
                   </h4>
@@ -132,16 +125,14 @@
                     ¿En dónde recibirás tu pedido?
                   </div>
                   <hr style="margin-top: 0" />
-                  <div *ngIf="this.deliveryForm.get('location').enabled">
-                    <div 
-                      *ngFor="let loc of (locationList$|async)" 
-                      (click)="this.deliveryForm.get('location').setValue(loc)"
-                      [ngClass]="{'store__selected': this.deliveryForm.get('location').value == loc}">
+                  <div *ngIf="user.location">
+                    <div *ngFor="let loc of locations;let k=index" (click)="selectLocal(k)"
+                      [ngClass]="{'store__selected': selectedLocation == k}">
                       <div class="store">
                         <div><strong>{{ loc.address }}</strong></div>
                         <div>Referencia: {{ loc.reference }}</div>
                         <div class="store__district">
-                          {{loc.distrito.name}} - {{loc.provincia.name}} - {{loc.departamento.name}}
+                          {{loc.distrito}} - {{loc.provincia}} - {{loc.departamento}}
                         </div>
                         <div class="ms-flex">
                           <span class="ms-fill"></span>
@@ -159,35 +150,31 @@
                     </button>
                   </div>
                 </div>
-                <ng-template #contact>
-                  <div>
-                    <h4 class="delivery__title">
-                      Coordina el delivery con la tienda.
-                    </h4>
-                    <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
-                    <ul>
-                      <li *ngFor="let num of contactNumbers" style="color: #828282;font-weight: 600;">{{num}}</li>
-                    </ul>
-                    <p>o enviarnos un correo con el número de tu pedido a:</p>
-                    <p *ngFor="let em of contactEmails" style="color: #828282;font-weight: 600;">{{em}}</p>
-                    <p>Luego de coordinar el delivery, el precio se actualizará con el costo respectivo.</p>
-                  </div>
-                </ng-template>
+                <div *ngIf="deliveryForm.value == -2">
+                  <h4 class="delivery__title">
+                    Coordina el delivery con la tienda.
+                  </h4>
+                  <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
+                  <ul>
+                    <li *ngFor="let num of contactNumbers" style="color: #828282;font-weight: 600;">{{num}}</li>
+                  </ul>
+                  <p>o enviarnos un correo con el número de tu pedido a:</p>
+                  <p *ngFor="let em of contactEmails" style="color: #828282;font-weight: 600;">{{em}}</p>
+                  <p>Luego de coordinar el delivery, el precio se actualizará con el costo respectivo.</p>
+                </div>
               </mat-card-content>
-              <mat-card-content *ngSwitchCase="true">
+              <mat-card-content *ngSwitchCase="2">
                 <h4 class="delivery__title">
                   Ubica nuestras tiendas en:
                 </h4>
-                <div 
-                  *ngFor="let store of (deliveryList$ | async)" 
-                  (click)="this.deliveryForm.get('delivery').setValue(store)"
-                  [ngClass]="{'store__selected': this.deliveryForm.get('delivery').value == store}">
+                <div *ngFor="let store of stores;let i=index" (click)="selectStore(i)"
+                  [ngClass]="{'store__selected': selectedStore == i}">
                   <div class="store">
-                    <div class="store__address">{{store?.address}}</div>
+                    <div class="store__address">{{store.address}}</div>
                     <div class="store__district">
-                      {{store?.distrito?.name}} - {{store?.provincia?.name}} - {{store?.departamento?.name}}
+                      {{store.distrito.name}} - {{store.provincia.name}} - {{store.departamento.name}}
                     </div>
-                    <div class="store__schedule">{{store?.schedule}}</div>
+                    <div class="store__schedule">{{store.schedule}}</div>
                   </div>
                   <hr style="margin: 0" />
                 </div>
@@ -427,27 +414,24 @@
             <p class="resume__small">*En el siguiente paso se procederá a generar la orden de compra y podrá confirmar
               el Pago.</p>
           </div>
-          <!-- Second section -->
+          <!-- Secon section -->
           <div *ngIf="(view$|async) == 2">
             <div class="w3-margin-bottom">
               <h4 class="resume__subtitle">Comentario adicional</h4>
               <mat-form-field class="w3-block" appearance="outline">
-                <textarea autocomplete="off" [formControl]="this.deliveryForm.get('observation')" matInput placeholder="Escriba..."
+                <textarea autocomplete="off" [formControl]="observation" type="tel" matInput placeholder="Escriba.."
                   rows="3"></textarea>
               </mat-form-field>
               <p class="resume__small">*Puedes dejar un comentario adicional para tenerlo en cuenta al generar tu pedido
               </p>
             </div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button 
-                [disabled]="!this.deliveryForm.valid" 
-                color="primary"
-                class="resume__button">
-                Generar orden de pedido</button>
+              <button mat-raised-button [disabled]="validatedSecondButton" (click)="thirdView()" color="primary"
+                class="resume__button">Generar orden de
+                pedido</button>
             </div>
             <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
           </div>
-
           <!-- Third section -->
           <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
             <button 

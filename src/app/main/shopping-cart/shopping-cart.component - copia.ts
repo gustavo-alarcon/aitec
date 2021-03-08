@@ -4,8 +4,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
-import { BehaviorSubject, combineLatest, empty, Observable, of } from 'rxjs';
-import { finalize, map, shareReplay, startWith, switchMap, take, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, empty, Observable } from 'rxjs';
+import { finalize, map, startWith, switchMap, take, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { Sale, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -14,8 +14,6 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
 import { SaleDialogComponent } from './sale-dialog/sale-dialog.component';
 import { LandingService } from 'src/app/core/services/landing.service';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
-import { Product } from 'src/app/core/models/product.model';
-import { Stores } from 'src/app/core/models/stores.model';
 
 
 @Component({
@@ -31,8 +29,10 @@ export class ShoppingCartComponent implements OnInit {
   discount$ = this.discount.asObservable();
 
   list$: Observable<any>;
+  sum$: Observable<string>;
   subtotal$: Observable<string>;
   igv$: Observable<string>;
+  delivery$: Observable<any>;
   totalAll$: Observable<string>;
 
   uploadingSale$: BehaviorSubject<boolean> | Observable<Sale> = null;
@@ -44,6 +44,7 @@ export class ShoppingCartComponent implements OnInit {
 
   initCoupon$: Observable<any>
   couponList: Array<any> = []
+  couponForm: FormControl = new FormControl('')
   couponVerified: boolean = false
 
   user: User
@@ -54,7 +55,7 @@ export class ShoppingCartComponent implements OnInit {
   selectedDelivery: number = 0;
   zones: Array<any> = [];
 
-  //deliveryForm: FormControl = new FormControl(null)
+  deliveryForm: FormControl = new FormControl(null)
 
   stores: any[] = []
   locations: any[] = []
@@ -101,18 +102,7 @@ export class ShoppingCartComponent implements OnInit {
   initPayment$: Observable<any>
   firstTime: number = 1
 
-  //NEW
-  deliveryForm: FormGroup     //Subtype deliveryType designates 0 (delivery) or 1 (pickup)
-  couponForm: FormControl = new FormControl('', {updateOn: 'submit'})
-
-
   reqProdListObservable$: Observable<SaleRequestedProducts[]>
-  delivery$: Observable<number>;
-  sum$: Observable<number>;
-
-
-  deliveryList$: Observable<Product["zones"] | Stores>;
-  locationList$: Observable<User["location"]>;
 
   constructor(
     private dbs: DatabaseService,
@@ -127,118 +117,46 @@ export class ShoppingCartComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.deliveryForm = this.fb.group({
-      deliveryPickUp: new FormControl(false), //Designates type 0 (delivery) or 1 (pickup)
-      delivery: new FormControl(null, Validators.required),
-      observation: new FormControl(''),
-      location: new FormControl(null, Validators.required)    //Personal location of user. Only used when pickUp 0 and valid delivery
-    })
 
     this.reqProdListObservable$ = this.shopCar.reqProdListObservable
 
-    this.deliveryList$ = this.deliveryForm.get("deliveryPickUp").valueChanges.pipe(
-      startWith(this.deliveryForm.get("deliveryPickUp").value),
-      switchMap(pickUp => {
-
-        this.deliveryForm.get("delivery").setValue(null)
-        this.deliveryForm.get("delivery").markAsUntouched()
-
-        if(!pickUp){
-          //If not pickup, we return requested Products (shop car) and then get products DB
-          //to get available zones
-          return this.reqProdListObservable$.pipe(
-            switchMap(reqProdList => {
-              //If we have single product, we return complete list
-              if(reqProdList){
-                if(reqProdList.length == 1){
-                  if(reqProdList[0].quantity == 1){
-                  return this.shopCar.getProductDbObservable(reqProdList[0].product.id).pipe(
-                    take(1),
-                    map(prodDB => {
-                      if(prodDB.zones){
-                        this.deliveryForm.get("delivery").enable()
-                        
-                        let other: Product["zones"][0] = {
-                          name: "Coordinar el delivery con la tienda",
-                          delivery: 0
-                        }
-
-                        return [other, ...prodDB.zones]
-                      } else {
-                        this.deliveryForm.get("delivery").disable()
-                        return []
-                      }
-                      
-                    })
-                  )}
-                }
-              }
-              this.deliveryForm.get("delivery").disable()
-              return of([])
-            })
-          )
-        } else {
-          //If pickup, we return available stores
-          this.deliveryForm.get("delivery").enable()
-          return this.dbs.getStores()
-        }
-      }),
-      shareReplay(1),
-      tap(console.log)
-    )
-
-    this.delivery$ = this.deliveryForm.get("delivery").statusChanges.pipe(
-      startWith(this.deliveryForm.get("delivery").status),
-      switchMap(status => {
-        this.deliveryForm.get("location").setValue(null)
-        this.deliveryForm.get("location").disable()
-        if(status == "VALID"){
-          //IF it is valid, it could be a product zone or a store (in this case, 0)
-          return this.deliveryForm.get("delivery").valueChanges.pipe(
-            startWith(this.deliveryForm.get("delivery").value),
-            map((res: Product["zones"][0]) => {
-              if(res){
-                //In the case we select a valid location and delivery is not 0
-                if(!!res.delivery){
-                  this.deliveryForm.get("location").enable()
-                  return res.delivery
-                }
-              }
-              return 0
-            })
-          )
-        } else {
-          return of(0)
-        }
-      }),
-      shareReplay(1)
-    )
-
-    this.locationList$ = this.auth.user$.pipe(
-      map(user => {
-        if(user){
-          if(user.location){
-            return user.location
-          }
-        }
-        return []
+    this.delivery$ = this.dbs.delivery$.pipe(
+      tap(del => {
+        this.deliveryNumber = del
       })
     )
-    
 
     this.sum$ = combineLatest([
       this.auth.user$,
       this.reqProdListObservable$,
-      this.delivery$
+      this.dbs.delivery$
     ]).pipe(
-      map(([user, ord, delivery]) => {
-        if (ord.length) {
-          let sum = [...ord]
-            .map((el) => this.giveProductPrice(el, user.customerType))
-            .reduce((a, b) => a + b, 0);
-          return sum + delivery;
+      map(([user, ord, del]) => {
+
+        let may = user.customerType
+        if (ord.length == 1) {
+          if (ord[0].quantity == 1) {
+            this.zones = ord[0].product["zones"] ? ord[0].product["zones"] : []
+            if (this.deliveryForm.disabled) {
+              this.deliveryForm.setValue(null)
+              this.deliveryForm.enable()
+            }
+          } else {
+            this.deliveryForm.setValue(-2)
+            this.deliveryForm.disable()
+          }
         } else {
-          return 0;
+          this.deliveryForm.setValue(-2)
+          this.deliveryForm.disable()
+        }
+        if (ord.length) {
+          let suma = [...ord]
+            .map((el) => this.giveProductPrice(el, may))
+            .reduce((a, b) => a + b, 0);
+          this.total = suma + del;
+          return (suma + del).toFixed(2);
+        } else {
+          return (0 + del).toFixed(2);
         }
       })
     );
@@ -361,7 +279,6 @@ export class ShoppingCartComponent implements OnInit {
 
 
   }
-
 
 
   firstView() {
@@ -637,23 +554,22 @@ export class ShoppingCartComponent implements OnInit {
   }
 
 
-  // selectDelivery(option) {
-  //   console.log(option);
-  //   if (option) {
-  //     this.selectedDelivery = option.delivery
+  selectDelivery(option) {
+    if (option) {
+      this.selectedDelivery = option.delivery
 
-  //     if (this.delivery == 1) {
-  //       this.dbs.delivery.next(this.selectedDelivery);
-  //     }
-  //   } else {
-  //     this.selectedDelivery = 0
-  //     this.dbs.delivery.next(this.selectedDelivery);
-  //   }
+      if (this.delivery == 1) {
+        this.dbs.delivery.next(this.selectedDelivery);
+      }
+    } else {
+      this.selectedDelivery = 0
+      this.dbs.delivery.next(this.selectedDelivery);
+    }
 
-  // }
+  }
 
 
-  openMap(user: User, index: number, edit: boolean) {
+  openMap(user, index, edit) {
     this.dialog.open(LocationDialogComponent, {
       data: {
         user: user,
@@ -664,7 +580,6 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   selectStore(value) {
-    console.log(this.stores[value])
     this.selectedStore = value
   }
 
