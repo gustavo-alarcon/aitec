@@ -6,6 +6,8 @@ export interface Product {
   description: string;
   additionalDescription: string;
   idCategory?: string;
+  //idCategory will refer to id, category or subcategory. CHeck category
+  //in coupon model for more info
   guarantee: boolean;
   timeguarantee: number;
   sku: string;                //Codigo de existencia

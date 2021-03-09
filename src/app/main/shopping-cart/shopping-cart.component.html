@@ -359,7 +359,7 @@
             <div class="ms-flex ms-flex--center">
               <span>Descuento promocional</span>
               <span class="ms-fill"></span>
-              <span>{{ discount$ | async }}</span>
+              <span>{{ discount$ | async | number: ".2"}}</span>
             </div>
             <div class="ms-flex ms-flex--center">
               <span>IGV</span>
@@ -384,25 +384,45 @@
           <!-- First section -->
           <div *ngIf="(view$|async) == 1">
             <p class="resume__small">*El costo del delivery se agregará despues de registrar el método de entrega</p>
-            <div class="w3-margin-bottom" *ngIf="initCoupon$ | async">
+            {{couponForm.get('coupon').status}}
+            <form [formGroup]="couponForm" class="w3-margin-bottom">
               <h4 class="resume__subtitle">Tengo un código de descuento</h4>
               <div class="email-form background-color w3-margin-top">
-                <input matInput type="text" autocomplete="off" [formControl]="couponForm" class="email-form__input"
+                <input 
+                  [readonly]="!couponForm.get('coupon').invalid"
+                  matInput type="text" autocomplete="off" 
+                  formControlName="coupon" class="email-form__input"
                   style="border: none" />
-                <button mat-icon-button [style.visibility]="couponVerified?'visible':'hidden'" (click)="clearCoupon()">
-                  <mat-icon>close</mat-icon>
-                </button>
-                <button mat-button class="email-form__button" *ngIf="couponVerified;else noCoupon">
-                  <mat-icon>check_circle_outline</mat-icon>
-                </button>
-                <ng-template #noCoupon>
-                  <button mat-button class="email-form__button" (click)="getDiscountCoupon()">
-                    <mat-icon>refresh</mat-icon>
-                  </button>
-                </ng-template>
+                
+                <div [ngSwitch]="couponForm.get('coupon').status">
+                  <!-- <mat-card-content *ngSwitchCase="false"> -->
+                    <div *ngSwitchCase="'VALID'" style="white-space: nowrap;">
+                        <button
+                          type="button" mat-icon-button (click)="clearCoupon()">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                        <button
+                          type="button" mat-button class="email-form__button_success" >
+                          <mat-icon>check_circle_outline</mat-icon>
+                        </button>
+                    </div>
+                    
+                    <button *ngSwitchCase="'INVALID'"
+                      type="submit" mat-button class="email-form__button">
+                      <mat-icon>refresh</mat-icon>
+                    </button>
+
+                    <button *ngSwitchCase="'PENDING'"
+                      disabled
+                      type="button" mat-button class="email-form__button_pending">
+                      <mat-icon><mat-spinner diameter="24"></mat-spinner></mat-icon>
+                    </button>
+                </div>
+                
               </div>
               <p class="resume__small">*El código de descuento es único y solo es válido para UN uso</p>
-            </div>
+            </form>
+
             <div class="w3-margin-bottom">
               <h4 class="resume__subtitle">Selecciona un asesor</h4>
 

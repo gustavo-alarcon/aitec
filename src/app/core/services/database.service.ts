@@ -15,7 +15,7 @@ import {
   mapTo,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError } from 'rxjs';
+import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError, combineLatest } from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase';
@@ -31,6 +31,7 @@ import { Kardex } from '../models/kardex.model';
 import { Waybill, WaybillProductList } from '../models/waybill.model';
 import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 import { Stores } from '../models/stores.model';
+import { Coupon } from '../models/coupon.model';
 
 @Injectable({
   providedIn: 'root',
@@ -288,6 +289,30 @@ export class DatabaseService {
     ).valueChanges().pipe(shareReplay(1));
   }
 
+  //deph Level refers to how many fields do we have in coupon Category
+  getCategoryListFromCoupon(coupon: Coupon): Observable<Category[]> {
+    let dephLevel = <1|2|3>(Number(!!coupon.category.id) + Number(!!coupon.category.idCategory) +
+                            Number(!!coupon.category.idSubCategory))
+    let catId = coupon.category.id
+
+    let id = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+              ref.where('id', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
+    let idCategory = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+              ref.where('idCategory', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
+    let idSubCategory = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
+              ref.where('idSubCategory', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
+  
+    //For more info check coupon model Category
+    switch(dephLevel){
+      case 1:
+        return combineLatest([id, idCategory]).pipe(map(([idRes, idCatRes]) => [...idRes, ...idCatRes]))
+      case 2:
+        return combineLatest([id, idSubCategory]).pipe(map(([idRes, idSubCatRes]) => [...idRes, ...idSubCatRes]))
+      case 3:
+        return of([coupon.category])
+    }
+  }
+
   getSubCategories(id): Observable<Category[]> {
     return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
       ref.where('idCategory', '==', id)
@@ -363,6 +388,19 @@ export class DatabaseService {
       )
       .valueChanges()
       .pipe(shareReplay(1));
+  }
+
+  getCoupon(coupon: string): Observable<Coupon>{
+    return this.afs.collection<Coupon>(`/db/aitec/coupons`, (ref) =>
+        ref.where('name', '==', coupon).limit(1)).get({source: "server"}).pipe(
+          map(res => {
+            if(res.empty){
+              return null
+            } else {
+              return (<Coupon>res.docs[0].data())
+            }
+          })
+        )
   }
 
   getCouponsDoc(): Observable<any> {

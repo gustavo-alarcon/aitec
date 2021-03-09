@@ -20,7 +20,7 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product | Package;
+  product: Product //| Package;
   //Product can contain many colors, so we use
   //chosenProduct to get the color
   //This means, a sale can have many products with same id

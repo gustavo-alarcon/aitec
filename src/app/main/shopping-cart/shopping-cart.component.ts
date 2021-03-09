@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -16,6 +16,8 @@ import { LandingService } from 'src/app/core/services/landing.service';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 import { Product } from 'src/app/core/models/product.model';
 import { Stores } from 'src/app/core/models/stores.model';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { Coupon } from 'src/app/core/models/coupon.model';
 
 
 @Component({
@@ -27,7 +29,7 @@ export class ShoppingCartComponent implements OnInit {
   view = new BehaviorSubject<number>(1);
   view$ = this.view.asObservable();
 
-  discount = new BehaviorSubject<string>('0.00');
+  discount = new BehaviorSubject<number>(0);
   discount$ = this.discount.asObservable();
 
   list$: Observable<any>;
@@ -103,8 +105,7 @@ export class ShoppingCartComponent implements OnInit {
 
   //NEW
   deliveryForm: FormGroup     //Subtype deliveryType designates 0 (delivery) or 1 (pickup)
-  couponForm: FormControl = new FormControl('', {updateOn: 'submit'})
-
+  couponForm: FormGroup
 
   reqProdListObservable$: Observable<SaleRequestedProducts[]>
   delivery$: Observable<number>;
@@ -124,6 +125,7 @@ export class ShoppingCartComponent implements OnInit {
     private snackbar: MatSnackBar,
     private ld: LandingService,
     public shopCar: ShoppingCarService,
+    public afs: AngularFirestore
   ) { }
 
   ngOnInit(): void {
@@ -134,8 +136,18 @@ export class ShoppingCartComponent implements OnInit {
       location: new FormControl(null, Validators.required)    //Personal location of user. Only used when pickUp 0 and valid delivery
     })
 
+    this.couponForm = this.fb.group({
+      coupon: new FormControl('', {
+        updateOn: 'submit', asyncValidators:[this.couponValidator(this.dbs)], validators: [Validators.required]}),
+      couponData: new FormControl(null)
+    })
+    
+    this.couponForm.valueChanges.pipe(tap(console.log)).subscribe()
+    this.couponForm.statusChanges.pipe(tap(console.log)).subscribe()
+
     this.reqProdListObservable$ = this.shopCar.reqProdListObservable
 
+    //List of zones or stores in delivery
     this.deliveryList$ = this.deliveryForm.get("deliveryPickUp").valueChanges.pipe(
       startWith(this.deliveryForm.get("deliveryPickUp").value),
       switchMap(pickUp => {
@@ -184,9 +196,9 @@ export class ShoppingCartComponent implements OnInit {
         }
       }),
       shareReplay(1),
-      tap(console.log)
     )
 
+    //Refers to delivery price
     this.delivery$ = this.deliveryForm.get("delivery").statusChanges.pipe(
       startWith(this.deliveryForm.get("delivery").status),
       switchMap(status => {
@@ -214,6 +226,7 @@ export class ShoppingCartComponent implements OnInit {
       shareReplay(1)
     )
 
+    //User old locations
     this.locationList$ = this.auth.user$.pipe(
       map(user => {
         if(user){
@@ -242,6 +255,67 @@ export class ShoppingCartComponent implements OnInit {
         }
       })
     );
+
+    //Refers to delivery price. Here we validate coupon and apply disccount
+    this.discount$ = combineLatest([<Observable<Coupon>>this.couponForm.get('couponData').valueChanges,
+                                    this.reqProdListObservable$])
+      .pipe(
+        switchMap(([coup, reqProdList]) => {
+          //We first get matching elements from reqProdList (where coupon could be applied)
+          let matched: SaleRequestedProducts[] = []
+          if(coup){
+            //Matching brand
+            if(coup.brand){
+              matched = reqProdList.filter(reqProd => reqProd.product.brand.name == coup.brand)
+              return of([coup, matched])
+            }
+            //Matching category
+            if(coup.category){
+              //We get all matching categories
+              return this.dbs.getCategoryListFromCoupon(coup).pipe(map(catList => {
+                matched = reqProdList.filter(reqProd => 
+                          !!catList.find(cat => cat.id == reqProd.product.idCategory))
+                return ([coup, matched])
+              }))
+            }
+            //Matching all
+            return ([coup, reqProdList])
+          } else {
+            return of([])
+          }
+        }),
+        switchMap((res: [Coupon, SaleRequestedProducts[]])=> {
+          if(res.length){
+            let coup = res[0]
+            let reqProdList = res[1]
+            return this.auth.user$.pipe(map(user => {
+              let sum = [...reqProdList]
+                .map((el) => this.giveProductPrice(el, user.customerType))
+                .reduce((a, b) => a + b, 0);
+              //We finally calculate discount:
+              if(sum > coup.from){
+                switch(coup.type){
+                  //Money case
+                  case 1:
+                    return coup.discount
+                  //Percentage case
+                  case 2:
+                    //Calculate discount
+                    let disc = Math.round(sum * coup.discount)/100.0
+                    //If it exceeds limit, we return limit, if not, disc
+                    return disc > coup.limit ? coup.limit : disc
+                }
+              } else {
+                return 0
+              }
+            }))
+          } else {
+            return of(0)
+          }
+        }),
+        startWith(0),
+        shareReplay(1)
+    )
 
     this.totalAll$ = combineLatest([
       this.sum$,
@@ -560,64 +634,8 @@ export class ShoppingCartComponent implements OnInit {
   }
 
   clearCoupon() {
-    this.couponForm.setValue('')
-    this.discount.next('0.00')
-    this.couponForm.enable()
-    this.couponVerified = false
-  }
-
-  getDiscountCoupon() {
-    let value = this.couponForm.value
-
-    if (value) {
-      this.couponForm.disable()
-      let ind = this.couponList.findIndex(el => el.name == value)
-      if (ind >= 0) {
-        let coupon = this.couponList[ind]
-        if (coupon.users.includes(this.dbs.uidUser)) {
-          this.snackbar.open('Cupón ya utilizado', 'Aceptar');
-          this.couponForm.enable()
-        } else {
-          let from = coupon.from ? this.total >= coupon.from : true
-          if (from) {
-            let today = new Date()
-            let validDate = coupon.limitDate ? today.getTime() >= coupon.startDate.toMillis() && today.getTime() <= coupon.endDate.toMillis() : true
-            if (validDate) {
-              let disc = this.getDiscount(coupon)
-              if (coupon.type == 1) {
-                this.discount.next(disc.toFixed(2))
-              } else {
-                if (coupon.limit > 0) {
-                  if (disc > coupon.limit) {
-                    this.discount.next(coupon.limit.toFixed(2))
-
-                  } else {
-                    this.discount.next(disc.toFixed(2))
-                  }
-                } else {
-                  this.discount.next(disc.toFixed(2))
-                }
-              }
-              this.couponVerified = true
-            } else {
-              this.snackbar.open('Código expirado', 'Aceptar');
-              this.couponForm.enable()
-            }
-          } else {
-            this.snackbar.open('El código no se puede utilizar para este monto de compra', 'Aceptar');
-            this.couponForm.enable()
-          }
-        }
-
-      } else {
-        this.snackbar.open('Código de descuento incorrecto', 'Aceptar');
-        this.couponForm.enable()
-
-      }
-
-
-    }
-
+    this.couponForm.get('coupon').setValue('')
+    this.couponForm.get('couponData').setValue(null)
   }
 
   showAdviser(staff): string | undefined {
@@ -635,22 +653,6 @@ export class ShoppingCartComponent implements OnInit {
       this.dbs.delivery.next(0);
     }
   }
-
-
-  // selectDelivery(option) {
-  //   console.log(option);
-  //   if (option) {
-  //     this.selectedDelivery = option.delivery
-
-  //     if (this.delivery == 1) {
-  //       this.dbs.delivery.next(this.selectedDelivery);
-  //     }
-  //   } else {
-  //     this.selectedDelivery = 0
-  //     this.dbs.delivery.next(this.selectedDelivery);
-  //   }
-
-  // }
 
 
   openMap(user: User, index: number, edit: boolean) {
@@ -714,5 +716,51 @@ export class ShoppingCartComponent implements OnInit {
   eliminatedphoto(ind) {
     this.photosList.splice(ind, 1);
     this.photos.data.splice(ind, 1);
+  }
+
+  //Async Validators
+  couponValidator(dbs: DatabaseService) {
+    return (ctrl: AbstractControl): Observable<ValidationErrors|null> => {
+      let coupon = <string>ctrl.value
+      ctrl.parent.get('couponData').setValue(null)
+      return this.dbs.getCoupon(coupon).pipe(
+        switchMap(couponDB => {
+          console.log(couponDB)
+          //There exists no coupon
+          if(!couponDB){
+            this.snackbar.open('Cupón inválido.')
+            return of({noCoupon: true})
+          } else {
+            //If coupon exist, we continue with validations.
+            //Date validation
+            if(couponDB.limitDate){
+              let startDate = new Date(1970)
+              let endDate = new Date(1970)
+              let actualDate = new Date()
+
+              startDate.setSeconds(<number>couponDB.startDate["seconds"])
+              endDate.setSeconds(<number>couponDB.endDate["seconds"] + 86340) //Fix to include endDate
+              if(actualDate < startDate || actualDate > endDate){
+                this.snackbar.open('Cupón expirado.')
+                return of({expiredCoupon: true})
+              } 
+            } 
+            //User validation
+            return this.auth.user$.pipe(
+              take(1),
+              map(user => {
+                if(!!couponDB.users.find(uid => user.uid == uid)){
+                  this.snackbar.open('Cupón agotado.')
+                  return {usedCoupon: true}
+                } else {
+                  ctrl.parent.get('couponData').setValue(couponDB)
+                  return null
+                }
+              })
+            )
+          }
+        })
+      )
+    }
   }
 }
