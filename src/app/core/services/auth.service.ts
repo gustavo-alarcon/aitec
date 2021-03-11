@@ -30,7 +30,6 @@ export class AuthService {
 
 
   public authLoader: boolean = false;
-  public uid: string = null;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -48,13 +47,12 @@ export class AuthService {
     this.user$ = this.afAuth.user.pipe(
       switchMap(user => {
         if (user) {
-          this.uid = user.uid
           return this.afs.collection('users').doc<User>(user.uid).valueChanges()
         } else {
-          this.uid = null
           return of(null)
         }
-      })
+      }),
+      shareReplay(1)
     )
     this.getUser$ = this.getUserObservable()
   }

@@ -40,7 +40,11 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
     let sale = event.data();
     console.log("Sale created: "+ sale.id)
 
-    console.log();
+    let saleColl = db.collection(`db/aitec/sales`).doc(sale.id)
+
+    let salesCorrelative = db.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
+
+    let couponColl = db.collection(`db/aitec/coupons`)
 
     let productsListColl = db.collection(`/db/aitec/productsList`)
     let productArray = Array.from(new Set(sale.requestedProducts.map(prod => (
@@ -53,12 +57,36 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
 
     return db.runTransaction(trans => {
       console.log('Executing transaction');      
-      return trans.getAll(...productArray).then(productsTrans => {
+      return trans.getAll(salesCorrelative, ...productArray).then(res => {
+        
+        let productsTrans = [...res.slice(1)]
+        let salesCorr = res[0]
+        let correlative = null;
+
         //If one product does not exist at DB, we send error
         if(productsTrans.some((doc) => !doc.exists)){
           console.log("One product document does not exist.")
-          return Promise.reject('Product does not exist')
+          throw 'Product does not exist'
         }
+
+        //We first set correlative
+        if(!salesCorr.exists){
+          correlative = 1;
+        } else {
+          correlative = (!!salesCorr.data().rCorrelative) ? (salesCorr.data().rCorrelative + 1) : 1
+        }
+
+        trans.set(salesCorrelative, {rCorrelative: correlative}, {merge: true})
+        //WE update correlative of sale at the end
+
+        //We now update coupon
+        if(!!sale.coupon){
+          let ocupId = sale.coupon.id
+          if(ocupId){
+            trans.update(couponColl.doc(ocupId), {users: admin.firestore.FieldValue.arrayUnion(sale.user.uid)})
+          }
+        }
+
         console.log("Validating Stock")
 
         productsTrans.forEach(el => {
@@ -101,7 +129,7 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
           trans.update(productsListColl.doc(productDB.id), productDB)
         })
 
-        trans.update(db.collection(`db/aitec/sales`).doc(sale.id), {status: 'Solicitado'})
+        trans.update(saleColl, {status: 'Solicitado', correlative})
 
        }).then(
         success => {
@@ -109,7 +137,7 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
         },
         err => {
           console.log("Unsuccessfull sale")
-          return db.collection(`db/aitec/sales`).doc(sale.id).update({status: 'Error'})
+          return saleColl.update({status: 'Error'})
         }
        )
        

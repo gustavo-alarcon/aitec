@@ -54,6 +54,24 @@
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
   }
+  &__button_success {
+    border-radius: 0;
+    min-width: 45px !important;
+    padding: 5px !important;
+    background-color: green;
+    color: white;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+  &__button_pending {
+    border-radius: 0;
+    min-width: 45px !important;
+    padding: 5px !important;
+    background-color: lightgrey;
+    color: white;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
 }
 
 .delivery {

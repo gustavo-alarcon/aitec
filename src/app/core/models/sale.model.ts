@@ -1,6 +1,8 @@
 import { User } from 'src/app/core/models/user.model';
 import { Product, unitProduct } from './product.model';
 import { Package } from './package.model';
+import { Coupon } from './coupon.model';
+import { Stores } from './stores.model';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
@@ -20,7 +22,7 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product | Package;
+  product: Product //| Package;
   //Product can contain many colors, so we use
   //chosenProduct to get the color
   //This means, a sale can have many products with same id
@@ -36,44 +38,54 @@ export interface Sale {
   id: string;
   correlative: number;
   correlativeType: string;
-  payType?: any,
-  document?: string,             //tipo de comprobante
-  location?: {
-    address: string,
-    district: any,
-    coord?: {
-      lat: number,
-      lng: number,
-    },
-    reference: string,
-    phone: number
-  },
-
-  userId?: string;
   user: User;                   //requesting user
-  requestDate: Date,            //Fecha deseada por cliente
 
-  idDocument: number;
-  documentInfo: any;
-  payInfo: any;
-
-  idDelivery: number;
-  deliveryType: string;
-  deliveryInfo: any;
-  payDelivery:boolean;
-  observation: string;
-
-  adviser:any;
-  coupon:any;
-  //A partir de este punto, todo varia de acuerdo
-  //a formulario de ventas.
   status: saleStatusOptions[keyof saleStatusOptions]
-
   requestedProducts: SaleRequestedProducts[];
 
 
-  deliveryPrice: number;
-  total: number;
+
+  // Delivery data
+  deliveryPickUp: boolean;  //Whether it is pickup or delivery (sent)
+  delivery: Product["zones"][0] | Stores;   //Product zone in case of delivery, stores in pickup
+  observation: string;
+  location: User["location"][0]             //In case of delivery and valid zone
+  //deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
+
+  //Coupon data
+  coupon:Coupon;
+  couponDiscount: Number       //Discount applied at creatinon
+
+  //Payment data
+  document: "Boleta"| "Factura",             //tipo de comprobante
+  documentInfo: {
+    dni: string,
+    name: string
+  } | {
+    ruc: string,
+    name: string,
+    address: string
+  };
+  
+  payType?: {
+    name: string;
+    value: number;
+    account?: string;
+  },
+  payInfo: {      //Not yet used or implemented
+    type: string,
+    numero: string,
+    month: string,
+    year: string,
+    cvv: string,
+    titular: string,
+  };
+
+  adviser:any;
+
+
+
+  //Here comes things that will be editted
 
   voucher: {
     voucherPhoto: string,

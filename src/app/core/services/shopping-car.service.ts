@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { map, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { Product } from '../models/product.model';
 import { SaleRequestedProducts } from '../models/sale.model';
@@ -21,6 +21,7 @@ export class ShoppingCarService {
   //Requeted products
   private reqProdListSubject: BehaviorSubject<SaleRequestedProducts[]>
   public reqProdListObservable: Observable<SaleRequestedProducts[]>
+  public validateStock: Observable<boolean>     //Should give true if stock exceeded
 
   
 
@@ -65,6 +66,33 @@ export class ShoppingCarService {
           }
         }),
         shareReplay(1)
+      )
+      this.validateStock = this.reqProdListObservable.pipe(
+        switchMap(reqProdList => {
+          
+          let productListDBObservable = Array.from(new Set(reqProdList.map(reqProd => reqProd.product.id)))
+                            .map(id => this.getProductDbObservable(id))
+  
+          if(reqProdList.length){
+            return combineLatest(productListDBObservable).pipe(
+              map(prodListDB => {
+                //We validate stock
+                return reqProdList.some(reqProd => {
+                  //We first find the right product on prodListDB and then the color
+                  let prodColorDbStock = prodListDB.find(prodDb => (prodDb.sku == reqProd.product.sku)).products
+                                          .find(prodDbColor => prodDbColor.sku == reqProd.chosenProduct.sku)
+                                          .virtualStock
+                  return reqProd.quantity > prodColorDbStock
+                })
+  
+              })
+            )
+  
+          } else {
+            return of<boolean>(true)
+          }
+          
+        }), shareReplay(1)
       )
     }
   
@@ -150,5 +178,5 @@ export class ShoppingCarService {
   clearCar(){
     this.reqProdListSubject.next([])
   }
-  
+
 }

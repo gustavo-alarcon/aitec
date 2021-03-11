@@ -39,6 +39,7 @@ import { PaymentComponent } from './payment/payment.component';
 import { HttpClientModule } from '@angular/common/http';
 import { PaymentErrorComponent } from './payment-error/payment-error.component';
 import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div
     MatCardModule,
     MatExpansionModule,
     ReactiveFormsModule,
+    MatBadgeModule,
     FormsModule,
     MatRadioModule,
     GoogleMapsModule,
