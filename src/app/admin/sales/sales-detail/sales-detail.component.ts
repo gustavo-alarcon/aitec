@@ -5,7 +5,7 @@ import { Sale, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/mod
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { startWith, map, tap, take, switchMap, debounceTime, pairwise, filter } from 'rxjs/operators';
-import { Product } from 'src/app/core/models/product.model';
+import { Product, Zone } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { User } from 'src/app/core/models/user.model';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -60,7 +60,7 @@ export class SalesDetailComponent implements OnInit {
     this.searchProductControl = new FormControl("")
 
     this.productForm = this.fb.group({
-      deliveryPrice: [this.sale.deliveryPrice, Validators.required],
+      deliveryPrice: [(this.sale.deliveryPickUp ? 0 : (<Zone>this.sale.delivery).delivery), Validators.required],
       productList: this.fb.array([])
     });
 
@@ -527,8 +527,6 @@ export class SalesDetailComponent implements OnInit {
     let sale: Sale = {
       ...this.sale,
       status: newStatus,
-      deliveryPrice: this.productForm.get('deliveryPrice').value,
-      total: this.getTotalPrice(),
       requestedProducts: [],
       voucher: this.sale.voucher,
       voucherChecked: this.voucherCheckedForm.value,

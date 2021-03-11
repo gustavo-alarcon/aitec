@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
+import { Zone } from 'src/app/core/models/product.model';
 
 
 @Component({
@@ -401,7 +402,7 @@ console.log(this.getCurrentMonthOfViewDate());
   }
 
   giveTotalSalesPrice(sales: Sale[]): number {
-    return sales.reduce((a, b) => a + (this.giveTotalPrice(b) + b.deliveryPrice), 0)
+    return sales.reduce((a, b) => a + (this.giveTotalPrice(b) + (b.deliveryPickUp ? 0 : (<Zone>b.delivery).delivery)), 0)
   }
 }
 

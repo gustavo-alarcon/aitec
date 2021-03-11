@@ -99,6 +99,7 @@ export class DatabaseService {
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
+  couponRef: `db/aitec/coupons`= `db/aitec/coupons`
 
   generalConfigDoc = this.afs
     .collection(this.configRef)
@@ -830,7 +831,7 @@ export class DatabaseService {
       })
     );
 
-    let upload$ = concat(snapshot$, interval(1000).pipe(take(2)), url$);
+    let upload$ = concat(snapshot$, interval(100).pipe(take(2)), url$);
     return upload$;
   }
 
@@ -861,6 +862,81 @@ export class DatabaseService {
     let upload$ = concat(snapshot$, url$);
     return upload$;
   }
+
+  finishPurshase(newSale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
+
+    const batch = this.afs.firestore.batch()
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
+
+    newSale.id = saleRef.id
+
+    batch.set(saleRef, newSale);
+    return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
+  }
+
+  saveSale(sale: Sale, phot?: {data: File[]}): Observable<[firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]> {
+    console.log('here');
+
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
+
+    let newSale = {...sale}
+    newSale.id = saleRef.id
+
+    if (phot) {
+      let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
+
+      return forkJoin(photos).pipe(
+        takeLast(1),
+        map((res: string[]) => {
+          //We update voucher field
+          newSale.voucher = [...phot.data.map((el, i) => {
+            return {
+              voucherPhoto: res[i],
+              voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
+            }
+          })]
+          //We now get the firestore batch
+          return this.finishPurshase(newSale)
+        })
+      )
+    } else {
+      return of(this.finishPurshase(newSale))
+    }
+
+  }
+
+  // return this.afs.firestore.runTransaction((transaction) => {
+  //   return transaction.get(saleCount).then((sfDoc) => {
+  //     if (!sfDoc.exists) {
+  //       transaction.set(saleCount, { salesCounter: 0 });
+  //     }
+
+  //     //sales
+  //     ////generalCounter
+  //     let newCorr = 1
+  //     if (sfDoc.data().salesCounter) {
+  //       newCorr = sfDoc.data().salesCounter + 1;
+  //     }
+
+  //     transaction.update(saleCount, { salesCounter: newCorr });
+
+  //     newSale.correlative = newCorr
+  //     mess.correlative = '#R' + ("000" + newCorr).slice(-4)
+  //     let message = {
+  //       to: [user.email],
+  //       template: {
+  //         name: 'pedidoUser',
+  //         data: mess
+  //       }
+  //     }
+
+  //     transaction.set(saleRef, newSale);
+
+  //     transaction.set(emailRef, message);
+
+  //   });
+
+  // })
 
   getSalesUser(user: string): Observable<Sale[]> {
     return this.afs
@@ -1135,16 +1211,7 @@ export class DatabaseService {
 
   }*/
 
-  finishPurshase(newSale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
-
-    const batch = this.afs.firestore.batch()
-    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
-
-    newSale.id = saleRef.id
-
-    batch.set(saleRef, newSale);
-    return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
-  }
+  
   
 /*
   sendEmail(newSale) {
@@ -1191,129 +1258,10 @@ export class DatabaseService {
     })
 
   }
-
-
-  saveSale(user: User, newSale, phot?: any) {
-    console.log('here');
-
-    const saleCount = this.afs.firestore.collection(`/db/aitec/config/`).doc('generalConfig');
-    const saleRef = this.afs.firestore.collection(`/db/aitec/sales`).doc();
-    const emailRef = this.afs.firestore.collection(`/mail`).doc();
-
-    newSale.id = saleRef.id
-    let newOrder = [...this.order].map(ord => {
-      ord['subtotal'] = ord.price * ord.quantity
-      return ord
-    })
-
-
-
-    let mess = {
-      order: newOrder,
-      correlative: '#R',
-      date: `${('0' + newSale.createdAt.getDate()).slice(-2)}-${('0' + (newSale.createdAt.getMonth() + 1)).slice(-2)}-${newSale.createdAt.getFullYear()}`, //string date
-      payment: newSale.payType.name,//metodo de pago
-      document: newSale.document,//boleta/facturacion
-      boleta: newSale.idDocument == 1,
-      factura: newSale.idDocument == 2,
-      info: newSale.documentInfo,//document info
-      subtotal: (newSale.total * 0.82).toFixed(2),
-      igv: (newSale.total * 0.18).toFixed(2),
-      envio: newSale.deliveryPrice.toFixed(2),
-      total: newSale.total.toFixed(2),
-      asesor: newSale.adviser,
-      deliveryType: newSale.deliveryType,
-      location: newSale.deliveryInfo,
-      isDelivery: newSale.idDelivery == 1,
-      isStore: newSale.idDelivery == 2,
-      store: newSale.deliveryInfo
-    }
-
-    if (phot) {
-      let photos = [...phot.data.map(el => this.uploadPhotoVoucher(newSale.id, el))]
-
-      forkJoin(photos).pipe(
-        takeLast(1),
-      ).subscribe((res: string[]) => {
-        newSale.voucher = [...phot.data.map((el, i) => {
-          return {
-            voucherPhoto: res[i],
-            voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
-          }
-        })]
-        return this.afs.firestore.runTransaction((transaction) => {
-          return transaction.get(saleCount).then((sfDoc) => {
-            if (!sfDoc.exists) {
-              transaction.set(saleCount, { salesCounter: 0 });
-            }
-
-            //sales
-            ////generalCounter
-            let newCorr = 1
-            if (sfDoc.data().salesCounter) {
-              newCorr = sfDoc.data().salesCounter + 1;
-            }
-
-            transaction.update(saleCount, { salesCounter: newCorr });
-
-            newSale.correlative = newCorr
-            mess.correlative = '#R' + ("000" + newCorr).slice(-4)
-            let message = {
-              to: [user.email],
-              template: {
-                name: 'pedidoUser',
-                data: mess
-              }
-            }
-
-            transaction.set(saleRef, newSale);
-
-            transaction.set(emailRef, message);
-
-          });
-
-        })
-
-      })
-    } else {
-      return this.afs.firestore.runTransaction((transaction) => {
-        return transaction.get(saleCount).then((sfDoc) => {
-          if (!sfDoc.exists) {
-            transaction.set(saleCount, { salesCounter: 0 });
-          }
-
-          //sales
-          ////generalCounter
-          let newCorr = 1
-          if (sfDoc.data().salesCounter) {
-            newCorr = sfDoc.data().salesCounter + 1;
-          }
-
-          transaction.update(saleCount, { salesCounter: newCorr });
-
-          newSale.correlative = newCorr
-          mess.correlative = '#R' + ("000" + newCorr).slice(-4)
-
-          let message = {
-            to: ['mocharan@meraki-s.com'],
-            template: {
-              name: 'pedidoUser',
-              data: mess
-            }
-          }
-
-          transaction.set(saleRef, newSale);
-
-          transaction.set(emailRef, message);
-
-        });
-
-      })
-
-    }
-
-  }
 */
+
+  
+
   //products
 
   uploadPhotoProduct(id: string, file: File): Observable<string | number> {

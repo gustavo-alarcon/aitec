@@ -41,16 +41,19 @@ export class LocationDialogComponent implements OnInit {
   ngOnInit(): void {
     console.log(this.data);
     this.departamentos = this.pl.getDepartamentos()
-
+    console.log(this.departamentos);
 
     if (this.data.edit) {
+      this.provincias = this.pl.getProvincias(this.data.user.location[this.data.ind].departamento.id)
+      this.distritos = this.pl.getDistritos(this.data.user.location[this.data.ind].provincia.id)
       this.firstFormGroup = this.fb.group({
         reference: [this.data.user.location[this.data.ind].reference, [Validators.required]],
         name: [this.data.user.location[this.data.ind].address, [Validators.required]],
-        departamento: [null, Validators.required],
-        provincia: [null, Validators.required],
-        distrito: [null, Validators.required]
+        departamento: [this.data.user.location[this.data.ind].departamento.id, Validators.required],
+        provincia: [this.data.user.location[this.data.ind].provincia.id, Validators.required],
+        distrito: [this.data.user.location[this.data.ind].distrito.id, Validators.required]
       });
+      console.log(this.firstFormGroup.value)
       this.center = this.data.user.location[this.data.ind].coord
     } else {
       this.firstFormGroup = this.fb.group({
@@ -94,6 +97,7 @@ export class LocationDialogComponent implements OnInit {
   }
 
   save() {
+    console.log(this.firstFormGroup.value)
     this.firstFormGroup.disable()
     const userRef = this.af.firestore.collection(`/users`).doc(this.data.user.uid);
     const batch = this.af.firestore.batch()
@@ -107,6 +111,7 @@ export class LocationDialogComponent implements OnInit {
       distrito: this.distritos.find(dis => dis.id == this.firstFormGroup.get('distrito').value),
       idDistrito: this.firstFormGroup.get('distrito').value
     }
+    console.log(newLoacation)
 
     let savelocations = this.data.user.location ? this.data.user.location : []
     if (this.data.edit) {
@@ -114,7 +119,7 @@ export class LocationDialogComponent implements OnInit {
     } else {
       savelocations.push(newLoacation)
     }
-
+/*
     batch.update(userRef, {
       location: savelocations
     })
@@ -126,7 +131,7 @@ export class LocationDialogComponent implements OnInit {
       this.dialogRef.close();
       this.loading.next(false)
       this.firstFormGroup.enable()
-    })
+    })*/
   }
 
 

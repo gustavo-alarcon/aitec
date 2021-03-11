@@ -4,89 +4,166 @@
     <a class="bradcumb" routerLink="/main/carrito">Mi Carrito</a>
   </div>
   <div class="w3-margin-top w3-row">
+    <!-- Main section -->
     <div class="w3-container w3-col l8 col-md-7">
-      <ng-container *ngIf="initDelivery$ | async"></ng-container>
+      <!-- Button Header -->
       <div *ngIf="(view$|async) != 4">
+        <!-- Desktop version -->
         <div class="ms-flex w3-hide-small w3-hide-medium w3-margin-bottom w3-padding"
           style="justify-content: space-between">
-          <button mat-raised-button color="primary" *ngIf="(view$|async) == 1; else firstButton">
+
+          <button 
+            *ngIf="(view$|async) == 1; else firstButton"
+            mat-raised-button color="primary" >
             <mat-icon>check_circle_outline</mat-icon>
             Revisa tu orden
           </button>
           <ng-template #firstButton>
-            <button mat-button class="button--desactive" (click)="firstView()">
+            <button 
+              type="button"
+              *ngIf="secondButtonVal$ | async else firstButtonStock"
+              matBadge="!" matBadgePosition="after" matBadgeColor="warn"
+              (click)="firstView()"
+              mat-button class="button--desactive" >
               <mat-icon>check_circle_outline</mat-icon>
               Revisa tu orden
             </button>
+            <ng-template #firstButtonStock>
+              <button 
+                (click)="firstView()"
+                mat-button class="button--desactive" >
+                <mat-icon>check_circle_outline</mat-icon>
+                Revisa tu orden
+              </button>
+            </ng-template>
           </ng-template>
-          <button mat-raised-button color="primary" *ngIf="(view$|async) == 2; else secondButton">
+
+          <button 
+            *ngIf="(view$|async) == 2; else secondButton"
+            mat-raised-button color="primary" >
             <mat-icon>local_shipping</mat-icon>
             Método de Entrega
           </button>
           <ng-template #secondButton>
-            <button mat-button class="button--desactive" (click)="secondView()">
+            <button 
+              [disabled]="((view$|async) == 1) && (secondButtonVal$ | async)"
+              (click)="secondView()"
+              mat-button class="button--desactive" >
               <mat-icon>local_shipping</mat-icon>
               Método de Entrega
             </button>
           </ng-template>
-          <button mat-raised-button color="primary" *ngIf="(view$|async) == 3; else thirdButton">
+
+          <button 
+            *ngIf="(view$|async) == 3; else thirdButton"
+            mat-raised-button color="primary" >
             <mat-icon>request_page</mat-icon>
             Método de Pago
           </button>
           <ng-template #thirdButton>
-            <button mat-button class="button--desactive" [disabled]="validatedSecondButton" (click)="thirdView()">
+            <button 
+              (click)="thirdView()"
+              [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async)" 
+              mat-button class="button--desactive" >
               <mat-icon>request_page</mat-icon>
               Método de Pago
             </button>
           </ng-template>
 
         </div>
+
+        <!-- Mobile version -->
         <div class="w3-hide-large w3-margin-bottom" style="justify-content: space-between;display: flex;">
-          <div class="w3-center" *ngIf="(view$|async) == 1; else firstMinButton">
+          
+          <div 
+            *ngIf="(view$|async) == 1; else firstMinButton"
+            class="w3-center">
             <div class="mini-button w3-center">
               <mat-icon>check_circle_outline</mat-icon>
             </div>
             <div>Revisa tu orden</div>
           </div>
           <ng-template #firstMinButton>
-            <div class="button--desactive w3-center" (click)="firstView()">
+            <div *ngIf="secondButtonVal$ | async; else firstMinButtonStock"
+              matBadge="!" matBadgePosition="after" matBadgeColor="warn"
+              class="button--desactive w3-center" (click)="firstView()">
               <div>
                 <mat-icon>check_circle_outline</mat-icon>
               </div>
               <div>Revisa tu orden</div>
             </div>
+            <ng-template #firstMinButtonStock>
+              <div 
+                class="button--desactive w3-center" (click)="firstView()">
+                <div>
+                  <mat-icon>check_circle_outline</mat-icon>
+                </div>
+                <div>Revisa tu orden</div>
+              </div>
+            </ng-template>
           </ng-template>
-          <div class="w3-center" *ngIf="(view$|async) == 2; else secondMinButton">
+
+          <div 
+            *ngIf="(view$|async) == 2; else secondMinButton"
+            class="w3-center" >
             <div class="mini-button w3-center">
               <mat-icon>local_shipping</mat-icon>
             </div>
             <div>Método de Entrega</div>
           </div>
           <ng-template #secondMinButton>
-            <div class="button--desactive w3-center" (click)="secondView()">
+            <div 
+              *ngIf="((view$|async) == 1) && (secondButtonVal$ | async); else secondMinButtonEnabled"
+              class="button--desactive w3-center" >
               <div>
                 <mat-icon>local_shipping</mat-icon>
               </div>
               <div>Método de Entrega</div>
             </div>
+            <ng-template #secondMinButtonEnabled>
+              <div 
+                (click)="secondView()"
+                class="button--desactive w3-center" >
+                <div>
+                  <mat-icon>local_shipping</mat-icon>
+                </div>
+                <div>Método de Entrega</div>
+              </div>
+            </ng-template>
           </ng-template>
-          <div class="w3-center" *ngIf="(view$|async) == 3; else thirdMinButton">
+
+          <div 
+            *ngIf="(view$|async) == 3; else thirdMinButton"
+            class="w3-center">
             <div class="mini-button w3-center">
               <mat-icon>request_page</mat-icon>
             </div>
             <div>Método de Pago</div>
           </div>
           <ng-template #thirdMinButton>
-            <div class="button--desactive w3-center" (click)="thirdView()">
+            <div 
+              *ngIf="(!deliveryForm.valid) || (secondButtonVal$ | async); else thirdMinButtonEnabled"
+              class="button--desactive w3-center" >
               <div>
                 <mat-icon>request_page</mat-icon>
               </div>
               <div>Método de Pago</div>
             </div>
+            <ng-template #thirdMinButtonEnabled>
+              <div 
+                (click)="thirdView()"
+                class="button--desactive w3-center" >
+                <div>
+                  <mat-icon>request_page</mat-icon>
+                </div>
+                <div>Método de Pago</div>
+              </div>
+            </ng-template>
           </ng-template>
 
         </div>
       </div>
+      <!-- Body -->
       <div class="w3-margin-top div-content__scroll">
         <div *ngIf="(view$|async) == 1">
           <app-shopping-list-mobile [edit]="true" [purchase]="true"></app-shopping-list-mobile>
@@ -95,27 +172,27 @@
         <div *ngIf="(view$|async) == 2">
           <div class="menuContainer">
             <div 
-              (click)="this.deliveryForm.get('deliveryPickUp').setValue(false)" 
-              [ngClass]="{'activated': !this.deliveryForm.get('deliveryPickUp').value, 
-                          'deactivated': this.deliveryForm.get('deliveryPickUp').value}">
+              (click)="deliveryForm.get('deliveryPickUp').setValue(false)" 
+              [ngClass]="{'activated': !deliveryForm.get('deliveryPickUp').value, 
+                          'deactivated': deliveryForm.get('deliveryPickUp').value}">
               Entrega en domicilio
             </div>
             <div 
-              (click)="this.deliveryForm.get('deliveryPickUp').setValue(true)" 
-              [ngClass]="{'activated': this.deliveryForm.get('deliveryPickUp').value, 
-                          'deactivated': !this.deliveryForm.get('deliveryPickUp').value}">
+              (click)="deliveryForm.get('deliveryPickUp').setValue(true)" 
+              [ngClass]="{'activated': deliveryForm.get('deliveryPickUp').value, 
+                          'deactivated': !deliveryForm.get('deliveryPickUp').value}">
               Recojo en tienda
             </div>
           </div>
           <mat-card class="w3-block delivery">
-            <ng-container [ngSwitch]="this.deliveryForm.get('deliveryPickUp').value" class="w3-block delivery">
+            <ng-container [ngSwitch]="deliveryForm.get('deliveryPickUp').value" class="w3-block delivery">
               <mat-card-content *ngSwitchCase="false">
                 <h4 class="delivery__title w3-center">
                   Por favor registra tus datos y verifícalos
                 </h4>
                 <mat-form-field class="w3-block" appearance="outline">
                   <mat-label>Zona de envío</mat-label>
-                  <mat-select disableRipple [formControl]="this.deliveryForm.get('delivery')">
+                  <mat-select disableRipple [formControl]="deliveryForm.get('delivery')">
                     <mat-option *ngFor="let dept of (deliveryList$ | async)" [value]="dept">
                       {{ dept.name | titlecase }}
                     </mat-option>
@@ -132,11 +209,11 @@
                     ¿En dónde recibirás tu pedido?
                   </div>
                   <hr style="margin-top: 0" />
-                  <div *ngIf="this.deliveryForm.get('location').enabled">
+                  <div *ngIf="deliveryForm.get('location').enabled">
                     <div 
-                      *ngFor="let loc of (locationList$|async)" 
-                      (click)="this.deliveryForm.get('location').setValue(loc)"
-                      [ngClass]="{'store__selected': this.deliveryForm.get('location').value == loc}">
+                      *ngFor="let loc of (locationList$|async); let k=index" 
+                      (click)="deliveryForm.get('location').setValue(loc)"
+                      [ngClass]="{'store__selected': deliveryForm.get('location').value == loc}">
                       <div class="store">
                         <div><strong>{{ loc.address }}</strong></div>
                         <div>Referencia: {{ loc.reference }}</div>
@@ -166,10 +243,10 @@
                     </h4>
                     <p> Para coordinar el delivery con la tienda puedes comunicarte a los siguientes números:</p>
                     <ul>
-                      <li *ngFor="let num of contactNumbers" style="color: #828282;font-weight: 600;">{{num}}</li>
+                      <li *ngFor="let num of (contactNumbers$ | async)" style="color: #828282;font-weight: 600;">{{num}}</li>
                     </ul>
                     <p>o enviarnos un correo con el número de tu pedido a:</p>
-                    <p *ngFor="let em of contactEmails" style="color: #828282;font-weight: 600;">{{em}}</p>
+                    <p *ngFor="let em of (contactEmails$ | async)" style="color: #828282;font-weight: 600;">{{em}}</p>
                     <p>Luego de coordinar el delivery, el precio se actualizará con el costo respectivo.</p>
                   </div>
                 </ng-template>
@@ -180,8 +257,8 @@
                 </h4>
                 <div 
                   *ngFor="let store of (deliveryList$ | async)" 
-                  (click)="this.deliveryForm.get('delivery').setValue(store)"
-                  [ngClass]="{'store__selected': this.deliveryForm.get('delivery').value == store}">
+                  (click)="deliveryForm.get('delivery').setValue(store)"
+                  [ngClass]="{'store__selected': deliveryForm.get('delivery').value == store}">
                   <div class="store">
                     <div class="store__address">{{store?.address}}</div>
                     <div class="store__district">
@@ -197,6 +274,7 @@
           </mat-card>
 
         </div>
+        <!-- Payment -->
         <div *ngIf="(view$|async) == 3">
           <mat-card class="w3-block delivery">
             <div class="w3-margin-bottom">
@@ -211,10 +289,12 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+
               <div class="w3-margin-bottom" *ngIf="method.account">
                 <strong>{{method.account}}</strong>
               </div>
-              <div *ngIf="deliveryForm.value!=-2 || viewDelivery == 2">
+
+              <div>
                 <div *ngIf="method.value==3">
                   
                   <div class="w3-margin-bottom">
@@ -258,8 +338,10 @@
                       (change)="addNewPhoto('photoURL', photoURL.files)" />
                   </div>
                 </div>
+
+
                 <div *ngIf="method.value==2">
-                  <app-payment [total]="total"></app-payment>
+                  <app-payment [total]="(totalAll$ | async)"></app-payment>
                 </div>
               </div>
 
@@ -268,48 +350,35 @@
               <h4 class="delivery__title">
                 Elija el tipo de comprobante y verifique sus datos
               </h4>
-              <mat-radio-group color="primary" [(ngModel)]="document">
-                <mat-radio-button [value]="1"> Boleta </mat-radio-button>
-                <mat-radio-button class="w3-margin-left" [value]="2">
+              <mat-radio-group color="primary" [formControl]="documentTypeForm">
+                <mat-radio-button value="Boleta"> Boleta </mat-radio-button>
+                <mat-radio-button class="w3-margin-left" value="Factura">
                   Factura
                 </mat-radio-button>
               </mat-radio-group>
-              <form [formGroup]="boletaForm" *ngIf="document==1" class="w3-margin-top">
+
+              <form [formGroup]="documentForm" class="w3-margin-top">
                 <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>DNI</mat-label>
-                  <input autocomplete="off" formControlName="dni" type="text" matInput placeholder="DNI/RUC" />
+                  <mat-label>{{documentTypeForm.value == 'Boleta' ? 'DNI':'RUC'}}</mat-label>
+                  <input autocomplete="off" formControlName="number" type="text" matInput placeholder="DNI/RUC" />
                   <mat-error>Campo requerido</mat-error>
                 </mat-form-field>
                 <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>Nombre</mat-label>
+                  <mat-label>{{documentTypeForm.value == 'Boleta' ? 'Nombre':'Razon Social'}}</mat-label>
                   <input autocomplete="off" formControlName="name" type="text" matInput />
                   <mat-error>Campo requerido</mat-error>
                 </mat-form-field>
-
-
-              </form>
-              <form [formGroup]="facturaForm" *ngIf="document==2" class="w3-margin-top">
-                <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>RUC</mat-label>
-                  <input autocomplete="off" formControlName="ruc" type="text" matInput placeholder="DNI/RUC" />
-                  <mat-error>Campo requerido</mat-error>
-                </mat-form-field>
-                <mat-form-field class="w3-block" appearance="outline">
-                  <mat-label>Razon Social</mat-label>
-                  <input autocomplete="off" formControlName="name" type="text" matInput />
-                  <mat-error>Campo requerido</mat-error>
-                </mat-form-field>
-                <mat-form-field class="w3-block" appearance="outline">
+                <mat-form-field *ngIf="documentTypeForm$ | async" class="w3-block" appearance="outline">
                   <mat-label>Direccion Fiscal</mat-label>
                   <input autocomplete="off" formControlName="address" type="text" matInput />
                   <mat-error>Campo requerido</mat-error>
                 </mat-form-field>
-
-
               </form>
+
             </div>
           </mat-card>
         </div>
+        <!-- Loader -->
         <div *ngIf="(view$|async) == 4" style="padding-top: 14vh">
           <div style="height: 100vh;display: flex;align-items: center;justify-content: center;">
             <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
@@ -318,6 +387,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Ticket summary -->
     <div class="w3-col l4 col-md-5">
       <div class="w3-padding">
         <div class="resume" *ngIf="initPayment$|async;else loader">
@@ -345,11 +416,12 @@
             </div>
           </div>
           <div class="resume__divider"></div>
+          <!-- Price summary -->
           <div class="resume__descrip w3-section">
             <div class="ms-flex ms-flex--center">
               <span>Subtotal</span>
               <span class="ms-fill"></span>
-              <span>{{ subtotal$ | async }}</span>
+              <span>{{ subtotal$ | async | number: ".2"}}</span>
             </div>
             <div class="ms-flex ms-flex--center">
               <span>Cargos adicionales</span>
@@ -364,7 +436,7 @@
             <div class="ms-flex ms-flex--center">
               <span>IGV</span>
               <span class="ms-fill"></span>
-              <span>{{ igv$ | async }}</span>
+              <span>{{ igv$ | async | number: ".2"}}</span>
             </div>
             <div class="ms-flex ms-flex--center">
               <span>Delivery</span>
@@ -377,14 +449,15 @@
             <div style="display: flex; margin-top: 20px;justify-content: space-between;">
               <div><strong>Total a pagar:</strong></div>
               <div class="ticket__total">
-                S/. {{ totalAll$ | async }}
+                S/. {{ totalAll$ | async | number: ".2"}}
               </div>
             </div>
           </div>
+          
           <!-- First section -->
           <div *ngIf="(view$|async) == 1">
             <p class="resume__small">*El costo del delivery se agregará despues de registrar el método de entrega</p>
-            {{couponForm.get('coupon').status}}
+            <!-- Coupon form -->
             <form [formGroup]="couponForm" class="w3-margin-bottom">
               <h4 class="resume__subtitle">Tengo un código de descuento</h4>
               <div class="email-form background-color w3-margin-top">
@@ -395,7 +468,6 @@
                   style="border: none" />
                 
                 <div [ngSwitch]="couponForm.get('coupon').status">
-                  <!-- <mat-card-content *ngSwitchCase="false"> -->
                     <div *ngSwitchCase="'VALID'" style="white-space: nowrap;">
                         <button
                           type="button" mat-icon-button (click)="clearCoupon()">
@@ -432,7 +504,7 @@
                   type="text" matInput>
                 <mat-autocomplete #adviserAutocomplete="matAutocomplete" [displayWith]="showAdviser">
 
-                  <mat-option *ngFor="let adviser of advisers$ | async" [value]="adviser">
+                  <mat-option *ngFor="let adviser of (advisers$ | async)" [value]="adviser">
                     {{adviser.displayName}}
                   </mat-option>
                 </mat-autocomplete>
@@ -442,7 +514,12 @@
             </div>
             <div class="resume__title w3-section">Total: S/. {{ totalAll$ | async }}</div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button (click)="secondView()" color="primary" class="resume__button">Continuar</button>
+              <button 
+                [disabled]="secondButtonVal$ | async"
+                (click)="secondView()" 
+                mat-raised-button color="primary" class="resume__button">
+                Continuar
+              </button>
             </div>
             <p class="resume__small">*En el siguiente paso se procederá a generar la orden de compra y podrá confirmar
               el Pago.</p>
@@ -452,28 +529,33 @@
             <div class="w3-margin-bottom">
               <h4 class="resume__subtitle">Comentario adicional</h4>
               <mat-form-field class="w3-block" appearance="outline">
-                <textarea autocomplete="off" [formControl]="this.deliveryForm.get('observation')" matInput placeholder="Escriba..."
+                <textarea autocomplete="off" [formControl]="deliveryForm.get('observation')" matInput placeholder="Escriba..."
                   rows="3"></textarea>
               </mat-form-field>
               <p class="resume__small">*Puedes dejar un comentario adicional para tenerlo en cuenta al generar tu pedido
               </p>
             </div>
             <div class="w3-center w3-margin-bottom">
-              <button mat-raised-button 
-                [disabled]="!this.deliveryForm.valid" 
+              <button 
+                (click)="thirdView()"
+                mat-raised-button 
+                [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async)" 
                 color="primary"
                 class="resume__button">
                 Generar orden de pedido</button>
             </div>
             <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
           </div>
-
           <!-- Third section -->
           <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
             <button 
-              *ngIf="reqProdListObservable$|async as reqProdList"
-              [disabled]="(uploadingSale$ | async)" mat-raised-button 
-              (click)="finish(reqProdList)" color="primary" class="resume__button">
+              type="button"
+              *ngIf="finishObservable$|async as finishData"
+              [disabled]="(uploadingSale$ | async) || (!deliveryForm.valid) || 
+                          (secondButtonVal$ | async) || (!documentForm.valid) ||
+                          (!method.value) || (method.value == 3)&&(!photosList?.length)" 
+              (click)="finish(finishData)" 
+              mat-raised-button color="primary" class="resume__button">
               Finalizar Compra
             </button>
           </div>

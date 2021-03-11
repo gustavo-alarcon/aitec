@@ -29,34 +29,20 @@ export class ShoppingCartComponent implements OnInit {
   view = new BehaviorSubject<number>(1);
   view$ = this.view.asObservable();
 
-  discount = new BehaviorSubject<number>(0);
-  discount$ = this.discount.asObservable();
+  discount$: Observable<number>
 
-  list$: Observable<any>;
-  subtotal$: Observable<string>;
-  igv$: Observable<string>;
-  totalAll$: Observable<string>;
+  subtotal$: Observable<Number>;
+  igv$: Observable<Number>;
+  totalAll$: Observable<Number>;
 
-  uploadingSale$: BehaviorSubject<boolean> | Observable<Sale> = null;
-
-  total: number = 0
+  uploadingSale$: Observable<boolean|Sale> = null;
 
   adviserForm: FormControl = new FormControl('')
   advisers$: Observable<any>;
 
-  initCoupon$: Observable<any>
-  couponList: Array<any> = []
-  couponVerified: boolean = false
-
-  user: User
-
   /*delivery*/
-  initDelivery$: Observable<any>
   delivery: number = 1;
   selectedDelivery: number = 0;
-  zones: Array<any> = [];
-
-  //deliveryForm: FormControl = new FormControl(null)
 
   stores: any[] = []
   locations: any[] = []
@@ -69,14 +55,12 @@ export class ShoppingCartComponent implements OnInit {
   selectedLocation: number = 0;
   selectedStore: number = 0;
 
-  deliveryNumber: number = 0
-
   /*Payments*/
   cardForm: FormGroup;
   boletaForm: FormGroup;
   facturaForm: FormGroup;
 
-  document: number = 1;
+  document: 'Boleta' | 'Factura' = 'Boleta';
   method: {
     name: string;
     value: number;
@@ -101,7 +85,8 @@ export class ShoppingCartComponent implements OnInit {
     };
 
   initPayment$: Observable<any>
-  firstTime: number = 1
+
+  user: User
 
   //NEW
   deliveryForm: FormGroup     //Subtype deliveryType designates 0 (delivery) or 1 (pickup)
@@ -114,6 +99,20 @@ export class ShoppingCartComponent implements OnInit {
 
   deliveryList$: Observable<Product["zones"] | Stores>;
   locationList$: Observable<User["location"]>;
+  config$: any;
+  contactNumbers$: Observable<Stores[]>;
+  contactEmails$: any;
+  secondButtonVal$: Observable<boolean>;      //Used to validate stock in order to pass to second section
+  finishObservable$: Observable<{             //Includes data needed to finish sale
+    reqProdList: SaleRequestedProducts[],
+    user: User,
+    delivery: number,
+    discount: number
+  }>                     
+  documentForm: FormGroup;
+  documentTypeForm: FormControl;
+  documentTypeForm$: Observable<boolean>    //Used to show address field
+
 
   constructor(
     private dbs: DatabaseService,
@@ -129,6 +128,11 @@ export class ShoppingCartComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.initForms()
+    this.initObservables()
+  }
+
+  initForms(){
     this.deliveryForm = this.fb.group({
       deliveryPickUp: new FormControl(false), //Designates type 0 (delivery) or 1 (pickup)
       delivery: new FormControl(null, Validators.required),
@@ -141,10 +145,39 @@ export class ShoppingCartComponent implements OnInit {
         updateOn: 'submit', asyncValidators:[this.couponValidator(this.dbs)], validators: [Validators.required]}),
       couponData: new FormControl(null)
     })
-    
-    this.couponForm.valueChanges.pipe(tap(console.log)).subscribe()
-    this.couponForm.statusChanges.pipe(tap(console.log)).subscribe()
 
+    //NOT USED OR IMPLEMENTED
+    this.cardForm = this.fb.group({
+      type: [null],
+      numero: [null],
+      month: [null],
+      year: [null],
+      cvv: [null],
+      titular: [null],
+    });
+
+    this.boletaForm = this.fb.group({
+      dni: [null, Validators.required],
+      name: [null, Validators.required]
+    });
+
+    this.facturaForm = this.fb.group({
+      ruc: [null, Validators.required],
+      name: [null, Validators.required],
+      address: [null, Validators.required],
+    });
+
+    this.documentTypeForm = new FormControl("Boleta")
+
+    this.documentForm = this.fb.group({
+      number: [null, Validators.required],
+      name: [null, Validators.required],
+      address: [null, Validators.required],
+    });
+
+  }
+
+  initObservables(){
     this.reqProdListObservable$ = this.shopCar.reqProdListObservable
 
     //List of zones or stores in delivery
@@ -198,6 +231,18 @@ export class ShoppingCartComponent implements OnInit {
       shareReplay(1),
     )
 
+    //User old locations
+    this.locationList$ = this.auth.user$.pipe(
+      map(user => {
+        if(user){
+          if(user.location){
+            return user.location
+          }
+        }
+        return []
+      })
+    )
+
     //Refers to delivery price
     this.delivery$ = this.deliveryForm.get("delivery").statusChanges.pipe(
       startWith(this.deliveryForm.get("delivery").status),
@@ -226,19 +271,7 @@ export class ShoppingCartComponent implements OnInit {
       shareReplay(1)
     )
 
-    //User old locations
-    this.locationList$ = this.auth.user$.pipe(
-      map(user => {
-        if(user){
-          if(user.location){
-            return user.location
-          }
-        }
-        return []
-      })
-    )
     
-
     this.sum$ = combineLatest([
       this.auth.user$,
       this.reqProdListObservable$,
@@ -256,7 +289,7 @@ export class ShoppingCartComponent implements OnInit {
       })
     );
 
-    //Refers to delivery price. Here we validate coupon and apply disccount
+    //Refers to discount price. Here we validate coupon and apply disccount
     this.discount$ = combineLatest([<Observable<Coupon>>this.couponForm.get('couponData').valueChanges,
                                     this.reqProdListObservable$])
       .pipe(
@@ -322,22 +355,19 @@ export class ShoppingCartComponent implements OnInit {
       this.discount$
     ]).pipe(
       map(([sum, dis]) => {
-        return (Number(sum) - Number(dis)).toFixed(2)
-      }),
-      tap(res => {
-        this.total = Number(res)
+        return Number(sum) - Number(dis)
       })
     )
 
     this.subtotal$ = this.sum$.pipe(
       map(sum => {
-        return (Number(sum) * 0.82).toFixed(2)
+        return (Number(sum) * 0.82)
       })
     )
 
     this.igv$ = this.sum$.pipe(
       map(sum => {
-        return (Number(sum) * 0.18).toFixed(2)
+        return Number(sum) * 0.18
       })
     )
 
@@ -358,48 +388,22 @@ export class ShoppingCartComponent implements OnInit {
       })
     );
 
-    this.initCoupon$ = this.dbs.getCoupons().pipe(
-      tap(res => {
-        this.couponList = res
-      })
-    )
+    this.config$ = this.ld.getConfig().pipe(shareReplay(1))
+    this.contactNumbers$ = this.config$.pipe(map(confi => {
+      if (confi['contactSale']){
+        return confi['contactSale']['numbers']
+      } else {
+        return []
+      }
+    }))
 
-    /*Delivery*/
-    this.initDelivery$ = combineLatest([
-      this.dbs.getStores(),
-      this.ld.getConfig()
-    ]).pipe(
-      map(([stores, confi]) => {
-        if (confi['contactSale']) {
-          this.contactNumbers = confi['contactSale']['numbers']
-          this.contactEmails = confi['contactSale']['emails']
-        }
-        this.stores = stores
-        return stores
-      })
-    )
-
-    /*Payments*/
-
-    this.cardForm = this.fb.group({
-      type: [null],
-      numero: [null],
-      month: [null],
-      year: [null],
-      cvv: [null],
-      titular: [null],
-    });
-
-    this.boletaForm = this.fb.group({
-      dni: [null, Validators.required],
-      name: [null, Validators.required]
-    });
-
-    this.facturaForm = this.fb.group({
-      ruc: [null, Validators.required],
-      name: [null, Validators.required],
-      address: [null, Validators.required],
-    });
+    this.contactEmails$ = this.config$.pipe(map(confi => {
+      if (confi['contactSale']){
+        return confi['contactSale']['emails']
+      } else {
+        return []
+      }
+    }))
 
     this.initPayment$ = combineLatest([
       this.auth.user$,
@@ -432,8 +436,49 @@ export class ShoppingCartComponent implements OnInit {
       })
     )
 
+    this.documentTypeForm$ = combineLatest([
+      this.documentTypeForm.valueChanges.pipe(startWith(this.documentTypeForm.value)),
+      this.auth.user$.pipe(take(1))])
+      .pipe(
+        map((res) => {
+          let saleDoc: Sale["document"] = res[0]
+          let user = res[1]
+          console.log(saleDoc)
 
+          if (user.personData.type == 'natural') {
+            this.documentForm.get('number').setValue(user.personData['dni'])
+            this.documentForm.get('name').setValue(user.personData['name'] + ' ' + user.personData['lastName'])
+          } else {
+            this.facturaForm.setValue({
+              number: user.personData.ruc,
+              name: user.personData.name,
+              address: user.personData.address
+            })
+          }
 
+          if(saleDoc == "Boleta"){
+            this.documentForm.get('address').disable()
+            return false
+          } else {
+            this.documentForm.get('address').enable()
+            return true
+          }
+        })
+    )
+
+    //Button Validation: true means disabled
+    this.secondButtonVal$ = this.shopCar.validateStock
+
+    this.finishObservable$ = combineLatest([
+      this.reqProdListObservable$, this.auth.user$, this.delivery$, this.discount$, 
+    ]).pipe(map(res => {
+      return ({
+        reqProdList: res[0],
+        user: res[1],
+        delivery: res[2],
+        discount: res[3]
+      })
+    }))
   }
 
 
@@ -444,160 +489,111 @@ export class ShoppingCartComponent implements OnInit {
 
   secondView() {
     this.view.next(2);
-    this.validatedSecondButton = false
   }
 
   thirdView() {
     console.log(this.deliveryForm.value)
-    let valid = false
-    if (this.delivery == 1) {
-      if (this.deliveryForm.value) {
-        if (this.deliveryForm.value == -2) {
-          valid = true
-        } else {
-          valid = this.locations.length != 0
+    this.view.next(3)
+  }
+
+  finish(finishData: {reqProdList: SaleRequestedProducts[], user: User, delivery: number, discount: number}) {
+    
+    this.uploadingSale$ = of(true)
+
+    let date = new Date()
+
+    let newSale: Sale = {
+      id: '',
+      correlative: 0,
+      correlativeType: 'R',
+      user: finishData.user,
+
+      status: (new saleStatusOptions()).requesting,
+      requestedProducts: finishData.reqProdList,
+
+      deliveryPickUp: this.deliveryForm.get('deliveryPickUp').value,
+      delivery: this.deliveryForm.get('delivery').disabled ? null : this.deliveryForm.get('delivery').value,
+      observation: this.deliveryForm.get('observation').value,
+      location: this.deliveryForm.get('location').disabled ? null : this.deliveryForm.get('location').value,
+
+      coupon: this.couponForm.get('couponData').value,
+      couponDiscount: finishData.discount,
+
+      document: this.documentTypeForm.value,
+      documentInfo: this.documentForm.value,
+
+      payType: this.method,
+      payInfo: this.cardForm.value,     //NOT USED OR IMPLEMENTED
+
+      adviser: this.adviserForm.value,
+
+      createdAt: date,
+      createdBy: finishData.user,
+
+      voucher: [],
+      voucherChecked: false,
+    }
+
+
+    console.log(newSale);
+
+    let phot = this.photos.data.length ? this.photos : null;
+
+    this.uploadingSale$ = this.dbs.saveSale(newSale, phot).pipe(
+      map(([batch, ref])=> {
+        batch.commit()
+          .then(res => {
+            console.log('Writing Sale successfull')
+            this.snackbar.open("Validando Stock")
+            this.uploadingSale$ = ref.valueChanges().pipe(
+              takeWhile(sale => {
+                let statuses = new saleStatusOptions()
+                console.log(sale.status)
+                switch(sale.status){
+                  case statuses.failed:
+                    this.snackbar.open("Error. Falta de Stock.", "Aceptar")
+                    return false;
+                  case statuses.requested:
+                    this.shopCar.clearCar();
+                    this.dialog.open(SaleDialogComponent, 
+                      {data: { 
+                        name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
+                        email: sale.user.email, 
+                        number: String(sale.correlative).padStart(6, "0"), 
+                        asesor: sale.adviser }}
+                      )
+                    this.router.navigate(['/main']);
+                    return false;
+                  default:
+                    return true;
+                }
+              })
+            )
+          }).catch(err => {
+            console.log('Writing Sale unsuccessfull')
+            this.snackbar.open("Error en conexión. Vuelva a intentarlo.")
+            this.uploadingSale$ = of(false)
+          });
+        return true
+      }), startWith(true)
+    )
+
+
+    //this.dbs.sendEmail(newSale)
+    /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
+      this.view.next(1)
+      this.dbs.order = []
+      this.dbs.orderObs.next([])
+      let name = this.user.personData ? this.user.personData.name + ' ' + this.user.personData['lastName'] : this.user['name'] + ' ' + this.user['lastName']
+      this.dialog.open(SaleDialogComponent, {
+        data: {
+          name: name,
+          number: newSale.correlative,
+          email: this.user.email
         }
-      } else {
-        this.snackbar.open('Por favor, escoga una zona de envio', 'Aceptar');
-
-      }
-    } else {
-      valid = true
-    }
-    if (valid) {
-      this.view.next(3);
-    } else {
-      this.snackbar.open('Por favor, agregue una dirección', 'Aceptar');
-    }
-  }
-
-  validatedThirdButton() {
-    let location = this.user ? this.user.location ? true : false : false;
-    let delivery = this.selectedDelivery ? true : false;
-    if (this.delivery == 1) {
-      return !location && !delivery
-    } else {
-      return !delivery
-    }
-  }
-
-  validatedFinishButton() {
-    let doc;
-    if (this.document == 1) {
-
-      doc = this.boletaForm.valid
-    } else {
-      doc = this.facturaForm.valid
-    }
-
-    if (!doc) {
-      this.snackbar.open('Por favor, complete la información del comprobante de pago', 'Aceptar');
-    }
-
-    if (!this.method.value) {
-      this.snackbar.open('Por favor, indique el método de pago', 'Aceptar');
-    }
-    let meth = true;
-    let del = this.viewDelivery == 1 && this.deliveryForm.value != -2
-    if (this.method.value == 3 && del) {
-      meth = this.photosList.length > 0
-    }
-
-    if (!meth) {
-      this.snackbar.open('Por favor, agregué el voucher de pago', 'Aceptar');
-    }
-    return doc && meth
-  }
-
-  finish(reqProdList: SaleRequestedProducts[]) {
-    if (this.validatedFinishButton()) {
-      this.uploadingSale$ = new BehaviorSubject(true)
-
-      console.log(this.selectedLocation)
-      let info = {
-        location: !!this.user.location ? this.user.location[this.selectedLocation] : null,
-        store: this.delivery == 2 ? this.stores[this.selectedStore] : null
-      }
-
-      let newSale: Sale = {
-        id: '',
-        correlative: 0,
-        correlativeType: 'R',
-        idDocument: this.document,
-        document: this.document == 1 ? 'Boleta' : 'Factura',
-        documentInfo: this.document == 1 ? this.boletaForm.value : this.facturaForm.value,
-        payType: this.method,
-        payInfo: this.cardForm.value,
-        idDelivery: this.delivery,
-        deliveryType: this.delivery == 1 ? 'Entrega en domicilio' : 'Recojo en tienda',
-        deliveryInfo: info,
-        payDelivery: this.delivery == 1 ? this.deliveryForm.value != -2 : true,
-        requestDate: null,
-        createdAt: new Date(),
-        createdBy: null,
-        user: this.user,
-        requestedProducts: reqProdList,
-        status: 'Solicitando',
-        total: this.total,
-        deliveryPrice: this.delivery == 1 ? this.selectedDelivery : 0,
-        observation: this.observation.value,
-        voucher: [],
-        voucherChecked: false,
-        adviser: this.adviserForm.value,
-        coupon: null
-      }
-
-
-      console.log(newSale);
-
-      let phot = this.photos.data.length ? this.photos : null;
-
-      let [batch, saleRef] = this.dbs.finishPurshase(newSale);
-
-      batch.commit()
-        .then(res => {
-          console.log('Writing Sale successfull')
-          this.snackbar.open("Validando Stock")
-          this.uploadingSale$ = saleRef.valueChanges().pipe(
-            takeWhile(sale => {
-              let statuses = new saleStatusOptions()
-              console.log(sale.status)
-              switch(sale.status){
-                case statuses.failed:
-                  this.snackbar.open("Error. Falta de Stock.", "Aceptar")
-                  return false;
-                case statuses.requested:
-                  this.snackbar.open("Compra registrada!", "Aceptar")
-                  return false;
-                default:
-                  return true;
-              }
-            })
-          )
-        }).catch(err => {
-          console.log('Writing Sale unsuccessfull')
-          this.snackbar.open("Error en conexión. Vuelva a intentarlo.")
-        });
-
-
-      //this.dbs.sendEmail(newSale)
-      /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
-        this.view.next(1)
-        this.dbs.order = []
-        this.dbs.orderObs.next([])
-        let name = this.user.personData ? this.user.personData.name + ' ' + this.user.personData['lastName'] : this.user['name'] + ' ' + this.user['lastName']
-        this.dialog.open(SaleDialogComponent, {
-          data: {
-            name: name,
-            number: newSale.correlative,
-            email: this.user.email
-          }
-        })
-        this.router.navigate(['/main/mispedidos']);
-      })*/
-    }
-
-
+      })
+      this.router.navigate(['/main/mispedidos']);
+    })*/
 
   }
 
@@ -616,23 +612,6 @@ export class ShoppingCartComponent implements OnInit {
     }
   }
 
-  getDiscount(coupon) {
-    switch (coupon.redirectTo) {
-      case 'Toda la compra':
-        return coupon.type == 2 ? this.total * (coupon.discount / 100) : coupon.discount
-        break;
-      case 'Categoría/subcategoría':
-        let ord = [...this.dbs.order].filter(orde => orde.product.idCategory == coupon.category).reduce((a, b) => a + b.price, 0)
-        return coupon.type == 2 ? ord * (coupon.discount / 100) : ord > coupon.discount ? coupon.discount : ord
-        break;
-      case 'Marca':
-        let des = [...this.dbs.order].filter(or => or.product.brand.name ? or.product.brand.name == coupon.brand : or.product.brand == coupon.brand)
-          .reduce((a, b) => a + b.price, 0)
-        return coupon.type == 2 ? des * (coupon.discount / 100) : des > coupon.discount ? coupon.discount : des
-        break;
-    }
-  }
-
   clearCoupon() {
     this.couponForm.get('coupon').setValue('')
     this.couponForm.get('couponData').setValue(null)
@@ -644,17 +623,6 @@ export class ShoppingCartComponent implements OnInit {
 
   /*Delivery*/
 
-  change(id) {
-    this.viewDelivery = id
-    this.delivery = id
-    if (id == 1) {
-      this.dbs.delivery.next(this.selectedDelivery);
-    } else {
-      this.dbs.delivery.next(0);
-    }
-  }
-
-
   openMap(user: User, index: number, edit: boolean) {
     this.dialog.open(LocationDialogComponent, {
       data: {
@@ -665,27 +633,13 @@ export class ShoppingCartComponent implements OnInit {
     })
   }
 
-  selectStore(value) {
-    console.log(this.stores[value])
-    this.selectedStore = value
-  }
-
-  selectLocal(value) {
-    this.selectedLocation = value
-  }
-
-  /*Payments*/
-  chooseType(type) {
-    this.cardForm.get('type').setValue(type);
-  }
-
   addNewPhoto(formControlName: string, image: File[]) {
     if (image.length === 0) return;
     let reader = new FileReader();
     this.photos.resizing$[formControlName].next(true);
 
     this.ng2ImgMax
-      .resizeImage(image[0], 10000, 426)
+      .resizeImage(image[0], 1000, 426)
       .pipe(take(1))
       .subscribe(
         (result) => {
@@ -723,12 +677,13 @@ export class ShoppingCartComponent implements OnInit {
     return (ctrl: AbstractControl): Observable<ValidationErrors|null> => {
       let coupon = <string>ctrl.value
       ctrl.parent.get('couponData').setValue(null)
-      return this.dbs.getCoupon(coupon).pipe(
+      return dbs.getCoupon(coupon).pipe(
         switchMap(couponDB => {
           console.log(couponDB)
           //There exists no coupon
           if(!couponDB){
-            this.snackbar.open('Cupón inválido.')
+            this.snackbar.open('Cupón inválido.', "Aceptar")
+            ctrl.setValue(null)
             return of({noCoupon: true})
           } else {
             //If coupon exist, we continue with validations.
@@ -741,7 +696,8 @@ export class ShoppingCartComponent implements OnInit {
               startDate.setSeconds(<number>couponDB.startDate["seconds"])
               endDate.setSeconds(<number>couponDB.endDate["seconds"] + 86340) //Fix to include endDate
               if(actualDate < startDate || actualDate > endDate){
-                this.snackbar.open('Cupón expirado.')
+                this.snackbar.open('Cupón expirado.', "Aceptar")
+                ctrl.setValue(null)
                 return of({expiredCoupon: true})
               } 
             } 
@@ -750,7 +706,8 @@ export class ShoppingCartComponent implements OnInit {
               take(1),
               map(user => {
                 if(!!couponDB.users.find(uid => user.uid == uid)){
-                  this.snackbar.open('Cupón agotado.')
+                  this.snackbar.open('Cupón agotado.', "Aceptar")
+                  ctrl.setValue(null)
                   return {usedCoupon: true}
                 } else {
                   ctrl.parent.get('couponData').setValue(couponDB)

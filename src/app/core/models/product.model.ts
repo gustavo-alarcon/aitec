@@ -43,8 +43,8 @@ export interface unitProduct {
   sku: string;
   color: Color;
   gallery: Array<Gallery>;
-  stock?:number;          //NO FUNCIONA
-  realStock?: number;
+  stock?:number;            //NO FUNCIONA
+  realStock?: number;       
   virtualStock?: number;
 }
 
@@ -66,7 +66,7 @@ interface Color {
   color: string;
 }
 
-interface Zone {
+export interface Zone {
   name: string;
   delivery: number;
 }
