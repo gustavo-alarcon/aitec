@@ -50,7 +50,7 @@ export interface Sale {
   delivery: Product["zones"][0] | Stores;   //Product zone in case of delivery, stores in pickup
   observation: string;
   location: User["location"][0]             //In case of delivery and valid zone
-  //deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
+  deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
 
   //Coupon data
   coupon:Coupon;

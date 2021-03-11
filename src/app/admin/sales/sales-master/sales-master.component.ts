@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
 import { Zone } from 'src/app/core/models/product.model';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 
 
 @Component({
@@ -42,7 +43,8 @@ export class SalesMasterComponent implements OnInit {
   constructor(
     private dbs: DatabaseService,
     private dialog: MatDialog,
-    public datePipe: DatePipe
+    public datePipe: DatePipe,
+    public shopCar: ShoppingCarService,
 
   ) { }
 
@@ -397,12 +399,14 @@ console.log(this.getCurrentMonthOfViewDate());
       return amount * price
     }
   }
+  
   giveTotalPrice(sale: Sale): number {
     return sale.requestedProducts.reduce((a, b) => a + this.givePrice(b), 0)
   }
 
   giveTotalSalesPrice(sales: Sale[]): number {
-    return sales.reduce((a, b) => a + (this.giveTotalPrice(b) + (b.deliveryPickUp ? 0 : (<Zone>b.delivery).delivery)), 0)
+    console.log(sales)
+    return sales.reduce((a, b) => a + this.shopCar.giveProductPriceOfSale(b), 0)
   }
 }
 

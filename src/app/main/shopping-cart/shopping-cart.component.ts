@@ -280,7 +280,7 @@ export class ShoppingCartComponent implements OnInit {
       map(([user, ord, delivery]) => {
         if (ord.length) {
           let sum = [...ord]
-            .map((el) => this.giveProductPrice(el, user.customerType))
+            .map((el) => this.shopCar.giveProductPrice(el, user.customerType == 'Mayorista'))
             .reduce((a, b) => a + b, 0);
           return sum + delivery;
         } else {
@@ -323,7 +323,7 @@ export class ShoppingCartComponent implements OnInit {
             let reqProdList = res[1]
             return this.auth.user$.pipe(map(user => {
               let sum = [...reqProdList]
-                .map((el) => this.giveProductPrice(el, user.customerType))
+                .map((el) => this.shopCar.giveProductPrice(el, user.customerType == 'Mayorista'))
                 .reduce((a, b) => a + b, 0);
               //We finally calculate discount:
               if(sum > coup.from){
@@ -498,7 +498,7 @@ export class ShoppingCartComponent implements OnInit {
 
   finish(finishData: {reqProdList: SaleRequestedProducts[], user: User, delivery: number, discount: number}) {
     
-    this.uploadingSale$ = of(true)
+    //this.uploadingSale$ = of(true)
 
     let date = new Date()
 
@@ -515,6 +515,7 @@ export class ShoppingCartComponent implements OnInit {
       delivery: this.deliveryForm.get('delivery').disabled ? null : this.deliveryForm.get('delivery').value,
       observation: this.deliveryForm.get('observation').value,
       location: this.deliveryForm.get('location').disabled ? null : this.deliveryForm.get('location').value,
+      deliveryPrice: finishData.delivery,
 
       coupon: this.couponForm.get('couponData').value,
       couponDiscount: finishData.discount,
@@ -535,10 +536,11 @@ export class ShoppingCartComponent implements OnInit {
     }
 
 
-    console.log(newSale);
+    console.log(newSale.deliveryPickUp);
+    console.log(newSale.delivery);
 
     let phot = this.photos.data.length ? this.photos : null;
-
+/*
     this.uploadingSale$ = this.dbs.saveSale(newSale, phot).pipe(
       map(([batch, ref])=> {
         batch.commit()
@@ -578,7 +580,7 @@ export class ShoppingCartComponent implements OnInit {
       }), startWith(true)
     )
 
-
+*/
     //this.dbs.sendEmail(newSale)
     /*this.dbs.reduceStock(this.user, newSale, phot).then(() => {
       this.view.next(1)
@@ -599,18 +601,7 @@ export class ShoppingCartComponent implements OnInit {
 
 
 
-  giveProductPrice(item, mayorista): number {
-    if (!mayorista && item.product.promo) {
-      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.price;
-      return promTotalPrice + noPromTotalPrice;
-    }
-    else {
-      return item.quantity * item.price
-    }
-  }
+
 
   clearCoupon() {
     this.couponForm.get('coupon').setValue('')
