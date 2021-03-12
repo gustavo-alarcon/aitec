@@ -9,8 +9,10 @@ export class saleStatusOptions {
   failed = 'Error';                         //Estado de rechazo de confirmación de cloud function
   requested = 'Solicitado';                 //Estado de confirmación de cloud function
   attended = 'Atendido';
-  confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid
-  confirmedDocument = 'Comprobante Confirmado';
+  //Fecha asignada y tracking
+  confirmedRequest = 'Solicitud Confirmada';  
+  //Aca recien aparece n° de comprobante      //can be confirmed only when voucher is valid
+  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a logística
   // confirmedDelivery = 'Delivery Confirmado';
   // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
@@ -82,8 +84,6 @@ export interface Sale {
   };
 
   adviser:any;
-
-
 
   //Here comes things that will be editted
 
