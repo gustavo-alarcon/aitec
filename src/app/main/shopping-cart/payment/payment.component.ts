@@ -101,7 +101,9 @@ export class PaymentComponent implements OnInit {
   
   payFinishSuccess(response){
     
-   return this.router.navigateByUrl('main/carrito/success');    
+   //return this.router.navigateByUrl('main/carrito/success');   
+   return this.router.navigate(['main/carrito/success']);
+ 
 
   }
   
