@@ -166,12 +166,7 @@
                     <div class="overflow_container">
                         <mat-icon>group</mat-icon>
                         <b *ngIf="sale.user else noUser"> 
-                            <ng-container *ngIf="sale.user?.name else userDisplayName">
-                                {{sale.user.name+" "+sale.user?.lastName1}}
-                            </ng-container>
-                            <ng-template #userDisplayName>
-                                {{sale.user?.displayName}}
-                            </ng-template>
+                            {{sale.documentInfo.name}}
                         </b>
                         <ng-template #noUser>
                             <b>Sin Nombre</b>
@@ -179,12 +174,9 @@
                     </div>
                     <div class="overflow_container">
                         <mat-icon>chrome_reader_mode</mat-icon>
-                        <b *ngIf="sale.user?.dni else noNumber">
-                            {{sale.user.dni}}
+                        <b>
+                            {{sale.document == "Boleta" ? sale.documentInfo?.dni : sale.documentInfo?.ruc}}
                         </b>
-                        <ng-template #noNumber>
-                            <b>00000000</b>
-                        </ng-template>
                     </div>
                     <div class="overflow_container">
                         <mat-icon>mail</mat-icon>
