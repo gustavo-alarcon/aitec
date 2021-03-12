@@ -1,4 +1,4 @@
-import { Sale, saleStatusOptions } from './../models/sale.model';
+import { Sale, SaleRequestedProducts, saleStatusOptions } from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
@@ -32,6 +32,7 @@ import { Waybill, WaybillProductList } from '../models/waybill.model';
 import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 import { Stores } from '../models/stores.model';
 import { Coupon } from '../models/coupon.model';
+import { Payments } from '../models/payments.model';
 
 @Injectable({
   providedIn: 'root',
@@ -435,13 +436,20 @@ export class DatabaseService {
       );
   }
 
-  getPaymentsChanges() {
+  getPaymentsChanges(): Observable<Payments[]> {
     return this.afs
-      .collection(`/db/aitec/config/generalConfig/payments`, (ref) =>
+      .collection<Payments>(`/db/aitec/config/generalConfig/payments`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      )
-      .valueChanges()
-      .pipe(shareReplay(1));
+      ).valueChanges().pipe(
+        map(payList => {
+          return payList.map(pay => {
+            return {
+              ...pay,
+              type: pay.voucher ? 3 : pay.name.includes('arjeta') ? 2 : 1
+            }
+          })
+        })
+      );
   }
 
   getPaymentsDoc(): Observable<any> {
@@ -454,6 +462,8 @@ export class DatabaseService {
         })
       );
   }
+
+
 
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
@@ -938,14 +948,22 @@ export class DatabaseService {
 
   // })
 
-  getSalesUser(user: string): Observable<Sale[]> {
+  getSalesUser(userId: string): Observable<Sale[]> {
     return this.afs
       .collection<Sale>(`/db/aitec/sales`, (ref) =>
-        ref.where('user.uid', '==', user)
+        ref.where('user.uid', '==', userId)
       )
       .valueChanges();
   }
 
+  getPayingSales(userId: string): Observable<Sale> {
+    let status = (new saleStatusOptions()).paying
+    return this.afs
+      .collection<Sale>(`/db/aitec/sales`, (ref) =>
+        ref.where('user.uid', '==', userId).where('status', '==', status).limit(1)
+      )
+      .valueChanges().pipe(map(sales => sales[0]));
+  }
 
   getSales(date: { begin: Date; end: Date }): Observable<Sale[]> {
     let real = {
@@ -1739,6 +1757,32 @@ export class DatabaseService {
 
   sell(Sale){
 
+  }
+
+  //Calculator functions
+  //mayorista is given in user.customerType == "Mayorista"
+  giveProductPrice(item: SaleRequestedProducts, mayorista: string): number {
+    let may = (mayorista == "Mayorista")
+    if (!may && item.product.promo) {
+      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+      let noPromTotalPrice = noPromTotalQuantity * item.price;
+      return promTotalPrice + noPromTotalPrice;
+    }
+    else {
+      return item.quantity * item.price
+    }
+  }
+
+  giveProductPriceOfSale(sale: Sale): number{
+    let sum = [...sale.requestedProducts]
+      .map((el) => this.giveProductPrice(el, sale.user.customerType == 'Mayorista'))
+      .reduce((a, b) => a + b, 0);
+    let delivery = Number(sale.deliveryPrice)
+    let discount = Number(sale.couponDiscount)
+    
+    return (sum + delivery - discount)
   }
 
 }

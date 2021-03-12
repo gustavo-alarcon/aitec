@@ -39,6 +39,8 @@ export interface User {
   favorites?:string[]
 
   shoppingCar?: SaleRequestedProducts[]
+  pendingPayment?: boolean              //Used to indicate if a payment is expected
+  
 }
 interface naturalPerson {
   type:"natural";

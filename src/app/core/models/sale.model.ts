@@ -7,7 +7,8 @@ import { Stores } from './stores.model';
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
   failed = 'Error';                         //Estado de rechazo de confirmación de cloud function
-  requested = 'Solicitado';                 //Estado de confirmación de cloud function
+  paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago
+  requested = 'Solicitado';                 //Venta confirmada por cloud function y pagada
   attended = 'Atendido';
   confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid
   confirmedDocument = 'Comprobante Confirmado';
@@ -50,7 +51,7 @@ export interface Sale {
   delivery: Product["zones"][0] | Stores;   //Product zone in case of delivery, stores in pickup
   observation: string;
   location: User["location"][0]             //In case of delivery and valid zone
-  //deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
+  deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
 
   //Coupon data
   coupon:Coupon;
@@ -72,14 +73,14 @@ export interface Sale {
     value: number;
     account?: string;
   },
-  payInfo: {      //Not yet used or implemented
-    type: string,
-    numero: string,
-    month: string,
-    year: string,
-    cvv: string,
-    titular: string,
-  };
+  // payInfo: {      //Not yet used or implemented
+  //   type: string,
+  //   numero: string,
+  //   month: string,
+  //   year: string,
+  //   cvv: string,
+  //   titular: string,
+  // };
 
   adviser:any;
 
