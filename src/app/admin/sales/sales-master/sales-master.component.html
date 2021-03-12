@@ -134,10 +134,10 @@
                         <mat-icon style="font-size:20px;"
                             color="primary">assignment_ind</mat-icon>
                         <span *ngIf="sale.attendedData else noAdviser">
-                            <ng-container *ngIf="sale.attendedData.attendedBy.name else displayName">
+                            <ng-container *ngIf="sale.attendedData.attendedBy.name else displayName2">
                                 {{sale.attendedData.attendedBy.name+" "+sale.attendedData.attendedBy?.lastName1}}
                             </ng-container>
-                            <ng-template #displayName>
+                            <ng-template #displayName2>
                                 {{sale.attendedData.attendedBy?.displayName}}
                             </ng-template>
                         </span>
