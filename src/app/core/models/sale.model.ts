@@ -3,6 +3,7 @@ import { Product, unitProduct } from './product.model';
 import { Package } from './package.model';
 import { Coupon } from './coupon.model';
 import { Stores } from './stores.model';
+import { Payments } from './payments.model';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
@@ -68,11 +69,7 @@ export interface Sale {
     address: string
   };
   
-  payType?: {
-    name: string;
-    value: number;
-    account?: string;
-  },
+  payType: Payments
   // payInfo: {      //Not yet used or implemented
   //   type: string,
   //   numero: string,

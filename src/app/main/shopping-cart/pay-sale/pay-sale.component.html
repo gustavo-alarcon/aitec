@@ -79,8 +79,30 @@
     <!-- Ticket summary -->
     <div class="w3-col l4 col-md-5">
       <div class="w3-padding">
-        <div class="resume" *ngIf="initPayment$|async; else loader">
+        <div class="resume">
           <h2 class="resume__title">Resumen de pedido</h2>
+          <div>
+            <div class="resume__divider"></div>
+            <div class="resume__list w3-section">
+              <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px">
+                <div style="width: 20%">Cant.</div>
+                <div style="width: 55%">Descripción</div>
+                <div style="width: 25%">Precio</div>
+              </div>
+              <div *ngFor="let prod of (sale$|async).requestedProducts" class="ordItem">
+                <div style="width: 20%" class="w3-center">
+                  {{prod.quantity | number:'2.'}}
+                </div>
+                <div style="width: 55%">
+                  {{prod.product.description}}
+                </div>
+                <div style="width: 25%">
+                  {{dbs.giveProductPrice(prod) | currency: 'S/. ':'symbol':'2.2-2'}}
+                </div>
+
+              </div>
+            </div>
+          </div>
           <div class="resume__divider"></div>
           <!-- Price summary -->
           <div class="resume__descrip w3-section">
@@ -89,11 +111,11 @@
               <span class="ms-fill"></span>
               <span>{{ subtotal$ | async | number: ".2"}}</span>
             </div>
-            <div class="ms-flex ms-flex--center">
+            <!-- <div class="ms-flex ms-flex--center">
               <span>Cargos adicionales</span>
               <span class="ms-fill"></span>
               <span>0.00</span>
-            </div>
+            </div> -->
             <div class="ms-flex ms-flex--center">
               <span>Descuento promocional</span>
               <span class="ms-fill"></span>
@@ -111,7 +133,7 @@
             </div>
           </div>
           <div class="resume__divider"></div>
-          <div *ngIf="(view$|async) != 1">
+          <div>
             <div style="display: flex; margin-top: 20px;justify-content: space-between;">
               <div><strong>Total a pagar:</strong></div>
               <div class="ticket__total">
@@ -120,17 +142,18 @@
             </div>
           </div>
           
-          <!-- End Button -->
+          <!-- Third section -->
           <div class="w3-center w3-margin-top">
-            <button 
+            <!-- <button 
               type="button"
+              *ngIf="finishObservable$|async as finishData"
               [disabled]="(uploadingSale$ | async) || (!deliveryForm.valid) || 
                           (secondButtonVal$ | async) || (!documentForm.valid) ||
                           (!method.value) || (method.value == 3)&&(!photosList?.length)" 
               (click)="finish(finishData)" 
               mat-raised-button color="primary" class="resume__button">
               Finalizar Compra
-            </button>
+            </button> -->
           </div>
 
         </div>

@@ -277,75 +277,7 @@
         <!-- Payment -->
         <div *ngIf="(view$|async) == 3">
           <mat-card class="w3-block delivery">
-            <div class="w3-margin-bottom">
-              <h4 class="delivery__title">
-                Elige el método de pago
-              </h4>
-              <mat-form-field class="w3-block" appearance="outline">
-                <mat-label>Opciones de pago</mat-label>
-                <mat-select [(ngModel)]="method">
-                  <mat-option *ngFor="let pay of payments" [value]="pay">
-                    {{pay.name}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <div class="w3-margin-bottom" *ngIf="method.account">
-                <strong>{{method.account}}</strong>
-              </div>
-
-              <div>
-                <div *ngIf="method.value==3">
-                  
-                  <div class="w3-margin-bottom">
-                    <div class="w3-margin-bottom" style="position: relative"
-                      *ngFor="let image of photosList; let ind = index">
-                      <img class="voucher" style="object-fit: cover" [src]="image.img" alt="fotografía" />
-                      <div class="ms-flex w3-block" style="position: absolute; top: 0">
-                        <span class="ms-fill"></span>
-                        <button type="button" *ngIf="!image.show" mat-icon-button (click)="image.show = true">
-                          <mat-icon>zoom_in</mat-icon>
-                        </button>
-                        <button type="button" *ngIf="image.show" mat-icon-button (click)="image.show = false">
-                          <mat-icon>zoom_out</mat-icon>
-                        </button>
-                        <button type="button" mat-icon-button (click)="eliminatedphoto(ind)">
-                          <mat-icon>close</mat-icon>
-                        </button>
-                      </div>
-                      <div style="text-align: center; border: 1px solid silver" *ngIf="image.show">
-                        <div class="ms-flex w3-block">
-                          <span class="ms-fill"></span>
-                          <button mat-icon-button (click)="image.show = false">
-                            <mat-icon>close</mat-icon>
-                          </button>
-                        </div>
-                        <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
-                      </div>
-                    </div>
-
-                    <div class="voucher" (click)="photoURL.click()">
-                      Agregar foto de voucher de pago
-                    </div>
-                    <mat-hint>*Campo requerido</mat-hint>
-
-                    <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%"
-                      mode="indeterminate">
-                    </mat-progress-bar>
-                    <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
-                      style="width: 100%">*comprimiendo</span>
-                    <input style="display: none" #photoURL type="file" accept="image/*"
-                      (change)="addNewPhoto('photoURL', photoURL.files)" />
-                  </div>
-                </div>
-
-
-                <div *ngIf="method.value==2">
-                  <app-payment [total]="(totalAll$ | async)"></app-payment>
-                </div>
-              </div>
-
-            </div>
+            
             <div class="w3-margin-top">
               <h4 class="delivery__title">
                 Elija el tipo de comprobante y verifique sus datos
@@ -391,7 +323,7 @@
     <!-- Ticket summary -->
     <div class="w3-col l4 col-md-5">
       <div class="w3-padding">
-        <div class="resume" *ngIf="initPayment$|async;else loader">
+        <div class="resume" *ngIf="initPayment$|async; else loader">
           <h2 class="resume__title">Resumen de pedido</h2>
           <div *ngIf="(view$|async) == 2">
             <div class="resume__divider"></div>
@@ -409,7 +341,7 @@
                   {{prod.product.description}}
                 </div>
                 <div style="width: 25%">
-                  {{giveProductPrice(prod) | currency: 'S/. ':'symbol':'2.2-2'}}
+                  {{dbs.giveProductPrice(prod) | currency: 'S/. ':'symbol':'2.2-2'}}
                 </div>
 
               </div>
@@ -521,8 +453,7 @@
                 Continuar
               </button>
             </div>
-            <p class="resume__small">*En el siguiente paso se procederá a generar la orden de compra y podrá confirmar
-              el Pago.</p>
+            
           </div>
           <!-- Second section -->
           <div *ngIf="(view$|async) == 2">
@@ -542,9 +473,8 @@
                 [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async)" 
                 color="primary"
                 class="resume__button">
-                Generar orden de pedido</button>
+                Continuar</button>
             </div>
-            <p class="resume__small">*Con la aceptación del pedido, usted confirma la compra del mismo</p>
           </div>
           <!-- Third section -->
           <div *ngIf="(view$|async) == 3" class="w3-center w3-margin-top">
@@ -552,12 +482,15 @@
               type="button"
               *ngIf="finishObservable$|async as finishData"
               [disabled]="(uploadingSale$ | async) || (!deliveryForm.valid) || 
-                          (secondButtonVal$ | async) || (!documentForm.valid) ||
-                          (!method.value) || (method.value == 3)&&(!photosList?.length)" 
+                          (secondButtonVal$ | async) || (!documentForm.valid)" 
               (click)="finish(finishData)" 
               mat-raised-button color="primary" class="resume__button">
               Finalizar Compra
             </button>
+            <p class="resume__small">
+              *Al finalizar la compra, se separarán los productos por un plazo de 1 hora. 
+              Usted podrá realizar el pago en dicho tiempo.
+            </p>
           </div>
 
         </div>

@@ -102,6 +102,8 @@ export class DatabaseService {
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
 
+  saleStatus = new saleStatusOptions()
+
   generalConfigDoc = this.afs
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
@@ -891,6 +893,46 @@ export class DatabaseService {
 
     let newSale = {...sale}
     newSale.id = saleRef.id
+
+    if (phot) {
+      let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
+
+      return forkJoin(photos).pipe(
+        takeLast(1),
+        map((res: string[]) => {
+          //We update voucher field
+          newSale.voucher = [...phot.data.map((el, i) => {
+            return {
+              voucherPhoto: res[i],
+              voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
+            }
+          })]
+          //We now get the firestore batch
+          return this.finishPurshase(newSale)
+        })
+      )
+    } else {
+      return of(this.finishPurshase(newSale))
+    }
+
+  }
+
+  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<[firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]> {
+    console.log('here');
+
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
+
+    let newSale = {...sale}
+
+    switch(sale.payType.type){
+      case 1://Case of contraentrega
+      case 2://Case of tarjeta
+        newSale.status = this.saleStatus.requested
+        break;
+      case 3://Case of voucher
+      
+        break;
+    }
 
     if (phot) {
       let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]

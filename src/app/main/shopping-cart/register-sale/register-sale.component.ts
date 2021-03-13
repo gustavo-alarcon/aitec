@@ -41,30 +41,8 @@ export class RegisterSaleComponent implements OnInit {
 
 
   document: 'Boleta' | 'Factura' = 'Boleta';
-  method: {
-    name: string;
-    value: number;
-    account?: string;
-  } = { name: '', value: 0 };
-
-  payments: Array<any> = [];
 
   observation: FormControl = new FormControl('')
-
-  photosList: Array<any> = [];
-  photos: {
-    resizing$: {
-      photoURL: Observable<boolean>;
-    };
-    data: File[];
-  } = {
-      resizing$: {
-        photoURL: new BehaviorSubject<boolean>(false),
-      },
-      data: [],
-    };
-
-  initPayment$: Observable<any>
 
   user: User
 
@@ -98,7 +76,6 @@ export class RegisterSaleComponent implements OnInit {
     private dbs: DatabaseService,
     public auth: AuthService,
     private fb: FormBuilder,
-    private ng2ImgMax: Ng2ImgMaxService,
     private router: Router,
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
@@ -364,26 +341,7 @@ export class RegisterSaleComponent implements OnInit {
       }
     }))
 
-    this.initPayment$ = combineLatest([
-      this.auth.user$,
-      this.dbs.getPaymentsChanges()
-    ]).pipe(
-      map(([user, payments]) => {
-        console.log(payments);
-        this.payments = payments.map(pay => {
-          return {
-            name: pay['name'],
-            account: pay['account'],
-            value: pay['voucher'] ? 3 : pay['name'].includes('arjeta') ? 2 : 1
-          }
-        })
 
-        this.user = user
-        console.log(this.user)
-
-        return user
-      })
-    )
 
     this.documentTypeForm$ = combineLatest([
       this.documentTypeForm.valueChanges.pipe(startWith(this.documentTypeForm.value)),
@@ -464,6 +422,7 @@ export class RegisterSaleComponent implements OnInit {
       delivery: this.deliveryForm.get('delivery').disabled ? null : this.deliveryForm.get('delivery').value,
       observation: this.deliveryForm.get('observation').value,
       location: this.deliveryForm.get('location').disabled ? null : this.deliveryForm.get('location').value,
+      deliveryPrice: finishData.delivery,
 
       coupon: this.couponForm.get('couponData').value,
       couponDiscount: finishData.discount,
@@ -471,7 +430,7 @@ export class RegisterSaleComponent implements OnInit {
       document: this.documentTypeForm.value,
       documentInfo: this.documentForm.value,
 
-      payType: this.method,
+      payType: null,
       //payInfo: this.cardForm.value,     //NOT USED OR IMPLEMENTED
 
       adviser: this.adviserForm.value,
@@ -582,44 +541,6 @@ export class RegisterSaleComponent implements OnInit {
     })
   }
 
-  addNewPhoto(formControlName: string, image: File[]) {
-    if (image.length === 0) return;
-    let reader = new FileReader();
-    this.photos.resizing$[formControlName].next(true);
-
-    this.ng2ImgMax
-      .resizeImage(image[0], 1000, 426)
-      .pipe(take(1))
-      .subscribe(
-        (result) => {
-          this.photos.data.push(
-            new File(
-              [result],
-              formControlName +
-              this.photosList.length +
-              result.name.match(/\..*$/)
-            )
-          );
-          reader.readAsDataURL(image[0]);
-          reader.onload = (_event) => {
-            this.photosList.push({
-              img: reader.result,
-              show: false,
-            });
-            this.photos.resizing$[formControlName].next(false);
-          };
-        },
-        (error) => {
-          this.photos.resizing$[formControlName].next(false);
-          this.snackbar.open('Por favor, elija una imagen en formato JPG, o PNG', 'Aceptar');
-        }
-      );
-  }
-
-  eliminatedphoto(ind) {
-    this.photosList.splice(ind, 1);
-    this.photos.data.splice(ind, 1);
-  }
 
   //Async Validators
   couponValidator(dbs: DatabaseService) {

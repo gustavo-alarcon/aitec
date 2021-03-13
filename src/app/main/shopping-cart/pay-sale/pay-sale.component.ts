@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Ng2ImgMaxService } from 'ng2-img-max';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { Payments } from 'src/app/core/models/payments.model';
 import { Sale } from 'src/app/core/models/sale.model';
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -20,11 +22,31 @@ export class PaySaleComponent implements OnInit {
   paymentMethodList$: Observable<Payments[]>;
   sale$: Observable<Sale>
   sum$: Observable<number>;
+  subtotal$: Observable<number>;
+  igv$: Observable<number>;
+  discount$: Observable<Number>;
+  delivery$: Observable<number>;
+  totalAll$: Observable<number>;
+
+  photosList: Array<any> = [];
+  photos: {
+    resizing$: {
+      photoURL: Observable<boolean>;
+    };
+    data: File[];
+  } = {
+      resizing$: {
+        photoURL: new BehaviorSubject<boolean>(false),
+      },
+      data: [],
+    };
 
 
   constructor(
-    private dbs: DatabaseService,
-    private auth: AuthService
+    public dbs: DatabaseService,
+    private auth: AuthService,
+    private ng2ImgMax: Ng2ImgMaxService,
+    private snackbar: MatSnackBar,
   ) { }
   
 
@@ -32,6 +54,7 @@ export class PaySaleComponent implements OnInit {
     this.paymentMethod = new FormControl(null, Validators.required)
     this.paymentMethodList$ = this.dbs.getPaymentsChanges()
     this.paymentMethod$ = this.paymentMethod.valueChanges
+
     this.sale$ = this.auth.user$.pipe(
       switchMap(user => {
         return this.dbs.getPayingSales(user.uid)
@@ -46,6 +69,76 @@ export class PaySaleComponent implements OnInit {
           return sum + sale.deliveryPrice;
       })
     )
+
+    this.subtotal$ = this.sum$.pipe(
+      map(sum => {
+        return (Number(sum) * 0.82)
+      })
+    )
+
+    this.igv$ = this.sum$.pipe(
+      map(sum => {
+        return Number(sum) * 0.18
+      })
+    )
+    this.discount$ = this.sale$.pipe(
+      map(sale => {
+        return sale.couponDiscount
+      })
+    )
+    this.delivery$ = this.sale$.pipe(
+      map(sale => {
+        return sale.deliveryPrice
+      })
+    )
+
+    this.totalAll$ = combineLatest([
+      this.sum$,
+      this.discount$
+    ]).pipe(
+      map(([sum, dis]) => {
+        return Number(sum) - Number(dis)
+      })
+    )
+  }
+
+  addNewPhoto(formControlName: string, image: File[]) {
+    if (image.length === 0) return;
+    let reader = new FileReader();
+    this.photos.resizing$[formControlName].next(true);
+
+    this.ng2ImgMax
+      .resizeImage(image[0], 1000, 426)
+      .pipe(take(1))
+      .subscribe(
+        (result) => {
+          this.photos.data.push(
+            new File(
+              [result],
+              formControlName +
+              this.photosList.length +
+              result.name.match(/\..*$/)
+            )
+          );
+          reader.readAsDataURL(image[0]);
+          reader.onload = (_event) => {
+            this.photosList.push({
+              img: reader.result,
+              show: false,
+            });
+            this.photos.resizing$[formControlName].next(false);
+          };
+        },
+        (error) => {
+          this.photos.resizing$[formControlName].next(false);
+          this.snackbar.open('Por favor, elija una imagen en formato JPG, o PNG', 'Aceptar');
+        }
+      );
+  }
+
+  eliminatedphoto(ind) {
+    this.photosList.splice(ind, 1);
+    this.photos.data.splice(ind, 1);
   }
 
 }
