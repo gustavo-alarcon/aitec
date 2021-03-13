@@ -144,16 +144,16 @@
           
           <!-- Third section -->
           <div class="w3-center w3-margin-top">
-            <!-- <button 
+            <button 
               type="button"
-              *ngIf="finishObservable$|async as finishData"
-              [disabled]="(uploadingSale$ | async) || (!deliveryForm.valid) || 
-                          (secondButtonVal$ | async) || (!documentForm.valid) ||
-                          (!method.value) || (method.value == 3)&&(!photosList?.length)" 
-              (click)="finish(finishData)" 
+              *ngIf="sale$|async as sale"
+              [disabled]="(!(uploadingSale$ | async)) || 
+                          ((finishSale$|async) && (paymentMethod.value?.type == 3)) ||
+                          (!paymentMethod.value) || (paymentMethod.value?.type == 3)&&(!photosList?.length)" 
+              (click)="finish(sale)" 
               mat-raised-button color="primary" class="resume__button">
               Finalizar Compra
-            </button> -->
+            </button>
           </div>
 
         </div>

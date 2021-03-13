@@ -101,6 +101,8 @@ export class DatabaseService {
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
+  salesCorrColl = this.afs.firestore.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
+
 
   saleStatus = new saleStatusOptions()
 
@@ -875,86 +877,107 @@ export class DatabaseService {
     return upload$;
   }
 
-  finishPurshase(newSale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
 
+  saveSale(sale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
     const batch = this.afs.firestore.batch()
     const saleRef = this.afs.firestore.collection(this.salesRef).doc();
 
+    let newSale = {...sale}
     newSale.id = saleRef.id
-
+    
     batch.set(saleRef, newSale);
     return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
-  }
-
-  saveSale(sale: Sale, phot?: {data: File[]}): Observable<[firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]> {
-    console.log('here');
-
-    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
-
-    let newSale = {...sale}
-    newSale.id = saleRef.id
-
-    if (phot) {
-      let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
-
-      return forkJoin(photos).pipe(
-        takeLast(1),
-        map((res: string[]) => {
-          //We update voucher field
-          newSale.voucher = [...phot.data.map((el, i) => {
-            return {
-              voucherPhoto: res[i],
-              voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
-            }
-          })]
-          //We now get the firestore batch
-          return this.finishPurshase(newSale)
-        })
-      )
-    } else {
-      return of(this.finishPurshase(newSale))
-    }
 
   }
 
-  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<[firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]> {
+  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<Promise<{success: boolean}>>{
     console.log('here');
 
-    const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
 
     let newSale = {...sale}
+    newSale.status = this.saleStatus.requested
 
     switch(sale.payType.type){
       case 1://Case of contraentrega
       case 2://Case of tarjeta
-        newSale.status = this.saleStatus.requested
-        break;
+        return of(this.finishPayment(newSale))
       case 3://Case of voucher
-      
-        break;
+        let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
+
+        return forkJoin(photos).pipe(
+          takeLast(1),
+          map((res: string[]) => {
+            //We update voucher field
+            newSale.voucher = [...phot.data.map((el, i) => {
+              return {
+                voucherPhoto: res[i],
+                voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
+              }
+            })]
+            //We now get the firestore batch
+            return this.finishPayment(newSale)
+          })
+        )
     }
 
-    if (phot) {
-      let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
+  }
 
-      return forkJoin(photos).pipe(
-        takeLast(1),
-        map((res: string[]) => {
-          //We update voucher field
-          newSale.voucher = [...phot.data.map((el, i) => {
-            return {
-              voucherPhoto: res[i],
-              voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
-            }
-          })]
-          //We now get the firestore batch
-          return this.finishPurshase(newSale)
-        })
-      )
-    } else {
-      return of(this.finishPurshase(newSale))
-    }
+  finishPayment(newSale: Sale): Promise<{success: boolean}>{
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc(newSale.id);
+    const genConfigRef = this.salesCorrColl
+    const couponColl = this.afs.firestore.collection(`db/aitec/coupons`)
+    
+    return this.afs.firestore.runTransaction((transaction)=> {
+      return transaction.get(genConfigRef).then((sfDoc)=> {
 
+        let sale = {...newSale}
+        
+        let correlative = 0
+        let salesCorr = sfDoc[0]
+
+
+        if(!sfDoc.exists){
+          correlative = 1
+        } else {
+          correlative = (!!salesCorr.data().rCorrelative) ? (salesCorr.data().rCorrelative + 1) : 1
+        }
+
+        //We set current correlative in config
+        transaction.set(saleRef, {rCorrelative: correlative})
+
+        //We update sale
+        sale.correlative = correlative
+        transaction.set(saleRef, sale)
+
+        //We now fill cupoun
+        if(!!sale.coupon){
+          let ocupId = sale.coupon.id
+          if(ocupId){
+            transaction.update(couponColl.doc(ocupId), {users: firebase.default.firestore.FieldValue.arrayUnion(sale.user.uid)})
+          }
+        }
+
+      }).then(
+        success => {
+          return {success: true}
+        },
+        err => {
+          return {success: false}
+        }
+       )
+
+    })
+  }
+
+  cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch{
+    const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
+    const userRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid);
+
+    let batch = this.afs.firestore.batch()
+    batch.delete(saleRef)
+    batch.update(userRef, {pendingPayment: false})
+
+    return batch
   }
 
   // return this.afs.firestore.runTransaction((transaction) => {

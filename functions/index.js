@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { constants } = require('node:fs');
 
 let app = admin.initializeApp();
 const db = admin.firestore();
@@ -40,13 +41,9 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
     let sale = event.data();
     console.log("Sale created: "+ sale.id)
 
-    let saleColl = db.collection(`db/aitec/sales`).doc(sale.id)
+    const saleColl = db.collection(`db/aitec/sales`).doc(sale.id)
 
-    let salesCorrelative = db.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
-
-    let couponColl = db.collection(`db/aitec/coupons`)
-
-    let productsListColl = db.collection(`/db/aitec/productsList`)
+    const productsListColl = db.collection(`/db/aitec/productsList`)
     let productArray = Array.from(new Set(sale.requestedProducts.map(prod => (
       //Should be updated if we consider packages
       //We use set to get unique ids
@@ -57,34 +54,15 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
 
     return db.runTransaction(trans => {
       console.log('Executing transaction');      
-      return trans.getAll(salesCorrelative, ...productArray).then(res => {
+      return trans.getAll(...productArray).then(res => {
         
-        let productsTrans = [...res.slice(1)]
-        let salesCorr = res[0]
-        let correlative = null;
+        const userColl = db.collection(`users`).doc(sale.user.uid)
+        let productsTrans = [...res]
 
         //If one product does not exist at DB, we send error
         if(productsTrans.some((doc) => !doc.exists)){
           console.log("One product document does not exist.")
           throw 'Product does not exist'
-        }
-
-        //We first set correlative
-        if(!salesCorr.exists){
-          correlative = 1;
-        } else {
-          correlative = (!!salesCorr.data().rCorrelative) ? (salesCorr.data().rCorrelative + 1) : 1
-        }
-
-        trans.set(salesCorrelative, {rCorrelative: correlative}, {merge: true})
-        //WE update correlative of sale at the end
-
-        //We now update coupon
-        if(!!sale.coupon){
-          let ocupId = sale.coupon.id
-          if(ocupId){
-            trans.update(couponColl.doc(ocupId), {users: admin.firestore.FieldValue.arrayUnion(sale.user.uid)})
-          }
         }
 
         console.log("Validating Stock")
@@ -129,7 +107,8 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
           trans.update(productsListColl.doc(productDB.id), productDB)
         })
 
-        trans.update(saleColl, {status: 'Solicitado', correlative})
+        trans.update(saleColl, {status: 'Pagando'})
+        trans.update(userColl, {shoppingCar: [], pendingPayment = true})
 
        }).then(
         success => {

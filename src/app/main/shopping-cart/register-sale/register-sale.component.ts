@@ -410,7 +410,7 @@ export class RegisterSaleComponent implements OnInit {
     let date = new Date()
 
     let newSale: Sale = {
-      id: '',
+      id: null,
       correlative: 0,
       correlativeType: 'R',
       user: finishData.user,
@@ -445,46 +445,40 @@ export class RegisterSaleComponent implements OnInit {
 
     console.log(newSale);
 
-    let phot = this.photos.data.length ? this.photos : null;
+    let [batch, ref] = this.dbs.saveSale(newSale)
 
-    this.uploadingSale$ = this.dbs.saveSale(newSale, phot).pipe(
-      map(([batch, ref])=> {
-        batch.commit()
-          .then(res => {
-            console.log('Writing Sale successfull')
-            this.snackbar.open("Validando Stock")
-            this.uploadingSale$ = ref.valueChanges().pipe(
-              takeWhile(sale => {
-                let statuses = new saleStatusOptions()
-                console.log(sale.status)
-                switch(sale.status){
-                  case statuses.failed:
-                    this.snackbar.open("Error. Falta de Stock.", "Aceptar")
-                    return false;
-                  case statuses.requested:
-                    this.shopCar.clearCar();
-                    this.dialog.open(SaleDialogComponent, 
-                      {data: { 
-                        name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
-                        email: sale.user.email, 
-                        number: String(sale.correlative).padStart(6, "0"), 
-                        asesor: sale.adviser }}
-                      )
-                    this.router.navigate(['/main']);
-                    return false;
-                  default:
-                    return true;
-                }
-              })
-            )
-          }).catch(err => {
-            console.log('Writing Sale unsuccessfull')
-            this.snackbar.open("Error en conexión. Vuelva a intentarlo.")
-            this.uploadingSale$ = of(false)
-          });
-        return true
-      }), startWith(true)
-    )
+    batch.commit()
+      .then(res => {
+        console.log('Writing Sale successfull')
+        this.snackbar.open("Validando Stock", "Aceptar")
+        this.uploadingSale$ = ref.valueChanges().pipe(
+          takeWhile(sale => {
+            let statuses = new saleStatusOptions()
+            console.log(sale.status)
+            switch(sale.status){
+              case statuses.failed:
+                this.snackbar.open("Error. Falta de Stock.", "Aceptar")
+                return false;
+              case statuses.paying:
+                this.dialog.open(SaleDialogComponent, 
+                  {data: { 
+                    name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
+                    email: sale.user.email, 
+                    number: String(sale.correlative).padStart(6, "0"), 
+                    asesor: sale.adviser }}
+                  )
+                return false;
+              default:
+                return true;
+            }
+          }),
+          startWith(true)
+        )
+      }).catch(err => {
+        console.log('Writing Sale unsuccessfull')
+        this.snackbar.open("Error en conexión. Vuelva a intentarlo.", "Aceptar")
+        this.uploadingSale$ = of(false)
+      });
 
 
     //this.dbs.sendEmail(newSale)
