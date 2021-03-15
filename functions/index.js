@@ -1,6 +1,5 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const { constants } = require('node:fs');
 
 let app = admin.initializeApp();
 const db = admin.firestore();
@@ -93,7 +92,6 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
               console.log("Quantity: ", el2.quantity)
 
               if(productColor.virtualStock - el2.quantity < 0){
-                
                 throw 'Stock is not enough'
               } else {
                 console.log("ProductDB editted")
@@ -108,7 +106,7 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
         })
 
         trans.update(saleColl, {status: 'Pagando'})
-        trans.update(userColl, {shoppingCar: [], pendingPayment = true})
+        trans.update(userColl, {shoppingCar: [], pendingPayment: true})
 
        }).then(
         success => {
@@ -123,3 +121,116 @@ exports.registerPurchase = functions.firestore.document(`db/aitec/sales/{saleId}
     })
 
 })
+
+//This collection will be used when cancelling not yet payed Sales
+exports.reStockPurshase = functions.firestore.document(`db/aitec/reStock/{saleId}`)
+  .onCreate(event => {
+
+    let sale = event.data();
+    console.log("Sale created: "+ sale.id)
+
+    const saleColl = db.collection(`db/aitec/sales`).doc(sale.id)
+
+    const productsListColl = db.collection(`/db/aitec/productsList`)
+    
+    let productArray = Array.from(new Set(sale.requestedProducts.map(prod => (
+      //Should be updated if we consider packages
+      //We use set to get unique ids
+      prod.product.id
+    )))).map((prodId)=> productsListColl.doc(prodId))
+
+    console.log("Initiating transaction");
+
+    return db.runTransaction(trans => {
+      console.log('Executing transaction');      
+      return trans.getAll(...productArray).then(res => {
+        
+        const userColl = db.collection(`users`).doc(sale.user.uid)
+        let productsTrans = [...res]
+
+        //If one product does not exist at DB, we send error
+        if(productsTrans.some((doc) => !doc.exists)){
+          console.log("One product document does not exist.")
+          //throw 'Product does not exist'
+        }
+
+        console.log("Validating Stock")
+
+        productsTrans.forEach(el => {
+          let productDB = el.data();
+          console.log("In productDB evaluating stock of: "+ productDB.id)
+          console.log(productDB.products)
+
+          sale.requestedProducts.filter(el2 => 
+              //We get the requested products (in sale) that match
+              //the current product from DB
+              el2.product.id == productDB.id
+            ).forEach(el2 =>{
+              //We now check if there is at least one requested product
+              //whose color does not have enough stock
+              console.log("In sale evaluating stock of: "+ el2.chosenProduct.sku)
+              //console.log(el2)
+
+              let productColor = productDB.products.find(prodColor => 
+                //We find the product corresponding to the color
+                prodColor.sku == el2.chosenProduct.sku
+                )
+              console.log("Product Color found in productDB: "+ productColor.sku)
+              console.log(productColor);
+
+              console.log("DB stock: ", productColor.virtualStock)
+              console.log("Quantity: ", el2.quantity)
+
+              console.log("ProductDB editted")
+              productColor.virtualStock += el2.quantity
+
+            })
+          console.log("ProductDB result: ")
+          console.log(productDB.products)
+
+          trans.update(productsListColl.doc(productDB.id), productDB)
+        })
+
+        trans.delete(saleColl)
+        trans.update(userColl, {shoppingCar: [], pendingPayment: false})
+
+       }).then(
+        success => {
+          console.log('Successfull stock change!')
+        },
+        err => {
+          console.log("Unsuccessfull reStocking sale")
+          //return saleColl.update({status: 'Error'})
+        }
+       )
+       
+    })
+
+})
+
+exports.scheduleReStockPurshase = functions.pubsub.schedule('every 15 minutes')
+  .timeZone('America/Lima')
+  .onRun((context) => {
+    const payingSalesColl = db.collection(`db/aitec/sales`).where("status", "==", 'Pagando')
+    const reStockSalesColl = db.collection(`db/aitec/reStock`)
+    const salesColl = db.collection(`db/aitec/sales`)
+
+    return db.runTransaction(trans => {
+      console.log('Executing transaction');      
+      return trans.getAll(...productArray).then(res => {
+        let salesExpired = [...res].filter(sale => {
+          if(!sale.exists){
+            return false
+          } else {
+            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.data().createdAt['seconds']
+            let leftTime = 3600 - lapsedTime
+            //If it is more than 1:15, it should be re stocked
+            return leftTime < -900
+          }
+        }).map(sale => sale.data())
+
+        
+
+      })})
+});
+

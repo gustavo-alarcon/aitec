@@ -39,9 +39,8 @@ export class LocationDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this.data);
     this.departamentos = this.pl.getDepartamentos()
-    console.log(this.departamentos);
+    console.log(this.data)
 
     if (this.data.edit) {
       this.provincias = this.pl.getProvincias(this.data.user.location[this.data.ind].departamento.id)

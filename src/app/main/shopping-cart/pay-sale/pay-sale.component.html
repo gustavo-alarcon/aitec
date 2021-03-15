@@ -1,10 +1,18 @@
-<div class="store__container w3-section" style="position: relative;">
+<div *ngIf="sale$ | async; else loader"
+  class="store__container w3-section" style="position: relative;">
 
   <div class="w3-margin-top w3-row">
     <!-- Main section -->
     <div class="w3-container w3-col l8 col-md-7">
       <mat-card class="w3-block delivery">
         <div class="w3-margin-bottom">
+          <h4 class="delivery__title w3-center">
+            Finalizando pago
+          </h4>
+          <p>Tus productos han sido reservados por 1 hora. 
+            Si excedes este tiempo, tendrás que separar tu compra nuevamente.</p>
+          <p>Solo te quedan <b style="color:red">{{timer$ | async | date:'m:ss'}}</b> 
+            minutos para completar el pago.</p>
           <h4 class="delivery__title">
             Elige el método de pago
           </h4>
@@ -89,7 +97,7 @@
                 <div style="width: 55%">Descripción</div>
                 <div style="width: 25%">Precio</div>
               </div>
-              <div *ngFor="let prod of (sale$|async).requestedProducts" class="ordItem">
+              <div *ngFor="let prod of (sale$|async)?.requestedProducts" class="ordItem">
                 <div style="width: 20%" class="w3-center">
                   {{prod.quantity | number:'2.'}}
                 </div>
@@ -142,17 +150,27 @@
             </div>
           </div>
           
-          <!-- Third section -->
+          <!-- Finish Button -->
           <div class="w3-center w3-margin-top">
             <button 
               type="button"
-              *ngIf="sale$|async as sale"
-              [disabled]="(!(uploadingSale$ | async)) || 
-                          ((finishSale$|async) && (paymentMethod.value?.type == 3)) ||
-                          (!paymentMethod.value) || (paymentMethod.value?.type == 3)&&(!photosList?.length)" 
+              *ngIf="(sale$|async) as sale"
+              [disabled]="(disFinishButton$ | async) || !(this.uploadingSale$|async)" 
               (click)="finish(sale)" 
               mat-raised-button color="primary" class="resume__button">
               Finalizar Compra
+            </button>
+          </div>
+
+          <!-- Cancel button -->
+          <div class="w3-center w3-margin-top">
+            <button 
+              type="button"
+              *ngIf="(sale$|async) as sale"
+              [disabled]="!(this.uploadingSale$|async)"
+              (click)="cancelSale(sale)" 
+              mat-raised-button color="warn" class="resume__button">
+              Cancelar Compra
             </button>
           </div>
 

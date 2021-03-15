@@ -98,6 +98,7 @@ export class DatabaseService {
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
+  reStockRef: `db/aitec/reStock` = `db/aitec/reStock`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
@@ -881,16 +882,20 @@ export class DatabaseService {
   saveSale(sale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
     const batch = this.afs.firestore.batch()
     const saleRef = this.afs.firestore.collection(this.salesRef).doc();
+    const usersRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid)
 
     let newSale = {...sale}
     newSale.id = saleRef.id
     
     batch.set(saleRef, newSale);
+    //clearing bakset
+    batch.update(usersRef, {shoppingCar: []})
+
     return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
 
   }
 
-  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<Promise<{success: boolean}>>{
+  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<Promise<{success: boolean, sale?:Sale}>>{
     console.log('here');
 
 
@@ -922,15 +927,14 @@ export class DatabaseService {
 
   }
 
-  finishPayment(newSale: Sale): Promise<{success: boolean}>{
+  finishPayment(newSale: Sale): Promise<{success: boolean, sale?: Sale}>{
     const saleRef = this.afs.firestore.collection(this.salesRef).doc(newSale.id);
     const genConfigRef = this.salesCorrColl
     const couponColl = this.afs.firestore.collection(`db/aitec/coupons`)
+    let sale = {...newSale}
     
     return this.afs.firestore.runTransaction((transaction)=> {
       return transaction.get(genConfigRef).then((sfDoc)=> {
-
-        let sale = {...newSale}
         
         let correlative = 0
         let salesCorr = sfDoc[0]
@@ -943,7 +947,7 @@ export class DatabaseService {
         }
 
         //We set current correlative in config
-        transaction.set(saleRef, {rCorrelative: correlative})
+        transaction.set(genConfigRef, {rCorrelative: correlative})
 
         //We update sale
         sale.correlative = correlative
@@ -959,7 +963,7 @@ export class DatabaseService {
 
       }).then(
         success => {
-          return {success: true}
+          return {success: true, sale}
         },
         err => {
           return {success: false}
@@ -972,11 +976,10 @@ export class DatabaseService {
   cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch{
     const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
     const userRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid);
+    const reStockRef = this.afs.firestore.collection(this.reStockRef).doc(sale.id);
 
     let batch = this.afs.firestore.batch()
-    batch.delete(saleRef)
-    batch.update(userRef, {pendingPayment: false})
-
+    batch.set(reStockRef, sale)
     return batch
   }
 
@@ -1840,14 +1843,14 @@ export class DatabaseService {
     }
   }
 
-  giveProductPriceOfSale(sale: Sale): number{
-    let sum = [...sale.requestedProducts]
-      .map((el) => this.giveProductPrice(el, sale.user.customerType == 'Mayorista'))
-      .reduce((a, b) => a + b, 0);
-    let delivery = Number(sale.deliveryPrice)
-    let discount = Number(sale.couponDiscount)
+  // giveProductPriceOfSale(sale: Sale): number{
+  //   let sum = [...sale.requestedProducts]
+  //     .map((el) => this.giveProductPrice(el, sale.user.customerType == 'Mayorista'))
+  //     .reduce((a, b) => a + b, 0);
+  //   let delivery = Number(sale.deliveryPrice)
+  //   let discount = Number(sale.couponDiscount)
     
-    return (sum + delivery - discount)
-  }
+  //   return (sum + delivery - discount)
+  // }
 
 }

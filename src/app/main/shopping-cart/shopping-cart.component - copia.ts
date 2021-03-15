@@ -21,7 +21,7 @@ import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
   templateUrl: './shopping-cart.component.html',
   styleUrls: ['./shopping-cart.component.scss'],
 })
-export class ShoppingCartComponent implements OnInit {
+export class ShoppingCartComponentCopy implements OnInit {
   view = new BehaviorSubject<number>(1);
   view$ = this.view.asObservable();
 

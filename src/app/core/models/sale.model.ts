@@ -8,7 +8,7 @@ import { Payments } from './payments.model';
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
   failed = 'Error';                         //Estado de rechazo de confirmación de cloud function
-  paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago
+  paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago. Usuario se marcará con pendingPayment
   requested = 'Solicitado';                 //Venta confirmada por cloud function y pagada
   attended = 'Atendido';
   confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid

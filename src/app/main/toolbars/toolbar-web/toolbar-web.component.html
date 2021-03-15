@@ -82,9 +82,17 @@
             shopping_cart</mat-icon>
         </button>
         <ng-template #noOrder>
-          <button mat-button matTooltip="Carrito">
-            <mat-icon>shopping_cart</mat-icon>
+          <button *ngIf="timer$ | async as timer; else noTimer"
+            matTooltip="Completar pago."
+            color="warn" mat-flat-button routerLink="/main/carrito">
+            {{timer | date:'mm:ss'}}
           </button>
+          <ng-template #noTimer>
+            <button mat-button matTooltip="Carrito">
+              <mat-icon>shopping_cart</mat-icon>
+            </button>
+          </ng-template>
+
         </ng-template>
       </div>
     </div>

@@ -68,9 +68,16 @@
           shopping_cart</mat-icon>
       </button>
       <ng-template #noOrder>
-        <button mat-icon-button >
-          <mat-icon>shopping_cart</mat-icon>
+        <button mat-icon-button routerLink="/main/carrito" *ngIf="timer$ | async; else noTimer">
+          <mat-icon [matBadge]="'!'" matBadgeColor="warn" matBadgePosition="before">
+            shopping_cart</mat-icon>
         </button>
+        <ng-template #noTimer>
+          <button mat-icon-button >
+            <mat-icon>shopping_cart</mat-icon>
+          </button>
+        </ng-template>
+        
       </ng-template>
     </div>
     <ng-template #iniciarSesion2>

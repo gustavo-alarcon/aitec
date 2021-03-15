@@ -44,8 +44,6 @@ export class RegisterSaleComponent implements OnInit {
 
   observation: FormControl = new FormControl('')
 
-  user: User
-
   //NEW
   deliveryForm: FormGroup     //Subtype deliveryType designates 0 (delivery) or 1 (pickup)
   couponForm: FormGroup
@@ -71,12 +69,13 @@ export class RegisterSaleComponent implements OnInit {
   documentTypeForm: FormControl;
   documentTypeForm$: Observable<boolean>    //Used to show address field
 
+  user$: Observable<User>
+
 
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private fb: FormBuilder,
-    private router: Router,
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private ld: LandingService,
@@ -114,6 +113,7 @@ export class RegisterSaleComponent implements OnInit {
   }
 
   initObservables(){
+    this.user$= this.auth.user$
     this.reqProdListObservable$ = this.shopCar.reqProdListObservable
 
     //List of zones or stores in delivery
@@ -459,14 +459,16 @@ export class RegisterSaleComponent implements OnInit {
               case statuses.failed:
                 this.snackbar.open("Error. Falta de Stock.", "Aceptar")
                 return false;
-              case statuses.paying:
-                this.dialog.open(SaleDialogComponent, 
-                  {data: { 
-                    name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
-                    email: sale.user.email, 
-                    number: String(sale.correlative).padStart(6, "0"), 
-                    asesor: sale.adviser }}
-                  )
+              case statuses.requesting:
+                // this.dialog.open(SaleDialogComponent, 
+                //   {data: { 
+                //     name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
+                //     email: sale.user.email, 
+                //     number: String(sale.correlative).padStart(6, "0"), 
+                //     asesor: sale.adviser }}
+                //   )
+                this.snackbar.open("Sus productos serán reservados por 1 hora. Por favor, complete el pago.", "Aceptar")
+                this.shopCar.clearCar()
                 return false;
               default:
                 return true;
@@ -499,20 +501,6 @@ export class RegisterSaleComponent implements OnInit {
 
   }
 
-
-
-  giveProductPrice(item, mayorista): number {
-    if (!mayorista && item.product.promo) {
-      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.price;
-      return promTotalPrice + noPromTotalPrice;
-    }
-    else {
-      return item.quantity * item.price
-    }
-  }
 
   clearCoupon() {
     this.couponForm.get('coupon').setValue('')

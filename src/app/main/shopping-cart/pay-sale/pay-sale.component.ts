@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { truncateSync } from 'fs';
+import { Router } from '@angular/router';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, interval, Observable, of, timer } from 'rxjs';
-import { distinctUntilChanged, map, shareReplay, switchMap, take, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, startWith, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 import { Payments } from 'src/app/core/models/payments.model';
 import { Sale } from 'src/app/core/models/sale.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
+import { SaleDialogComponent } from '../sale-dialog/sale-dialog.component';
 
 @Component({
   selector: 'app-pay-sale',
@@ -45,17 +48,20 @@ export class PaySaleComponent implements OnInit {
       data: [],
     };
 
+  updatePhoto$: BehaviorSubject<boolean> = new BehaviorSubject(false) //Only used to emit an event whenever change in Photo
+
   uploadingSale$: Observable<boolean> = of(true);   //contrary: false when it is uploading
 
-  emitFinish: BehaviorSubject<boolean> = new BehaviorSubject(true); 
-
-  //When true and payment type is tarjeta, finish button will be disabled. In case of error,
+  emitFinish: BehaviorSubject<boolean> = new BehaviorSubject(false); 
+  //When false and payment type is tarjeta, finish button will be disabled. In case of error,
   //finish button will be enabled by emitFinish=false
+
   emitFinish$: Observable<boolean>
   finishSale$: Observable<boolean>;
 
   //Timer used to show remaining time
   timer$: Observable<number>
+  disFinishButton$: Observable<boolean>;
 
 
   constructor(
@@ -63,10 +69,14 @@ export class PaySaleComponent implements OnInit {
     private auth: AuthService,
     private ng2ImgMax: Ng2ImgMaxService,
     private snackbar: MatSnackBar,
+    private router: Router,
+    private dialog: MatDialog,
+    private shopCar: ShoppingCarService
   ) { }
   
 
   ngOnInit(): void {
+    this.shopCar.clearCar()
     this.paymentMethod = new FormControl(null, Validators.required)
     this.paymentMethodList$ = this.dbs.getPaymentsChanges()
     this.paymentMethod$ = this.paymentMethod.valueChanges
@@ -89,7 +99,8 @@ export class PaySaleComponent implements OnInit {
             return leftTime
           }),
           takeWhile(leftTime => {
-            if(leftTime > -900){
+            console.log(leftTime)
+            if(leftTime > -900){        //It will be cancelled only after 1:15 h
               return true
             } else {
               this.cancelSale(sale)
@@ -98,7 +109,7 @@ export class PaySaleComponent implements OnInit {
           }, true),
           map(leftTime => {
             if(leftTime >0){
-              return leftTime
+              return leftTime*1000
             } else {
               return 0
             }
@@ -155,14 +166,36 @@ export class PaySaleComponent implements OnInit {
     .pipe(
       //takeWhile(([sale, emit])=> (!emit), true),
       map(([sale, emit])=> {
-        if(!emit){
+        if(!!emit){
+          this.finish(sale)
           return true
         } else {
-          this.finish(sale)
           return false
         }
       }),
       distinctUntilChanged()
+    )
+
+    this.disFinishButton$ = combineLatest(
+      [this.finishSale$, this.paymentMethod$, this.updatePhoto$.asObservable()])
+    .pipe(
+      map(([finishSale, paymentMethod, updatePhoto])=> {
+        //If no option 
+        if(!paymentMethod){
+          return true
+        }
+
+        //If method is tarjeta, but finishSale was never emitted
+        if(!finishSale && (paymentMethod.type == 2)){
+          return true
+        }
+        //If method is voucher and photosList is empty
+        if(!this.photosList.length && (paymentMethod.type == 3)){
+          return true
+        }
+        return false
+      }),
+      startWith(true)
     )
 
 
@@ -193,6 +226,7 @@ export class PaySaleComponent implements OnInit {
               show: false,
             });
             this.photos.resizing$[formControlName].next(false);
+            this.updatePhoto$.next(true)
           };
         },
         (error) => {
@@ -205,6 +239,7 @@ export class PaySaleComponent implements OnInit {
   eliminatedphoto(ind) {
     this.photosList.splice(ind, 1);
     this.photos.data.splice(ind, 1);
+    this.updatePhoto$.next(true)
   }
 
   //WE first emitFinish, and in observable finishSale$ we will execute finish
@@ -212,16 +247,27 @@ export class PaySaleComponent implements OnInit {
     this.emitFinish.next(true)
   }
 
-  finish(sale: Sale){
+  finish(newSale: Sale){
+    let sale = {...newSale}
+    sale.payType = this.paymentMethod.value
     this.uploadingSale$ = this.dbs.saveSalePayment(sale, this.photos)
     .pipe(
       map(res => {
         res.then(
           succ => {
             if(succ.success){
-              this.snackbar.open("Compra exitosa!")
+              sale = succ.sale
+              this.dialog.open(SaleDialogComponent, 
+                {data: { 
+                  name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
+                  email: sale.user.email, 
+                  number: String(sale.correlative).padStart(6, "0"), 
+                  asesor: sale.adviser }}
+                )
+              this.router.navigate(["main"])
+              //this.snackbar.open("Compra exitosa!")
             } else {
-              this.snackbar.open("Error! Haga click en registrar compra.")
+              this.snackbar.open("Error! Haga click en Finalizar Compra.")
               this.uploadingSale$ = of(true)
             }
           }
@@ -231,9 +277,11 @@ export class PaySaleComponent implements OnInit {
   }
 
   cancelSale(sale: Sale){
+    this.uploadingSale$ = of(false)
     this.dbs.cancelSalePayment(sale).commit().then(
       res => {
-        this.snackbar.open("Tiempo excedido.")
+        this.router.navigate(["main"])
+        this.snackbar.open("Compra cancelada.", "Aceptar")
       }
     ).catch(err => {
         this.snackbar.open("Ocurrió un error. Por favor, actualice la página")

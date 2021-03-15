@@ -46,6 +46,7 @@ export class WebViewComponent implements OnInit {
 
   reqProdObservable$: Observable<SaleRequestedProducts>
   verifyStock$: Observable<boolean>
+  pendingPayment$: Observable<boolean>;
 
   constructor(
     public auth: AuthService,
@@ -84,6 +85,12 @@ export class WebViewComponent implements OnInit {
         )
         }
       )
+    )
+
+    this.pendingPayment$ = this.auth.user$.pipe(
+      map(user => {
+        return !user.pendingPayment
+      })
     )
   }
 

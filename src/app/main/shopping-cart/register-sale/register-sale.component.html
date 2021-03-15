@@ -209,32 +209,37 @@
                     ¿En dónde recibirás tu pedido?
                   </div>
                   <hr style="margin-top: 0" />
-                  <div *ngIf="deliveryForm.get('location').enabled">
-                    <div 
-                      *ngFor="let loc of (locationList$|async); let k=index" 
-                      (click)="deliveryForm.get('location').setValue(loc)"
-                      [ngClass]="{'store__selected': deliveryForm.get('location').value == loc}">
-                      <div class="store">
-                        <div><strong>{{ loc.address }}</strong></div>
-                        <div>Referencia: {{ loc.reference }}</div>
-                        <div class="store__district">
-                          {{loc.distrito.name}} - {{loc.provincia.name}} - {{loc.departamento.name}}
+                  <ng-container *ngIf="user$ | async as user">
+
+                    <div *ngIf="deliveryForm.get('location').enabled">
+                      <div 
+                        *ngFor="let loc of (locationList$|async); let k=index" 
+                        (click)="deliveryForm.get('location').setValue(loc)"
+                        [ngClass]="{'store__selected': deliveryForm.get('location').value == loc}">
+                        <div class="store">
+                          <div><strong>{{ loc.address }}</strong></div>
+                          <div>Referencia: {{ loc.reference }}</div>
+                          <div class="store__district">
+                            {{loc.distrito.name}} - {{loc.provincia.name}} - {{loc.departamento.name}}
+                          </div>
+                          <div class="ms-flex">
+                            <span class="ms-fill"></span>
+                            <button
+                              mat-button color="primary" (click)="openMap(user,k, true)">
+                              Editar
+                            </button>
+                          </div>
                         </div>
-                        <div class="ms-flex">
-                          <span class="ms-fill"></span>
-                          <button mat-button color="primary" (click)="openMap(user,k, true)">
-                            Editar
-                          </button>
-                        </div>
+                        <hr style="margin: 0" />
                       </div>
-                      <hr style="margin: 0" />
                     </div>
-                  </div>
-                  <div class="w3-padding w3-center">
-                    <button mat-button color="primary" (click)="openMap(user,0, false)">
-                      Agregar dirección
-                    </button>
-                  </div>
+                    <div class="w3-padding w3-center">
+                      <button mat-button color="primary" (click)="openMap(user,0, false)">
+                        Agregar dirección
+                      </button>
+                    </div>
+                  </ng-container>
+
                 </div>
                 <ng-template #contact>
                   <div>

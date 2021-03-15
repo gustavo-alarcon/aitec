@@ -1,8 +1,8 @@
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, interval, Observable, of } from 'rxjs';
 import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { map, shareReplay, filter, startWith, switchMap } from 'rxjs/operators';
+import { map, shareReplay, filter, startWith, switchMap, takeWhile } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
@@ -36,6 +36,7 @@ export class ToolbarWebComponent implements OnInit {
   shopCarNumber$: Observable<number>
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
+  timer$: Observable<number>;
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -47,6 +48,45 @@ export class ToolbarWebComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.timer$ = this.auth.user$.pipe(
+      switchMap(user => {
+        console.log(user)
+        if(!user.pendingPayment){
+          return of(null)
+        } else {
+        return this.dbs.getPayingSales(user.uid).pipe(
+          switchMap(sale => {
+
+            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
+    
+            return interval(1000).pipe(
+              map(actualSecondLapsed => {
+                let leftTime = 3600 - lapsedTime - actualSecondLapsed
+                return leftTime
+              }),
+              takeWhile(leftTime => {
+                console.log(leftTime)
+                if(leftTime > -900){
+                  return true
+                } else {
+                  return false
+                }
+              }, true),
+              map(leftTime => {
+                if(leftTime >0){
+                  return leftTime*1000
+                } else {
+                  return 0
+                }
+              })
+            )
+            
+          })
+        )}
+      }),
+      shareReplay(1)
+    )
+    
     this.shopCarNumber$ = this.shopCar.reqProdListObservable.pipe(
       map(list => {
         if(list){
