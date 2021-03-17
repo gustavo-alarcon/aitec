@@ -1,10 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Sale } from 'src/app/core/models/sale.model';
+import { Sale, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import KRGlue from "@lyracom/embedded-form-glue";
 import { tap } from 'rxjs/operators';
+import { Payments } from 'src/app/core/models/payments.model';
+import { MatDialog } from '@angular/material/dialog';
+import { SaleDialogComponent } from '../sale-dialog/sale-dialog.component';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -17,34 +21,42 @@ export class PaymentCardComponent implements OnInit {
 
   @Input() total:string;
   @Input() user: User;
-  @Input() sale: Sale
+  @Input() sale: Sale;
+  @Input() paymentMethod: Payments
 
   private API_ENDPOINT = 'https://api.micuentaweb.pe';
   private API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
-  data: { ipnTargetUrl: string; metadata: Sale; amount: string; currency: string; orderId: string; customer: { email: string; reference: string; billingDetails: { cellPhoneNumber: string; firstName: string; }; }; };
 
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private router: Router,
+
   ) { }
 
   ngOnInit(): void {
     let decimal=parseFloat(this.total).toFixed(2);    
     let totalPay =decimal.replace(/\./g,'');
+
+    let newSale = {...this.sale}
+    newSale.payType = this.paymentMethod
+    newSale.status = (new saleStatusOptions()).requested
     
     //Saving data
-    this.data = {
+    let data = {
       ipnTargetUrl: 'https://us-central1-aitec-ecommerce.cloudfunctions.net/cardPayment',
-      metadata  :  this.sale,
+      metadata  :  newSale,
       amount    :  totalPay,
       currency  :  "PEN",
-      orderId   :  this.sale.id,
+      orderId   :  newSale.id,
       customer  :  {
           email : this.user.email,
           reference: this.user.uid,
           billingDetails: {
             cellPhoneNumber: String(this.user.personData.phone),
-            firstName: this.user.personData.name
+            firstName: this.user.personData.name,
+            language: "ES"
           }
 
       }
@@ -52,9 +64,11 @@ export class PaymentCardComponent implements OnInit {
     console.log("loading form")
 
     //loading Form Token
-    this.loadFormToken(this.data).toPromise()
+    this.loadFormToken(data).toPromise()
     .then(formToken => {
       return this.loadPaymentLibrary(formToken)
+    }).catch(err => {
+      console.log(err)
     })
 
   }
@@ -81,13 +95,13 @@ export class PaymentCardComponent implements OnInit {
     return formToken;
   }
 
-  loadPaymentLibrary(formToken) {
+  loadPaymentLibrary(formToken){
     KRGlue.loadLibrary(this.API_ENDPOINT, this.API_KEY)
       .then(({KR}) => {
         console.log("Library Loaded")
         return KR.setFormConfig({
           'formToken': formToken.answer.formToken,
-          'kr-language': 'en-US'
+          'kr-language': 'es-PE'
         })
       })
       .then(({KR}) => {
@@ -97,8 +111,36 @@ export class PaymentCardComponent implements OnInit {
       .then(({KR, result})=> {
         console.log("Form added")
         this.noLoading$.next(true)
-        KR.onSubmit((res)=> {console.log('success: '+res)})
-        KR.onError((res)=> {console.log('error: '+res)})
+        //What to do with submission
+        KR.onSubmit(
+          res => {
+            console.log(res)
+            if (res.clientAnswer.orderStatus === 'PAID') {
+  
+              console.log('Payment success');
+              this.dialog.open(SaleDialogComponent, 
+                {
+                  closeOnNavigation: false,
+                  disableClose: true,
+                  maxWidth: '260px',
+                  data: { 
+                    name: !!this.sale.user.name ? this.sale.user.name : this.sale.user.personData.name, 
+                    email: this.sale.user.email, 
+                    number: this.sale.id, 
+                    asesor: this.sale.adviser }
+                  }
+                )
+              this.router.navigate(["main"])
+      
+              return false;
+            }
+            else {
+              console.error(`Payment status : ${res.clientAnswer.orderStatus}`);
+             
+              return  false;
+            }
+          }
+        )
         return KR.showForm(result.formId)
       })
       
@@ -107,3 +149,4 @@ export class PaymentCardComponent implements OnInit {
 
 
 }
+

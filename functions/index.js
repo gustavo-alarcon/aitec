@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
 const crypto = require('crypto');
-
+const cardPass = require('./card-pass.json')
 
 let app = admin.initializeApp();
 const db = admin.firestore();
@@ -244,17 +244,76 @@ exports.scheduleReStockPurshase = functions.pubsub.schedule('every 15 minutes')
 
 exports.cardPayment = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
-    console.log("----------")
-    let answer = req['body']
+    const answer = req['body']
+
+    //We first verify authenticity
+    const krAnswer = answer['kr-answer']
+    const krHash = answer['kr-hash']
+
+    const data = JSON.parse(krAnswer)
+    const key = data.orderDetails.mode == "TEST" ? cardPass.TEST : cardPass.PROD
+
+    let krHashCalculated = crypto.createHmac("sha256", key).update(krAnswer).digest('hex');
+
+    if(krHashCalculated != krHash){
+      res.status(404).send("Fraud attempt.")
+    } else {
+      //In case it is fine, we validate it is paid or not
+      if(data.orderStatus != "PAID"){
+        res.status(200).send("Not fully paid.")
+      } else {
+        //We now extract actual sale data
+        let newSale = {...data.transactions[0].metadata}
+
+        //And save it to DB
+        const saleRef = db.collection(`db/aitec/sales`).doc(newSale.id);
+        const genConfigRef = db.collection(`db/aitec/config`).doc('salesCorrelative')
+        const couponColl = db.collection(`db/aitec/coupons`)
+        const userColl = db.collection(`users`)
+
+        
+        db.runTransaction((transaction)=> {
+          return transaction.get(genConfigRef).then((sfDoc)=> {
+            
+            let correlative = 0
+
+            if(!sfDoc.exists){
+              correlative = 1
+            } else {
+              correlative = (!!sfDoc.data().rCorrelative) ? (sfDoc.data().rCorrelative + 1) : 1
+            }
+
+            //We set current correlative in config
+            transaction.set(genConfigRef, {rCorrelative: correlative})
+
+            //We update sale with new correlative
+            newSale.correlative = correlative
+            transaction.set(saleRef, newSale)
+
+            //We now fill cupoun
+            if(!!newSale.coupon){
+              let ocupId = sale.coupon.id
+              if(ocupId){
+                transaction.update(couponColl.doc(ocupId), {users: admin.firestore.FieldValue.arrayUnion(newSale.user.uid)})
+              }
+            }
+            //We update user pendingPayment
+            transaction.update(userColl.doc(newSale.user.uid), {pendingPayment: false})
+
+          }).then(
+            success => {
+              res.status(200).send("Successful sale.")
+            },
+            err => {
+              res.status(404).send("Error writing sale.")
+            }
+          )
+
+        })
+      }
 
 
-    let krAnswer = answer['kr-answer']
-
-    let token4 = crypto.createHmac("sha256", key4).update(krAnswer).digest('hex');
-
-    console.log("sent: "+answer['kr-hash'])
-    console.log("sent2: "+ answer['kr-hash'])
-    res.status(200).send("Done")
+    }
     
   })
 })

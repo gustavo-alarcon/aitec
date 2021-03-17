@@ -13,6 +13,7 @@ import {
   switchMap,
   take,
   mapTo,
+  debounceTime,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
 import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError, combineLatest } from 'rxjs';
@@ -831,6 +832,7 @@ export class DatabaseService {
   }
 
   uploadPhotoPackage(id: string, file: File): Observable<string | number> {
+    console.log("uploadPhotoPackage")
     const path = `/packagesList/pictures/${id}-${file.name}`;
 
     // Reference to storage bucket
@@ -846,7 +848,7 @@ export class DatabaseService {
       })
     );
 
-    let upload$ = concat(snapshot$, interval(100).pipe(take(2)), url$);
+    let upload$ = concat(snapshot$, interval(250).pipe(take(1)), url$);
     return upload$;
   }
 
@@ -907,11 +909,13 @@ export class DatabaseService {
       case 2://Case of tarjeta
         return of(this.finishPayment(newSale))
       case 3://Case of voucher
-        let photos = [...phot.data.map(el => this.uploadPhotoPackage(newSale.id, el))]
-
+        let photos = [...phot.data.map(el => (
+          this.uploadPhotoPackage(newSale.id, el).pipe(takeLast(1))
+          ))]
         return forkJoin(photos).pipe(
           takeLast(1),
           map((res: string[]) => {
+            
             //We update voucher field
             newSale.voucher = [...phot.data.map((el, i) => {
               return {
@@ -919,6 +923,7 @@ export class DatabaseService {
                 voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
               }
             })]
+
             //We now get the firestore batch
             return this.finishPayment(newSale)
           })
@@ -931,19 +936,21 @@ export class DatabaseService {
     const saleRef = this.afs.firestore.collection(this.salesRef).doc(newSale.id);
     const genConfigRef = this.salesCorrColl
     const couponColl = this.afs.firestore.collection(`db/aitec/coupons`)
+    const userColl = this.afs.firestore.collection(this.userRef)
+
     let sale = {...newSale}
+    
     
     return this.afs.firestore.runTransaction((transaction)=> {
       return transaction.get(genConfigRef).then((sfDoc)=> {
         
         let correlative = 0
-        let salesCorr = sfDoc[0]
 
 
         if(!sfDoc.exists){
           correlative = 1
         } else {
-          correlative = (!!salesCorr.data().rCorrelative) ? (salesCorr.data().rCorrelative + 1) : 1
+          correlative = (!!sfDoc.data().rCorrelative) ? (sfDoc.data().rCorrelative + 1) : 1
         }
 
         //We set current correlative in config
@@ -960,6 +967,8 @@ export class DatabaseService {
             transaction.update(couponColl.doc(ocupId), {users: firebase.default.firestore.FieldValue.arrayUnion(sale.user.uid)})
           }
         }
+
+        transaction.update(userColl.doc(sale.user.uid), {pendingPayment: false})
 
       }).then(
         success => {
@@ -1045,6 +1054,9 @@ export class DatabaseService {
           .where('createdAt', '>=', real.begin)
       )
       .valueChanges();
+  }
+  getSaleId(saleId: string): Observable<Sale>{
+    return this.afs.collection(this.salesRef).doc<Sale>(saleId).valueChanges()
   }
 
   onSaveSale(sale: Sale): Observable<firebase.default.firestore.WriteBatch> {

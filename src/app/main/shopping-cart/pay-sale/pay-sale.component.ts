@@ -50,14 +50,7 @@ export class PaySaleComponent implements OnInit {
 
   updatePhoto$: BehaviorSubject<boolean> = new BehaviorSubject(false) //Only used to emit an event whenever change in Photo
 
-  uploadingSale$: Observable<boolean> = of(true);   //contrary: false when it is uploading
-
-  emitFinish: BehaviorSubject<boolean> = new BehaviorSubject(false); 
-  //When false and payment type is tarjeta, finish button will be disabled. In case of error,
-  //finish button will be enabled by emitFinish=false
-
-  emitFinish$: Observable<boolean>
-  finishSale$: Observable<boolean>;
+  uploadingSale$: BehaviorSubject<boolean> = new BehaviorSubject(true);   //contrary: false when it is uploading
 
   //Timer used to show remaining time
   timer$: Observable<number>
@@ -163,35 +156,15 @@ export class PaySaleComponent implements OnInit {
       })
     )
 
-    this.emitFinish$ = this.emitFinish.asObservable()
-
-    this.finishSale$ = combineLatest([this.sale$, this.emitFinish$])
-    .pipe(
-      //takeWhile(([sale, emit])=> (!emit), true),
-      map(([sale, emit])=> {
-        if(!!emit){
-          this.finish(sale)
-          return true
-        } else {
-          return false
-        }
-      }),
-      distinctUntilChanged()
-    )
-
     this.disFinishButton$ = combineLatest(
-      [this.finishSale$, this.paymentMethod$, this.updatePhoto$.asObservable()])
+      [this.paymentMethod$, this.updatePhoto$.asObservable()])
     .pipe(
-      map(([finishSale, paymentMethod, updatePhoto])=> {
+      map(([paymentMethod, updatePhoto])=> {
         //If no option 
         if(!paymentMethod){
           return true
         }
 
-        //If method is tarjeta, but finishSale was never emitted
-        if(!finishSale && (paymentMethod.type == 2)){
-          return true
-        }
         //If method is voucher and photosList is empty
         if(!this.photosList.length && (paymentMethod.type == 3)){
           return true
@@ -245,42 +218,44 @@ export class PaySaleComponent implements OnInit {
     this.updatePhoto$.next(true)
   }
 
-  //WE first emitFinish, and in observable finishSale$ we will execute finish
-  emitFinishEvent(){
-    this.emitFinish.next(true)
-  }
-
   finish(newSale: Sale){
     let sale = {...newSale}
     sale.payType = this.paymentMethod.value
-    this.uploadingSale$ = this.dbs.saveSalePayment(sale, this.photos)
-    .pipe(
-      map(res => {
-        res.then(
-          succ => {
-            if(succ.success){
-              sale = succ.sale
-              this.dialog.open(SaleDialogComponent, 
-                {data: { 
-                  name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
-                  email: sale.user.email, 
-                  number: String(sale.correlative).padStart(6, "0"), 
-                  asesor: sale.adviser }}
-                )
-              this.router.navigate(["main"])
-              //this.snackbar.open("Compra exitosa!")
-            } else {
-              this.snackbar.open("Error! Haga click en Finalizar Compra.")
-              this.uploadingSale$ = of(true)
+    this.uploadingSale$.next(false)
+    this.dbs.saveSalePayment(sale, this.photos)
+      .pipe(
+        map(res => {
+          res.then(
+            succ => {
+              if(succ.success){
+                sale = succ.sale
+                this.dialog.open(SaleDialogComponent, 
+                  {
+                    closeOnNavigation: false,
+                    disableClose: true,
+                    maxWidth: '260px',
+                    data: { 
+                      name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
+                      email: sale.user.email, 
+                      number: sale.id, 
+                      asesor: sale.adviser }
+                    }
+                  )
+                this.router.navigate(["main"])
+                //this.snackbar.open("Compra exitosa!")
+              } else {
+                this.snackbar.open("Error. Por favor, intente de nuevo.")
+                this.uploadingSale$.next(true)
+              }
             }
-          }
-        )
-        return false
-    }))
+          )
+          return false
+        })
+      ).subscribe()
   }
 
   cancelSale(sale: Sale){
-    this.uploadingSale$ = of(false)
+    this.uploadingSale$.next(false)
     this.dbs.cancelSalePayment(sale).commit().then(
       res => {
         this.router.navigate(["main"])

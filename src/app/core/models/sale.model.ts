@@ -70,14 +70,6 @@ export interface Sale {
   };
   
   payType: Payments
-  // payInfo: {      //Not yet used or implemented
-  //   type: string,
-  //   numero: string,
-  //   month: string,
-  //   year: string,
-  //   cvv: string,
-  //   titular: string,
-  // };
 
   adviser:any;
 

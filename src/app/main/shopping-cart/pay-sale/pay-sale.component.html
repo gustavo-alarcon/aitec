@@ -78,7 +78,8 @@
               <app-payment-card 
                 [total]="(totalAll$ | async)"
                 [user]="user$ | async"
-                [sale]="sale$ | async">
+                [sale]="sale$ | async"
+                [paymentMethod]="paymentMethod.value">
               </app-payment-card>
             </div>
           </div>
@@ -155,7 +156,9 @@
           </div>
           
           <!-- Finish Button -->
-          <div class="w3-center w3-margin-top">
+          <div 
+            *ngIf="paymentMethod.value?.type!=2"
+            class="w3-center w3-margin-top">
             <button 
               type="button"
               *ngIf="(sale$|async) as sale"
