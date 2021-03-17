@@ -142,7 +142,7 @@
               </app-quantity-div-improved>
             </ng-container>
             <ng-template #emptyProd>
-              <ng-container *ngIf="pendingPayment$ | async">
+              <ng-container *ngIf="!(pendingPayment$ | async)">
                 <button *ngIf="verifyStock$ | async" mat-flat-button color="primary" 
                   (click)="addProd()" class="product__add" 
                   [style.visibility]="true ? 'visible' : 'hidden'">

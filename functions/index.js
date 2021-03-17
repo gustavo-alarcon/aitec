@@ -1,5 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const cors = require('cors')({ origin: true });
+const crypto = require('crypto');
+
 
 let app = admin.initializeApp();
 const db = admin.firestore();
@@ -215,22 +218,44 @@ exports.scheduleReStockPurshase = functions.pubsub.schedule('every 15 minutes')
     const reStockSalesColl = db.collection(`db/aitec/reStock`)
     const salesColl = db.collection(`db/aitec/sales`)
 
-    return db.runTransaction(trans => {
-      console.log('Executing transaction');      
-      return trans.getAll(...productArray).then(res => {
-        let salesExpired = [...res].filter(sale => {
-          if(!sale.exists){
-            return false
-          } else {
-            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.data().createdAt['seconds']
-            let leftTime = 3600 - lapsedTime
-            //If it is more than 1:15, it should be re stocked
-            return leftTime < -900
-          }
-        }).map(sale => sale.data())
+    const batch = db.batch()
 
-        
+    return payingSalesColl.get().then(salesColl => {
+      
+      [...salesColl.docs].filter(sale => {
+        if(!sale.exists){
+          return false
+        } else {
+          let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.data().createdAt['seconds']
+          let leftTime = 3600 - lapsedTime
+          //If it is more than 1:15, it should be re stocked
+          return leftTime < -900
+        }
+      }).map(sale => sale.data()).forEach(sale => {
+        batch.set(reStockSalesColl.doc(sale.id), sale)
+      })
 
-      })})
+      return batch.commit()
+
+    })
+
+
 });
+
+exports.cardPayment = functions.https.onRequest((req, res) => {
+  cors(req, res, () => {
+    console.log("----------")
+    let answer = req['body']
+
+
+    let krAnswer = answer['kr-answer']
+
+    let token4 = crypto.createHmac("sha256", key4).update(krAnswer).digest('hex');
+
+    console.log("sent: "+answer['kr-hash'])
+    console.log("sent2: "+ answer['kr-hash'])
+    res.status(200).send("Done")
+    
+  })
+})
 

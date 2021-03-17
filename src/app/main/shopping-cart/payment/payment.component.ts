@@ -21,8 +21,8 @@ export class PaymentComponent implements OnInit {
 
   data:any;
 
-  private static readonly API_ENDPOINT = 'https://api.micuentaweb.pe';
-  private static readonly API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
+  private API_ENDPOINT = 'https://api.micuentaweb.pe';
+  private API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
   
   constructor(
               private readonly db:DatabaseService,
@@ -51,7 +51,7 @@ export class PaymentComponent implements OnInit {
 
   private async loadPaymentLibrary(): Promise<void> {
     if (!this.KR) {
-      await KRGlue.loadLibrary(PaymentComponent.API_ENDPOINT, PaymentComponent.API_KEY).then(async ({KR}) => {
+      await KRGlue.loadLibrary(this.API_ENDPOINT, this.API_KEY).then(async ({KR}) => {
         await KR.setFormConfig({'kr-language': 'en-US'});
 
         this.KR = KR;

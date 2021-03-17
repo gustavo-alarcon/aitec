@@ -62,6 +62,7 @@ export class PaySaleComponent implements OnInit {
   //Timer used to show remaining time
   timer$: Observable<number>
   disFinishButton$: Observable<boolean>;
+  user$: Observable<import("c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model").User>;
 
 
   constructor(
@@ -81,7 +82,9 @@ export class PaySaleComponent implements OnInit {
     this.paymentMethodList$ = this.dbs.getPaymentsChanges()
     this.paymentMethod$ = this.paymentMethod.valueChanges
 
-    this.sale$ = this.auth.user$.pipe(
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
+
+    this.sale$ = this.user$.pipe(
       switchMap(user => {
         return this.dbs.getPayingSales(user.uid)
       }),
@@ -91,23 +94,23 @@ export class PaySaleComponent implements OnInit {
     this.timer$ = this.sale$.pipe(
       switchMap(sale => {
 
-        let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
-
         return interval(1000).pipe(
           map(actualSecondLapsed => {
-            let leftTime = 3600 - lapsedTime - actualSecondLapsed
+            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
+            let leftTime = 3600 - lapsedTime
             return leftTime
           }),
           takeWhile(leftTime => {
-            console.log(leftTime)
+            //console.log(leftTime)
             if(leftTime > -900){        //It will be cancelled only after 1:15 h
               return true
             } else {
-              this.cancelSale(sale)
+              //this.cancelSale(sale)
               return false
             }
           }, true),
           map(leftTime => {
+            //console.log(leftTime)
             if(leftTime >0){
               return leftTime*1000
             } else {

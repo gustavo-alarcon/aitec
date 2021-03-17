@@ -1437,8 +1437,7 @@ export class DatabaseService {
         headers: new HttpHeaders({
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
-          Authorization: `${auth}`,
-
+          Authorization: auth,
         })
       };
 

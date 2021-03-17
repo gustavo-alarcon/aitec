@@ -27,7 +27,7 @@ export class ToolbarMobileComponent implements OnInit {
   } = null
 
   shopCarNumber$: Observable<number>
-  timer$: Observable<number>;
+  pendingPayment$: Observable<boolean>;
 
   constructor(
     public auth: AuthService,
@@ -48,44 +48,7 @@ export class ToolbarMobileComponent implements OnInit {
       })
     )
 
-    this.timer$ = this.auth.user$.pipe(
-      switchMap(user => {
-        console.log(user)
-        if(!user.pendingPayment){
-          return of(null)
-        } else {
-        return this.dbs.getPayingSales(user.uid).pipe(
-          switchMap(sale => {
-
-            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
-    
-            return interval(1000).pipe(
-              map(actualSecondLapsed => {
-                let leftTime = 3600 - lapsedTime - actualSecondLapsed
-                return leftTime
-              }),
-              takeWhile(leftTime => {
-                console.log(leftTime)
-                if(leftTime > -900){
-                  return true
-                } else {
-                  return false
-                }
-              }, true),
-              map(leftTime => {
-                if(leftTime >0){
-                  return leftTime*1000
-                } else {
-                  return 0
-                }
-              })
-            )
-            
-          })
-        )}
-      }),
-      shareReplay(1)
-    )
+    this.pendingPayment$ = this.auth.user$.pipe(map(user => !!user.pendingPayment))
 
     this.search$ = this.searchForm.valueChanges.pipe(
       startWith(''),

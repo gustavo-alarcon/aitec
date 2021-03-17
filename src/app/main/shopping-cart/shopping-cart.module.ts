@@ -42,6 +42,7 @@ import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div
 import { MatBadgeModule } from '@angular/material/badge';
 import { RegisterSaleComponent } from './register-sale/register-sale.component';
 import { PaySaleComponent } from './pay-sale/pay-sale.component';
+import { PaymentCardComponent } from './payment-card/payment-card.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { PaySaleComponent } from './pay-sale/pay-sale.component';
     PaymentErrorComponent,
     RegisterSaleComponent,
     PaySaleComponent,
+    PaymentCardComponent,
   ],
   imports: [
     CommonModule,

@@ -37,6 +37,7 @@ export class ToolbarWebComponent implements OnInit {
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
   timer$: Observable<number>;
+  user$: Observable<User>;
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -48,24 +49,26 @@ export class ToolbarWebComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.timer$ = this.auth.user$.pipe(
+    this.user$ = this.auth.user$
+
+    this.timer$ = this.user$.pipe(
       switchMap(user => {
-        console.log(user)
+        //console.log(user)
         if(!user.pendingPayment){
-          return of(null)
+          return of(0)
         } else {
         return this.dbs.getPayingSales(user.uid).pipe(
           switchMap(sale => {
 
-            let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
     
             return interval(1000).pipe(
               map(actualSecondLapsed => {
-                let leftTime = 3600 - lapsedTime - actualSecondLapsed
+                let lapsedTime = Math.round((new Date()).valueOf()/1000) - sale.createdAt['seconds']
+                let leftTime = 3600 - lapsedTime
                 return leftTime
               }),
               takeWhile(leftTime => {
-                console.log(leftTime)
+                //console.log(leftTime)
                 if(leftTime > -900){
                   return true
                 } else {

@@ -89,7 +89,7 @@ export class WebViewComponent implements OnInit {
 
     this.pendingPayment$ = this.auth.user$.pipe(
       map(user => {
-        return !user.pendingPayment
+        return !!user.pendingPayment
       })
     )
   }

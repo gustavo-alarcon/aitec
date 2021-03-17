@@ -75,7 +75,11 @@
             </div>
 
             <div *ngIf="paymentMethod.value?.type==2">
-              <app-payment [total]="(totalAll$ | async)"></app-payment>
+              <app-payment-card 
+                [total]="(totalAll$ | async)"
+                [user]="user$ | async"
+                [sale]="sale$ | async">
+              </app-payment-card>
             </div>
           </div>
 

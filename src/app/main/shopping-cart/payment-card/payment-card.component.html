@@ -1,0 +1,12 @@
+<div>                    
+  <div class="form" >
+    <div class="container">
+      <div id="myPaymentForm"></div>
+      <div *ngIf="!(noLoading$ | async)"
+        style="height: 50vh;display: flex;align-items: center;justify-content: center;">
+        <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+        </mat-progress-spinner>
+      </div>
+    </div>
+  </div>
+</div> 
