@@ -82,7 +82,8 @@ export class ShoppingCarService {
                   let prodColorDbStock = prodListDB.find(prodDb => (prodDb.sku == reqProd.product.sku)).products
                                           .find(prodDbColor => prodDbColor.sku == reqProd.chosenProduct.sku)
                                           .virtualStock
-                  return reqProd.quantity > prodColorDbStock
+                  
+                  return (reqProd.quantity > prodColorDbStock) || (reqProd.quantity <1)
                 })
   
               })

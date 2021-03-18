@@ -1,6 +1,6 @@
 export interface Payments {
   account: string;  //Es una descripcion
-  createdAt: Date;
+  createdAt: Date;        //Not included in sale of tarjetas
   id: string;
   name: string;           //If it is tarjeta, will include word arjeta
   voucher: boolean        //To incluide voucher photo

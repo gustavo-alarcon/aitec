@@ -3,6 +3,9 @@ const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
 const crypto = require('crypto');
 const cardPass = require('./card-pass.json')
+const https = require('https');
+const axios = require('axios')
+
 
 let app = admin.initializeApp();
 const db = admin.firestore();
@@ -263,7 +266,25 @@ exports.cardPayment = functions.https.onRequest((req, res) => {
         res.status(200).send("Not fully paid.")
       } else {
         //We now extract actual sale data
-        let newSale = {...data.transactions[0].metadata}
+        const metadata = {...data.transactions[0].metadata}
+        
+        let newSale = {
+          user: {
+            uid: metadata.user_uid,
+          },
+          coupon: !metadata.coupon_id ? null : {
+            id: metadata.coupon_id,
+          },
+          id: metadata.sale_id,
+          payType: {
+            account: !!metadata.payType_account ? metadata.payType_account:null,
+            id: metadata.payType_id,
+            name: metadata.payType_name,
+            voucher: Boolean(metadata.payType_voucher),
+            type: Number(metadata.payType_type),
+          },
+          status:metadata.status
+        }
 
         //And save it to DB
         const saleRef = db.collection(`db/aitec/sales`).doc(newSale.id);
@@ -287,8 +308,11 @@ exports.cardPayment = functions.https.onRequest((req, res) => {
             transaction.set(genConfigRef, {rCorrelative: correlative})
 
             //We update sale with new correlative
-            newSale.correlative = correlative
-            transaction.set(saleRef, newSale)
+            transaction.update(saleRef, {
+              correlative: correlative,
+              payType: newSale.payType,
+              status: newSale.status,
+            })
 
             //We now fill cupoun
             if(!!newSale.coupon){
@@ -318,3 +342,42 @@ exports.cardPayment = functions.https.onRequest((req, res) => {
   })
 })
 
+exports.reqForm2 = functions.firestore.document('test/{id}').onCreate((event) => {
+    //const data = req['body']
+    
+    let data = {
+      amount:  255,
+      currency:  "PEN",
+    }
+    
+    const username = cardPass.USER;
+    const password = cardPass.TEST;
+
+    var auth = 'Basic '+ "MTM0MjE4Nzk6dGVzdHBhc3N3b3JkX01yTE9KeXByU29md0hFRWJTckpZeUl3djVEWnNURzc2V3dpT3E5bXNGbWo2TA=="
+
+    const options = {
+      hostName: 'api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment',
+      port: 443, // should be 443 if https
+      //path: '' ,
+      method: 'POST',
+      headers: {
+         'Content-Type': 'application/json',
+         'Authorization': auth       
+        }
+    }
+    
+    return axios.default
+    .post('https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment', data, {
+      headers: options.headers
+    })
+    .then(res => {
+      console.log(`statusCode: ${res.statusCode}`)
+      console.log(res)
+    })
+    .catch(error => {
+      console.error(error)
+    })
+
+
+    
+})

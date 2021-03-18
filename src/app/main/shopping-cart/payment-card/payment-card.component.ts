@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Sale, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { User } from 'src/app/core/models/user.model';
 import KRGlue from "@lyracom/embedded-form-glue";
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { Payments } from 'src/app/core/models/payments.model';
 import { MatDialog } from '@angular/material/dialog';
 import { SaleDialogComponent } from '../sale-dialog/sale-dialog.component';
@@ -40,13 +40,26 @@ export class PaymentCardComponent implements OnInit {
     let totalPay =decimal.replace(/\./g,'');
 
     let newSale = {...this.sale}
-    newSale.payType = this.paymentMethod
-    newSale.status = (new saleStatusOptions()).requested
+
+    let coupon_id = null
+    if(!!newSale.coupon){
+      coupon_id = newSale.coupon.id
+    }
     
     //Saving data
     let data = {
       ipnTargetUrl: 'https://us-central1-aitec-ecommerce.cloudfunctions.net/cardPayment',
-      metadata  :  newSale,
+      metadata  :  {
+        user_uid: newSale.user.uid,
+        coupon_id: coupon_id,
+        sale_id: newSale.id,
+        payType_account: this.paymentMethod.account,
+        payType_id: this.paymentMethod.id,
+        payType_name: this.paymentMethod.name,
+        payType_voucher: this.paymentMethod.voucher,
+        payType_type: this.paymentMethod.type,
+        status: (new saleStatusOptions()).requested
+      },
       amount    :  totalPay,
       currency  :  "PEN",
       orderId   :  newSale.id,
@@ -62,6 +75,7 @@ export class PaymentCardComponent implements OnInit {
       }
     };
     console.log("loading form")
+    console.log(data)
 
     //loading Form Token
     this.loadFormToken(data).toPromise()
@@ -79,18 +93,34 @@ export class PaymentCardComponent implements OnInit {
     const password = 'testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
 
     var auth = 'Basic ' + btoa(username + ":" + password);
+    console.log(auth)
 
-    var url = "/api-payment/V4/Charge/CreatePayment";
+    var url = "https://us-central1-aitec-ecommerce.cloudfunctions.net/reqForm";
 
     const httpOptions = {
       headers: new HttpHeaders({
+        //'Content-type': 'application/form-data',
         'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        Authorization: auth,
-      })
+        //'Content-Type': 'application/json',
+        //Authorization: auth,
+        // 'Access-Control-Allow-Origin': '*',
+        //"Access-Control-Allow-Headers": "authorization, ecsPaymentId",
+        // //'Content-Type': 'application/json',
+        // Authorization: auth,
+      }),
     };
 
-    let formToken = this.http.post(url, JSON.stringify(data), httpOptions).pipe(tap((console.log)))
+    let formToken = this.http.post(url, null/*JSON.stringify(data)*/, httpOptions).pipe(
+      tap(res=> {
+        console.log("tapping")
+        console.log(res)
+      }),
+      catchError((err, caught)=> {
+        console.log("catching error")
+        console.log(err)
+        console.log(caught)
+        return null
+      }))
 
     return formToken;
   }
