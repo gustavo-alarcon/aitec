@@ -9,6 +9,7 @@ import { Payments } from 'src/app/core/models/payments.model';
 import { MatDialog } from '@angular/material/dialog';
 import { SaleDialogComponent } from '../sale-dialog/sale-dialog.component';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -32,7 +33,7 @@ export class PaymentCardComponent implements OnInit {
     private http: HttpClient,
     private dialog: MatDialog,
     private router: Router,
-
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -79,7 +80,7 @@ export class PaymentCardComponent implements OnInit {
 
     //loading Form Token
     this.loadFormToken(data).toPromise()
-    .then(formToken => {
+    .then((formToken: string) => {
       return this.loadPaymentLibrary(formToken)
     }).catch(err => {
       console.log(err)
@@ -89,48 +90,35 @@ export class PaymentCardComponent implements OnInit {
 
   //We first request formToken. The formToken will be valid only for 15 min
   loadFormToken(data): Observable<Object>{
-    const username = '13421879';
-    const password = 'testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
 
-    var auth = 'Basic ' + btoa(username + ":" + password);
-    console.log(auth)
+    let url = "https://us-central1-aitec-ecommerce.cloudfunctions.net/reqForm";
 
-    var url = "https://us-central1-aitec-ecommerce.cloudfunctions.net/reqForm";
+    //You should choose which mode you want
+    let mode: "TEST"|"PROD" = "TEST"
 
     const httpOptions = {
       headers: new HttpHeaders({
-        //'Content-type': 'application/form-data',
         'Access-Control-Allow-Origin': '*',
-        //'Content-Type': 'application/json',
-        //Authorization: auth,
-        // 'Access-Control-Allow-Origin': '*',
-        //"Access-Control-Allow-Headers": "authorization, ecsPaymentId",
-        // //'Content-Type': 'application/json',
-        // Authorization: auth,
-      }),
+      })
     };
 
-    let formToken = this.http.post(url, null/*JSON.stringify(data)*/, httpOptions).pipe(
-      tap(res=> {
-        console.log("tapping")
-        console.log(res)
-      }),
+    let formToken = this.http.post(url+`/?mode=${mode}`, data, {...httpOptions, responseType: 'text'}).pipe(
       catchError((err, caught)=> {
         console.log("catching error")
         console.log(err)
-        console.log(caught)
+        this.snackBar.open("Error. Por favor, refresque la página.", "Aceptar")
         return null
       }))
 
     return formToken;
   }
 
-  loadPaymentLibrary(formToken){
+  loadPaymentLibrary(formToken: string){
     KRGlue.loadLibrary(this.API_ENDPOINT, this.API_KEY)
       .then(({KR}) => {
         console.log("Library Loaded")
         return KR.setFormConfig({
-          'formToken': formToken.answer.formToken,
+          'formToken': formToken,
           'kr-language': 'es-PE'
         })
       })

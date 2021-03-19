@@ -1,10 +1,9 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const cors = require('cors')({ origin: true });
+const cors = require('cors')({ origin: "http://aitecperu.com.pe" });
 const crypto = require('crypto');
 const cardPass = require('./card-pass.json')
-const https = require('https');
-const axios = require('axios')
+const gaxios = require('gaxios')
 
 
 let app = admin.initializeApp();
@@ -342,42 +341,38 @@ exports.cardPayment = functions.https.onRequest((req, res) => {
   })
 })
 
-exports.reqForm2 = functions.firestore.document('test/{id}').onCreate((event) => {
-    //const data = req['body']
-    
-    let data = {
-      amount:  255,
-      currency:  "PEN",
-    }
+exports.reqForm = functions.https.onRequest((req, res) => {
+  return cors(req, res, ()=>{
+    const mode = req.query.mode
+    const data = req['body']
     
     const username = cardPass.USER;
-    const password = cardPass.TEST;
+    const password = mode == "TEST" ? cardPass.TEST : (mode=="PROD" ? cardPass.PROD : "ERROR");
 
-    var auth = 'Basic '+ "MTM0MjE4Nzk6dGVzdHBhc3N3b3JkX01yTE9KeXByU29md0hFRWJTckpZeUl3djVEWnNURzc2V3dpT3E5bXNGbWo2TA=="
+    console.log("mode: "+mode)
+    var auth = 'Basic '+ Buffer.from(username+":"+password).toString('base64')
 
     const options = {
-      hostName: 'api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment',
-      port: 443, // should be 443 if https
-      //path: '' ,
+      url: '/api-payment/V4/Charge/CreatePayment',
       method: 'POST',
+      baseURL: 'https://api.micuentaweb.pe',
       headers: {
          'Content-Type': 'application/json',
          'Authorization': auth       
-        }
+        },
+      data: data
     }
-    
-    return axios.default
-    .post('https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment', data, {
-      headers: options.headers
-    })
-    .then(res => {
-      console.log(`statusCode: ${res.statusCode}`)
-      console.log(res)
-    })
-    .catch(error => {
-      console.error(error)
-    })
 
-
-    
+    return gaxios.request(options)
+      .then(res2 => {
+        console.log(`status: ${res2.data.status}`)
+        //console.log(res2.data.answer.formToken)
+        res.status(200).send(res2.data.answer.formToken)
+      })
+      .catch(error => {
+        console.error(error)
+        res.status(400).send(error)
+      })
+  })
 })
+

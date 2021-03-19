@@ -58,7 +58,7 @@
             *ngIf="(view$|async) == 3; else thirdButton"
             mat-raised-button color="primary" >
             <mat-icon>request_page</mat-icon>
-            Método de Pago
+            Elegir Comprobante
           </button>
           <ng-template #thirdButton>
             <button 
@@ -66,7 +66,7 @@
               [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async)" 
               mat-button class="button--desactive" >
               <mat-icon>request_page</mat-icon>
-              Método de Pago
+              Elegir Comprobante
             </button>
           </ng-template>
 
@@ -138,7 +138,7 @@
             <div class="mini-button w3-center">
               <mat-icon>request_page</mat-icon>
             </div>
-            <div>Método de Pago</div>
+            <div>Elegir Comprobante</div>
           </div>
           <ng-template #thirdMinButton>
             <div 
@@ -147,7 +147,7 @@
               <div>
                 <mat-icon>request_page</mat-icon>
               </div>
-              <div>Método de Pago</div>
+              <div>Elegir Comprobante</div>
             </div>
             <ng-template #thirdMinButtonEnabled>
               <div 
@@ -156,7 +156,7 @@
                 <div>
                   <mat-icon>request_page</mat-icon>
                 </div>
-                <div>Método de Pago</div>
+                <div>Elegir Comprobante</div>
               </div>
             </ng-template>
           </ng-template>
@@ -490,10 +490,10 @@
                           (secondButtonVal$ | async) || (!documentForm.valid)" 
               (click)="finish(finishData)" 
               mat-raised-button color="primary" class="resume__button">
-              Finalizar Compra
+              Proceder a Pago
             </button>
             <p class="resume__small">
-              *Al finalizar la compra, se separarán los productos por un plazo de 1 hora. 
+              *Se separarán los productos por un plazo de 1 hora. 
               Usted podrá realizar el pago en dicho tiempo.
             </p>
           </div>
