@@ -43,67 +43,6 @@
   <ng-container *ngIf="salesFiltered$ | async as salesFiltered">
       <ng-container *ngIf="salesFiltered.length else noSales">
 
-        <!-- <div *ngFor="let sale of salesFiltered | paginate: { itemsPerPage: 10, currentPage: p }"
-            class="list-parent-container "
-            [class.shadow-color]="(detailSubject | async)?.id == sale.id">
-
-          <div matRipple class="list-container background-color" (click)="onSelectDetail(sale)">
-                <div class="general">
-                    <div style="font-size: 24px;">
-                        <b>#R1347</b>
-                    </div>
-                    <div>
-                        <mat-icon color="primary">assignment_turned_in</mat-icon>
-                        Paola Ruiz
-                    </div>
-                    <div>
-                        <mat-icon style="font-size:20px;"
-                            color="primary">assignment_turned_in</mat-icon>
-                        01/06/2020
-                    </div>
-                    <div>
-                        <mat-icon style="font-size:20px;"
-                            color="primary">directions_bike</mat-icon>
-                        21/10/2020
-                    </div>
-                </div>
-                <div class="client">
-                    <mat-icon>group</mat-icon>
-                    <b>Nombre Prueba</b>
-                </div>
-                <div class="document">
-                    <b>Factura FE001-00003</b>
-                </div>
-                <div class="driver">
-                    <div class="driver_header">
-                        <mat-icon>directions_bike</mat-icon>
-                        <span>José Romero</span>
-                        <mat-icon>phone_in_talk</mat-icon>
-                    </div>
-                    <div class="driver_row">
-                        <span>Asignado</span>
-                        <b>14:21</b>
-                    </div>
-                    <div class="driver_row">
-                        <span>En curso</span>
-                        <b>16:12</b>
-                    </div>
-                </div>
-                <div class="status">
-                    <button style="height: 100%; width:100%;" color="accent" 
-                        mat-raised-button type=button>
-                        <b>Pedido</b>
-                    </button>
-                </div>
-                <div class="price">
-                    <button style="height: 100%; width:100%;" color="primary"
-                         mat-raised-button type=button>
-                        <b>S/.106.00</b>
-                    </button>
-                </div>
-          </div>
-        </div> -->
-
         <div *ngFor="let sale of salesFiltered | paginate: { itemsPerPage: 10, currentPage: p }"
             class="list-parent-container "
             [class.shadow-color]="(detailSubject | async)?.id == sale.id">
@@ -150,32 +89,20 @@
                             color="primary">assignment_turned_in</mat-icon>
                         {{sale.createdAt['seconds']*1000 | date:'dd/MM/yyyy'}} <small>{{sale.createdAt['seconds']*1000 | date:'h:mm a'}}</small>
                     </div>
-                    <!-- <div matTooltip="Fecha Asignada">
-                        <mat-icon style="font-size:20px;"
-                            color="primary">directions_bike</mat-icon>
-                        <span *ngIf="sale.confirmedRequestData else noConfirmedRequest">
-                            {{sale.confirmedRequestData?.assignedDate['seconds']*1000 | date:'dd/MM/yyyy'}}
-                        </span>
-                        <ng-template #noConfirmedRequest>
-                            <span>"---"</span>
-                        </ng-template>
-                    </div> -->
+
                 </div>
                 <div class="divider"></div>
                 <div class="client">
                     <div class="overflow_container">
                         <mat-icon>group</mat-icon>
-                        <b *ngIf="sale.user else noUser"> 
+                        <b> 
                             {{sale.documentInfo.name}}
                         </b>
-                        <ng-template #noUser>
-                            <b>Sin Nombre</b>
-                        </ng-template>
                     </div>
                     <div class="overflow_container">
                         <mat-icon>chrome_reader_mode</mat-icon>
                         <b>
-                            {{sale.document == "Boleta" ? sale.documentInfo?.dni : sale.documentInfo?.ruc}}
+                            {{sale.documentInfo.number}}
                         </b>
                     </div>
                     <div class="overflow_container">
@@ -203,8 +130,8 @@
                             </button>
                         </a>
                         <ng-template #noPhone>
-                          <button disabled
-                            style="width:100%" color="accent" 
+                          <button disabled class="actions"
+                            color="accent" 
                             mat-raised-button type=button>
                             <mat-icon>local_phone</mat-icon>
                           </button>
@@ -227,9 +154,8 @@
                         mat-flat-button type=button>
                         <b>{{sale.status}}</b>
                     </button>
-                    <button color="primary"
-                         mat-flat-button type=button>
-                        <b>{{(giveTotalPrice(sale) + sale.deliveryPrice) | currency:'S/.'}}</b>
+                    <button color="primary" style="overflow: auto;" mat-flat-button type=button>
+                      <b>{{sale | salePrice | currency:'S/.'}}</b>
                     </button>
                 </div>
           </div>

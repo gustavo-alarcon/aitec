@@ -32,7 +32,7 @@ export class SalesDetailComponent implements OnInit {
 
   searchProductControl: FormControl;
 
-  products$: Observable<(Product | Package)[]>
+  products$: Observable<(Product | Package)[]>  //Used to search new products in order to add
   weight$: Observable<any>;
 
   @Input() sale: Sale
@@ -60,24 +60,28 @@ export class SalesDetailComponent implements OnInit {
     this.searchProductControl = new FormControl("")
 
     this.productForm = this.fb.group({
-      deliveryPrice: [(this.sale.deliveryPickUp ? 0 : (<Zone>this.sale.delivery).delivery), Validators.required],
-      productList: this.fb.array([])
+      deliveryPrice: [(this.sale.deliveryPickUp ? 0 : !(<Zone>this.sale.delivery)?.delivery) ? 0 : (<Zone>this.sale.delivery)?.delivery, Validators.required],
+      productList: this.fb.array([]),
+      couponDiscount: [!!this.sale.couponDiscount ? this.sale.couponDiscount : 0],
+      additionalPrice: [!!this.sale.additionalPrice ? this.sale.additionalPrice : 0],
     });
 
-    this.voucherCheckedForm = new FormControl(!!this.sale.voucherChecked, Validators.requiredTrue);
+    this.voucherCheckedForm = new FormControl(!!this.sale.voucherChecked, 
+                              this.sale.voucher ? Validators.requiredTrue : null);
 
     this.sale.requestedProducts.forEach((product, index) => {
       (<FormArray>this.productForm.get('productList')).insert(index,
-        product.product.package ?
+        // product.product.package ?
+        //   this.fb.group({
+        //     product: [product.product, Validators.required],
+        //     quantity: [product.quantity, Validators.required],
+        //     chosenOptions: this.fb.array(
+        //       product.chosenOptions.map(opt => new FormControl(opt))
+        //     )
+        //   }) :
           this.fb.group({
             product: [product.product, Validators.required],
-            quantity: [product.quantity, Validators.required],
-            chosenOptions: this.fb.array(
-              product.chosenOptions.map(opt => new FormControl(opt))
-            )
-          }) :
-          this.fb.group({
-            product: [product.product, Validators.required],
+            color: [product.chosenProduct, Validators.required],
             quantity: [product.quantity, Validators.required],
           })
       )
@@ -89,6 +93,9 @@ export class SalesDetailComponent implements OnInit {
         !this.sale.confirmedRequestData ? null :
           this.getDateFromDB(this.sale.confirmedRequestData.assignedDate),
         Validators.required],
+      trackingCode: [
+        !this.sale.confirmedRequestData ? null :
+          this.sale.confirmedRequestData.trackingCode],
       observation: [
         !this.sale.confirmedRequestData ? null :
           this.sale.confirmedRequestData.observation],
@@ -103,17 +110,17 @@ export class SalesDetailComponent implements OnInit {
       ]
     })
 
-    this.confirmedDeliveryForm = this.fb.group({
-      deliveryType: [
-        !this.sale.confirmedDeliveryData ? false :
-          this.sale.confirmedDeliveryData.deliveryType == "Biker" ?
-            false : true
-      ],
-      deliveryBusiness: [
-        !this.sale.confirmedDeliveryData ? null :
-          this.sale.confirmedDeliveryData.deliveryBusiness
-      ],
-    })
+    // this.confirmedDeliveryForm = this.fb.group({
+    //   deliveryType: [
+    //     !this.sale.confirmedDeliveryData ? false :
+    //       this.sale.confirmedDeliveryData.deliveryType == "Biker" ?
+    //         false : true
+    //   ],
+    //   deliveryBusiness: [
+    //     !this.sale.confirmedDeliveryData ? null :
+    //       this.sale.confirmedDeliveryData.deliveryBusiness
+    //   ],
+    // })
   }
 
   //initRequestConfirmed
@@ -126,60 +133,60 @@ export class SalesDetailComponent implements OnInit {
 
   initObservables() {
     //Search Product
-    this.products$ = combineLatest(
-      this.searchProductControl.valueChanges.pipe(startWith("")),
-      combineLatest(this.dbs.getProductsListValueChanges(), this.dbs.getPackagesListValueChanges()
-      ).pipe(map(([prod, pack]) => [...prod, ...pack].sort((a, b) =>
-        a.description > b.description ? 1 : a.description < b.description ? -1 : 0))
-      ),
-      this.dbs.getGeneralConfigDoc()).pipe(
-        map(([formValue, productsList, generalConfig]) => {
+    // this.products$ = combineLatest([
+    //   this.searchProductControl.valueChanges.pipe(startWith("")),
+    //   combineLatest([this.dbs.getProductsListValueChanges(), this.dbs.getPackagesListValueChanges()
+    //   ]).pipe(map(([prod, pack]) => [...prod, ...pack].sort((a, b) =>
+    //     a.description > b.description ? 1 : a.description < b.description ? -1 : 0))
+    //   ),
+    //   this.dbs.getGeneralConfigDoc()]).pipe(
+    //     map(([formValue, productsList, generalConfig]) => {
 
-          //console.log(formValue);
+    //       //console.log(formValue);
 
-          let products = !productsList.length ? [] :
-            productsList.filter(el => !this.productForm.get('productList').value.find(
-              (product: SaleRequestedProducts) => product.product.id == el.id
-            ))
+    //       let products = !productsList.length ? [] :
+    //         productsList.filter(el => !this.productForm.get('productList').value.find(
+    //           (product: SaleRequestedProducts) => product.product.id == el.id
+    //         ))
 
-          if (typeof formValue === 'string') {
-            return products.filter(el => el.description.match(new RegExp(formValue, 'ig')))
-          } else {
+    //       if (typeof formValue === 'string') {
+    //         return products.filter(el => el.description.match(new RegExp(formValue, 'ig')))
+    //       } else {
 
-            // let product: SaleRequestedProducts = {
-            //   product: (<Product | Package>formValue),
-            //   quantity: 1,
-            //   chosenOptions: !(<Product | Package>formValue).package ? null :
-            //     new Array((<Package>formValue).totalItems)
-            // };
+    //         // let product: SaleRequestedProducts = {
+    //         //   product: (<Product | Package>formValue),
+    //         //   quantity: 1,
+    //         //   chosenOptions: !(<Product | Package>formValue).package ? null :
+    //         //     new Array((<Package>formValue).totalItems)
+    //         // };
 
 
-            //   (<FormArray>this.productForm.get('productList')).insert(0,
-            //     product.product.package ?
-            //       this.fb.group({
-            //         product: [product.product, Validators.required],
-            //         quantity: [product.quantity, Validators.required],
-            //         chosenOptions: this.fb.array(
-            //           product.product.items.map(item =>
-            //             item.productsOptions.length != 1 ? new FormControl()
-            //               : new FormControl(item.productsOptions[0])
-            //           )
-            //         )
-            //       }) :
-            //       this.fb.group({
-            //         product: [product.product, Validators.required],
-            //         quantity: [product.quantity, Validators.required],
-            //       })
-            //   )
+    //         //   (<FormArray>this.productForm.get('productList')).insert(0,
+    //         //     product.product.package ?
+    //         //       this.fb.group({
+    //         //         product: [product.product, Validators.required],
+    //         //         quantity: [product.quantity, Validators.required],
+    //         //         chosenOptions: this.fb.array(
+    //         //           product.product.items.map(item =>
+    //         //             item.productsOptions.length != 1 ? new FormControl()
+    //         //               : new FormControl(item.productsOptions[0])
+    //         //           )
+    //         //         )
+    //         //       }) :
+    //         //       this.fb.group({
+    //         //         product: [product.product, Validators.required],
+    //         //         quantity: [product.quantity, Validators.required],
+    //         //       })
+    //         //   )
 
-              this.searchProductControl.setValue("")
-              return productsList.filter(el => !this.productForm.get('productList').value.find(
-                (product: SaleRequestedProducts) => product.product.id == el.id
-              ))
+    //           this.searchProductControl.setValue("")
+    //           return productsList.filter(el => !this.productForm.get('productList').value.find(
+    //             (product: SaleRequestedProducts) => product.product.id == el.id
+    //           ))
             
-          }
-        })
-      )
+    //       }
+    //     })
+    //   )
 
 
   }

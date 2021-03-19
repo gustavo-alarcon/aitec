@@ -1854,14 +1854,14 @@ export class DatabaseService {
     }
   }
 
-  // giveProductPriceOfSale(sale: Sale): number{
-  //   let sum = [...sale.requestedProducts]
-  //     .map((el) => this.giveProductPrice(el, sale.user.customerType == 'Mayorista'))
-  //     .reduce((a, b) => a + b, 0);
-  //   let delivery = Number(sale.deliveryPrice)
-  //   let discount = Number(sale.couponDiscount)
+  giveProductPriceOfSale(sale: Sale): number{
+    let sum = [...sale.requestedProducts]
+      .map((el) => this.giveProductPrice(el, sale.user.customerType))
+      .reduce((a, b) => a + b, 0);
+    let delivery = Number(sale.deliveryPrice)
+    let discount = Number(sale.couponDiscount)
     
-  //   return (sum + delivery - discount)
-  // }
+    return (sum + delivery - discount)
+  }
 
 }

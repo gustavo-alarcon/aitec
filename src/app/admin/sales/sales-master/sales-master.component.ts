@@ -75,7 +75,6 @@ export class SalesMasterComponent implements OnInit {
 
   initObservables() {
     const view = this.dbs.getCurrentMonthOfViewDate();
-console.log(this.getCurrentMonthOfViewDate());
 
     let beginDate = view.from;
     let endDate = new Date();
@@ -101,10 +100,10 @@ console.log(this.getCurrentMonthOfViewDate());
     this.search$ = this.search.valueChanges;
 
 
-    this.salesFiltered$ = combineLatest(
+    this.salesFiltered$ = combineLatest([
       this.search$.pipe(startWith('')),
       this.sales$,
-      this.statusForm.valueChanges.pipe(startWith('Todos')))
+      this.statusForm.valueChanges.pipe(startWith('Todos'))])
       .pipe(
         map(([search, sales, saleState]) => {
           console.log(sales);
@@ -118,11 +117,8 @@ console.log(this.getCurrentMonthOfViewDate());
             return order.filter(el => {
               return el.correlative.toString().includes(search) ||
                 el.user.email?.includes(search.toLowerCase()) ||
-                el.user.personData.name?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.personData['lastName']?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.name?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.personData['ruc']?.toString().toLowerCase().includes(search.toLowerCase())
+                el.documentInfo.name?.toLowerCase().includes(search.toLowerCase()) ||
+                el.documentInfo.number?.toString().toLowerCase().includes(search.toLowerCase())
             });
 
           } else {
@@ -367,7 +363,7 @@ console.log(this.getCurrentMonthOfViewDate());
   }
 
   getCorrelative(corr: number) {
-    return corr.toString().padStart(4, '0')
+    return corr.toString().padStart(6, '0')
   }
 
   getUser(userId): Observable<string> {
@@ -381,33 +377,29 @@ console.log(this.getCurrentMonthOfViewDate());
     return this.datePipe.transform(dateObj, 'dd/MM/yyyy');
   }
 
-  givePrice(item: SaleRequestedProducts): number {
-    let amount = item['quantity']
-    let price = item['product']['price']
-    if (item.product.promo) {
-      let promo = item['product']['promoData']['quantity']
-      let pricePromo = item['product']['promoData']['promoPrice']
+  // givePrice(item: SaleRequestedProducts): number {
+  //   let amount = item['quantity']
+  //   let price = item['product']['price']
+  //   if (item.product.promo) {
+  //     let promo = item['product']['promoData']['quantity']
+  //     let pricePromo = item['product']['promoData']['promoPrice']
 
-      if (amount >= promo) {
-        let wp = amount % promo
-        let op = Math.floor(amount / promo)
-        return wp * price + op * pricePromo
-      } else {
-        return amount * price
-      }
-    } else {
-      return amount * price
-    }
-  }
-  
-  giveTotalPrice(sale: Sale): number {
-    return sale.requestedProducts.reduce((a, b) => a + this.givePrice(b), 0)
-  }
+  //     if (amount >= promo) {
+  //       let wp = amount % promo
+  //       let op = Math.floor(amount / promo)
+  //       return wp * price + op * pricePromo
+  //     } else {
+  //       return amount * price
+  //     }
+  //   } else {
+  //     return amount * price
+  //   }
+  // }
 
   giveTotalSalesPrice(sales: Sale[]): number {
-    console.log(sales)
-    return sales.reduce((a, b) => a + this.shopCar.giveProductPriceOfSale(b), 0)
+    return sales.reduce((a, b) => a + this.dbs.giveProductPriceOfSale(b), 0)
   }
+
 }
 
 
