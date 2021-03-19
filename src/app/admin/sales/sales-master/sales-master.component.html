@@ -113,7 +113,8 @@
                     <div style="font-size: 24px;">
                         <b>#{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}</b>
                     </div>
-                    <div class="overflow_container" style="width:100%">
+                    <div matTooltip="Atendido por:"
+                      class="overflow_container" style="width:100%">
                         <mat-icon style="font-size:20px;"
                             color="primary">assignment_ind</mat-icon>
                         <span *ngIf="sale.attendedData else noAttended">
@@ -128,12 +129,28 @@
                             <span>Sin Atender</span>
                         </ng-template>
                     </div>
+                    <div matTooltip="Asesor:"
+                      class="overflow_container" style="width:100%">
+                        <mat-icon style="font-size:20px;"
+                            color="primary">assignment_ind</mat-icon>
+                        <span *ngIf="sale.attendedData else noAdviser">
+                            <ng-container *ngIf="sale.attendedData.attendedBy.name else displayName2">
+                                {{sale.attendedData.attendedBy.name+" "+sale.attendedData.attendedBy?.lastName1}}
+                            </ng-container>
+                            <ng-template #displayName2>
+                                {{sale.attendedData.attendedBy?.displayName}}
+                            </ng-template>
+                        </span>
+                        <ng-template #noAdviser>
+                            <span>Sin Asesor</span>
+                        </ng-template>
+                    </div>
                     <div matTooltip="Fecha Solicitada">
                         <mat-icon style="font-size:20px;"
                             color="primary">assignment_turned_in</mat-icon>
                         {{sale.createdAt['seconds']*1000 | date:'dd/MM/yyyy'}} <small>{{sale.createdAt['seconds']*1000 | date:'h:mm a'}}</small>
                     </div>
-                    <div matTooltip="Fecha Asignada">
+                    <!-- <div matTooltip="Fecha Asignada">
                         <mat-icon style="font-size:20px;"
                             color="primary">directions_bike</mat-icon>
                         <span *ngIf="sale.confirmedRequestData else noConfirmedRequest">
@@ -142,19 +159,14 @@
                         <ng-template #noConfirmedRequest>
                             <span>"---"</span>
                         </ng-template>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="divider"></div>
                 <div class="client">
                     <div class="overflow_container">
                         <mat-icon>group</mat-icon>
                         <b *ngIf="sale.user else noUser"> 
-                            <ng-container *ngIf="sale.user?.name else userDisplayName">
-                                {{sale.user.name+" "+sale.user?.lastName1}}
-                            </ng-container>
-                            <ng-template #userDisplayName>
-                                {{sale.user?.displayName}}
-                            </ng-template>
+                            {{sale.documentInfo.name}}
                         </b>
                         <ng-template #noUser>
                             <b>Sin Nombre</b>
@@ -162,12 +174,9 @@
                     </div>
                     <div class="overflow_container">
                         <mat-icon>chrome_reader_mode</mat-icon>
-                        <b *ngIf="sale.user?.dni else noNumber">
-                            {{sale.user.dni}}
+                        <b>
+                            {{sale.document == "Boleta" ? sale.documentInfo?.dni : sale.documentInfo?.ruc}}
                         </b>
-                        <ng-template #noNumber>
-                            <b>00000000</b>
-                        </ng-template>
                     </div>
                     <div class="overflow_container">
                         <mat-icon>mail</mat-icon>
@@ -184,13 +193,22 @@
                             mat-raised-button type=button>
                             <mat-icon>place</mat-icon>
                         </button>
-                        <!--a class="actions" [href]="'tel:'+sale.location.phone"
+                        <a 
+                          *ngIf="sale.user?.personData?.phone else noPhone"
+                          class="actions" [href]="'tel:'+ sale.user?.personData?.phone"
                             (click)="$event.stopPropagation()">
                             <button style="width:100%" color="accent" 
                                 mat-raised-button type=button>
                                 <mat-icon>local_phone</mat-icon>
                             </button>
-                        </a-->
+                        </a>
+                        <ng-template #noPhone>
+                          <button disabled
+                            style="width:100%" color="accent" 
+                            mat-raised-button type=button>
+                            <mat-icon>local_phone</mat-icon>
+                          </button>
+                        </ng-template>
 
                     </div>
                 </div>

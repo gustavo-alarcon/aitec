@@ -11,8 +11,10 @@ export class saleStatusOptions {
   paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago. Usuario se marcará con pendingPayment
   requested = 'Solicitado';                 //Venta confirmada por cloud function y pagada
   attended = 'Atendido';
-  confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid
-  confirmedDocument = 'Comprobante Confirmado';
+  //Fecha asignada y tracking
+  confirmedRequest = 'Solicitud Confirmada';  
+  //Aca recien aparece n° de comprobante      //can be confirmed only when voucher is valid
+  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a logística
   // confirmedDelivery = 'Delivery Confirmado';
   // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
@@ -72,8 +74,6 @@ export interface Sale {
   payType: Payments
 
   adviser:any;
-
-
 
   //Here comes things that will be editted
 
