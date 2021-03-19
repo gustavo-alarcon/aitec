@@ -39,7 +39,10 @@
       </button>
 
       <mat-hint align="end">{{(prodStock$ | async)}} disponibles</mat-hint>
-      <mat-error align="end">Solo {{(prodStock$ | async)}} disponibles</mat-error>
+      <mat-error align="end">
+        <span *ngIf="quantityForm?.errors?.stock">Solo {{(prodStock$ | async)}} disponibles</span>
+        <span *ngIf="quantityForm?.errors?.min">Mínimo 1 producto.</span>
+      </mat-error>
 
     </mat-form-field>
 

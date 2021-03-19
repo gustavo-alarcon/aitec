@@ -1,29 +1,44 @@
-<div style="max-width: 250px; position: relative;">
-  <div mat-dialog-title>
-    <div class="ms-flex">
-      <h2 class="title-login">
-        Gracias por tu compra
-      </h2>
-      <span class="ms-fill"></span>
-      <button mat-icon-button mat-dialog-close>
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-    <mat-divider></mat-divider>
-
+<div mat-dialog-title>
+  <div style="display: flex; flex-direction: row; justify-content: space-between;">
+    <h2 class="title-login">
+      {{(correlative$ | async) ? "Gracias por tu compra" : "Espere..."}}
+    </h2>
+    
+    <button [disabled]="!(correlative$ | async)"
+      mat-icon-button mat-dialog-close type="button">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
-  <div mat-dialog-content class="w3-center">
+  <mat-divider></mat-divider>
+
+</div>
+<div mat-dialog-content class="w3-center">
+  <ng-container *ngIf="correlative$ | async as corr; else noCorr">
     <p>Gracias por elegir Aitec Group, {{data.name | titlecase}}.</p>
-    <p>Hemos recibido tu pedido, el número es: <strong> #R{{data.number}}</strong>. Procesaremos tu
+    <p>Hemos recibido tu pedido, el número es: <strong> #R{{corr}}</strong>. Procesaremos tu
       compra y nos pondremos en contacto para coordinar la entrega. </p>
     <p *ngIf="data.asesor">Elegiste al asesor de ventas: {{data.asesor.displayName}}, comunicate al número:
       {{data.asesor.phone}}</p>
-    <p>Te llegará un correo electrónico a: <strong>{{data.email}}</strong> con la confirmación de tu pedido.</p>
+    <p>Te llegará un correo electrónico a <strong>{{data.email}}</strong> con la confirmación de tu pedido.</p>
 
     <div style="text-align: right;" class="w3-section">
       <img src="../../../../assets/images/logo-black.png" width="100px" alt="">
     </div>
-  </div>
-  <div class="div-bottom">
-  </div>
+  </ng-container>
+  <ng-template #noCorr>
+    <div 
+      style="display: flex; align-items: center; justify-content: center;
+              padding: 32px">
+      <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+      </mat-progress-spinner>
+    </div>
+  </ng-template>
+</div>
+<div mat-dialog-actions>
+  <!-- <button 
+    [disabled]="!(correlative$ | async)"
+    type="button"
+    mat-button mat-dialog-close>
+    Aceptar
+  </button> -->
 </div>

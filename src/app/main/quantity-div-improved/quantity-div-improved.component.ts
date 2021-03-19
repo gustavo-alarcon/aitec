@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
@@ -21,7 +21,7 @@ export class QuantityDivImprovedComponent implements OnInit {
   @Input() price: number;
   quantity$: Observable<number>;
 
-  quantityForm: FormControl = new FormControl();
+  quantityForm: FormControl = new FormControl(null, Validators.min(1));
   quantityForm$: Observable<number>;
   reqProductObservable$: Observable<SaleRequestedProducts> = null;
   prodStock$: Observable<number>

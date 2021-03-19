@@ -179,17 +179,17 @@ export class StoreComponent implements OnInit {
         );
         break;
       case 'cat':
-        let categ = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim()) 
+        let categ = this.allCategories.find(ct => ct.completeName.toLowerCase().trim().replace("  ", " ") == cat.toLowerCase().trim().replace("  ", " ")) 
         let catList = this.allCategories.filter(ct => ct.idCategory == categ.id).map(ct => ct.id)
         return prod.filter(el => categ ? el.idCategory == categ.id || catList.includes(el.idCategory) : false)
         break;
       case 'sub':
-        let catego = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim())
+        let catego = this.allCategories.find(ct => ct.completeName.toLowerCase().trim().replace("  ", " ") == cat.toLowerCase().trim().replace("  ", " "))
         let subList = this.allCategories.filter(ct => ct.idSubCategory == catego.id).map(ct => ct.id)
         return prod.filter(el => catego ? el.idCategory == catego.id || subList.includes(el.idCategory) : false)
         break;
       case 'subsub':
-        let category = this.allCategories.find(ct => ct.completeName.toLowerCase().trim() == cat.toLowerCase().trim()) 
+        let category = this.allCategories.find(ct => ct.completeName.toLowerCase().trim().replace("  ", " ") == cat.toLowerCase().trim().replace("  ", " ")) 
         return prod.filter(el => category ? el.idCategory == category.id : false)
         break;
 

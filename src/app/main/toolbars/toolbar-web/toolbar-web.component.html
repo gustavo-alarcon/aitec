@@ -77,15 +77,27 @@
             <span>Mis Preguntas</span>
           </button>
         </mat-menu>
-        <button mat-button routerLink="/main/carrito" matTooltip="Carrito" *ngIf="shopCarNumber$ | async as number; else noOrder">
-          <mat-icon [matBadge]="number" matBadgeColor="warn">
-            shopping_cart</mat-icon>
+        
+        <button *ngIf="(user$ | async)?.pendingPayment; else noTimer"
+          matTooltip="Completar pago."
+          color="warn" mat-flat-button routerLink="/main/carrito">
+          {{timer$ | async | date:'mm:ss'}}
         </button>
-        <ng-template #noOrder>
-          <button mat-button matTooltip="Carrito">
-            <mat-icon>shopping_cart</mat-icon>
+        <ng-template #noTimer>
+          <button 
+            *ngIf="shopCarNumber$ | async as number; else noOrder"
+            mat-button routerLink="/main/carrito" matTooltip="Carrito" >
+            <mat-icon [matBadge]="number" matBadgeColor="warn">
+              shopping_cart</mat-icon>
           </button>
+            
+          <ng-template #noOrder>
+            <button mat-button matTooltip="Carrito">
+              <mat-icon>shopping_cart</mat-icon>
+            </button>
+          </ng-template>
         </ng-template>
+        
       </div>
     </div>
 

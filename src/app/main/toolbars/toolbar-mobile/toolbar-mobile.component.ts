@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { combineLatest, interval, Observable, of } from 'rxjs';
+import { filter, map, shareReplay, startWith, switchMap, takeWhile } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
@@ -27,6 +27,7 @@ export class ToolbarMobileComponent implements OnInit {
   } = null
 
   shopCarNumber$: Observable<number>
+  pendingPayment$: Observable<boolean>;
 
   constructor(
     public auth: AuthService,
@@ -46,6 +47,8 @@ export class ToolbarMobileComponent implements OnInit {
 
       })
     )
+
+    this.pendingPayment$ = this.auth.user$.pipe(map(user => !!user.pendingPayment))
 
     this.search$ = this.searchForm.valueChanges.pipe(
       startWith(''),

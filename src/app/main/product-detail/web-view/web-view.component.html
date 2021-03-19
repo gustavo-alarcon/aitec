@@ -142,13 +142,14 @@
               </app-quantity-div-improved>
             </ng-container>
             <ng-template #emptyProd>
-              <!-- I have to modify it to reflect stock. With no stock should not be shown -->
-              <button *ngIf="verifyStock$ | async" mat-flat-button color="primary" 
-                (click)="addProd()" class="product__add" 
-                [style.visibility]="true ? 'visible' : 'hidden'">
-                <mat-icon>shopping_cart</mat-icon>
-                <span> Agregar al Carrito</span>
-              </button>
+              <ng-container *ngIf="!(pendingPayment$ | async)">
+                <button *ngIf="verifyStock$ | async" mat-flat-button color="primary" 
+                  (click)="addProd()" class="product__add" 
+                  [style.visibility]="true ? 'visible' : 'hidden'">
+                  <mat-icon>shopping_cart</mat-icon>
+                  <span> Agregar al Carrito</span>
+                </button>
+              </ng-container>
             </ng-template>
           </div>
           <ng-template #loginbutton>
