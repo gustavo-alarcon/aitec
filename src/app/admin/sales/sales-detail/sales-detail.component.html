@@ -10,21 +10,25 @@
                 <b>ATENDER</b>
             </button>
             <ng-template #deshacer>
-                <button *ngIf="
-                        sale.status != saleStatusOptions.cancelled" style="height: 40px;" [disabled]="loading$ | async"
-                    (click)="onSubmitForm(sale.status, user, true)" mat-raised-button color="warn" type="button">
+                <button 
+                  *ngIf="sale.status != saleStatusOptions.cancelled" 
+                  mat-raised-button color="warn" type="button" style="height: 40px;" 
+                  [disabled]="loading$ | async"
+                  (click)="onSubmitForm(sale.status, user, true)" >
                     <b>Deshacer</b>
                 </button>
             </ng-template>
         </span>
         <span *ngIf="sale.status != saleStatusOptions.cancelled">
-            <button (click)="onSubmitForm(saleStatusOptions.cancelled, user)" [disabled]="loading$ | async" mat-mini-fab
-                color="warn" type="button">
-                <mat-icon>close</mat-icon>
+            <button 
+              [disabled]="loading$ | async" mat-mini-fab
+              (click)="onSubmitForm(saleStatusOptions.cancelled, user)" 
+              color="warn" type="button">
+              <mat-icon>close</mat-icon>
             </button>
         </span>
     </div>
-    <div *ngIf="products$ | async as products" class="actionsContainer formFieldRounded">
+    <!-- <div *ngIf="products$ | async as products" class="actionsContainer formFieldRounded">
         <mat-form-field *ngIf="sale.status == saleStatusOptions.attended" class="content w3-small"
             style="display: block; width:100%; margin-bottom: 0;" appearance="outline">
             <mat-icon matPrefix></mat-icon>
@@ -40,7 +44,7 @@
                 <span *ngIf="searchProductControl.errors?.required">Campo requerido</span>
             </mat-error>
         </mat-form-field>
-    </div>
+    </div> -->
     <div class="w3-margin-top">
         <table [formGroup]="productForm" class="table-sale">
             <tr>
@@ -130,16 +134,14 @@
                             </ul>
                         </ng-container>
 
-
-
                     </td>
                     <!-- price -->
                     <td class="w3-right-align table-sale__td table-sale__td--space">
-                        <span>{{giveProductPrice(item.value) | currency: 'S/. ':'symbol':'2.2-2'}}</span>
-                        <mat-icon *ngIf="sale.status == saleStatusOptions.attended" class="removeIcon" color="primary"
+                        <span>{{giveProductPrice(item.value) | currency: 'S/. '}}</span>
+                        <!-- <mat-icon *ngIf="sale.status == saleStatusOptions.attended" class="removeIcon" color="primary"
                             (click)="onDeleteProduct(i)">
                             remove_circle
-                        </mat-icon>
+                        </mat-icon> -->
                     </td>
                 </div>
 

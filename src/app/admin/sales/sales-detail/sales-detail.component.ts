@@ -81,7 +81,7 @@ export class SalesDetailComponent implements OnInit {
         //   }) :
           this.fb.group({
             product: [product.product, Validators.required],
-            color: [product.chosenProduct, Validators.required],
+            chosenProduct: [product.chosenProduct, Validators.required],
             quantity: [product.quantity, Validators.required],
           })
       )
@@ -254,6 +254,7 @@ export class SalesDetailComponent implements OnInit {
             }
           )
         ),
+        //Rejected
         empty()
       ))).subscribe(
         () => {

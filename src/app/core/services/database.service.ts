@@ -1840,8 +1840,8 @@ export class DatabaseService {
 
   //Calculator functions
   //mayorista is given in user.customerType == "Mayorista"
-  giveProductPrice(item: SaleRequestedProducts, mayorista: string): number {
-    let may = (mayorista == "Mayorista")
+  giveProductPrice(item: SaleRequestedProducts, customerType: string): number {
+    let may = (customerType == "Mayorista")
     if (!may && item.product.promo) {
       let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
       let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;

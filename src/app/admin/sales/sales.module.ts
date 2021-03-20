@@ -29,6 +29,7 @@ import {LazyLoadImageModule} from 'ng-lazyload-image';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { SalePricePipe } from './sale-price.pipe';
+import { ProductPricePipe } from './product-price.pipe';
 
 
 
@@ -39,7 +40,8 @@ import { SalePricePipe } from './sale-price.pipe';
     SalesDetailComponent,
     SalesPhotoDialogComponent,
     SalesAddressDialogComponent,
-    SalePricePipe
+    SalePricePipe,
+    ProductPricePipe
   ],
   imports: [
     CommonModule,
