@@ -57,10 +57,12 @@ export class SalesDetailComponent implements OnInit {
 
 
   initForm() {
+    console.log(this.sale)
+
     this.searchProductControl = new FormControl("")
 
     this.productForm = this.fb.group({
-      deliveryPrice: [(this.sale.deliveryPickUp ? 0 : !(<Zone>this.sale.delivery)?.delivery) ? 0 : (<Zone>this.sale.delivery)?.delivery, Validators.required],
+      deliveryPrice: [(!(<Zone>this.sale?.delivery)?.delivery) ? 0 : (<Zone>this.sale?.delivery)?.delivery, Validators.required],
       productList: this.fb.array([]),
       couponDiscount: [!!this.sale.couponDiscount ? this.sale.couponDiscount : 0],
       additionalPrice: [!!this.sale.additionalPrice ? this.sale.additionalPrice : 0],
@@ -86,6 +88,8 @@ export class SalesDetailComponent implements OnInit {
           })
       )
     })
+
+    console.log((<FormArray>this.productForm.get('productList')).controls[0])
 
     this.confirmedRequestForm = this.fb.group({
       // desiredDate: [this.getDateFromDB(this.sale.requestDate)],

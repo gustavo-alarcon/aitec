@@ -72,7 +72,9 @@
                         <span *ngIf="!item.get('product').value.promo">
                             {{item.get('product').value.description}}
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto"
-                                matTooltip="{{item.get('product').value.price | currency: 'S/. '}}">
+                                matTooltip="Precio: {{
+                                  (sale.user.customerType == 'Mayorista' ? 
+                                  item.get('product').value.priceMay : item.get('product').value.priceMin) | currency: 'S/. '}}">
                                 info
                             </mat-icon>
                         </span>
@@ -80,7 +82,9 @@
                         <span *ngIf="item.get('product').value.promo">
                             {{item.get('product').value.description}}
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto"
-                                matTooltip="Precio: {{item.get('product').value.price | currency: 'S/. '}}">
+                                matTooltip="Precio: {{(
+                                  sale.user.customerType == 'Mayorista' ? 
+                                  item.get('product').value.priceMay : item.get('product').value.priceMin) | currency: 'S/. '}}">
                                 info
                             </mat-icon>
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto" matTooltip="Oferta ({{onFloor(item.get('quantity').value, item.get('product').value.promoData.quantity)}}): 

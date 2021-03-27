@@ -1,5 +1,17 @@
 <div *ngIf="sales$ | async as sales else noSales">
   <!-- Actions form -->
+  <div *ngIf="observable$ | async as observ">
+    <div *ngFor="observ; let i=index">
+
+      <mat-form-field hintLabel="Correlativo, nombre, apellido, correo o DNI" class="search" appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Buscar" [formControl]="formArray.controls[i]" autocomplete="off">
+        <mat-hint align="end"><strong>{{(salesFiltered$ | async)?.length}}</strong> resultados</mat-hint>
+      </mat-form-field>
+
+    </div>
+  </div>
+
   <div class="actionsContainer"
     style="margin-right: 16px;">
       <mat-form-field class="w3-margin-top w3-margin-bottom w3-block" style="max-width: 350px;" appearance="outline">
