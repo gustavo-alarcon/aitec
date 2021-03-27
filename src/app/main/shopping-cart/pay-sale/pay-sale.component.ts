@@ -98,7 +98,7 @@ export class PaySaleComponent implements OnInit {
             if(leftTime > -900){        //It will be cancelled only after 1:15 h
               return true
             } else {
-              //this.cancelSale(sale)
+              this.cancelSale(sale)
               return false
             }
           }, true),

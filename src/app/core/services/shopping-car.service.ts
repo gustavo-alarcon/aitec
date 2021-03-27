@@ -39,7 +39,11 @@ export class ShoppingCarService {
               map(res => {
                 console.log("after requesting user info")
                 if (res.exists) {
-                  this.reqProdListSubject.next((<User>res.data()).shoppingCar)
+                  if(!!(<User>res.data()).shoppingCar){
+                    this.reqProdListSubject.next([])
+                  } else {
+                    this.reqProdListSubject.next((<User>res.data()).shoppingCar)
+                  }
                   return <User>res.data()
                 } else {
                   return null
