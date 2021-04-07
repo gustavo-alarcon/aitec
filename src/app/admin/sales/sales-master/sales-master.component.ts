@@ -188,146 +188,139 @@ export class SalesMasterComponent implements OnInit {
   downloadXls(sales: Sale[]): void {
     //console.log(sales);
     let table_xlsx: any[] = [];
+    
     let headersXlsx = [
       'Correlativo',
       'Usuario',
-      'DNI',
-      'e-mail',
+      'DNI/RUC',
+      'Correo',
       'Teléfono',
       'Estado',
+      'Tipo de entrega',      //Recojo en tienda, Entrega, A coordinar
       'Dirección',
+      'Departamento',
       'Distrito',
-      'Referencia',
+      'Provincia',
+      'Referencia',           //Solo en el caso de entrega
       // 'Sub-Total',
       // 'Delivery',
+
       'Tipo Documento',
       'RUC',
-      'Nombre de empresa',
+      'Nombre/Razón social',
       'Dirección de empresa',
-      'Total',
-      'OP',
+
       'Tipo de pago',
+
+      'Asesor',
+
       'Fecha de Solicitud',
-      //'Fecha de Envio Deseada', 
-      'Usuario Responsable',
-      'Fecha de Atención',
-      'Usuario de Confirmación de Solicitud',
+
+      'Fecha de Atención', 
+      'Usuario responsable',
+
       'Fecha de Confirmación de Solicitud',
+      'Usuario de Confirmación de Solicitud',
       'Fecha Asignada',
-      'Usuario de Confirmación de Comprobante',
+      'Codigo de seguimiento',
+      'Observación',
+
       'Fecha de Confirmación de Comprobante',
-      //'Fecha de Confirmación de Delivery', 
-      //'Fecha de Asignación de Conductor', 
-      //'Fecha de Entrega',
-      'Usuario de Anulación',
+      'Usuario de Confirmación de Comprobante',
+      'Número de comprobante',
+
       'Fecha de Anulación',
-      'Sub Total', 'IGV', 'Total', 'Delivery', 'Total con Delivery',
-      'Paquete', 'Descripción', 'Cantidad', 'Peso Unitario', 'Peso Total', 'Precio Total']
+      'Usuario de Anulación',
+
+      'Sub-total',
+      'IGV',
+      'Precio por delivery',
+      'Descuento por cupón',
+      'Precio adicional',
+      'Total',
+
+      'Producto',
+      'Color',
+      'Cantidad',
+      'Precio'
+
+    ];
 
     table_xlsx.push(headersXlsx);
 
+
+    let noData = "--"
+
     sales.forEach(sale => {
       const temp = [
-        /*
         sale.correlative.toString().padStart(6, "0"),
-        sale.user.name ? sale.user.lastName1 ? sale.user.lastName2 ?
-          sale.user.name + " " + sale.user.lastName1 + " " + sale.user.lastName2 :
-          sale.user.name + " " + sale.user.lastName1 : sale.user.name :
-          (sale.user.displayName ? sale.user.displayName : "Sin nombre"),
-        sale.user.dni ? sale.user.dni : "Sin DNI",
+        sale.user.personData.name,
+        !!sale.user.personData["dni"] ? sale.user.personData["dni"] : !!sale.user.personData["ruc"] ? sale.user.personData["ruc"] : "Sin documento",
         sale.user.email,
-        sale.location.address ? sale.location.phone : '',
+        sale.user.personData.phone ?  sale.user.personData.phone: 'Sin número',
         sale.status,
-        sale.location.address ? sale.location.address : '',
-        sale.location.address ? sale.location.district['name'] : '',
-        sale.location.address ? sale.location.reference : '',
-        sale.document,
-        sale.ruc,
-        sale.companyName,
-        sale.companyAddress,
-        (this.giveTotalPrice(sale) + sale.deliveryPrice).toFixed(2),
-        '',
-        typeof sale.payType == 'string' ? sale.payType : sale.payType.name,
-        sale.createdAt ? this.getXlsDate(sale.createdAt) : "-",
-        //sale.requestDate ? this.getXlsDate(sale.requestDate) : "-",
-        sale.attendedData ?
-          sale.attendedData.attendedBy.name ? sale.attendedData.attendedBy.lastName1 ? sale.attendedData.attendedBy.lastName2 ?
-            sale.attendedData.attendedBy.name + " " + sale.attendedData.attendedBy.lastName1 + " " + sale.attendedData.attendedBy.lastName2 :
-            sale.attendedData.attendedBy.name + " " + sale.attendedData.attendedBy.lastName1 : sale.attendedData.attendedBy.name :
-            (sale.attendedData.attendedBy.displayName ? sale.attendedData.attendedBy.displayName : "Sin nombre") : "-",
-        sale.attendedData ? this.getXlsDate(sale.attendedData.attendedAt) : "-",
-        sale.confirmedRequestData ?
-          sale.confirmedRequestData.confirmedBy.name ? sale.confirmedRequestData.confirmedBy.lastName1 ? sale.confirmedRequestData.confirmedBy.lastName2 ?
-            sale.confirmedRequestData.confirmedBy.name + " " + sale.confirmedRequestData.confirmedBy.lastName1 + " " + sale.confirmedRequestData.confirmedBy.lastName2 :
-            sale.confirmedRequestData.confirmedBy.name + " " + sale.confirmedRequestData.confirmedBy.lastName1 : sale.confirmedRequestData.confirmedBy.name :
-            (sale.confirmedRequestData.confirmedBy.displayName ? sale.confirmedRequestData.confirmedBy.displayName : "Sin nombre") : "-",
-        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.confirmedAt) : "-",
-        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.assignedDate) : "-",
-        sale.confirmedDocumentData ?
-          sale.confirmedDocumentData.confirmedBy.name ? sale.confirmedDocumentData.confirmedBy.lastName1 ? sale.confirmedDocumentData.confirmedBy.lastName2 ?
-            sale.confirmedDocumentData.confirmedBy.name + " " + sale.confirmedDocumentData.confirmedBy.lastName1 + " " + sale.confirmedDocumentData.confirmedBy.lastName2 :
-            sale.confirmedDocumentData.confirmedBy.name + " " + sale.confirmedDocumentData.confirmedBy.lastName1 : sale.confirmedDocumentData.confirmedBy.name :
-            (sale.confirmedDocumentData.confirmedBy.displayName ? sale.confirmedDocumentData.confirmedBy.displayName : "Sin nombre") : "-",
-        sale.confirmedDocumentData ? this.getXlsDate(sale.confirmedDocumentData.confirmedAt) : "-",
-        //sale.confirmedDeliveryData ? this.getXlsDate(sale.confirmedDeliveryData.confirmedAt) : "-",
-        //sale.driverAssignedData ? this.getXlsDate(sale.driverAssignedData.assignedAt) : "-",
-        //sale.finishedData ? this.getXlsDate(sale.finishedData.finishedAt) : "-",
-        sale.cancelledData ?
-          sale.cancelledData.cancelledBy.name ? sale.cancelledData.cancelledBy.lastName1 ? sale.cancelledData.cancelledBy.lastName2 ?
-            sale.cancelledData.cancelledBy.name + " " + sale.cancelledData.cancelledBy.lastName1 + " " + sale.cancelledData.cancelledBy.lastName2 :
-            sale.cancelledData.cancelledBy.name + " " + sale.cancelledData.cancelledBy.lastName1 : sale.cancelledData.cancelledBy.name :
-            (sale.cancelledData.cancelledBy.displayName ? sale.cancelledData.cancelledBy.displayName : "Sin nombre") : "-",
-        sale.cancelledData ? this.getXlsDate(sale.cancelledData.cancelledAt) : "-",
-        (this.giveTotalPrice(sale) - this.giveTotalPrice(sale) / 1.18 * 0.18).toFixed(2), //Soles
-        (this.giveTotalPrice(sale) / 1.18 * 0.18).toFixed(2),
-        (this.giveTotalPrice(sale)).toFixed(2),
-        (sale.deliveryPrice).toFixed(2),
-        (this.giveTotalPrice(sale) + sale.deliveryPrice).toFixed(2),*/
-      ];
-      //      'Producto', 'Cantidad', 'Precio'
-/*
-      sale.requestedProducts.forEach(prod => {       
-        // console.log(prod);
+        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega" : "A coordinar",
 
-        // let temp2 = [
-        //   ...temp,
-        //   !prod.product.package ? prod.product.description : prod.product.description+"("+
-        //     prod.chosenOptions.map(el => el ? el.description : "Sin elegir").join("; ")
-        //   +")",
-        //   prod.quantity,
-        //   prod.product.unit.weight,
-        //   (prod.quantity*prod.product.unit.weight),
-        //   "S/. "+this.givePrice(prod).toFixed(2)
-        // ]
-        // table_xlsx.push(temp2);
+        sale.deliveryPickUp ? sale.delivery["address"] : sale.location ? sale.location.address : noData,
+        sale.deliveryPickUp ? sale.delivery["departamento"] : sale.location ? sale.location.departamento : noData,
+        sale.deliveryPickUp ? sale.delivery["distrito"] : sale.location ? sale.location.distrito : noData,
+        sale.deliveryPickUp ? sale.delivery["provincia"] : sale.location ? sale.location.provincia : noData,
+        sale.deliveryPickUp ? noData : sale.location ? sale.location.reference : noData,
+
+        sale.document,
+        sale.documentInfo.number,
+        sale.documentInfo.name,
+        sale.documentInfo.address ? sale.documentInfo.address : noData,
+
+        sale.payType.name,
+
+        sale.adviser?.displayName ? sale.adviser?.displayName : "Sin asesor",
+
+        sale.createdAt ? this.getXlsDate(sale.createdAt) : noData,
+
+        sale.attendedData ? this.getXlsDate(sale.attendedData.attendedAt) : noData,
+        sale.attendedData ? sale.attendedData.attendedBy.personData.name : noData,
+
+        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.confirmedAt) : noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.confirmedBy.personData.name : noData,
+        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.assignedDate) : noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.trackingCode: noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.observation: noData,
+
+        sale.confirmedDocumentData ? this.getXlsDate(sale.confirmedDocumentData.confirmedAt) : noData,
+        sale.confirmedDocumentData ? sale.confirmedDocumentData.confirmedBy : noData,
+        sale.confirmedDocumentData ? sale.confirmedDocumentData.documentNumber : noData,
+
+        sale.cancelledData ? this.getXlsDate(sale.cancelledData.cancelledAt) : noData,
+        sale.cancelledData ? sale.cancelledData.cancelledBy.personData.name : noData,
+
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) / 1.18).toFixed(2),
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) / 1.18 * 0.18).toFixed(2),
+        sale.deliveryPrice ? sale.deliveryPrice : "0",
+        sale.couponDiscount ? sale.couponDiscount : "0",
+        sale.additionalPrice ? sale.additionalPrice : "0",
+
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) + 
+        (sale.deliveryPrice ? sale.deliveryPrice : 0)-
+        (sale.couponDiscount ? sale.couponDiscount : 0)+
+        (sale.additionalPrice ? sale.additionalPrice : 0)).toFixed(2),
+
+      ];
+      //      'Producto', 'Color', 'Cantidad', 'Precio'
+
+      sale.requestedProducts.forEach(prod => {       
         let temp2;
 
-        if (!prod.product.package) {
-          temp2 = [
-            ...temp,
-            '-',
-            prod.product.description,
-            prod.quantity,
-            (prod.quantity),
-            this.givePrice(prod).toFixed(2) //Soles
-          ]
-          table_xlsx.push(temp2);
-        } else {
-          prod['chosenOptions'].map(el => {
-            if (el) {
-              temp2 = [
-                ...temp,
-                prod.product.description,
-                el.description,
-                prod.quantity,
-                (prod.quantity),
-                this.givePrice(prod).toFixed(2)
-              ]
-              table_xlsx.push(temp2);
-            }
-          })
-        }
-      })*/
+        temp2 = [
+          ...temp,
+          prod.product.description,
+          prod.chosenProduct.color.name,
+          prod.quantity,
+          prod.price
+        ]
+        
+        table_xlsx.push(temp2);
+      })
     })
 
     /* generate worksheet */
@@ -397,7 +390,10 @@ export class SalesMasterComponent implements OnInit {
   // }
 
   giveTotalSalesPrice(sales: Sale[]): number {
-    return sales.reduce((a, b) => a + this.dbs.giveProductPriceOfSale(b), 0)
+    return sales.reduce((a, b) => a + 
+      this.dbs.giveProductPriceOfSale(b.requestedProducts, b.user) 
+      + b.deliveryPrice - Number(b.couponDiscount) + Number(!!b.additionalPrice ? b.additionalPrice : 0)
+      , 0)
   }
 
 }

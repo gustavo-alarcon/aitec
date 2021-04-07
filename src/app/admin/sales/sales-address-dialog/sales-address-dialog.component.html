@@ -22,6 +22,16 @@
     <input readonly autocomplete="off" [formControl]="district" type="text" matInput>
   </mat-form-field>
 
+  <mat-form-field style="margin-bottom: 8px; display: block;" appearance="outline">
+    <mat-label>Departamento</mat-label>
+    <input readonly autocomplete="off" [formControl]="department" type="text" matInput>
+  </mat-form-field>
+
+  <mat-form-field style="margin-bottom: 8px; display: block;" appearance="outline">
+    <mat-label>Provincia</mat-label>
+    <input readonly autocomplete="off" [formControl]="province" type="text" matInput>
+  </mat-form-field>
+
 
   <!--agm-map style="height: 250px" [zoom]="14"
     [latitude]="data.location.coord.lat" [longitude]="data.location.coord.lng">

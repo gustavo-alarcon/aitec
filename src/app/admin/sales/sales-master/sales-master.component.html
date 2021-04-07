@@ -14,7 +14,7 @@
 
   <div class="actionsContainer"
     style="margin-right: 16px;">
-      <mat-form-field class="w3-margin-top w3-margin-bottom w3-block" style="max-width: 350px;" appearance="outline">
+      <mat-form-field class="w3-margin-top w3-margin-bottom w3-block" style="max-width: 240px;" appearance="outline">
         <mat-label>FECHA/PERIODO</mat-label>
         <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
           <input readonly matStartDate formControlName="begin" placeholder="Fecha Inicio">
@@ -24,7 +24,7 @@
         <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>
 
-      <mat-form-field class="content w3-small" appearance="outline">
+      <mat-form-field class="content w3-small" style="max-width: 240px;" appearance="outline">
           <mat-icon matPrefix></mat-icon>
           <mat-label>Estado</mat-label>
           <mat-select [formControl]="statusForm">
@@ -34,12 +34,14 @@
               </mat-option>
           </mat-select>
       </mat-form-field>
-      <ng-container *ngIf="salesFiltered$ | async as salesFiltered">
-          <button (click)="downloadXls(salesFiltered)" mat-raised-button [disabled]="!salesFiltered.length"
-              color="accent" type="button" class="content">
+      <div *ngIf="salesFiltered$ | async as salesFiltered">
+          <button 
+            (click)="downloadXls(salesFiltered)" mat-raised-button [disabled]="!salesFiltered.length"
+            class="w3-margin-bottom"
+            color="accent" type="button" >
               Descargar Excel
           </button>
-      </ng-container>
+      </div>
       <mat-form-field hintLabel="Correlativo, nombre, apellido, correo o DNI" class="search" appearance="outline">
           <mat-icon matPrefix>search</mat-icon>
           <input matInput placeholder="Buscar" [formControl]="search" autocomplete="off">
@@ -69,12 +71,7 @@
                         <mat-icon style="font-size:20px;"
                             color="primary">assignment_ind</mat-icon>
                         <span *ngIf="sale.attendedData else noAttended">
-                            <ng-container *ngIf="sale.attendedData.attendedBy.name else displayName">
-                                {{sale.attendedData.attendedBy.name+" "+sale.attendedData.attendedBy?.lastName1}}
-                            </ng-container>
-                            <ng-template #displayName>
-                                {{sale.attendedData.attendedBy?.displayName}}
-                            </ng-template>
+                              {{sale.attendedData.attendedBy.personData.name+" "+sale.attendedData.attendedBy.personData?.lastName}}
                         </span>
                         <ng-template #noAttended>
                             <span>Sin Atender</span>
@@ -84,13 +81,8 @@
                       class="overflow_container" style="width:100%">
                         <mat-icon style="font-size:20px;"
                             color="primary">assignment_ind</mat-icon>
-                        <span *ngIf="sale.attendedData else noAdviser">
-                            <ng-container *ngIf="sale.attendedData.attendedBy.name else displayName2">
-                                {{sale.attendedData.attendedBy.name+" "+sale.attendedData.attendedBy?.lastName1}}
-                            </ng-container>
-                            <ng-template #displayName2>
-                                {{sale.attendedData.attendedBy?.displayName}}
-                            </ng-template>
+                        <span *ngIf="sale.adviser else noAdviser">
+                          {{sale.adviser.displayName}}
                         </span>
                         <ng-template #noAdviser>
                             <span>Sin Asesor</span>
@@ -127,9 +119,11 @@
                         </ng-template>
                     </div>
                     <div class="actions-container">
-                        <button class="actions" color="accent" 
-                            (click)="onCheckDirection(sale, $event)"
-                            mat-raised-button type=button>
+                        <button 
+                          [disabled]="!sale?.location"
+                          class="actions" color="accent" 
+                          (click)="onCheckDirection(sale, $event)"
+                          mat-raised-button type=button>
                             <mat-icon>place</mat-icon>
                         </button>
                         <a 
@@ -167,7 +161,12 @@
                         <b>{{sale.status}}</b>
                     </button>
                     <button color="primary" style="overflow: auto;" mat-flat-button type=button>
-                      <b>{{sale | salePrice | currency:'S/.'}}</b>
+                      <b>{{((sale.requestedProducts | salePrice: sale.user) 
+                          + (sale.deliveryPrice ? sale.deliveryPrice : 0)
+                          + (sale.couponDiscount ? sale.couponDiscount : 0 )
+                          + (sale.additionalPrice ? sale.additionalPrice : 0)
+                          )
+                          | currency:'S/.'}}</b>
                     </button>
                 </div>
           </div>

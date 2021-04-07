@@ -1,10 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormBuilder, FormArray, Validators, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, FormArray, Validators, FormControl, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Observable, BehaviorSubject, merge, combineLatest, iif, of, throwError, empty } from 'rxjs';
 import { Sale, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { startWith, map, tap, take, switchMap, debounceTime, pairwise, filter } from 'rxjs/operators';
+import { startWith, map, tap, take, switchMap, debounceTime, pairwise, filter, first } from 'rxjs/operators';
 import { Product, Zone } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { User } from 'src/app/core/models/user.model';
@@ -13,6 +13,7 @@ import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmat
 import { SalesPhotoDialogComponent } from '../sales-photo-dialog/sales-photo-dialog.component';
 import { GeneralConfig } from 'src/app/core/models/generalConfig.model';
 import { Package } from 'src/app/core/models/package.model';
+import { Adviser } from 'src/app/core/models/adviser.model';
 
 @Component({
   selector: 'app-sales-detail',
@@ -29,6 +30,7 @@ export class SalesDetailComponent implements OnInit {
   confirmedDocumentForm: FormGroup;
   confirmedDeliveryForm: FormGroup;
   voucherCheckedForm: FormControl;
+  adviserForm: FormControl;
 
   searchProductControl: FormControl;
 
@@ -39,6 +41,8 @@ export class SalesDetailComponent implements OnInit {
   @Input() detailSubject: BehaviorSubject<Sale>
 
   saleStatusOptions = new saleStatusOptions();
+  status$: any;
+  advisers$: Observable<Adviser[]>;
 
   constructor(
     private fb: FormBuilder,
@@ -68,8 +72,8 @@ export class SalesDetailComponent implements OnInit {
       additionalPrice: [!!this.sale.additionalPrice ? this.sale.additionalPrice : 0],
     });
 
-    this.voucherCheckedForm = new FormControl(!!this.sale.voucherChecked, 
-                              this.sale.voucher ? Validators.requiredTrue : null);
+    // this.voucherCheckedForm = new FormControl(!!this.sale.voucherChecked, 
+    //                           this.sale.voucher ? Validators.requiredTrue : null);
 
     this.sale.requestedProducts.forEach((product, index) => {
       (<FormArray>this.productForm.get('productList')).insert(index,
@@ -89,8 +93,6 @@ export class SalesDetailComponent implements OnInit {
       )
     })
 
-    console.log((<FormArray>this.productForm.get('productList')).controls[0])
-
     this.confirmedRequestForm = this.fb.group({
       // desiredDate: [this.getDateFromDB(this.sale.requestDate)],
       assignedDate: [
@@ -99,10 +101,10 @@ export class SalesDetailComponent implements OnInit {
         Validators.required],
       trackingCode: [
         !this.sale.confirmedRequestData ? null :
-          this.sale.confirmedRequestData.trackingCode],
+          this.sale.confirmedRequestData?.trackingCode],
       observation: [
         !this.sale.confirmedRequestData ? null :
-          this.sale.confirmedRequestData.observation],
+          this.sale.confirmedRequestData?.observation],
     })
 
     this.confirmedDocumentForm = this.fb.group({
@@ -114,17 +116,44 @@ export class SalesDetailComponent implements OnInit {
       ]
     })
 
-    // this.confirmedDeliveryForm = this.fb.group({
-    //   deliveryType: [
-    //     !this.sale.confirmedDeliveryData ? false :
-    //       this.sale.confirmedDeliveryData.deliveryType == "Biker" ?
-    //         false : true
-    //   ],
-    //   deliveryBusiness: [
-    //     !this.sale.confirmedDeliveryData ? null :
-    //       this.sale.confirmedDeliveryData.deliveryBusiness
-    //   ],
-    // })
+    this.adviserForm = new FormControl(this.sale.adviser, this.objectValidator())
+
+    this.advisers$ = combineLatest(
+      [
+        this.adviserForm.valueChanges.pipe(
+          startWith(this.sale.adviser)
+          ),
+        this.dbs.getAdvisersStatic().pipe(map(advisers => {
+          let newAdvisers = []
+
+          if(this.sale.adviser){
+            newAdvisers = [
+              this.sale.adviser,
+              ...advisers.filter(ad => ad.id != this.sale.adviser.id)
+            ]
+          } else {
+            newAdvisers = [...advisers]
+          }
+
+          return newAdvisers
+        }))
+      ]
+    ).pipe(
+      map(([value, advisers]) => {
+        console.log(value)
+        let filt = null
+        if(value){
+          filt = typeof value == 'object' ? (<Adviser>value).displayName : (<string>value)
+        } else {
+          filt = ""
+        }
+
+        return advisers.filter((el) =>
+          value ? el.displayName.toLowerCase().includes(filt.toLowerCase()) : true
+        );
+      })
+    );
+
   }
 
   //initRequestConfirmed
@@ -136,6 +165,12 @@ export class SalesDetailComponent implements OnInit {
   }
 
   initObservables() {
+    this.status$ = this.confirmedRequestForm.valueChanges.pipe(
+      tap(res => {
+        console.log(res)
+      })
+    ).subscribe()
+
     //Search Product
     // this.products$ = combineLatest([
     //   this.searchProductControl.valueChanges.pipe(startWith("")),
@@ -200,79 +235,79 @@ export class SalesDetailComponent implements OnInit {
   }
 
   confirmVoucherChecked(event: MouseEvent, user: User) {
-    event.preventDefault();
-    this.loading$.next(true)
-    let dialogRef: MatDialogRef<ConfirmationDialogComponent>;
+    // event.preventDefault();
+    // this.loading$.next(true)
+    // let dialogRef: MatDialogRef<ConfirmationDialogComponent>;
 
-    if (this.voucherCheckedForm.value) {
-      dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-        closeOnNavigation: false,
-        disableClose: true,
-        width: '360px',
-        maxWidth: '360px',
-        data: {
-          warning: `Cancelar Voucher.`,
-          content: `¿Está seguro de deshacer la validación del Voucher?`,
-          noObservation: true,
-          observation: null,
-          title: 'Deshacer',
-          titleIcon: 'warning'
-        }
-      })
-    } else {
-      dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-        closeOnNavigation: false,
-        disableClose: true,
-        width: '360px',
-        maxWidth: '360px',
-        data: {
-          warning: `Confirmar Voucher.`,
-          content: `¿Está seguro de confirmar la validación del Voucher?`,
-          noObservation: true,
-          observation: null,
-          title: 'Confirmar',
-          titleIcon: 'warning'
-        }
-      })
-    }
+    // if (this.voucherCheckedForm.value) {
+    //   dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+    //     closeOnNavigation: false,
+    //     disableClose: true,
+    //     width: '360px',
+    //     maxWidth: '360px',
+    //     data: {
+    //       warning: `Cancelar Voucher.`,
+    //       content: `¿Está seguro de deshacer la validación del Voucher?`,
+    //       noObservation: true,
+    //       observation: null,
+    //       title: 'Deshacer',
+    //       titleIcon: 'warning'
+    //     }
+    //   })
+    // } else {
+    //   dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+    //     closeOnNavigation: false,
+    //     disableClose: true,
+    //     width: '360px',
+    //     maxWidth: '360px',
+    //     data: {
+    //       warning: `Confirmar Voucher.`,
+    //       content: `¿Está seguro de confirmar la validación del Voucher?`,
+    //       noObservation: true,
+    //       observation: null,
+    //       title: 'Confirmar',
+    //       titleIcon: 'warning'
+    //     }
+    //   })
+    // }
 
-    dialogRef.afterClosed().pipe(
-      take(1),
-      switchMap((answer: { action: string, lastObservation: string }) => iif(
-        //condition
-        () => { return answer.action == "confirm" },
-        //confirmed
-        of(this.dbs.onUpdateSaleVoucher(this.sale.id, !this.voucherCheckedForm.value, user)).pipe(
-          switchMap(
-            batch => {
+    // dialogRef.afterClosed().pipe(
+    //   take(1),
+    //   switchMap((answer: { action: string, lastObservation: string }) => iif(
+    //     //condition
+    //     () => { return answer.action == "confirm" },
+    //     //confirmed
+    //     of(this.dbs.onUpdateSaleVoucher(this.sale.id, !this.voucherCheckedForm.value, user)).pipe(
+    //       switchMap(
+    //         batch => {
 
-              return batch.commit().then(
-                res => {
-                  this.voucherCheckedForm.setValue(!this.voucherCheckedForm.value);
-                  this.snackBar.open('El pedido fue editado satisfactoriamente', 'Aceptar');
-                },
-                err => {
-                  throwError(err)
-                }
-              )
-            }
-          )
-        ),
-        //Rejected
-        empty()
-      ))).subscribe(
-        () => {
-          this.loading$.next(false)
-        },
-        err => {
-          this.loading$.next(false)
-          console.log(err);
-          this.snackBar.open('Ocurrió un error. Vuelva a intentarlo.', 'Aceptar');
-        },
-        () => {
-          this.loading$.next(false)
-        }
-      )
+    //           return batch.commit().then(
+    //             res => {
+    //               this.voucherCheckedForm.setValue(!this.voucherCheckedForm.value);
+    //               this.snackBar.open('El pedido fue editado satisfactoriamente', 'Aceptar');
+    //             },
+    //             err => {
+    //               throwError(err)
+    //             }
+    //           )
+    //         }
+    //       )
+    //     ),
+    //     //Rejected
+    //     empty()
+    //   ))).subscribe(
+    //     () => {
+    //       this.loading$.next(false)
+    //     },
+    //     err => {
+    //       this.loading$.next(false)
+    //       console.log(err);
+    //       this.snackBar.open('Ocurrió un error. Vuelva a intentarlo.', 'Aceptar');
+    //     },
+    //     () => {
+    //       this.loading$.next(false)
+    //     }
+    //   )
   }
 
   checkVouchers(user: User) {
@@ -281,6 +316,7 @@ export class SalesDetailComponent implements OnInit {
       width: '350px',
       data: {
         data: this.sale,
+        edit: this.sale.status == this.saleStatusOptions.attended,
         user: user
       }
     });
@@ -297,140 +333,65 @@ export class SalesDetailComponent implements OnInit {
 
   //newStatus will work as an old status when we edit (deshacer)
   //edit=true for deschacer
-  onSubmitForm(newStatus: Sale['status'], user: User, edit?: boolean) {
+  onSubmitForm(newStatus: Sale['status'], user: User, downgrade?: boolean) {
+    //Edit is used only when downgrading
     this.loading$.next(true);
-    let downNewStatus = edit ? this.onEditSaleGetNewStatus(newStatus, user) : null;
-    let sale = edit ? this.onGetUpdatedSale(downNewStatus, user) : this.onGetUpdatedSale(newStatus, user);
-    
-    of(!!edit).pipe(
-      switchMap(edit => {
-        if (!edit) {
+    let downNewStatus = downgrade ? this.onEditSaleGetNewStatus(newStatus, true) : null;
+    let sale = downgrade ? this.onGetUpdatedSale(downNewStatus, user) : this.onGetUpdatedSale(newStatus, user);
+    console.log("updating")
+    of(!!downgrade).pipe(
+      switchMap(downgrade => {
+        if (!downgrade) {
           return this.upgradeConfirmation(newStatus)
           
         } else {
           return this.downgradeConfirmation(downNewStatus)
         }
       }),
-      switchMap(answer => iif(
-        //condition
-        () => { return answer.action == "confirm" },
-        //confirmed
-        this.dbs.onSaveSale(sale).pipe(
-          switchMap(
-            batch => {
-              let save = false
-              let list = []
-              //If we are editting it (deshacer), and we are returning from
-              //confirmedDocument to confirmedRequest, we should refill the 
-              //lost stock
-             
-              // //If we are editting it (deshacer), and we are returning from
-              // //confirmedDelivery to confirmedDocument, we should refill the 
-              // //lost stock
-              // if(edit){
-              //   if(downNewStatus == this.saleStatusOptions.confirmedDocument &&
-              //       newStatus != this.saleStatusOptions.cancelled){
-              //     this.onUpdateStock(this.getSaleRequestedProducts(), batch, false)
-              //   } else {
-              //     //If we are returning fron cancelled to any of the ones bellow,
-              //     //We should take out from stock
-              //     if( newStatus == this.saleStatusOptions.cancelled &&
-              //       ( downNewStatus == this.saleStatusOptions.confirmedDelivery ||
-              //         downNewStatus == this.saleStatusOptions.driverAssigned ||
-              //         downNewStatus == this.saleStatusOptions.finished)
-              //       ){
-              //         //Recall that when we edit (deshacer) newStatus will work as the past status
-              //         this.onUpdateStock(this.getSaleRequestedProducts(), batch, true)
-              //       }
-              //   }
-              // } else {
-              //   //WE are note editting, but we are confirming delivery, so we
-              //   //should take out stock
-              //   if(newStatus == this.saleStatusOptions.confirmedDelivery){
-              //     this.onUpdateStock(this.getSaleRequestedProducts(), batch, true)
-              //   } else {
-              //     if(newStatus == this.saleStatusOptions.cancelled){
-              //       this.onUpdateStock(this.getSaleRequestedProducts(), batch, false)
-              //     }
-              //   }
-              // }
-              return batch.commit().then(
-                res => {
-                  this.snackBar.open('El pedido fue editado satisfactoriamente', 'Aceptar');
-                  this.detailSubject.next(sale);
-                },
-                err => {
-                  throwError(err)
-                }
-              )
+      first(),
+      tap(answer => {
+        console.log(answer)
+        if(answer.action == "confirm"){
+          let batch = this.dbs.onSaveSale(sale)
+          batch.commit().then(
+            res => {
+              this.loading$.next(false)
+              this.snackBar.open('El pedido fue editado satisfactoriamente', 'Aceptar');
+              this.detailSubject.next(sale);
+            },
+            err => {
+              this.loading$.next(false)
+              console.log(err)
+              this.snackBar.open('Ocurrió un error. Vuelva a intentarlo.', 'Aceptar');
             }
           )
-        ),
-        //dismissed
-        empty()
-      )
-      )
-    ).subscribe(
-      () => {
-        this.loading$.next(false)
-      },
-      err => {
-        console.log(err);
-        this.snackBar.open('Ocurrió un error. Vuelva a intentarlo.', 'Aceptar');
-        this.loading$.next(false);
-      },
-      () => {
-        this.loading$.next(false)
+        } else {
+          this.loading$.next(false)
+        }
       }
-    )
+      )
+    ).subscribe()
   }
 
-  onEditSaleGetNewStatus(pastStatus: Sale['status'], user: User): Sale['status'] {
-    switch (pastStatus) {
-      case this.saleStatusOptions.attended:
-        return this.saleStatusOptions.requested
-      case this.saleStatusOptions.confirmedRequest:
-        return this.saleStatusOptions.attended
-      case this.saleStatusOptions.confirmedDocument:
-        return this.saleStatusOptions.confirmedRequest
-      // case this.saleStatusOptions.confirmedDelivery:
-      //   //we should refill stock here
-      //     return  this.saleStatusOptions.confirmedDocument
-      // //If it is in finished or driverAssigned state,
-      // //we return it to confirmedDelivery
-      // case this.saleStatusOptions.driverAssigned:
-      //     return  this.saleStatusOptions.confirmedDocument
-      case this.saleStatusOptions.finished:
-        return this.saleStatusOptions.confirmedDocument
-      case this.saleStatusOptions.cancelled:
-        //We don't include a finished data, 
-        //because a finished sale can not be cancelled
-        if (this.sale.finishedData) {
-          // return this.saleStatusOptions.finished
-        } else {
-          if (this.sale.driverAssignedData) {
-            // return  this.saleStatusOptions.driverAssigned
-          } else {
-            if (this.sale.confirmedDeliveryData) {
-              // return  this.saleStatusOptions.confirmedDelivery
-            } else {
-              if (this.sale.confirmedDocumentData) {
-                return this.saleStatusOptions.confirmedDocument
-              } else {
-                if (this.sale.confirmedRequestData) {
-                  return this.saleStatusOptions.confirmedRequest
-                } else {
-                  if (this.sale.attendedData) {
-                    return this.saleStatusOptions.attended
-                  } else {
-                    return this.saleStatusOptions.requested
-                  }
-                }
-              }
-            }
-          }
-        }
-
+  onEditSaleGetNewStatus(actualStatus: Sale['status'], downgrade?: boolean): Sale['status'] {
+    if(downgrade){
+      switch (actualStatus) {
+        case this.saleStatusOptions.attended:
+          return this.saleStatusOptions.requested
+        case this.saleStatusOptions.confirmedRequest:
+          return this.saleStatusOptions.attended
+        case this.saleStatusOptions.confirmedDocument:
+          return this.saleStatusOptions.confirmedRequest
+      }
+    } else {
+      switch(actualStatus){
+        case this.saleStatusOptions.requested:
+          return this.saleStatusOptions.attended
+        case this.saleStatusOptions.attended:
+          return this.saleStatusOptions.confirmedRequest
+        case this.saleStatusOptions.confirmedRequest:
+          return this.saleStatusOptions.confirmedDocument
+      }
     }
   }
 
@@ -538,76 +499,45 @@ export class SalesDetailComponent implements OnInit {
 
     let sale: Sale = {
       ...this.sale,
+      additionalPrice: this.productForm.get("additionalPrice").value,
       status: newStatus,
-      requestedProducts: [],
-      voucher: this.sale.voucher,
-      voucherChecked: this.voucherCheckedForm.value,
-      driverAssignedData: null,
-      finishedData: null
+      adviser: this.adviserForm.valid ? this.adviserForm.value : null
+      //requestedProducts: [],
+      //voucher: this.sale.voucher,
+      //voucherChecked: this.voucherCheckedForm.value,
+      //driverAssignedData: null,
+      //finishedData: null
     };
 
-    // sale.requestedProducts = this.getSaleRequestedProducts();
-    if (newStatus == this.saleStatusOptions.cancelled) {
-      sale.cancelledData = {
-        cancelledAt: date,
-        cancelledBy: user
-      }
-    } else {
-      sale.cancelledData = null;
-      if (/*newStatus == this.saleStatusOptions.confirmedDelivery*/ false) {
-        sale.confirmedDeliveryData = {
-          confirmedAt: date,
+    switch(newStatus){
+      case this.saleStatusOptions.attended:
+        sale.attendedData = {
+          attendedAt: date,
+          attendedBy: user
+        }
+        sale.confirmedRequestData = null
+        sale.confirmedDocumentData = null
+        break;
+      case this.saleStatusOptions.confirmedRequest:
+        sale.confirmedRequestData = {
+          assignedDate: this.confirmedRequestForm.get('assignedDate').value,
+          trackingCode: this.confirmedRequestForm.get('trackingCode').value,
+          observation: this.confirmedRequestForm.get('observation').value,
           confirmedBy: user,
-          deliveryType: this.confirmedDeliveryForm.get("deliveryType").value ?
-            "Moto" : "Biker",
-          deliveryBusiness: this.confirmedDeliveryForm.get("deliveryBusiness").value
+          confirmedAt: new Date(),
         }
-      } else {
-        //Confirmed Document
-        sale.confirmedDeliveryData = null
-        if (newStatus == this.saleStatusOptions.confirmedDocument) {
-          sale.confirmedDocumentData = {
-            documentNumber: this.confirmedDocumentForm.get('documentNumber').value,
-            confirmedBy: user,
-            confirmedAt: date,
-          }
-        } else {
-          //Confirmed Request
-          // sale.confirmedDocumentData = null
-          if (newStatus == this.saleStatusOptions.confirmedRequest) {
-            sale.confirmedRequestData = {
-              assignedDate: this.confirmedRequestForm.get('assignedDate').value,
-              requestedProductsId: [...sale.requestedProducts.map(el => el.product.id)], 
-              observation: this.confirmedRequestForm.get('observation').value,
-              confirmedBy: user,
-              confirmedAt: date,
-            }
-            //25/09/2020
-            sale.requestedProducts.filter(el => !!el.product.package).map(el2 => el2.chosenOptions
-              .map(el3 => el3.id))
-              .forEach(el4 => {
-                sale.confirmedRequestData.requestedProductsId.push(...el4)
-              })
-          } else if (newStatus == this.saleStatusOptions.finished) {
-            sale.finishedData = {
-              finishedAt: date,
-              finishedBy: user,
-              observation: this.confirmedRequestForm.get('observation').value
-            }
-          } else {
-            //ATTENDED
-            // sale.confirmedRequestData = null
-            if (newStatus == this.saleStatusOptions.attended) {
-              sale.attendedData = {
-                attendedAt: date,
-                attendedBy: user
-              }
-            }
-          }
+        sale.confirmedDocumentData = null
+        break;
+      case this.saleStatusOptions.confirmedDocument:
+        sale.confirmedDocumentData = {
+          documentNumber: this.confirmedDocumentForm.get("documentNumber").value,
+          confirmedBy: user,
+          confirmedAt: date,
         }
-      }
     }
-    return sale;
+    
+    return sale
+
   }
 /*
   onUpdateStock(requestedProducts: Sale['requestedProducts'], batch: firebase.firestore.WriteBatch, decrease: boolean) {
@@ -668,5 +598,26 @@ export class SalesDetailComponent implements OnInit {
 
   getCorrelative(corr: number) {
     return corr.toString().padStart(4, '0')
+  }
+
+  showAdviser(adv: Adviser): string | undefined {
+    return adv ? adv.displayName : "Sin asesor";
+  }
+
+  objectValidator() {
+    return (control: AbstractControl): ValidationErrors => {
+
+      let type = control.value
+      if(type){
+        if(typeof type == 'string'){
+          return {noObject: true}
+        } else {
+          return null
+        }
+      } else {
+        return null
+      }
+      
+    }
   }
 }

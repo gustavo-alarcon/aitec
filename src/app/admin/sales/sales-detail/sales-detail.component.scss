@@ -12,8 +12,12 @@ table {
   opacity: 0.8;
   table-layout: fixed;
 }
-table .quantity {
-  width: 100px;
+table .quantity_header {
+  width: 10%;
+}
+
+table .price_header {
+  width: 30%;
 }
 
 .table-sale {
@@ -49,6 +53,13 @@ table .quantity {
 
 .table-sale__td--space {
   white-space: nowrap;
+}
+
+.table-sale__td--flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: nowrap;
 }
 
 .table-sale__input--thin {
@@ -97,6 +108,7 @@ table .quantity {
     align-items: center;
     text-align: center;
     letter-spacing: 0.05em;
+    max-width: 50%
   }
 }
 

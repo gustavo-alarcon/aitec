@@ -1,5 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { Product } from 'src/app/core/models/product.model';
 import { Sale } from 'src/app/core/models/sale.model';
+import { User } from 'src/app/core/models/user.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Pipe({
@@ -10,8 +12,10 @@ export class SalePricePipe implements PipeTransform {
     private dbs: DatabaseService
   ){}
 
-  transform(sale: Sale): number {
-    return this.dbs.giveProductPriceOfSale(sale);
+  transform(requestedProducts: {product: Product, quantity: number}[], 
+            user: User): number {
+    let price = this.dbs.giveProductPriceOfSale(requestedProducts, user)
+    return price
   }
 
 }

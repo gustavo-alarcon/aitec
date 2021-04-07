@@ -34,6 +34,7 @@ import { ProductsListComponent } from 'src/app/admin/products-list/products-list
 import { Stores } from '../models/stores.model';
 import { Coupon } from '../models/coupon.model';
 import { Payments } from '../models/payments.model';
+import { Adviser } from '../models/adviser.model';
 
 @Injectable({
   providedIn: 'root',
@@ -103,6 +104,7 @@ export class DatabaseService {
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
+  advisersRef: `/db/aitec/config/generalConfig/adviser` = `/db/aitec/config/generalConfig/adviser`
   salesCorrColl = this.afs.firestore.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
 
 
@@ -422,22 +424,33 @@ export class DatabaseService {
       );
   }
 
-  getAdvisers() {
+  getAdvisersStatic(): Observable<Adviser[]> {
     return this.afs
-      .collection(`/db/aitec/config/generalConfig/adviser`, (ref) =>
+      .collection<Adviser>(this.advisersRef, (ref) =>
+        ref.orderBy('displayName', 'desc')
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => (<Adviser>el.data()));
+        }),
+      );
+  }
+
+  getAdvisers(): Observable<Adviser[]> {
+    return this.afs
+      .collection<Adviser>(this.advisersRef, (ref) =>
         ref.orderBy('createdAt', 'desc')
       )
       .valueChanges()
       .pipe(shareReplay(1));
   }
 
-  getAdvisersDoc(): Observable<any> {
+  getAdvisersDoc(): Observable<Adviser[]> {
     return this.afs
-      .collection(`/db/aitec/config/generalConfig/adviser`, (ref) =>
+      .collection(this.advisersRef, (ref) =>
         ref.orderBy('createdAt', 'desc')
       ).get().pipe(
         map((snap) => {
-          return snap.docs.map((el) => el.data());
+          return snap.docs.map((el) => (<Adviser>el.data()));
         })
       );
   }
@@ -1051,7 +1064,7 @@ export class DatabaseService {
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
-          .where('createdAt', '>=', real.begin)
+          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc").limitToLast(3)
       )
       .valueChanges();
   }
@@ -1059,7 +1072,7 @@ export class DatabaseService {
     return this.afs.collection(this.salesRef).doc<Sale>(saleId).valueChanges()
   }
 
-  onSaveSale(sale: Sale): Observable<firebase.default.firestore.WriteBatch> {
+  onSaveSale(sale: Sale): firebase.default.firestore.WriteBatch {
     let saleRef: DocumentReference = this.afs.firestore
       .collection(this.salesRef)
       .doc(sale.id);
@@ -1067,7 +1080,7 @@ export class DatabaseService {
     let batch = this.afs.firestore.batch();
 
     batch.set(saleRef, saleData);
-    return of(batch);
+    return batch;
   }
 
   onSaveRate(saleid: string, sale: Sale["rateData"]): Promise<void> {
@@ -1840,28 +1853,26 @@ export class DatabaseService {
 
   //Calculator functions
   //mayorista is given in user.customerType == "Mayorista"
-  giveProductPrice(item: SaleRequestedProducts, customerType: string): number {
+  giveProductPrice(item: {product: Product, quantity: number}, customerType: string): number {
     let may = (customerType == "Mayorista")
     if (!may && item.product.promo) {
       let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
       let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
       let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.price;
+      let noPromTotalPrice = noPromTotalQuantity * item.product.priceMay;
       return promTotalPrice + noPromTotalPrice;
     }
     else {
-      return item.quantity * item.price
+      return item.quantity * item.product.priceMin
     }
   }
 
-  giveProductPriceOfSale(sale: Sale): number{
-    let sum = [...sale.requestedProducts]
-      .map((el) => this.giveProductPrice(el, sale.user.customerType))
+  giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], user: User): number{
+    let sum = [...requestedProducts]
+      .map((el) => this.giveProductPrice(el, user.customerType))
       .reduce((a, b) => a + b, 0);
-    let delivery = Number(sale.deliveryPrice)
-    let discount = Number(sale.couponDiscount)
-    
-    return (sum + delivery - discount)
+
+    return sum
   }
 
 }

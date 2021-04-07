@@ -4,6 +4,7 @@ import { Package } from './package.model';
 import { Coupon } from './coupon.model';
 import { Stores } from './stores.model';
 import { Payments } from './payments.model';
+import { Adviser } from './adviser.model';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
@@ -50,14 +51,14 @@ export interface Sale {
 
   // Delivery data
   deliveryPickUp: boolean;  //Whether it is pickup or delivery (sent)
-  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup
+  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup. When empty means contraentrega
   observation: string;
   location: User["location"][0]             //In case of delivery and valid zone
   deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
 
   //Coupon data
   coupon:Coupon;
-  couponDiscount: Number       //Discount applied at creatinon
+  couponDiscount: number       //Discount applied at creatinon
 
   //Payment data
   document: "Boleta"| "Factura",             //tipo de comprobante
@@ -69,7 +70,7 @@ export interface Sale {
   
   payType: Payments
 
-  adviser:any;
+  adviser: Adviser;
 
   //Here comes things that will be editted
   additionalPrice?: number;
@@ -79,9 +80,9 @@ export interface Sale {
     voucherPath: string
   }[]
 
-  voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
-  voucherActionBy?: User,
-  voucherActionAt?: Date,
+  // voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
+  // voucherActionBy?: User,
+  // voucherActionAt?: Date,
 
   attendedData?: {             //Can go only when Atendido or more
     attendedBy: User,

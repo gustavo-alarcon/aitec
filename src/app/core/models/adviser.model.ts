@@ -1,4 +1,4 @@
-export interface adviser {
+export interface Adviser {
   code: string;
   createdAt: Date;
   displayName: string;

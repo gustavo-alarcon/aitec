@@ -16,7 +16,9 @@
         style="display:flex; flex-direction: column; 
                 align-items: center; margin-bottom: 16px; position: relative">
 
-          <button [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+          <button 
+            *ngIf="data.edit"
+            [disabled]="(loading$ | async)"
             style="position: absolute; top:4px; right: 4px;"
             color="warn" mat-icon-button (click)="deletePhoto(i)">
               <mat-icon>delete</mat-icon>
@@ -41,7 +43,8 @@
           </div>
 
           <input 
-            [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+            *ngIf="data.edit"
+            [disabled]="(loading$ | async)"
             style="display: none" #photoURL type="file" accept='image/*' 
             (change)="addNewPhoto(i, photoURL.files)"/>
       </div>
@@ -49,14 +52,17 @@
       <div 
         style="width: 100%; display: flex; flex-direction: column;
           align-items: center; padding: 0 0 16px 0;">
-        <button [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+        <button 
+          *ngIf="data.edit"
+          [disabled]="(loading$ | async)"
           (click)="newPhoto.click()" mat-fab color="primary" type="button">
           <mat-icon>add</mat-icon>
         </button>
 
-        <input [disabled]="(loading$ | async) || data.data.status==saleStatusOptions.confirmedDocument"
+        <input 
+          [disabled]="(loading$ | async) || !data.edit"
           style="display: none" #newPhoto type="file" accept='image/*' 
-            (change)="addNewPhoto(photoFormArray.length, newPhoto.files)"/>
+          (change)="addNewPhoto(photoFormArray.length, newPhoto.files)"/>
       </div>
 
   </div>
@@ -65,6 +71,8 @@
 
 <mat-dialog-actions align="end">
   <button mat-stroked-button class="w3-margin-right" mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="accent" (click)="onSubmitForm()" type="button"
-      [disabled]="(loading$ | async) || !photoFormArray.length || data.data.status==saleStatusOptions.confirmedDocument">Guardar</button>
+  <button   
+    *ngIf="data.edit"
+    mat-raised-button color="accent" (click)="onSubmitForm()" type="button"
+    [disabled]="(loading$ | async) || !photoFormArray.length">Guardar</button>
 </mat-dialog-actions>
