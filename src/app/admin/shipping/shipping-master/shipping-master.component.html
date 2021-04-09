@@ -161,12 +161,12 @@
                         <b>{{sale.status}}</b>
                     </button>
                     <button color="primary" style="overflow: auto;" mat-flat-button type=button>
-                      <b>{{((sale.requestedProducts | salePrice: sale.user) 
+                      <!-- <b>{{((sale.requestedProducts | salePrice: sale.user) 
                           + (sale.deliveryPrice ? sale.deliveryPrice : 0)
                           + (sale.couponDiscount ? sale.couponDiscount : 0 )
                           + (sale.additionalPrice ? sale.additionalPrice : 0)
                           )
-                          | currency:'S/.'}}</b>
+                          | currency:'S/.'}}</b> -->
                     </button>
                 </div>
           </div>

@@ -25,6 +25,14 @@ const routes: Routes = [
         loadChildren: () => import('./sales/sales.module').then(mod => mod.SalesModule)
       },
       {
+        path: 'shipping',
+        loadChildren: () => import('./shipping/shipping.module').then(mod => mod.ShippingModule)
+      },
+      {
+        path: 'warehouse-view',
+        loadChildren: () => import('./warehouse-view/warehouse-view.module').then(mod => mod.WarehouseViewModule)
+      },
+      {
         path: 'warehouse',
         loadChildren: () => import('./warehouse/warehouse.module').then(mod => mod.WarehouseModule)
       },

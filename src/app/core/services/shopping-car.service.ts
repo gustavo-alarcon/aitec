@@ -184,28 +184,5 @@ export class ShoppingCarService {
     this.reqProdListSubject.next([])
   }
 
-  //Calculator functions
-  //mayorista is given in user.customerType == "Mayorista"
-  giveProductPrice(item: SaleRequestedProducts, mayorista: boolean): number {
-    if (!mayorista && item.product.promo) {
-      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.price;
-      return promTotalPrice + noPromTotalPrice;
-    }
-    else {
-      return item.quantity * item.price
-    }
-  }
-
-  giveProductPriceOfSale(sale: Sale): number{
-    let sum = [...sale.requestedProducts]
-      .map((el) => this.giveProductPrice(el, sale.user.customerType == 'Mayorista'))
-      .reduce((a, b) => a + b, 0);
-    let delivery = Number(sale.deliveryPrice)
-    let discount = Number(sale.couponDiscount)
-    
-    return (sum + delivery - discount)
-  }
+  
 }

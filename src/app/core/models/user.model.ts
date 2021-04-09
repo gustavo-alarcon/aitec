@@ -6,6 +6,7 @@ export interface User {
   role?:string;
   customerType?:string;         //'Mayorista'
   orders?:number;
+  deliveryUser?: boolean;
   location?: {
     address: string;
     reference: string;
@@ -29,7 +30,7 @@ export interface User {
   }[];
 
   personData: naturalPerson | businessPerson;
-  name?:string;
+  name?:string;           //Dont use this use natural person interface
   lastName?:string;
   lastLogin?: Date;
   lastBrowser?: string[]

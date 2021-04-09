@@ -18,7 +18,7 @@ import { User } from 'src/app/core/models/user.model';
 export class SalesPhotoDialogComponent implements OnInit {
   saleStatusOptions = new saleStatusOptions()
 
-  defaultImage = "../../../../assets/images/Disto_Logo1.png";
+  defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
   photoFormArray: FormArray = new FormArray([])
   loading$: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -31,7 +31,7 @@ export class SalesPhotoDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<SalesPhotoDialogComponent>,
     private dbs: DatabaseService,
-    @Inject(MAT_DIALOG_DATA) public data: { data: Sale, user: User }
+    @Inject(MAT_DIALOG_DATA) public data: { data: Sale, user: User, edit: boolean }
   ) { }
 
   ngOnInit(): void {
@@ -154,7 +154,7 @@ export class SalesPhotoDialogComponent implements OnInit {
       .subscribe(
         (res) => {
           let newSale: Sale =this.data.data;
-          newSale.voucherChecked = false;
+          //newSale.voucherChecked = false;
           newSale.voucher = photos;
           //console.log(newSale);
           this.dialogRef.close(newSale);

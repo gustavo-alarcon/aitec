@@ -10,17 +10,16 @@ import { AuthService } from 'src/app/core/services/auth.service';
 import { User } from 'src/app/core/models/user.model';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../confirmation-dialog/confirmation-dialog.component';
-import { SalesPhotoDialogComponent } from '../sales-photo-dialog/sales-photo-dialog.component';
 import { GeneralConfig } from 'src/app/core/models/generalConfig.model';
 import { Package } from 'src/app/core/models/package.model';
 import { Adviser } from 'src/app/core/models/adviser.model';
 
 @Component({
-  selector: 'app-sales-detail',
-  templateUrl: './sales-detail.component.html',
-  styleUrls: ['./sales-detail.component.scss']
+  selector: 'app-warehouse-view-detail',
+  templateUrl: './warehouse-view-detail.component.html',
+  styleUrls: ['./warehouse-view-detail.component.scss']
 })
-export class SalesDetailComponent implements OnInit {
+export class WarehouseViewDetailComponent implements OnInit {
   now: Date = new Date();
 
   loading$: BehaviorSubject<boolean> = new BehaviorSubject(false)
@@ -43,6 +42,7 @@ export class SalesDetailComponent implements OnInit {
   saleStatusOptions = new saleStatusOptions();
   status$: any;
   advisers$: Observable<Adviser[]>;
+  deliveryUser$: Observable<any[]>;
 
   constructor(
     private fb: FormBuilder,
@@ -116,7 +116,39 @@ export class SalesDetailComponent implements OnInit {
       ]
     })
 
+    this.confirmedDeliveryForm = this.fb.group({
+      referralGuideId: [
+        !this.sale.confirmedDeliveryData ? null :
+          this.sale.confirmedDeliveryData.referralGuideId ? 
+          this.sale.confirmedDeliveryData.referralGuideId : null,
+        Validators.required
+      ],
+      deliveryUser: [
+        !this.sale.confirmedDeliveryData ? null :
+          this.sale.confirmedDeliveryData.deliveryUser ? 
+          this.sale.confirmedDeliveryData.deliveryUser : null,
+        [Validators.required, this.objectValidator()]
+      ],
+    })
+
     this.adviserForm = new FormControl(this.sale.adviser, this.objectValidator())
+
+  }
+
+  //initRequestConfirmed
+
+  getDateFromDB(date: Date) {
+    let parsedDate = new Date(1970);
+    parsedDate.setSeconds(date['seconds'])
+    return parsedDate
+  }
+
+  initObservables() {
+    this.status$ = this.confirmedRequestForm.valueChanges.pipe(
+      tap(res => {
+        console.log(res)
+      })
+    ).subscribe()
 
     this.advisers$ = combineLatest(
       [
@@ -154,22 +186,41 @@ export class SalesDetailComponent implements OnInit {
       })
     );
 
-  }
+    this.deliveryUser$ = combineLatest(
+      [
+        this.confirmedDeliveryForm.get("deliveryUser").valueChanges.pipe(
+          startWith(this.sale.confirmedDeliveryData?.deliveryUser)
+          ),
+        this.dbs.getDeliveryUserStatic().pipe(map(deliveryGuys => {
+          let newDeliveryGuys: User[] = []
 
-  //initRequestConfirmed
+          if(this.sale.confirmedDeliveryData){
+            newDeliveryGuys = [
+              this.sale.confirmedDeliveryData.deliveryUser,
+              ...deliveryGuys.filter(ad => ad.uid != this.sale.confirmedDeliveryData.deliveryUser.uid)
+            ]
+          } else {
+            newDeliveryGuys = [...deliveryGuys]
+          }
 
-  getDateFromDB(date: Date) {
-    let parsedDate = new Date(1970);
-    parsedDate.setSeconds(date['seconds'])
-    return parsedDate
-  }
+          return newDeliveryGuys
+        }))
+      ]
+    ).pipe(
+      map(([value, deliveryGuys]) => {
+        console.log(value)
+        let filt = null
+        if(value){
+          filt = typeof value == 'object' ? ((<User>value).personData.name+" "+(<User>value).personData["lastName"]) : (<string>value)
+        } else {
+          filt = ""
+        }
 
-  initObservables() {
-    this.status$ = this.confirmedRequestForm.valueChanges.pipe(
-      tap(res => {
-        console.log(res)
+        return deliveryGuys.filter((el) =>
+          value ? (el.personData.name+" "+el.personData["lastName"]).toLowerCase().includes(filt.toLowerCase()) : true
+        );
       })
-    ).subscribe()
+    );
 
     //Search Product
     // this.products$ = combineLatest([
@@ -310,26 +361,6 @@ export class SalesDetailComponent implements OnInit {
     //   )
   }
 
-  checkVouchers(user: User) {
-    let dialogRef: MatDialogRef<SalesPhotoDialogComponent>
-    dialogRef = this.dialog.open(SalesPhotoDialogComponent, {
-      width: '350px',
-      data: {
-        data: this.sale,
-        edit: this.sale.status == this.saleStatusOptions.attended,
-        user: user
-      }
-    });
-
-    dialogRef.afterClosed().pipe(
-      take(1)).subscribe(
-        (newSale: Sale) => {
-          if (newSale) {
-            this.detailSubject.next(newSale);
-          }
-        }
-      )
-  }
 
   //newStatus will work as an old status when we edit (deshacer)
   //edit=true for deschacer
@@ -534,6 +565,18 @@ export class SalesDetailComponent implements OnInit {
           confirmedBy: user,
           confirmedAt: date,
         }
+        break;
+      case this.saleStatusOptions.confirmedDelivery:
+        sale.confirmedDeliveryData = {
+          deliveryUser: this.confirmedDeliveryForm.get("deliveryUser").value,
+
+          referralGuideDate: this.sale.confirmedDeliveryData.referralGuideDate,
+          referralGuideUser: this.sale.confirmedDeliveryData.referralGuideUser,
+          referralGuideId: this.confirmedDeliveryForm.get("referralGuideId").value,
+
+          confirmedBy: user,
+          confirmedAt: date,        
+        }
     }
     
     return sale
@@ -602,6 +645,10 @@ export class SalesDetailComponent implements OnInit {
 
   showAdviser(adv: Adviser): string | undefined {
     return adv ? adv.displayName : "Sin asesor";
+  }
+
+  showDeliveryUser(usr: User): string | undefined {
+    return usr ? usr.personData.name + usr.personData["lastName"] : "";
   }
 
   objectValidator() {

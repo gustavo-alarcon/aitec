@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const cors = require('cors')({ origin: ["https://aitecperu.com.pe", "https://api.micuentaweb.pe"] });
+const cors = require('cors')({ origin: true });
 const crypto = require('crypto');
 const cardPass = require('./card-pass.json')
 const gaxios = require('gaxios')
@@ -213,6 +213,8 @@ exports.reStockPurshase = functions.firestore.document(`db/aitec/reStock/{saleId
 
 })
 
+
+
 exports.scheduleReStockPurshase = functions.pubsub.schedule('every 15 minutes')
   .timeZone('America/Lima')
   .onRun((context) => {
@@ -309,7 +311,10 @@ exports.cardPayment = functions.https.onRequest((req, res) => {
             //We update sale with new correlative
             transaction.update(saleRef, {
               correlative: correlative,
-              payType: newSale.payType,
+              payType: {
+                ...newSale.payType,
+                transactionId: data.transactions[0].transactionDetails.cardDetails.legacyTransId
+              },
               status: newSale.status,
             })
 

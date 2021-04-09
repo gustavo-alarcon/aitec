@@ -14,8 +14,10 @@ export class SalesAddressDialogComponent implements OnInit {
   reference: FormControl;
   district: FormControl;
 
-  center = { lat: -12.046301, lng: -77.031027 };
+  center: { lat: number, lng: number };
   zoom = 15;
+  department: FormControl;
+  province: FormControl;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: Sale
@@ -26,8 +28,11 @@ export class SalesAddressDialogComponent implements OnInit {
   }
 
   initForms(){
+    this.center = this.data.location.coord
     this.adress = new FormControl(this.data.location.address);
     this.reference = new FormControl(this.data.location.reference);
+    this.department = new FormControl(this.data.location.departamento.name);
+    this.province = new FormControl(this.data.location.provincia.name);
     this.district = new FormControl(this.data.location.distrito.name);
   }
 }

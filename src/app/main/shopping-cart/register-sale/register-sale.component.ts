@@ -36,7 +36,7 @@ export class RegisterSaleComponent implements OnInit {
 
   uploadingSale$: Observable<boolean|Sale> = null;
 
-  adviserForm: FormControl = new FormControl('')
+  adviserForm: FormControl = new FormControl('', this.objectValidator())
   advisers$: Observable<any>;
 
 
@@ -433,13 +433,13 @@ export class RegisterSaleComponent implements OnInit {
       payType: null,
       //payInfo: this.cardForm.value,     //NOT USED OR IMPLEMENTED
 
-      adviser: this.adviserForm.value,
+      adviser: this.adviserForm.valid ? this.adviserForm.value : null,
 
       createdAt: date,
       createdBy: finishData.user,
 
       voucher: [],
-      voucherChecked: false,
+      //voucherChecked: false,
     }
 
 
@@ -521,6 +521,22 @@ export class RegisterSaleComponent implements OnInit {
         ind: index
       }
     })
+  }
+
+  objectValidator() {
+    return (control: AbstractControl): ValidationErrors => {
+      let type = control.value
+      if(type){
+        if(typeof type == 'object'){
+          return {noObject: true}
+        } else {
+          return null
+        }
+      } else {
+        return null
+      }
+      
+    }
   }
 
 

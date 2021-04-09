@@ -10,21 +10,25 @@
                 <b>ATENDER</b>
             </button>
             <ng-template #deshacer>
-                <button *ngIf="
-                        sale.status != saleStatusOptions.cancelled" style="height: 40px;" [disabled]="loading$ | async"
-                    (click)="onSubmitForm(sale.status, user, true)" mat-raised-button color="warn" type="button">
+                <button 
+                  *ngIf="sale.status != saleStatusOptions.cancelled" 
+                  mat-raised-button color="warn" type="button" style="height: 40px;" 
+                  [disabled]="loading$ | async"
+                  (click)="onSubmitForm(sale.status, user, true)" >
                     <b>Deshacer</b>
                 </button>
             </ng-template>
         </span>
         <span *ngIf="sale.status != saleStatusOptions.cancelled">
-            <button (click)="onSubmitForm(saleStatusOptions.cancelled, user)" [disabled]="loading$ | async" mat-mini-fab
-                color="warn" type="button">
-                <mat-icon>close</mat-icon>
+            <button 
+              [disabled]="loading$ | async" mat-mini-fab
+              (click)="onSubmitForm(saleStatusOptions.cancelled, user)" 
+              color="warn" type="button">
+              <mat-icon>close</mat-icon>
             </button>
         </span>
     </div>
-    <div *ngIf="products$ | async as products" class="actionsContainer formFieldRounded">
+    <!-- <div *ngIf="products$ | async as products" class="actionsContainer formFieldRounded">
         <mat-form-field *ngIf="sale.status == saleStatusOptions.attended" class="content w3-small"
             style="display: block; width:100%; margin-bottom: 0;" appearance="outline">
             <mat-icon matPrefix></mat-icon>
@@ -40,13 +44,13 @@
                 <span *ngIf="searchProductControl.errors?.required">Campo requerido</span>
             </mat-error>
         </mat-form-field>
-    </div>
+    </div> -->
     <div class="w3-margin-top">
         <table [formGroup]="productForm" class="table-sale">
             <tr>
-                <th class="quantity">Cant.</th>
+                <th class="quantity_header">Cant.</th>
                 <th>Descripción</th>
-                <th>Precio</th>
+                <th class="price_header">Precio</th>
             </tr>
             <tr formArrayName="productList"
                 *ngFor="let item of productForm.get('productList')['controls']; let i = index">
@@ -54,29 +58,33 @@
                 <div [formGroupName]="i" style="display:contents">
                     <!-- Quantity -->
                     <td class="table-sale__td table-sale__td--space" style="overflow: auto;">
-                        <input *ngIf="sale.status == saleStatusOptions.attended else readQuantity" autocomplete="off"
+                        <!-- <input *ngIf="sale.status == saleStatusOptions.attended else readQuantity" autocomplete="off"
                             class="table-sale__input--thin" formControlName="quantity" type="number" max=99 min=0
                             required>
-                        <ng-template #readQuantity>
+                        <ng-template #readQuantity> -->
                             {{item.get('quantity').value}}
-                        </ng-template>
+                        <!-- </ng-template> -->
                     </td>
                     <!-- Description -->
                     <td class="table-sale__td table-sale__td--space" style="overflow: auto;">
 
                         <!-- Normal -->
                         <span *ngIf="!item.get('product').value.promo">
-                            {{item.get('product').value.description}}
+                            {{item.get('product').value.description}} ({{item.get('chosenProduct').value.color.name}})
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto"
-                                matTooltip="{{item.get('product').value.price | currency: 'S/. '}}">
+                                matTooltip="Precio: {{
+                                  (sale.user.customerType == 'Mayorista' ? 
+                                  item.get('product').value.priceMay : item.get('product').value.priceMin) | currency: 'S/. '}}">
                                 info
                             </mat-icon>
                         </span>
                         <!-- We have promo-->
                         <span *ngIf="item.get('product').value.promo">
-                            {{item.get('product').value.description}}
+                            {{item.get('product').value.description}} ({{item.get('chosenProduct').value.color.name}})
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto"
-                                matTooltip="Precio: {{item.get('product').value.price | currency: 'S/. '}}">
+                                matTooltip="Precio: {{(
+                                  sale.user.customerType == 'Mayorista' ? 
+                                  item.get('product').value.priceMay : item.get('product').value.priceMin) | currency: 'S/. '}}">
                                 info
                             </mat-icon>
                             <mat-icon style="cursor: pointer; font-size:medium; width:auto" matTooltip="Oferta ({{onFloor(item.get('quantity').value, item.get('product').value.promoData.quantity)}}): 
@@ -130,93 +138,173 @@
                             </ul>
                         </ng-container>
 
-
-
                     </td>
                     <!-- price -->
-                    <td class="w3-right-align table-sale__td table-sale__td--space">
-                        <span>{{giveProductPrice(item.value) | currency: 'S/. ':'symbol':'2.2-2'}}</span>
-                        <mat-icon *ngIf="sale.status == saleStatusOptions.attended" class="removeIcon" color="primary"
+                    <td class="w3-right-align table-sale__td table-sale__td--space table-sale__td--flex">
+                        <span>
+                          S/. 
+                        </span>
+                        <span>
+                          {{item.value | productPrice:sale.user | currency: ' '}}
+                        </span>
+                        <!-- <mat-icon *ngIf="sale.status == saleStatusOptions.attended" class="removeIcon" color="primary"
                             (click)="onDeleteProduct(i)">
                             remove_circle
-                        </mat-icon>
+                        </mat-icon> -->
                     </td>
                 </div>
 
             </tr>
             <tr>
-                <td class="table-sale__td table-sale__td--border"></td>
-                <td class="w3-right-align table-sale__td table-sale__td--border">
+              <td colspan="3" class="table-sale__td table-sale__td--border">
+
+              </td>
+            </tr>
+            <tr>
+                <td class="table-sale__td "
+                  colspan="2">
                     SubTotal
                 </td>
-                <td class="w3-right-align table-sale__td table-sale__td--border table-sale__td--space"
-                    style="padding-right:32px">
-                    <span>{{getTotalPrice() -
-                        getTotalPrice()/1.18*0.18 | currency:'S/. ':'symbol':'2.2-2'}}
+                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                    <span>
+                      S/. 
                     </span>
+                    <span>
+                      {{(productForm.get('productList').value | salePrice:sale.user)/1.18
+                          | currency:' ':'symbol':'2.2-2'}}
+                    </span>
+                    
                 </td>
 
             </tr>
             <tr>
-                <td class="table-sale__td"></td>
-                <td class="w3-right-align table-sale__td">
+                <td colspan="2" class="table-sale__td">
                     I.G.V
                 </td>
-                <td class="w3-right-align table-sale__td table-sale__td--space" style="padding-right:32px">
+                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
                     <span>
-                        {{getTotalPrice()/1.18*0.18 | currency:'S/. ':'symbol':'2.2-2'}}
+                      S/. 
+                    </span>
+                    <span>
+                        {{(productForm.get('productList').value | salePrice:sale.user)/1.18*0.18
+                          | currency:' ':'symbol':'2.2-2'}}
                     </span>
                 </td>
 
             </tr>
             <tr>
-                <td class="table-sale__td"></td>
-                <td class="w3-right-align table-sale__td">
+                <td colspan="2" class="table-sale__td">
                     Total
                 </td>
-                <td class="w3-right-align table-sale__td table-sale__td--space" style="padding-right:32px">
+                <td class="table-sale__td table-sale__td--space table-sale__td--flex" >
                     <span>
-                        {{getTotalPrice() | currency:'S/. ':'symbol':'2.2-2'}}
+                      S/. 
+                    </span>
+                    <span>
+                        {{productForm.get('productList').value | salePrice:sale.user
+                        | currency:' ':'symbol':'2.2-2'}}
                     </span>
                 </td>
 
             </tr>
             <tr>
-                <td class="table-sale__td table-sale__td--border"></td>
-                <td class="w3-right-align table-sale__td table-sale__td--border">
+              <td colspan="2" class="table-sale__td">
+                  Cargos adicionales
+              </td>
+              <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                <span>
+                  S/. 
+                </span>
+
+                <input *ngIf="sale.status == saleStatusOptions.attended else readDelivery" autocomplete="off"
+                        class="table-sale__input--width" formControlName="additionalPrice" 
+                        type="number" required min=0>
+                <ng-template #readDelivery>
+                  <span>
+                      {{productForm.get('additionalPrice').value | currency:' ':'symbol':'2.2-2'}}
+                  </span>
+                </ng-template>
+              </td>
+
+            </tr>
+            <tr>
+              <td colspan="2" class="table-sale__td">
+                  Descuento promocional
+              </td>
+              <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                  <span>
+                    S/. 
+                  </span>
+                  <span>
+                      {{productForm.get('couponDiscount').value | currency:' ':'symbol':'2.2-2'}}
+                  </span>
+              </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="table-sale__td">
                     Delivery
                 </td>
-                <td class="w3-right-align table-sale__td table-sale__td--border table-sale__td--space"
-                    style="padding-right:32px">
-                    S/. <input *ngIf="sale.status == saleStatusOptions.attended else readDelivery" autocomplete="off"
-                        class="table-sale__input--width" formControlName="deliveryPrice" type="number" required min=0>
-                    <ng-template #readDelivery>
-                        {{this.productForm.get('deliveryPrice').value |number:'2.2-2'}}
-                    </ng-template>
-                </td>
+                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                    
+                      <span>
+                        S/. 
+                      </span>
+                      <span>
+                        {{this.productForm.get('deliveryPrice').value |currency:' ':'symbol':'2.2-2'}}
+                      </span>
+
+                    </td>
             </tr>
         </table>
     </div>
     <div class="total-div">
-        <div class="bigCheckbox">
+        <!-- <div class="bigCheckbox">
             <mat-checkbox [disabled]="(loading$ | async) || !(user.confi || user.accountant)"
                 [formControl]="voucherCheckedForm" (click)="confirmVoucherChecked($event, user)" color="primary">
             </mat-checkbox>
-        </div>
+        </div> -->
         <div class="voucher-div">
-            <div (click)="checkVouchers(user)" class="photo">
+          <ng-container [ngSwitch]="sale.payType.type">
+            <ng-container *ngSwitchCase="1">
+              <div class="photo">
+                <mat-icon style="font-size: xx-large; height: auto; width:auto;">
+                  highlight_off
+                </mat-icon>
+              </div>
+              <div class="photo-number">
+                  <span>Entrega</span>
+              </div>
+            </ng-container>
+            <ng-container *ngSwitchCase="2">
+              <div class="photo">
+                <mat-icon style="font-size: xx-large; height: auto; width:auto;">
+                  redeem
+                </mat-icon>
+              </div>
+              <div class="photo-number">
+                  <span>Tarjeta</span>
+              </div>
+            </ng-container>
+            <ng-container *ngSwitchCase="3">
+              <div (click)="checkVouchers(user)" class="photo">
                 <mat-icon style="font-size: xx-large; height: auto; width:auto;" *ngIf="sale.voucher.length > 1">
                     collections_bookmark</mat-icon>
                 <mat-icon style="font-size: xx-large; height: auto; width:auto;" *ngIf="sale.voucher.length == 1">book
                 </mat-icon>
-            </div>
-            <div class="photo-number">
-                <span>{{sale.voucher.length | number:"2.0-0"}} voucher</span>
-            </div>
+              </div>
+              <div class="photo-number">
+                  <span>{{sale.voucher.length | number:"2.0-0"}} voucher</span>
+              </div>
+            </ng-container>
+          </ng-container>
+            
         </div>
         <div class="ticket__total">
-            <span style="white-space: nowrap;">
-                {{getTotalPrice() + productForm.get('deliveryPrice').value | currency:'S/. '}}
+            <span style="white-space: nowrap; overflow-x: auto; font-size:22px">
+              {{(productForm.get('productList').value | salePrice:sale.user)
+                + productForm.get('additionalPrice').value - productForm.get('couponDiscount').value 
+                + this.productForm.get('deliveryPrice').value
+              | currency:'S/. ':'symbol':'2.2-2'}}
             </span>
         </div>
     </div>
@@ -226,53 +314,96 @@
         </div>
     </div> -->
 
+    <!-- transactionId  -->
+    <mat-form-field 
+      class="w3-margin-top"
+      *ngIf="sale.payType.type == 2"
+      style="width: 100%" appearance="outline">
+      <mat-label>N° de transacción</mat-label>
+      <input readonly matInput placeholder="N° de transacción" 
+          [value]="sale.payType.transactionId">
+    </mat-form-field>
+
+    <!-- adviserForm  -->
+    <mat-form-field style="width: 100%" class="w3-margin-top" appearance="outline">
+      <mat-label>Asesor Virtual</mat-label>
+      <input 
+        [readonly]="sale.status != saleStatusOptions.attended"
+        autocomplete="off" 
+        [formControl]="adviserForm" 
+        [matAutocomplete]="adviserAutocomplete"
+        type="text" matInput>
+      <mat-error>Por favor, elija una opción</mat-error>
+      <mat-autocomplete 
+        #adviserAutocomplete="matAutocomplete" 
+        [displayWith]="showAdviser">
+        <mat-option [value]="null">Sin Asesor</mat-option>
+        <mat-option *ngFor="let adviser of (advisers$ | async)" [value]="adviser">
+          {{adviser.displayName}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
     <!-- confirmedRequestData -->
-    <form style="display:contents" [formGroup]="confirmedRequestForm" *ngIf="
+    <form style="display:contents" 
+          (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedRequest, user)"
+          [formGroup]="confirmedRequestForm" 
+          *ngIf="
             sale.status == saleStatusOptions.attended ||
             sale.status == saleStatusOptions.confirmedRequest ||
             sale.status == saleStatusOptions.confirmedDocument ||
-            sale.status == saleStatusOptions.cancelled
+            (sale.status == saleStatusOptions.cancelled && !!sale.confirmedRequestData)
             ">
-        <div style="width: 100%; margin-top: 10px;
-                display:flex; flex-direction: row; justify-content: space-between">
-            <!-- requestDate  -->
-            <!-- <mat-form-field style="width: 48%"
-                appearance="outline">
-                <mat-label>F. Solicitud</mat-label>
-                <input readonly matInput placeholder="F. Solicitud" 
-                    [satDatepicker]="desiredDatePicker"
-                    [formControl]="confirmedRequestForm.get('desiredDate')" >
-                <sat-datepicker #desiredDatePicker [rangeMode]="false"></sat-datepicker>
-                <sat-datepicker-toggle disabled matSuffix [for]="desiredDatePicker" ></sat-datepicker-toggle>
-            </mat-form-field> -->
 
-            <!-- assignedDate  -->
-            <mat-form-field style="width: 100%" appearance="outline">
-                <mat-label>F. Asignada</mat-label>
-                <input readonly matInput placeholder="F. Asignada" [min]="now" [satDatepicker]="assignedDatePicker"
-                    [formControl]="confirmedRequestForm.get('assignedDate')">
-                <sat-datepicker #assignedDatePicker [rangeMode]="false"></sat-datepicker>
-                <sat-datepicker-toggle matSuffix [for]="assignedDatePicker"
-                    [disabled]="sale.status != saleStatusOptions.attended"></sat-datepicker-toggle>
-            </mat-form-field>
-        </div>
+        <!-- Assigned date -->
+        <mat-form-field style="width: 100%" appearance="outline">
+          <mat-label>F. Asignada</mat-label>
+          <input 
+            readonly matInput 
+            formControlName="assignedDate"
+            [matDatepicker]="assignedDatePicker">
+          <mat-datepicker #assignedDatePicker></mat-datepicker>
+          <mat-datepicker-toggle 
+            matSuffix [for]="assignedDatePicker"
+            [disabled]="sale.status != saleStatusOptions.attended">
+          </mat-datepicker-toggle>
+        </mat-form-field>
+
+        <!-- trackingCode  -->
+        <mat-form-field style="width: 100%" appearance="outline">
+          <mat-label>Número de seguimiento</mat-label>
+          <input 
+            [readonly]="sale.status != saleStatusOptions.attended"
+            matInput placeholder="0000-0000"
+            formControlName="trackingCode">
+        </mat-form-field>
+
         <!-- observation -->
-        <div>
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Observaciones</mat-label>
-                <textarea formControlName="observation" #observation
-                    [readonly]="sale.status != saleStatusOptions.attended" style="min-height: 50px;" matInput
-                    maxlength="150"></textarea>
-                <mat-hint align="end">{{observation.value?.length || 0}}/150</mat-hint>
-            </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" style="width: 100%">
+            <mat-label>Observaciones</mat-label>
+            <textarea formControlName="observation" #observation
+                [readonly]="sale.status != saleStatusOptions.attended" rows="4" matInput
+                maxlength="150"></textarea>
+            <mat-hint align="end">{{observation.value?.length || 0}}/150</mat-hint>
+        </mat-form-field>
+
+        <button 
+          *ngIf="sale.status == saleStatusOptions.attended" 
+          class="w3-block w3-margin-top" mat-raised-button color="accent" 
+          type="submit"
+          [disabled]="(loading$ | async) || !confirmedRequestForm.valid || 
+              !productForm.get('productList')['controls']?.length">
+          <b>Confirmar pedido</b>
+        </button>
     </form>
 
     <!-- confirmedDocumentData -->
-    <form style="display:contents" [formGroup]="confirmedDocumentForm" *ngIf="
+    <form (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedDocument, user)"
+      style="display:contents" [formGroup]="confirmedDocumentForm" 
+      *ngIf="
         sale.status == saleStatusOptions.confirmedRequest ||
         sale.status == saleStatusOptions.confirmedDocument ||
-        sale.status == saleStatusOptions.cancelled
+        (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDocumentData)
         ">
         <div style="width: 100%;
                 display:flex; flex-direction: row; justify-content: space-between">
@@ -290,83 +421,57 @@
             <!-- documentNumber  -->
             <mat-form-field style="width: 64%" appearance="outline">
                 <mat-label>Número de Comprobante</mat-label>
-                <input formControlName="documentNumber" [readonly]="sale.status != saleStatusOptions.confirmedRequest"
-                    autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
+                <input 
+                  formControlName="documentNumber" 
+                  [readonly]="sale.status != saleStatusOptions.confirmedRequest"
+                  autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
                 <mat-error>
-                    <!-- <span *ngIf="productForm.get('mermaStock').errors?.required">Campo requerido</span>
-                <span *ngIf="productForm.get('mermaStock').errors?.min">Solo positivos</span> -->
+                    Campo requerido
                 </mat-error>
             </mat-form-field>
         </div>
-        <div style="width: 100%;">
+        
+        <!-- number  -->
+        <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
+          <mat-label>{{sale.document == "Boleta" ? "DNI" : "RUC"}}</mat-label>
+          <input 
+            readonly
+            [value]="sale.documentInfo.number"
+            autocomplete="off" type="text" matInput >
+        </mat-form-field>
+
+        <!-- nombre  -->
+        <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
+          <mat-label>Nombre de {{sale.document == "Boleta" ? "Usuario" : "Empresa"}}</mat-label>
+          <input 
+            readonly
+            [value]="sale.documentInfo.name"
+            autocomplete="off" type="text" matInput >
+        </mat-form-field>
+
+        <!-- dirección  -->
+        <mat-form-field class="w3-small" *ngIf="sale.document == 'Factura'" style="width: 100%" appearance="outline">
+          <mat-label>Dirección</mat-label>
+          <input 
+            readonly
+            [value]="sale.documentInfo.address"
+            autocomplete="off" type="text" matInput >
+        </mat-form-field>
+
+        <button 
+          *ngIf="sale.status == saleStatusOptions.confirmedRequest" 
+          class="w3-block w3-margin-top" mat-raised-button
+          color="accent" type="submit" 
+          [disabled]="(loading$ | async) || !confirmedDocumentForm.valid">
+          <b>Confirmar comprobante</b>
+        </button>
+
+        <!-- <div style="width: 100%;">
             <span class="w3-small w3-text-grey w3-margin-left">Datos de factura</span>
             <p class="invoice_field" style="margin-top: 0px;">{{sale.ruc ? sale.ruc : 'No suministrado'}}</p>
             <p class="invoice_field">{{sale.companyName ? sale.companyName : 'No suministrado'}}</p>
             <p class="invoice_field">{{sale.companyAddress ? sale.companyAddress : 'No suministrado'}}</p>
-        </div>
+        </div> -->
     </form>
-
-    <!-- confirmedDeliveryData: We will not use this anymore -->
-
-    <form style="display:contents" [formGroup]="confirmedDeliveryForm" *ngIf="false">
-        <!-- <form 
-        style="display:contents"
-        [formGroup]="confirmedDeliveryForm"
-    *ngIf="
-        sale.status == saleStatusOptions.confirmedDocument ||
-        sale.status == saleStatusOptions.confirmedDelivery ||
-        sale.status == saleStatusOptions.driverAssigned ||
-        sale.status == saleStatusOptions.finished ||
-        sale.status == saleStatusOptions.cancelled
-        "> -->
-        <div style="width: 100%;
-                display:flex; flex-direction: row; justify-content: space-between">
-            <!-- deliveryType  -->
-            <div style="width: 32%; display: flex;
-                flex-direction: column; justify-content: center;">
-                <div style="display: flex; justify-content: center;">
-                    <mat-slide-toggle color="primary" [disabled]="sale.status != saleStatusOptions.confirmedDocument"
-                        formControlName="deliveryType"></mat-slide-toggle>
-                </div>
-                <div style="display: flex; justify-content: space-evenly;">
-                    <span>Biker</span>
-                    <span>Moto</span>
-                </div>
-            </div>
-
-            <!-- deliveryBusiness  -->
-            <mat-form-field style="width: 64%" appearance="outline">
-                <mat-label>Asignar empresa de delivery.</mat-label>
-                <input formControlName="deliveryBusiness"
-                    [readonly]="sale.status != saleStatusOptions.confirmedDocument" autocomplete="off" type="text"
-                    matInput placeholder="Asignar empresa de delivery.">
-                <mat-error>
-                    <!-- <span *ngIf="productForm.get('mermaStock').errors?.required">Campo requerido</span>
-                    <span *ngIf="productForm.get('mermaStock').errors?.min">Solo positivos</span> -->
-                </mat-error>
-            </mat-form-field>
-        </div>
-    </form>
-
-    <button *ngIf="sale.status == saleStatusOptions.attended" class="w3-block w3-margin-top" mat-raised-button
-        color="accent" type="button" (click)="onSubmitForm(saleStatusOptions.confirmedRequest, user)" [disabled]="(loading$ | async) || !productForm.valid || 
-            !productForm.get('productList')['controls']?.length||
-            !confirmedRequestForm.valid">
-        <b>Confirmar pedido</b>
-    </button>
-
-    <button *ngIf="sale.status == saleStatusOptions.confirmedRequest" class="w3-block w3-margin-top" mat-raised-button
-        color="accent" type="button" (click)="onSubmitForm(saleStatusOptions.confirmedDocument, user)"
-        [disabled]="(loading$ | async) || !voucherCheckedForm.valid || !confirmedDocumentForm.valid">
-        <b>Confirmar comprobante</b>
-    </button>
-
-    <button *ngIf="sale.status == saleStatusOptions.confirmedDocument" class="w3-block w3-margin-top" mat-raised-button
-        color="accent" type="button" (click)="onSubmitForm(saleStatusOptions.finished, user)"
-        [disabled]="loading$ | async">
-        <b>Confirmar entrega</b>
-    </button>
-
-    <ng-container *ngIf="weight$ | async"></ng-container>
 
 </div>

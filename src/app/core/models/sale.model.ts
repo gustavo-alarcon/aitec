@@ -1,21 +1,23 @@
 import { User } from 'src/app/core/models/user.model';
-import { Product, unitProduct } from './product.model';
+import { Product, unitProduct, Zone } from './product.model';
 import { Package } from './package.model';
 import { Coupon } from './coupon.model';
 import { Stores } from './stores.model';
 import { Payments } from './payments.model';
+import { Adviser } from './adviser.model';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
   failed = 'Error';                         //Estado de rechazo de confirmación de cloud function
   paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago. Usuario se marcará con pendingPayment
+
   requested = 'Solicitado';                 //Venta confirmada por cloud function y pagada
   attended = 'Atendido';
   //Fecha asignada y tracking
   confirmedRequest = 'Solicitud Confirmada';  
   //Aca recien aparece n° de comprobante      //can be confirmed only when voucher is valid
-  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a logística
-  // confirmedDelivery = 'Delivery Confirmado';
+  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a almacen
+  confirmedDelivery = 'Delivery Confirmado';
   // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
   cancelled = 'Anulado'
@@ -47,44 +49,40 @@ export interface Sale {
   status: saleStatusOptions[keyof saleStatusOptions]
   requestedProducts: SaleRequestedProducts[];
 
-
-
   // Delivery data
   deliveryPickUp: boolean;  //Whether it is pickup or delivery (sent)
-  delivery: Product["zones"][0] | Stores;   //Product zone in case of delivery, stores in pickup
+  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup. When empty means contraentrega
   observation: string;
   location: User["location"][0]             //In case of delivery and valid zone
   deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
 
   //Coupon data
   coupon:Coupon;
-  couponDiscount: Number       //Discount applied at creatinon
+  couponDiscount: number       //Discount applied at creatinon
 
   //Payment data
   document: "Boleta"| "Factura",             //tipo de comprobante
   documentInfo: {
-    dni: string,
+    number: string,
     name: string
-  } | {
-    ruc: string,
-    name: string,
-    address: string
-  };
+    address?: string
+  } 
   
   payType: Payments
 
-  adviser:any;
+  adviser: Adviser;
 
   //Here comes things that will be editted
+  additionalPrice?: number;
 
   voucher: {
     voucherPhoto: string,
     voucherPath: string
   }[]
 
-  voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
-  voucherActionBy?: User,
-  voucherActionAt?: Date,
+  // voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
+  // voucherActionBy?: User,
+  // voucherActionAt?: Date,
 
   attendedData?: {             //Can go only when Atendido or more
     attendedBy: User,
@@ -93,7 +91,7 @@ export interface Sale {
 
   confirmedRequestData?: {        //only when confirmedRequest or more
     assignedDate: Date,           //Fecha asignada por admin
-    requestedProductsId: string[];//Used in virtual stock
+    trackingCode: string,
     observation: string,
 
     confirmedBy: User,
@@ -108,8 +106,11 @@ export interface Sale {
   }
 
   confirmedDeliveryData?: {           //To confirme delivery data we need
-    deliveryType: "Biker" | "Moto",   //to have the vouchers checked
-    deliveryBusiness: any,
+    referralGuideId: string,          //referralGuideDate is the date when referral
+    referralGuideDate: Date,          //guide was assigned
+    referralGuideUser: User,
+
+    deliveryUser: User,
 
     confirmedBy: User,
     confirmedAt: Date

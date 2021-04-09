@@ -7,17 +7,13 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
-import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
-import { Zone } from 'src/app/core/models/product.model';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
-
-
 @Component({
-  selector: 'app-sales-master',
-  templateUrl: './sales-master.component.html',
-  styleUrls: ['./sales-master.component.scss']
+  selector: 'app-shipping-master',
+  templateUrl: './shipping-master.component.html',
+  styleUrls: ['./shipping-master.component.scss']
 })
-export class SalesMasterComponent implements OnInit {
+export class ShippingMasterComponent implements OnInit {
   @Input() detailSubject: BehaviorSubject<Sale>;
   @Input() locationSubject: BehaviorSubject<Number>;
   @Input() totalPriceSubject: BehaviorSubject<number>;
@@ -154,14 +150,14 @@ export class SalesMasterComponent implements OnInit {
     }, 4);
   }
 
-  onCheckDirection(el: Sale, event) {
-    event.stopPropagation()
-    this.dialog.open(SalesAddressDialogComponent, {
-      data: el,
-      width: '90vw',
-      maxWidth: '700px'
-    })
-  }
+  // onCheckDirection(el: Sale, event) {
+  //   event.stopPropagation()
+  //   this.dialog.open(SalesAddressDialogComponent, {
+  //     data: el,
+  //     width: '90vw',
+  //     maxWidth: '700px'
+  //   })
+  // }
 
   getName(displayName: string): string {
     let name = displayName.split(" ");
@@ -259,7 +255,7 @@ export class SalesMasterComponent implements OnInit {
         sale.user.email,
         sale.user.personData.phone ?  sale.user.personData.phone: 'Sin número',
         sale.status,
-        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega a domicilio" : "A coordinar",
+        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega" : "A coordinar",
 
         sale.deliveryPickUp ? sale.delivery["address"] : sale.location ? sale.location.address : noData,
         sale.deliveryPickUp ? sale.delivery["departamento"] : sale.location ? sale.location.departamento : noData,

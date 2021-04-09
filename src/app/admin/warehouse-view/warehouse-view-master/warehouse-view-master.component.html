@@ -119,54 +119,37 @@
                         </ng-template>
                     </div>
                     <div class="actions-container">
-                        <button 
-                          [disabled]="!sale?.location"
-                          class="actions" color="accent" 
-                          (click)="onCheckDirection(sale, $event)"
-                          mat-raised-button type=button>
-                            <mat-icon>place</mat-icon>
-                        </button>
-                        <a 
-                          *ngIf="sale.user?.personData?.phone else noPhone"
-                          class="actions" [href]="'tel:'+ sale.user?.personData?.phone"
-                            (click)="$event.stopPropagation()">
-                            <button style="width:100%" color="accent" 
-                                mat-raised-button type=button>
-                                <mat-icon>local_phone</mat-icon>
-                            </button>
-                        </a>
-                        <ng-template #noPhone>
-                          <button disabled class="actions"
-                            color="accent" 
-                            mat-raised-button type=button>
-                            <mat-icon>local_phone</mat-icon>
-                          </button>
-                        </ng-template>
-
-                    </div>
-                </div>
-                <div class="divider"></div>
-                <div class="status">
-                    <div class="overflow_container">
+                      <div class="overflow_container">
                         <b *ngIf="sale.confirmedDocumentData  else noDocument">
                             {{sale.document |titlecase}}{{" "+ sale.confirmedDocumentData.documentNumber}}
                         </b>
                         <ng-template #noDocument>
                             <b>Agregar Comprobante</b>
                         </ng-template>
+                      </div>
                     </div>
-                    <button color="accent" 
+                </div>
+                <div class="divider"></div>
+                <div class="status">
+
+                    <button color="primary" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b>{{sale.status}}</b>
                     </button>
-                    <button color="primary" style="overflow: auto;" mat-flat-button type=button>
-                      <b>{{((sale.requestedProducts | salePrice: sale.user) 
-                          + (sale.deliveryPrice ? sale.deliveryPrice : 0)
-                          + (sale.couponDiscount ? sale.couponDiscount : 0 )
-                          + (sale.additionalPrice ? sale.additionalPrice : 0)
-                          )
-                          | currency:'S/.'}}</b>
+                    <button 
+                        [disabled]="status.confirmedDeliveryData"
+                        color="accent" 
+                        style="overflow: auto;"
+                        mat-flat-button type=button>
+                        <b style="color: white;">Generar guia</b>
+                    </button>
+                    <button 
+                        [disabled]="!status.confirmedDeliveryData"
+                        color="accent" 
+                        style="overflow: auto;"
+                        mat-flat-button type=button>
+                        <b style="color: white;">Ver guia</b>
                     </button>
                 </div>
           </div>
