@@ -46,7 +46,7 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     WarehouseInventoryComponent,
     WarehouseCreateEditComponent,
     WarehouseProductsEntryComponent,
-    ReferralGuideDialogComponent
+    ReferralGuideDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -77,6 +77,10 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     MatNativeDateModule,
     FormsModule,
     NgxPrintModule, 
+  ],
+  exports: [
+    ReferralGuideDialogComponent,
+    CommonModule
   ]
 })
 export class WarehouseModule { }

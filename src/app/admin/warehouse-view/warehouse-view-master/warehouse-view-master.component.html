@@ -138,14 +138,16 @@
                         <b>{{sale.status}}</b>
                     </button>
                     <button 
-                        [disabled]="status.confirmedDeliveryData"
+                        [disabled]="sale?.confirmedDeliveryData?.referralGuide"
+                        (click)="onCheckreferralGuide(sale, true, $event)"
                         color="accent" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b style="color: white;">Generar guia</b>
                     </button>
                     <button 
-                        [disabled]="!status.confirmedDeliveryData"
+                        [disabled]="!sale?.confirmedDeliveryData?.referralGuide"
+                        (click)="onCheckreferralGuide(sale, false, $event)"
                         color="accent" 
                         style="overflow: auto;"
                         mat-flat-button type=button>

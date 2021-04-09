@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
 import { PlacesService } from '../../../core/services/places.service';
@@ -12,7 +12,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
 import { Product } from 'src/app/core/models/product.model';
 import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
-import { SerialItem } from 'src/app/core/models/SerialItem.model';
+import { Sale } from 'src/app/core/models/sale.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',
@@ -20,7 +20,9 @@ import { SerialItem } from 'src/app/core/models/SerialItem.model';
   styleUrls: ['./referral-guide-dialog.component.scss']
 })
 export class ReferralGuideDialogComponent implements OnInit {
-  currentDate: number = Date.now();
+  @Input() sale: Sale
+  @Output() closeDialog = new EventEmitter()
+
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
   guideFormGroup: FormGroup;
@@ -95,8 +97,6 @@ export class ReferralGuideDialogComponent implements OnInit {
       arrivalPoint: [null, Validators.required],
       transferReason: [null, Validators.required],
       observations: [null, Validators.required],
-      point: [null, Validators.required],
-      startDate: [null, Validators.required]
     });
 
     this.entryWarehouseControl = this.fb.control('', Validators.required);
@@ -140,11 +140,14 @@ export class ReferralGuideDialogComponent implements OnInit {
         this.validatingScan.next(true);
         if (warehouse && product && add) {
           return this.dbs.getStoredSerialNumbers(warehouse.id, product.id).pipe(
-            map(serials => { return serials.find(serial => serial.barcode === scan) }),
+            map(serials => { 
+              console.log(serials)
+              return serials.find(serial => serial.barcode === scan) 
+            }),
             tap(serial => {
 
               if (serial) {
-                this.addSerie();
+                this.addSerie(serial.id);
               } else {
                 this.entryScanControl.setErrors(null)
                 this.entryScanControl.markAsTouched()
@@ -176,60 +179,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.actionAddSerie.next(true);
   }
 
-  
-  
-  showEntrySerial(serie: SerialItem): string | null {
-    return serie.barcode ? serie.barcode : null;
-  }
-
-
-  saveReferral(){
-   
-    this.auth.user$.pipe(take(1)).subscribe(user => {    
-              
-      const batch = this.afs.firestore.batch()
-      const referralRef = this.afs.firestore.collection(`/db/aitec/referralSlips`).doc();    
-
-      const data = {
-        uid: referralRef.id,
-        orderCode:this.guideFormGroup.value['codigo'],
-        addressee:this.guideFormGroup.value['Addressee'],
-        DNI:this.guideFormGroup.value['dni'],
-        dateTranfer:this.guideFormGroup.get('startDate').value,
-        startingPoint:this.guideFormGroup.value['point'],
-        arrivalPoint:this.guideFormGroup.value['arrivalPoint'],
-        reasonTransfer:this.guideFormGroup.get('translate').value,
-        observations:this.guideFormGroup.value['oservations'],
-        warehouse:this.entryWarehouseControl.value,
-        productList:this.arrayProducts,
-        createdAt:new Date(),
-        createBy:user,
-
-      }
-
-      batch.set(referralRef, data)
-
-      batch.commit()
-      .then(() => {
-        //this.dialogRef.close();
-        this.snackbar.open("guia de remision guardado", "Cerrar");
-      })
-      .catch(err => {
-        console.log(err);
-        this.snackbar.open("Ups! parece que hubo un error ...", "Cerrar");
-      })
-      
-    })
-    
-
-  }  
-
-  // changeView(view): void {
-  //   this.view = view;
-  // }
-
-
-  addSerie() {
+  addSerie(id: string) {
     let scan = this.entryScanControl.value.trim();
 
     // First, lets check if the scanned code is part of our inventory
@@ -248,8 +198,7 @@ export class ReferralGuideDialogComponent implements OnInit {
       } else {
 
         let data: SerialNumber = {
-          //ANTES HABIAAAAAAAAAAAAAAAAAAAAAAAAAAA id: id
-          id: null,
+          id: id,
           barcode: scan,
           color: validation.product.color,
           sku: validation.product.sku,
@@ -393,7 +342,7 @@ export class ReferralGuideDialogComponent implements OnInit {
           editedBy: null
         }
 
-        this.dbs.createWaybill(data, user)
+        this.dbs.createWaybill(data, user, this.sale)
           .pipe(
             take(1)
           ).subscribe(batch => {
@@ -415,6 +364,9 @@ export class ReferralGuideDialogComponent implements OnInit {
                             this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
                               duration: 6000
                             });
+                            if(this.sale){
+                              this.closeDialog.emit(null)
+                            }
                           })
                       })
                     }

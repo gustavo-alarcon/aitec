@@ -1,0 +1,15 @@
+<div mat-dialog-title>
+  <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.2em">
+    <mat-icon style="vertical-align:middle">place</mat-icon>
+    <b>Generar Guía de Remisión</b>
+  </h2>
+  <mat-divider></mat-divider>
+</div>
+<mat-dialog-content>
+
+  <app-referral-guide-dialog
+    [sale]="data"
+    (closeDialog)="closeDialog()"
+  ></app-referral-guide-dialog>
+  
+</mat-dialog-content>

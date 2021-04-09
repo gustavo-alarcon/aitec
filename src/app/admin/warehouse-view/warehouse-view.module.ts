@@ -28,6 +28,9 @@ import { WarehouseViewComponent } from './warehouse-view.component';
 import { WarehouseViewMasterComponent } from './warehouse-view-master/warehouse-view-master.component';
 import { WarehouseViewDetailComponent } from './warehouse-view-detail/warehouse-view-detail.component';
 import { WarehouseViewRoutingModule } from './warehouse-view-routing.module'
+import { WarehouseModule } from '../warehouse/warehouse.module';
+import { WarehouseInventoryComponent } from '../warehouse/warehouse-inventory/warehouse-inventory.component';
+import { WarehouseViewReferralGuideDialogComponent } from './warehouse-view-referral-guide-dialog/warehouse-view-referral-guide-dialog.component';
 
 
 
@@ -36,10 +39,12 @@ import { WarehouseViewRoutingModule } from './warehouse-view-routing.module'
   declarations: [
     WarehouseViewComponent, 
     WarehouseViewMasterComponent, 
-    WarehouseViewDetailComponent
+    WarehouseViewDetailComponent,
+    WarehouseViewReferralGuideDialogComponent
   ],
   imports: [
     CommonModule,
+    WarehouseModule,
     WarehouseViewRoutingModule,
     MatIconModule,
     MatButtonModule,

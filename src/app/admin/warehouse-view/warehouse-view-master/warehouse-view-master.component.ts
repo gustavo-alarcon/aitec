@@ -8,6 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
+import { WarehouseViewReferralGuideDialogComponent } from '../warehouse-view-referral-guide-dialog/warehouse-view-referral-guide-dialog.component';
 
 @Component({
   selector: 'app-warehouse-view-master',
@@ -164,6 +165,16 @@ export class WarehouseViewMasterComponent implements OnInit {
   //     maxWidth: '700px'
   //   })
   // }
+
+  onCheckreferralGuide(sale: Sale, edit: boolean, event) {
+    event.stopPropagation()
+    if(edit){
+      this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
+        data: sale,
+      })
+    }
+    
+  }
 
   getName(displayName: string): string {
     let name = displayName.split(" ");

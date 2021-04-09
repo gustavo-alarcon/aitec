@@ -1753,11 +1753,20 @@ export class DatabaseService {
    * Creates a waybill based in the products registered
    * @param {Waybill} products - Content of the form used to generate waybills
    */
-  createWaybill(waybill: Waybill, user: User): Observable<firebase.default.firestore.WriteBatch> {
+  createWaybill(waybill: Waybill, user: User, sale?: Sale): Observable<firebase.default.firestore.WriteBatch> {
     const batch = this.afs.firestore.batch();
     const referralRef = this.afs.firestore.collection(`/db/aitec/waybills`).doc();
 
     waybill.id = referralRef.id;
+
+    if(sale){
+      const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id)
+      batch.update(saleRef, {
+        confirmedDeliveryData: {
+          referralGuide: waybill
+        }
+      })
+    }
 
     batch.set(referralRef, waybill);
 

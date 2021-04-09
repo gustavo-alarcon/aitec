@@ -5,6 +5,7 @@ import { Coupon } from './coupon.model';
 import { Stores } from './stores.model';
 import { Payments } from './payments.model';
 import { Adviser } from './adviser.model';
+import { Waybill } from './waybill.model';
 
 export class saleStatusOptions {
   requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
@@ -106,9 +107,7 @@ export interface Sale {
   }
 
   confirmedDeliveryData?: {           //To confirme delivery data we need
-    referralGuideId: string,          //referralGuideDate is the date when referral
-    referralGuideDate: Date,          //guide was assigned
-    referralGuideUser: User,
+    referralGuide: Waybill,          //referralGuideDate is the date when referral
 
     deliveryUser: User,
 

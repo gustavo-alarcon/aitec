@@ -117,10 +117,10 @@ export class WarehouseViewDetailComponent implements OnInit {
     })
 
     this.confirmedDeliveryForm = this.fb.group({
-      referralGuideId: [
+      referralGuide: [
         !this.sale.confirmedDeliveryData ? null :
-          this.sale.confirmedDeliveryData.referralGuideId ? 
-          this.sale.confirmedDeliveryData.referralGuideId : null,
+          this.sale.confirmedDeliveryData.referralGuide ? 
+          this.sale.confirmedDeliveryData.referralGuide : null,
         Validators.required
       ],
       deliveryUser: [
@@ -194,7 +194,7 @@ export class WarehouseViewDetailComponent implements OnInit {
         this.dbs.getDeliveryUserStatic().pipe(map(deliveryGuys => {
           let newDeliveryGuys: User[] = []
 
-          if(this.sale.confirmedDeliveryData){
+          if(this.sale?.confirmedDeliveryData?.deliveryUser){
             newDeliveryGuys = [
               this.sale.confirmedDeliveryData.deliveryUser,
               ...deliveryGuys.filter(ad => ad.uid != this.sale.confirmedDeliveryData.deliveryUser.uid)
@@ -570,9 +570,7 @@ export class WarehouseViewDetailComponent implements OnInit {
         sale.confirmedDeliveryData = {
           deliveryUser: this.confirmedDeliveryForm.get("deliveryUser").value,
 
-          referralGuideDate: this.sale.confirmedDeliveryData.referralGuideDate,
-          referralGuideUser: this.sale.confirmedDeliveryData.referralGuideUser,
-          referralGuideId: this.confirmedDeliveryForm.get("referralGuideId").value,
+          referralGuide: this.sale.confirmedDeliveryData.referralGuide,
 
           confirmedBy: user,
           confirmedAt: date,        
