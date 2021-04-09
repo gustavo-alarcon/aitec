@@ -435,6 +435,17 @@ export class DatabaseService {
       );
   }
 
+  getDeliveryUserStatic(): Observable<User[]> {
+    return this.afs
+      .collection<User>(this.userRef, (ref) =>
+        ref.orderBy('personData.name', 'desc').where("deliveryUser", "==", true)
+      ).get().pipe(
+        map((snap) => {
+          return snap.docs.map((el) => (<User>el.data()));
+        }),
+      );
+  }
+
   getAdvisers(): Observable<Adviser[]> {
     return this.afs
       .collection<Adviser>(this.advisersRef, (ref) =>

@@ -6,6 +6,7 @@ export interface User {
   role?:string;
   customerType?:string;         //'Mayorista'
   orders?:number;
+  deliveryUser?: boolean;
   location?: {
     address: string;
     reference: string;

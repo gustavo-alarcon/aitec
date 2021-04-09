@@ -16,8 +16,8 @@ export class saleStatusOptions {
   //Fecha asignada y tracking
   confirmedRequest = 'Solicitud Confirmada';  
   //Aca recien aparece n° de comprobante      //can be confirmed only when voucher is valid
-  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a logística
-  // confirmedDelivery = 'Delivery Confirmado';
+  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a almacen
+  confirmedDelivery = 'Delivery Confirmado';
   // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
   cancelled = 'Anulado'
@@ -106,8 +106,11 @@ export interface Sale {
   }
 
   confirmedDeliveryData?: {           //To confirme delivery data we need
-    deliveryType: "Biker" | "Moto",   //to have the vouchers checked
-    deliveryBusiness: any,
+    referralGuideId: string,          //referralGuideDate is the date when referral
+    referralGuideDate: Date,          //guide was assigned
+    referralGuideUser: User,
+
+    deliveryUser: User,
 
     confirmedBy: User,
     confirmedAt: Date

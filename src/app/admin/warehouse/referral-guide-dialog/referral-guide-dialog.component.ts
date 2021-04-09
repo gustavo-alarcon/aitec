@@ -95,6 +95,8 @@ export class ReferralGuideDialogComponent implements OnInit {
       arrivalPoint: [null, Validators.required],
       transferReason: [null, Validators.required],
       observations: [null, Validators.required],
+      point: [null, Validators.required],
+      startDate: [null, Validators.required]
     });
 
     this.entryWarehouseControl = this.fb.control('', Validators.required);
