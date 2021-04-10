@@ -86,7 +86,12 @@ export class ShippingMasterComponent implements OnInit {
     ).pipe(
       switchMap(([startdate,enddate]) => {
         
-        return this.dbs.getSales({ begin: startdate, end: enddate })
+        return this.dbs.getSales({ begin: startdate, end: enddate }).pipe(
+          map(sales => sales.filter(el => (
+            [this.saleStatusOptions.confirmedDelivery, this.saleStatusOptions.finished]
+            .includes(el.status)
+            )))
+        )
       }),
       map(sales => {
         return sales
@@ -157,6 +162,16 @@ export class ShippingMasterComponent implements OnInit {
   //     width: '90vw',
   //     maxWidth: '700px'
   //   })
+  // }
+
+  // onCheckreferralGuide(sale: Sale, edit: boolean, event) {
+  //   event.stopPropagation()
+  //   if(edit){
+  //     this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
+  //       data: sale,
+  //     })
+  //   }
+    
   // }
 
   getName(displayName: string): string {

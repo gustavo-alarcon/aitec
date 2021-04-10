@@ -9,6 +9,10 @@ import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 import { WarehouseViewReferralGuideDialogComponent } from '../warehouse-view-referral-guide-dialog/warehouse-view-referral-guide-dialog.component';
+import jsPDF from 'jspdf';
+import { Waybill } from 'src/app/core/models/waybill.model';
+import { saveAs } from 'file-saver';
+
 
 @Component({
   selector: 'app-warehouse-view-master',
@@ -407,6 +411,44 @@ export class WarehouseViewMasterComponent implements OnInit {
       this.dbs.giveProductPriceOfSale(b.requestedProducts, b.user) 
       + b.deliveryPrice - Number(b.couponDiscount) + Number(!!b.additionalPrice ? b.additionalPrice : 0)
       , 0)
+  }
+
+  printPdf(sale: Sale){
+    let doc = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4"
+    })
+
+    //Importando Plantilla
+    let img = new Image(595,842)
+    img.src = '../../../assets/images/guia_rem.png';
+
+    doc.addImage(img, 'PNG', 0, 0, 595, 842);
+
+    //Setting body styles
+    doc.setFontSize(12)
+
+    //writing body
+    //Nombre de destinatario
+    doc.text("Nombre de destinatario", 140, 200, {maxWidth: 180, align: "left"})
+    //Destinatario RUC
+    doc.text("10522365495", 420, 200, {maxWidth: 140, align: "left"})
+    //Dirección de llegada
+    doc.text("Dirección de llegada", 140, 225, {maxWidth: 180, align: "left"})
+    //Fecha de emisión
+    doc.text("29/12/1995", 420, 225, {maxWidth: 140, align: "left"})
+    //Dirección de partida
+    doc.text("Dirección de partida", 140, 250, {maxWidth: 180, align: "left"})
+    //Fecha de inicio de traslado
+    doc.text("29/12/1995", 420, 250, {maxWidth: 140, align: "left"})
+
+    doc.line(16,166,16+565,166)
+
+    let blob = doc.output('blob');
+
+    saveAs(blob);
+
   }
 
 }

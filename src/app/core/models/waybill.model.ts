@@ -4,7 +4,8 @@ import { Warehouse } from "./warehouse.model";
 
 export interface Waybill {
   id: string;
-  orderCode: string;
+  orderCode: string;      //Cambiar a Nro de Guia de remisión
+  saleOrder?: string;
   addressee: string;
   dni: string;
   transferDate: Date;

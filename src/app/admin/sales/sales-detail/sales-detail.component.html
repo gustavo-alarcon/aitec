@@ -48,14 +48,14 @@
     <div class="w3-margin-top">
         <table [formGroup]="productForm" class="table-sale">
             <tr>
-                <th class="quantity_header">Cant.</th>
-                <th>Descripción</th>
-                <th class="price_header">Precio</th>
+                <th class="quantity_header"><span>Cant.</span></th>
+                <th><span>Descripción</span></th>
+                <th class="price_header"><span>Precio</span></th>
             </tr>
             <tr formArrayName="productList"
                 *ngFor="let item of productForm.get('productList')['controls']; let i = index">
 
-                <div [formGroupName]="i" style="display:contents">
+                <ng-container [formGroupName]="i">
                     <!-- Quantity -->
                     <td class="table-sale__td table-sale__td--space" style="overflow: auto;">
                         <!-- <input *ngIf="sale.status == saleStatusOptions.attended else readQuantity" autocomplete="off"
@@ -152,7 +152,7 @@
                             remove_circle
                         </mat-icon> -->
                     </td>
-                </div>
+                </ng-container>
 
             </tr>
             <tr>

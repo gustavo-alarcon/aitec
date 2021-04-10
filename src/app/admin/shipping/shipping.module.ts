@@ -24,13 +24,15 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { ShippingComponent } from './shipping.component';
 import { ShippingRoutingModule } from './shipping-routing.module';
 import { ShippingMasterComponent } from './shipping-master/shipping-master.component';
+import { TotalQuantityPipe } from './total-quantity.pipe';
 
 
 
 @NgModule({
   declarations: [
     ShippingComponent,
-    ShippingMasterComponent
+    ShippingMasterComponent,
+    TotalQuantityPipe
   ],
   imports: [
     CommonModule,

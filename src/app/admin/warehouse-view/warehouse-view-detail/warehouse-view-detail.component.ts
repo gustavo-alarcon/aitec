@@ -646,7 +646,7 @@ export class WarehouseViewDetailComponent implements OnInit {
   }
 
   showDeliveryUser(usr: User): string | undefined {
-    return usr ? usr.personData.name + usr.personData["lastName"] : "";
+    return usr ? usr.personData.name + (usr.personData["lastName"] ? (" "+ usr.personData["lastName"]) : ""):""
   }
 
   objectValidator() {

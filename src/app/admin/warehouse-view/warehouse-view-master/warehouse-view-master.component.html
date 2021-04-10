@@ -147,7 +147,7 @@
                     </button>
                     <button 
                         [disabled]="!sale?.confirmedDeliveryData?.referralGuide"
-                        (click)="onCheckreferralGuide(sale, false, $event)"
+                        (click)="printPdf(sale)"
                         color="accent" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
