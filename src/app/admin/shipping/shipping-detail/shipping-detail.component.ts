@@ -43,6 +43,7 @@ export class ShippingDetailComponent implements OnInit {
   status$: any;
   advisers$: Observable<Adviser[]>;
   deliveryUser$: Observable<any[]>;
+  finishedForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -53,7 +54,7 @@ export class ShippingDetailComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    //console.log(this.sale)
+    console.log(this.sale)
     this.initForm()
     this.initObservables()
   }
@@ -61,7 +62,7 @@ export class ShippingDetailComponent implements OnInit {
 
 
   initForm() {
-    console.log(this.sale)
+    console.log("detail")
 
     this.searchProductControl = new FormControl("")
 
@@ -129,6 +130,11 @@ export class ShippingDetailComponent implements OnInit {
           this.sale.confirmedDeliveryData.deliveryUser : null,
         [Validators.required, this.objectValidator()]
       ],
+    })
+
+    this.finishedForm = this.fb.group({
+      observation: !this.sale.finishedData ? null:
+        this.sale.finishedData.observation
     })
 
     this.adviserForm = new FormControl(this.sale.adviser, this.objectValidator())
@@ -422,6 +428,11 @@ export class ShippingDetailComponent implements OnInit {
           return this.saleStatusOptions.confirmedRequest
         case this.saleStatusOptions.confirmedRequest:
           return this.saleStatusOptions.confirmedDocument
+        case this.saleStatusOptions.confirmedDocument:
+          return this.saleStatusOptions.confirmedDelivery
+        case this.saleStatusOptions.confirmedDelivery:
+          return this.saleStatusOptions.finished
+
       }
     }
   }
@@ -548,6 +559,8 @@ export class ShippingDetailComponent implements OnInit {
         }
         sale.confirmedRequestData = null
         sale.confirmedDocumentData = null
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
         break;
       case this.saleStatusOptions.confirmedRequest:
         sale.confirmedRequestData = {
@@ -558,6 +571,8 @@ export class ShippingDetailComponent implements OnInit {
           confirmedAt: new Date(),
         }
         sale.confirmedDocumentData = null
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
         break;
       case this.saleStatusOptions.confirmedDocument:
         sale.confirmedDocumentData = {
@@ -565,6 +580,8 @@ export class ShippingDetailComponent implements OnInit {
           confirmedBy: user,
           confirmedAt: date,
         }
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
         break;
       case this.saleStatusOptions.confirmedDelivery:
         sale.confirmedDeliveryData = {
@@ -574,6 +591,14 @@ export class ShippingDetailComponent implements OnInit {
 
           confirmedBy: user,
           confirmedAt: date,        
+        }
+        sale.finishedData = null
+        break;
+      case this.saleStatusOptions.finished:
+        sale.finishedData = {
+          observation: this.finishedForm.get("observation").value,
+          finishedAt: date,
+          finishedBy: user
         }
     }
     
@@ -646,7 +671,7 @@ export class ShippingDetailComponent implements OnInit {
   }
 
   showDeliveryUser(usr: User): string | undefined {
-    return usr ? usr.personData.name + usr.personData["lastName"] : "";
+    return usr ? usr.personData.name + (usr.personData["lastName"] ? (" "+ usr.personData["lastName"]) : ""):""
   }
 
   objectValidator() {

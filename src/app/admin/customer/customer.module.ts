@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CustomerRoutingModule } from './customer-routing.module';
-import { CustomerComponent } from './customer.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -19,9 +18,14 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatNativeDateModule } from '@angular/material/core';
+
+import { CustomerComponent } from './customer.component';
 
 @NgModule({
-  declarations: [CustomerComponent],
+  declarations: [
+    CustomerComponent
+  ],
   imports: [
     CommonModule,
     CustomerRoutingModule,
@@ -31,6 +35,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatFormFieldModule,
     MatDialogModule,
     MatDividerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatAutocompleteModule,
     MatSnackBarModule,
     MatCheckboxModule,

@@ -20,6 +20,9 @@ export class SaleDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.correlative$ = this.dbs.getSaleId(this.data.number).pipe(map(sale => {
+      if(!sale){
+        return null
+      }
       let corr = sale.correlative
       if(corr){
         return String(corr).padStart(6, "0")

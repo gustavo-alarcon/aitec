@@ -63,7 +63,9 @@ export class QuantityDivImprovedComponent implements OnInit {
         if(reqProd){
           return this.shopCar.getProductDbObservable(reqProd.product.id).pipe(
             map(prodDB => {
-              let prodDbStock = prodDB.products.find(prod => prod.sku == reqProd.chosenProduct.sku).virtualStock
+              let foundProdDB = prodDB.products.find(prod => prod.sku == reqProd.chosenProduct.sku)
+              let reservedStock = !!foundProdDB.reservedStock ? foundProdDB.reservedStock : 0
+              let prodDbStock = foundProdDB.virtualStock - reservedStock
               if(reqProd.quantity > prodDbStock){
                 console.log("setting error")
                 this.quantityForm.markAsTouched()

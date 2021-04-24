@@ -52,7 +52,7 @@ export interface Sale {
 
   // Delivery data
   deliveryPickUp: boolean;  //Whether it is pickup or delivery (sent)
-  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup. When empty means contraentrega
+  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup. When empty means a coordinar
   observation: string;
   location: User["location"][0]             //In case of delivery and valid zone
   deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone

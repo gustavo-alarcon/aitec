@@ -38,7 +38,7 @@
           <button 
             (click)="downloadXls(salesFiltered)" mat-raised-button [disabled]="!salesFiltered.length"
             class="w3-margin-bottom"
-            color="accent" type="button" >
+            color="primary" type="button" >
               Descargar Excel
           </button>
       </div>
@@ -120,8 +120,8 @@
                     </div>
                     <div class="actions-container">
                         <button 
-                          [disabled]="!sale?.location"
-                          class="actions" color="accent" 
+                          [disabled]="sale.deliveryPickUp ? false : sale.location ? false : true"
+                          class="actions" color="primary" 
                           (click)="onCheckDirection(sale, $event)"
                           mat-raised-button type=button>
                             <mat-icon>place</mat-icon>
@@ -130,14 +130,14 @@
                           *ngIf="sale.user?.personData?.phone else noPhone"
                           class="actions" [href]="'tel:'+ sale.user?.personData?.phone"
                             (click)="$event.stopPropagation()">
-                            <button style="width:100%" color="accent" 
+                            <button style="width:100%" color="primary" 
                                 mat-raised-button type=button>
                                 <mat-icon>local_phone</mat-icon>
                             </button>
                         </a>
                         <ng-template #noPhone>
                           <button disabled class="actions"
-                            color="accent" 
+                            color="primary" 
                             mat-raised-button type=button>
                             <mat-icon>local_phone</mat-icon>
                           </button>
@@ -155,12 +155,12 @@
                             <b>Agregar Comprobante</b>
                         </ng-template>
                     </div>
-                    <button color="accent" 
+                    <button color="primary" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b>{{sale.status}}</b>
                     </button>
-                    <button color="primary" style="overflow: auto;" mat-flat-button type=button>
+                    <button color="accent" style="overflow: auto;" mat-flat-button type=button>
                       <b>{{((sale.requestedProducts | salePrice: sale.user) 
                           + (sale.deliveryPrice ? sale.deliveryPrice : 0)
                           + (sale.couponDiscount ? sale.couponDiscount : 0 )

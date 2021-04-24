@@ -118,10 +118,8 @@ export class PaySaleComponent implements OnInit {
 
     this.sum$ = this.sale$.pipe(
       map(sale => {
-        let sum = {...sale}.requestedProducts
-            .map((el) => this.dbs.giveProductPrice(el, sale.user.customerType))
-            .reduce((a, b) => a + b, 0);
-          return sum + sale.deliveryPrice;
+        let sum = this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser)
+        return sum + sale.deliveryPrice;
       })
     )
 

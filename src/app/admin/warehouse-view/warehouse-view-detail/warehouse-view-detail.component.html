@@ -1,7 +1,7 @@
 <div *ngIf="auth.user$ | async as user" class="general-container background-color">
   <div style="display: flex; flex-direction: row; justify-content: space-between;">
-      <b style="font-size: 28px;">
-          #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
+      <b *ngIf="sale" style="font-size: 28px;">
+          Venta #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
       </b>
       <!-- <span>
           <button *ngIf="sale.status == saleStatusOptions.requested else deshacer" style="height: 40px;"
@@ -349,8 +349,9 @@
           sale.status == saleStatusOptions.attended ||
           sale.status == saleStatusOptions.confirmedRequest ||
           sale.status == saleStatusOptions.confirmedDocument ||
-          (sale.status == saleStatusOptions.cancelled && !!sale.confirmedRequestData) || 
-          sale.status == saleStatusOptions.confirmedDelivery
+          sale.status == saleStatusOptions.confirmedDelivery ||
+          sale.status == saleStatusOptions.finished ||
+          (sale.status == saleStatusOptions.cancelled && !!sale.confirmedRequestData)
           ">
 
       <!-- Assigned date -->
@@ -401,6 +402,8 @@
     *ngIf="
       sale.status == saleStatusOptions.confirmedRequest ||
       sale.status == saleStatusOptions.confirmedDocument ||
+      sale.status == saleStatusOptions.confirmedDelivery ||
+      sale.status == saleStatusOptions.finished ||
       (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDocumentData)
       ">
       <div style="width: 100%;
@@ -477,15 +480,17 @@
     style="display: contents" [formGroup]="confirmedDeliveryForm" 
     *ngIf="
       sale.status == saleStatusOptions.confirmedDocument ||
-      sale.status == saleStatusOptions.confirmedDelivery
+      sale.status == saleStatusOptions.confirmedDelivery ||
+      sale.status == saleStatusOptions.finished ||
+      (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDeliveryData)
       ">
       <div style="width: 100%;
           display:flex; flex-direction: row; justify-content: space-between">
           <!-- referralGuide  -->
-          <mat-form-field style="width: 32%" appearance="outline">
+          <mat-form-field style="width: 100%" appearance="outline">
               <mat-label>Guia de remisión</mat-label>
               <input 
-                [value]="confirmedDeliveryForm.get('referralGuide').value" 
+                [value]="confirmedDeliveryForm.get('referralGuide').value?.orderCode" 
                 readonly 
                 autocomplete="off" type="text" matInput placeholder="Guia de remisión">
               <mat-error>
@@ -495,22 +500,21 @@
           </mat-form-field>
 
           <!-- documentNumber  -->
-          <mat-form-field style="width: 64%" appearance="outline">
+          <!-- <mat-form-field style="width: 64%" appearance="outline">
               <mat-label>Número de Comprobante</mat-label>
               <input 
                 [value]="confirmedDeliveryForm.get('referralGuide').value"
                 readonly
                 autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
-              <!-- <mat-error>
-                  Campo requerido
-              </mat-error> -->
-          </mat-form-field>
+              
+          </mat-form-field> -->
       </div>
 
       <!-- deliveryUser  -->
       <mat-form-field style="width: 100%" class="w3-margin-top" appearance="outline">
-        <mat-label>Asignar repartidor</mat-label>
+        <mat-label>Repartidor</mat-label>
         <input 
+          placeholder="Asignar Repartidor"
           [readonly]="sale.status != saleStatusOptions.confirmedDocument"
           autocomplete="off" 
           formControlName="deliveryUser" 

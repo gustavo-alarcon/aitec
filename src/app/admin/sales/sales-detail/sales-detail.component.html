@@ -11,7 +11,9 @@
             </button>
             <ng-template #deshacer>
                 <button 
-                  *ngIf="sale.status != saleStatusOptions.cancelled" 
+                  *ngIf="(sale.status != saleStatusOptions.cancelled) && 
+                          (sale.status != saleStatusOptions.confirmedDelivery) && 
+                          (sale.status != saleStatusOptions.finished)" 
                   mat-raised-button color="warn" type="button" style="height: 40px;" 
                   [disabled]="loading$ | async"
                   (click)="onSubmitForm(sale.status, user, true)" >
@@ -19,7 +21,9 @@
                 </button>
             </ng-template>
         </span>
-        <span *ngIf="sale.status != saleStatusOptions.cancelled">
+        <span *ngIf="(sale.status != saleStatusOptions.cancelled) && 
+                      (sale.status != saleStatusOptions.confirmedDelivery) && 
+                      (sale.status != saleStatusOptions.finished)">
             <button 
               [disabled]="loading$ | async" mat-mini-fab
               (click)="onSubmitForm(saleStatusOptions.cancelled, user)" 
@@ -344,134 +348,268 @@
       </mat-autocomplete>
     </mat-form-field>
 
-    <!-- confirmedRequestData -->
-    <form style="display:contents" 
-          (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedRequest, user)"
-          [formGroup]="confirmedRequestForm" 
-          *ngIf="
-            sale.status == saleStatusOptions.attended ||
-            sale.status == saleStatusOptions.confirmedRequest ||
-            sale.status == saleStatusOptions.confirmedDocument ||
-            (sale.status == saleStatusOptions.cancelled && !!sale.confirmedRequestData)
-            ">
+    
+  <!-- confirmedRequestData -->
+  <form style="display:contents" 
+        (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedRequest, user)"
+        [formGroup]="confirmedRequestForm" 
+        *ngIf="
+          sale.status == saleStatusOptions.attended ||
+          sale.status == saleStatusOptions.confirmedRequest ||
+          sale.status == saleStatusOptions.confirmedDocument ||
+          sale.status == saleStatusOptions.confirmedDelivery ||
+          sale.status == saleStatusOptions.finished ||
+          (sale.status == saleStatusOptions.cancelled && !!sale.confirmedRequestData)
+          ">
 
-        <!-- Assigned date -->
-        <mat-form-field style="width: 100%" appearance="outline">
-          <mat-label>F. Asignada</mat-label>
-          <input 
-            readonly matInput 
-            formControlName="assignedDate"
-            [matDatepicker]="assignedDatePicker">
-          <mat-datepicker #assignedDatePicker></mat-datepicker>
-          <mat-datepicker-toggle 
-            matSuffix [for]="assignedDatePicker"
-            [disabled]="sale.status != saleStatusOptions.attended">
-          </mat-datepicker-toggle>
-        </mat-form-field>
+      <!-- Assigned date -->
+      <mat-form-field style="width: 100%" appearance="outline">
+        <mat-label>F. Asignada</mat-label>
+        <input 
+          readonly matInput 
+          formControlName="assignedDate"
+          [matDatepicker]="assignedDatePicker">
+        <mat-datepicker #assignedDatePicker></mat-datepicker>
+        <mat-datepicker-toggle 
+          matSuffix [for]="assignedDatePicker"
+          [disabled]="sale.status != saleStatusOptions.attended">
+        </mat-datepicker-toggle>
+      </mat-form-field>
 
-        <!-- trackingCode  -->
-        <mat-form-field style="width: 100%" appearance="outline">
-          <mat-label>Número de seguimiento</mat-label>
-          <input 
-            [readonly]="sale.status != saleStatusOptions.attended"
-            matInput placeholder="0000-0000"
-            formControlName="trackingCode">
-        </mat-form-field>
+      <!-- trackingCode  -->
+      <mat-form-field style="width: 100%" appearance="outline">
+        <mat-label>Número de seguimiento</mat-label>
+        <input 
+          [readonly]="sale.status != saleStatusOptions.attended"
+          matInput placeholder="0000-0000"
+          formControlName="trackingCode">
+      </mat-form-field>
 
-        <!-- observation -->
-        <mat-form-field appearance="outline" style="width: 100%">
-            <mat-label>Observaciones</mat-label>
-            <textarea formControlName="observation" #observation
-                [readonly]="sale.status != saleStatusOptions.attended" rows="4" matInput
-                maxlength="150"></textarea>
-            <mat-hint align="end">{{observation.value?.length || 0}}/150</mat-hint>
-        </mat-form-field>
+      <!-- observation -->
+      <mat-form-field appearance="outline" style="width: 100%">
+          <mat-label>Observaciones</mat-label>
+          <textarea formControlName="observation" #observation
+              [readonly]="sale.status != saleStatusOptions.attended" rows="4" matInput
+              maxlength="150"></textarea>
+          <mat-hint align="end">{{observation.value?.length || 0}}/150</mat-hint>
+      </mat-form-field>
 
-        <button 
-          *ngIf="sale.status == saleStatusOptions.attended" 
-          class="w3-block w3-margin-top" mat-raised-button color="accent" 
-          type="submit"
-          [disabled]="(loading$ | async) || !confirmedRequestForm.valid || 
-              !productForm.get('productList')['controls']?.length">
-          <b>Confirmar pedido</b>
-        </button>
-    </form>
+      <button 
+        *ngIf="sale.status == saleStatusOptions.attended" 
+        class="w3-block w3-margin-top" mat-raised-button color="accent" 
+        type="submit"
+        [disabled]="(loading$ | async) || !confirmedRequestForm.valid || 
+            !productForm.get('productList')['controls']?.length">
+        <b>Confirmar pedido</b>
+      </button>
+  </form>
 
-    <!-- confirmedDocumentData -->
-    <form (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedDocument, user)"
-      style="display:contents" [formGroup]="confirmedDocumentForm" 
-      *ngIf="
-        sale.status == saleStatusOptions.confirmedRequest ||
-        sale.status == saleStatusOptions.confirmedDocument ||
-        (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDocumentData)
-        ">
-        <div style="width: 100%;
-                display:flex; flex-direction: row; justify-content: space-between">
-            <!-- document  -->
-            <mat-form-field style="width: 32%" appearance="outline">
-                <mat-label>Tipo de Comp.</mat-label>
-                <input formControlName="document" readonly autocomplete="off" type="text" matInput
-                    placeholder="Tipo de Comp.">
-                <mat-error>
-                    <!-- <span *ngIf="productForm.get('realStock').errors?.required">Campo requerido</span>
-                <span *ngIf="productForm.get('realStock').errors?.min">Solo positivos</span> -->
-                </mat-error>
-            </mat-form-field>
+  <!-- confirmedDocumentData -->
+  <form (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedDocument, user)"
+    style="display: contents" [formGroup]="confirmedDocumentForm" 
+    *ngIf="
+      sale.status == saleStatusOptions.confirmedRequest ||
+      sale.status == saleStatusOptions.confirmedDocument ||
+      sale.status == saleStatusOptions.confirmedDelivery ||
+      sale.status == saleStatusOptions.finished ||
+      (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDocumentData)
+      ">
+      <div style="width: 100%;
+              display:flex; flex-direction: row; justify-content: space-between">
+          <!-- document  -->
+          <mat-form-field style="width: 32%" appearance="outline">
+              <mat-label>Tipo de Comp.</mat-label>
+              <input formControlName="document" readonly autocomplete="off" type="text" matInput
+                  placeholder="Tipo de Comp.">
+              <mat-error>
+                  <!-- <span *ngIf="productForm.get('realStock').errors?.required">Campo requerido</span>
+              <span *ngIf="productForm.get('realStock').errors?.min">Solo positivos</span> -->
+              </mat-error>
+          </mat-form-field>
 
-            <!-- documentNumber  -->
-            <mat-form-field style="width: 64%" appearance="outline">
-                <mat-label>Número de Comprobante</mat-label>
-                <input 
-                  formControlName="documentNumber" 
-                  [readonly]="sale.status != saleStatusOptions.confirmedRequest"
-                  autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
-                <mat-error>
-                    Campo requerido
-                </mat-error>
-            </mat-form-field>
-        </div>
-        
-        <!-- number  -->
-        <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
-          <mat-label>{{sale.document == "Boleta" ? "DNI" : "RUC"}}</mat-label>
-          <input 
-            readonly
-            [value]="sale.documentInfo.number"
-            autocomplete="off" type="text" matInput >
-        </mat-form-field>
+          <!-- documentNumber  -->
+          <mat-form-field style="width: 64%" appearance="outline">
+              <mat-label>Número de Comprobante</mat-label>
+              <input 
+                formControlName="documentNumber" 
+                [readonly]="sale.status != saleStatusOptions.confirmedRequest"
+                autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
+              <mat-error>
+                  Campo requerido
+              </mat-error>
+          </mat-form-field>
+      </div>
+      
+      <!-- number  -->
+      <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
+        <mat-label>{{sale.document == "Boleta" ? "DNI" : "RUC"}}</mat-label>
+        <input 
+          readonly
+          [value]="sale.documentInfo.number"
+          autocomplete="off" type="text" matInput >
+      </mat-form-field>
 
-        <!-- nombre  -->
-        <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
-          <mat-label>Nombre de {{sale.document == "Boleta" ? "Usuario" : "Empresa"}}</mat-label>
-          <input 
-            readonly
-            [value]="sale.documentInfo.name"
-            autocomplete="off" type="text" matInput >
-        </mat-form-field>
+      <!-- nombre  -->
+      <mat-form-field class="w3-small" style="width: 100%" appearance="outline">
+        <mat-label>Nombre de {{sale.document == "Boleta" ? "Usuario" : "Empresa"}}</mat-label>
+        <input 
+          readonly
+          [value]="sale.documentInfo.name"
+          autocomplete="off" type="text" matInput >
+      </mat-form-field>
 
-        <!-- dirección  -->
-        <mat-form-field class="w3-small" *ngIf="sale.document == 'Factura'" style="width: 100%" appearance="outline">
-          <mat-label>Dirección</mat-label>
-          <input 
-            readonly
-            [value]="sale.documentInfo.address"
-            autocomplete="off" type="text" matInput >
-        </mat-form-field>
+      <!-- dirección  -->
+      <mat-form-field class="w3-small" *ngIf="sale.document == 'Factura'" style="width: 100%" appearance="outline">
+        <mat-label>Dirección</mat-label>
+        <input 
+          readonly
+          [value]="sale.documentInfo.address"
+          autocomplete="off" type="text" matInput >
+      </mat-form-field>
 
-        <button 
-          *ngIf="sale.status == saleStatusOptions.confirmedRequest" 
-          class="w3-block w3-margin-top" mat-raised-button
-          color="accent" type="submit" 
-          [disabled]="(loading$ | async) || !confirmedDocumentForm.valid">
-          <b>Confirmar comprobante</b>
-        </button>
+      <button 
+        *ngIf="sale.status == saleStatusOptions.confirmedRequest" 
+        class="w3-block w3-margin-top" mat-raised-button
+        color="accent" type="submit" 
+        [disabled]="(loading$ | async) || !confirmedDocumentForm.valid">
+        <b>Confirmar comprobante</b>
+      </button>
 
-        <!-- <div style="width: 100%;">
-            <span class="w3-small w3-text-grey w3-margin-left">Datos de factura</span>
-            <p class="invoice_field" style="margin-top: 0px;">{{sale.ruc ? sale.ruc : 'No suministrado'}}</p>
-            <p class="invoice_field">{{sale.companyName ? sale.companyName : 'No suministrado'}}</p>
-            <p class="invoice_field">{{sale.companyAddress ? sale.companyAddress : 'No suministrado'}}</p>
-        </div> -->
-    </form>
+      <!-- <div style="width: 100%;">
+          <span class="w3-small w3-text-grey w3-margin-left">Datos de factura</span>
+          <p class="invoice_field" style="margin-top: 0px;">{{sale.ruc ? sale.ruc : 'No suministrado'}}</p>
+          <p class="invoice_field">{{sale.companyName ? sale.companyName : 'No suministrado'}}</p>
+          <p class="invoice_field">{{sale.companyAddress ? sale.companyAddress : 'No suministrado'}}</p>
+      </div> -->
+  </form>
+
+  <!-- confirmedDeliveryData -->
+  <form (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedDelivery, user)"
+    style="display: contents" [formGroup]="confirmedDeliveryForm" 
+    *ngIf="
+      sale.status == saleStatusOptions.confirmedDelivery ||
+      sale.status == saleStatusOptions.finished ||
+      (sale.status == saleStatusOptions.cancelled && !!sale.confirmedDeliveryData)
+      ">
+      <div style="width: 100%;
+          display:flex; flex-direction: row; justify-content: space-between">
+          <!-- referralGuide  -->
+          <mat-form-field style="width: 100%" appearance="outline">
+              <mat-label>Guia de remisión</mat-label>
+              <input 
+                [value]="confirmedDeliveryForm.get('referralGuide').value?.orderCode" 
+                readonly 
+                autocomplete="off" type="text" matInput placeholder="Guia de remisión">
+              <mat-error>
+                  <!-- <span *ngIf="productForm.get('realStock').errors?.required">Campo requerido</span>
+              <span *ngIf="productForm.get('realStock').errors?.min">Solo positivos</span> -->
+              </mat-error>
+          </mat-form-field>
+
+          <!-- documentNumber  -->
+          <!-- <mat-form-field style="width: 64%" appearance="outline">
+              <mat-label>Número de Comprobante</mat-label>
+              <input 
+                [value]="confirmedDeliveryForm.get('referralGuide').value"
+                readonly
+                autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
+              
+          </mat-form-field> -->
+      </div>
+
+      <!-- deliveryUser  -->
+      <mat-form-field style="width: 100%" class="w3-margin-top" appearance="outline">
+        <mat-label>Repartidor</mat-label>
+        <input 
+          placeholder="Asignar Repartidor"
+          readonly
+          autocomplete="off" 
+          formControlName="deliveryUser" 
+          [matAutocomplete]="deliveryUserAutocomplete"
+          type="text" matInput>
+        <mat-error>Por favor, elija una opción</mat-error>
+        <mat-autocomplete 
+          #deliveryUserAutocomplete="matAutocomplete" 
+          [displayWith]="showDeliveryUser">
+          <mat-option *ngFor="let deliveryUser of (deliveryUser$ | async)" [value]="deliveryUser">
+            {{deliveryUser?.personData?.name+" "+deliveryUser?.personData?.lastName}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      
+      
+
+      <!-- <button 
+        *ngIf="sale.status == saleStatusOptions.confirmedDocument" 
+        class="w3-block w3-margin-top" mat-raised-button
+        color="accent" type="submit" 
+        [disabled]="(loading$ | async) || !confirmedDeliveryForm.valid">
+        <b>Enviar a reparto</b>
+      </button> -->
+
+      <!-- <div style="width: 100%;">
+          <span class="w3-small w3-text-grey w3-margin-left">Datos de factura</span>
+          <p class="invoice_field" style="margin-top: 0px;">{{sale.ruc ? sale.ruc : 'No suministrado'}}</p>
+          <p class="invoice_field">{{sale.companyName ? sale.companyName : 'No suministrado'}}</p>
+          <p class="invoice_field">{{sale.companyAddress ? sale.companyAddress : 'No suministrado'}}</p>
+      </div> -->
+  </form>
+
+  <!-- finishedData -->
+  <form (ngSubmit)="onSubmitForm(saleStatusOptions.finished, user)"
+    style="display: contents" [formGroup]="finishedForm" 
+    *ngIf="
+      sale.status == saleStatusOptions.finished
+      ">
+
+      <!-- observation -->
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Observaciones de entrega</mat-label>
+        <textarea formControlName="observation" #observation2
+            readonly rows="4" matInput
+            maxlength="150"></textarea>
+        <mat-hint align="end">{{observation2.value?.length || 0}}/150</mat-hint>
+    </mat-form-field>
+
+    <!-- <ng-container *ngIf="sale?.location?.coord as coord">
+      <div class="w3-margin-top"
+        style="width: 100%;
+        display:flex; flex-direction: row; justify-content: space-around">
+
+          <a mat-stroked-button
+            style="width: 45%"
+            [href]="'https://waze.com/ul?ll='+coord.lat+','+coord.lng+'&z=10'"
+            target="_blank">
+            Waze
+          </a>
+
+          <a mat-stroked-button
+            style="width: 45%"
+            [href]="'https://www.google.com/maps/search/?api=1&query='+coord.lat+','+coord.lng"
+            target="_blank">
+            Maps
+          </a>
+      </div>
+
+      <div 
+        class="w3-margin-top w3-margin-bottom">
+        <google-map height="200px" width="100%" 
+          [center]="coord" 
+          [zoom]="15">
+
+          <map-marker [position]="coord"></map-marker>
+        </google-map>
+      </div>
+    </ng-container> -->
+
+    <!-- <button 
+      *ngIf="sale.status == saleStatusOptions.confirmedDelivery" 
+      class="w3-block w3-margin-top" mat-raised-button
+      color="accent" type="submit" 
+      [disabled]="(loading$ | async) || !finishedForm.valid">
+      <b>Entregar</b>
+    </button> -->
+
+  </form>
 
 </div>

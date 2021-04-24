@@ -1,6 +1,8 @@
-<ng-container *ngIf="(user$|async)?.pendingPayment; else noPayment">
-  <app-pay-sale></app-pay-sale>
+<ng-container *ngIf="action$ | async">
+  <ng-container *ngIf="(user$|async)?.pendingPayment; else noPayment">
+    <app-pay-sale></app-pay-sale>
+  </ng-container>
+  <ng-template #noPayment>
+    <app-register-sale></app-register-sale>
+  </ng-template>
 </ng-container>
-<ng-template #noPayment>
-  <app-register-sale></app-register-sale>
-</ng-template>

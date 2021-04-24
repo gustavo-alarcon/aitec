@@ -10,6 +10,7 @@ import { DatePipe } from '@angular/common';
 import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
 import { Zone } from 'src/app/core/models/product.model';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
+import { Waybill } from 'src/app/core/models/waybill.model';
 
 
 @Component({
@@ -67,7 +68,7 @@ export class SalesMasterComponent implements OnInit {
       end: new FormControl(endDate)
     });
 
-    this.status = Object.values(new saleStatusOptions())
+    this.status = Object.values(this.saleStatusOptions)
 
     this.statusForm = new FormControl('Todos')
     this.search = new FormControl('');
@@ -78,7 +79,7 @@ export class SalesMasterComponent implements OnInit {
 
     let beginDate = view.from;
     let endDate = new Date();
-    this.sales$ = combineLatest(
+    this.sales$ = combineLatest([
       this.dateForm.get('begin').valueChanges.pipe(
         startWith(beginDate),
         map(begin => begin.setHours(0, 0, 0, 0))
@@ -86,10 +87,9 @@ export class SalesMasterComponent implements OnInit {
       this.dateForm.get('end').valueChanges.pipe(
         startWith(endDate),
         map(end =>  end?end.setHours(23, 59, 59):null)
-      )
+      )]
     ).pipe(
       switchMap(([startdate,enddate]) => {
-        
         return this.dbs.getSales({ begin: startdate, end: enddate })
       }),
       map(sales => {
@@ -163,6 +163,16 @@ export class SalesMasterComponent implements OnInit {
     })
   }
 
+  // onCheckreferralGuide(sale: Sale, edit: boolean, event) {
+  //   event.stopPropagation()
+  //   if(edit){
+  //     this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
+  //       data: sale,
+  //     })
+  //   }
+    
+  // }
+
   getName(displayName: string): string {
     let name = displayName.split(" ");
     switch (name.length) {
@@ -202,8 +212,6 @@ export class SalesMasterComponent implements OnInit {
       'Distrito',
       'Provincia',
       'Referencia',           //Solo en el caso de entrega
-      // 'Sub-Total',
-      // 'Delivery',
 
       'Tipo Documento',
       'RUC',
@@ -229,8 +237,22 @@ export class SalesMasterComponent implements OnInit {
       'Usuario de Confirmación de Comprobante',
       'Número de comprobante',
 
+      'Guía de remisión',
+      'Usuario de delivery',
+      'Fecha de Confirmación de Delivery',
+      'Usuario de Confirmación de Delivery',
+
+      'Fecha de Entrega',
+      'Usuario de Entrega',
+      'Observaciones de Entrega',
+
       'Fecha de Anulación',
       'Usuario de Anulación',
+
+      'Calificación de servicio',
+      'Calificación de productos',
+      'Calificación de delivery',
+      'Observación',
 
       'Sub-total',
       'IGV',
@@ -259,7 +281,7 @@ export class SalesMasterComponent implements OnInit {
         sale.user.email,
         sale.user.personData.phone ?  sale.user.personData.phone: 'Sin número',
         sale.status,
-        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega a domicilio" : "A coordinar",
+        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega" : "A coordinar",
 
         sale.deliveryPickUp ? sale.delivery["address"] : sale.location ? sale.location.address : noData,
         sale.deliveryPickUp ? sale.delivery["departamento"] : sale.location ? sale.location.departamento : noData,
@@ -291,16 +313,30 @@ export class SalesMasterComponent implements OnInit {
         sale.confirmedDocumentData ? sale.confirmedDocumentData.confirmedBy : noData,
         sale.confirmedDocumentData ? sale.confirmedDocumentData.documentNumber : noData,
 
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.referralGuide ? sale.confirmedDeliveryData.referralGuide.orderCode : noData : noData,
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.deliveryUser.personData.name : noData,
+        sale.confirmedDeliveryData ? this.getXlsDate(sale.confirmedDeliveryData.confirmedAt) : noData,
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.confirmedBy.personData.name : noData,
+
+        sale.finishedData ? this.getXlsDate(sale.finishedData.finishedAt) : noData,
+        sale.finishedData ? sale.finishedData.finishedBy : noData,
+        sale.finishedData ? sale.finishedData.observation : noData,
+
         sale.cancelledData ? this.getXlsDate(sale.cancelledData.cancelledAt) : noData,
         sale.cancelledData ? sale.cancelledData.cancelledBy.personData.name : noData,
 
-        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) / 1.18).toFixed(2),
-        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) / 1.18 * 0.18).toFixed(2),
+        sale.rateData ? sale.rateData.serviceRate : noData,
+        sale.rateData ? sale.rateData.productRate : noData,
+        sale.rateData ? sale.rateData.deliveryRate : noData,
+        sale.rateData ? sale.rateData.observation ? sale.rateData.observation : noData : noData,
+
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) / 1.18).toFixed(2),
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) / 1.18 * 0.18).toFixed(2),
         sale.deliveryPrice ? sale.deliveryPrice : "0",
         sale.couponDiscount ? sale.couponDiscount : "0",
         sale.additionalPrice ? sale.additionalPrice : "0",
 
-        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user) + 
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) + 
         (sale.deliveryPrice ? sale.deliveryPrice : 0)-
         (sale.couponDiscount ? sale.couponDiscount : 0)+
         (sale.additionalPrice ? sale.additionalPrice : 0)).toFixed(2),
@@ -391,9 +427,13 @@ export class SalesMasterComponent implements OnInit {
 
   giveTotalSalesPrice(sales: Sale[]): number {
     return sales.reduce((a, b) => a + 
-      this.dbs.giveProductPriceOfSale(b.requestedProducts, b.user) 
+      this.dbs.giveProductPriceOfSale(b.requestedProducts, b.user.mayoristUser) 
       + b.deliveryPrice - Number(b.couponDiscount) + Number(!!b.additionalPrice ? b.additionalPrice : 0)
       , 0)
+  }
+
+  printPdf(data: Waybill){
+    this.dbs.printWaybillPdf(data)
   }
 
 }

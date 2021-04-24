@@ -38,7 +38,7 @@
           <button 
             (click)="downloadXls(salesFiltered)" mat-raised-button [disabled]="!salesFiltered.length"
             class="w3-margin-bottom"
-            color="accent" type="button" >
+            color="primary" type="button" >
               Descargar Excel
           </button>
       </div>
@@ -113,34 +113,31 @@
                 </div>
                 <div class="divider"></div>
                 <div class="client">
-                    <div class="overflow_container">
-                        <mat-icon>group</mat-icon>
+                    <div matTooltip="Nombre de Repartidor" class="overflow_container">
+                        <mat-icon>local_shipping</mat-icon>
                         <b> 
                             {{sale.confirmedDeliveryData?.deliveryUser?.personData?.name}} 
                             {{sale.confirmedDeliveryData?.deliveryUser?.personData?.lastName}}
                         </b>
                     </div>
                     <div matTooltip="Fecha Solicitada" class="overflow_container">
-                      <mat-icon style="font-size:20px;"
-                        color="primary">assignment_turned_in
+                      <mat-icon style="font-size:20px;">assignment_turned_in
                       </mat-icon>
                       {{sale.createdAt['seconds']*1000 | date:'dd/MM/yyyy'}}
                     </div>
                     <div matTooltip="Fecha de asignación" class="overflow_container">
-                      <mat-icon style="font-size:20px;"
-                        color="primary">assignment_turned_in
+                      <mat-icon style="font-size:20px;">query_builder
                       </mat-icon>
-                      Asignado: {{sale.confirmedDeliveryData.confirmedAt['seconds']*1000 | date:'dd/MM/yyyy'}}
+                      {{sale.confirmedDeliveryData.confirmedAt['seconds']*1000 | date:'dd/MM/yyyy'}}
                     </div>
                     <div matTooltip="Fecha de entrega" class="overflow_container">
-                      <mat-icon style="font-size:20px;"
-                        color="primary">assignment_turned_in
+                      <mat-icon style="font-size:20px;">query_builder
                       </mat-icon>
                       <span *ngIf="sale.finishedData; else noDelivered">
-                        Entregado: {{sale.finishedData.finishedAt['seconds']*1000 | date:'dd/MM/yyyy'}}
+                        {{sale.finishedData.finishedAt['seconds']*1000 | date:'dd/MM/yyyy'}}
                       </span>
-                      <ng-template>
-                        Entrega pendiente
+                      <ng-template #noDelivered>
+                        Sin entregar
                       </ng-template>
                     </div>
                 </div>
@@ -157,7 +154,7 @@
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b style="color: white;">
-                          Pago por: {{sale.payType.name | titlecase}}
+                          {{sale.payType.name | titlecase}}
                         </b>
                     </button>
                     <button 
@@ -166,7 +163,7 @@
                         style="overflow: auto; background: #A1A1A1;"
                         mat-flat-button type=button>
                         <b style="color: white;">
-                          Nro de paq.: {{sale | totalQuantity}}
+                          Nro de paq.: {{sale | totalQuantity | number: '2.0-0'}}
                         </b>
                     </button>
                 </div>

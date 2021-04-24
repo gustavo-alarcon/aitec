@@ -37,12 +37,12 @@ import { LocationDialogComponent } from './location-dialog/location-dialog.compo
 import { PaymentComponent } from './payment/payment.component';
 
 import { HttpClientModule } from '@angular/common/http';
-import { PaymentErrorComponent } from './payment-error/payment-error.component';
 import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
 import { MatBadgeModule } from '@angular/material/badge';
 import { RegisterSaleComponent } from './register-sale/register-sale.component';
 import { PaySaleComponent } from './pay-sale/pay-sale.component';
 import { PaymentCardComponent } from './payment-card/payment-card.component';
+import { PaymentCardFormComponent } from './payment-card-form/payment-card-form.component';
 
 @NgModule({
   declarations: [
@@ -52,10 +52,10 @@ import { PaymentCardComponent } from './payment-card/payment-card.component';
     ShoppingListMobileComponent,
     LocationDialogComponent,
     PaymentComponent,
-    PaymentErrorComponent,
     RegisterSaleComponent,
     PaySaleComponent,
     PaymentCardComponent,
+    PaymentCardFormComponent
   ],
   imports: [
     CommonModule,

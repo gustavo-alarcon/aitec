@@ -80,6 +80,7 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
   ],
   exports: [
     ReferralGuideDialogComponent,
+    MatFormFieldModule,
     CommonModule
   ]
 })

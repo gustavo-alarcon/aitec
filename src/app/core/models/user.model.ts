@@ -4,9 +4,13 @@ export interface User {
   uid?: string;
   email: string;
   role?:string;
-  customerType?:string;         //'Mayorista'
+
+  //customerType?:"Mayorista" | "Minorista";         //'Mayorista'
   orders?:number;
+
   deliveryUser?: boolean;
+  mayoristUser?: boolean;
+
   location?: {
     address: string;
     reference: string;
@@ -41,6 +45,7 @@ export interface User {
 
   shoppingCar?: SaleRequestedProducts[]
   pendingPayment?: boolean              //Used to indicate if a payment is expected
+  saleNumber?: number                   //Total number of transactions
   
 }
 interface naturalPerson {

@@ -14,7 +14,7 @@ export class SalePricePipe implements PipeTransform {
 
   transform(requestedProducts: {product: Product, quantity: number}[], 
             user: User): number {
-    let price = this.dbs.giveProductPriceOfSale(requestedProducts, user)
+    let price = this.dbs.giveProductPriceOfSale(requestedProducts, user.mayoristUser)
     return price
   }
 

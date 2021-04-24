@@ -1,7 +1,7 @@
 <div *ngIf="auth.user$ | async as user" class="general-container background-color">
   <div style="display: flex; flex-direction: row; justify-content: space-between;">
-      <b style="font-size: 28px;">
-          #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
+      <b *ngIf="sale" style="font-size: 28px;">
+          Venta #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
       </b>
       <!-- <span>
           <button *ngIf="sale.status == saleStatusOptions.requested else deshacer" style="height: 40px;"
@@ -45,6 +45,24 @@
           </mat-error>
       </mat-form-field>
   </div> -->
+
+  <button 
+    class="w3-block" mat-flat-button disabled
+    color="accent" style="overflow: auto; color:white; background: #A1A1A1;" type=button>
+    <b>Nro de paquetes: {{sale | totalQuantity | number:'2.0-0'}}</b>
+  </button>
+
+  <button 
+    *ngIf="sale.payType.type == 1"
+    class="w3-block w3-margin-top" mat-flat-button 
+    color="accent" style="overflow: auto; color:white;" type=button>
+    <b>Cobrar {{((sale.requestedProducts | salePrice: sale.user) 
+        + (sale.deliveryPrice ? sale.deliveryPrice : 0)
+        + (sale.couponDiscount ? sale.couponDiscount : 0 )
+        + (sale.additionalPrice ? sale.additionalPrice : 0))
+        | currency:'S/.'}}</b>
+  </button>
+
   <div class="w3-margin-top">
       <table [formGroup]="productForm" class="table-sale">
           <tr>
@@ -160,6 +178,83 @@
 
             </td>
           </tr>
+          <tr>
+            <td class="table-sale__td " colspan="3">
+              <span>Nombre del cliente: 
+                {{sale.user.personData.name}} 
+                {{sale.user.personData.lastName ? sale.user.personData.lastName : ""}}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-sale__td " colspan="3">
+              <span>Comprobante: 
+                {{sale.document}} {{sale.confirmedDocumentData.documentNumber}}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-sale__td " colspan="3">
+              <span>Teléfono: 
+                {{sale.user.personData.phone}}
+              </span>
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="table-sale__td " colspan="3">
+              <span>Tipo de entrega: 
+                {{sale.deliveryPickUp ? "En tienda" : sale.delivery ? "Delivery" : "A coordinar"}}
+              </span>
+            </td>
+          </tr>
+
+          <ng-container *ngIf="sale.delivery">
+            <tr>
+              <td class="table-sale__td " colspan="3">
+                <span>Dirección: 
+                  {{sale.delivery?.address ? sale?.delivery?.address : sale?.location?.address}}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="sale.location?.reference">
+              <td class="table-sale__td " colspan="3">
+                <span>Referencia: 
+                  {{sale.location.reference}}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="table-sale__td " colspan="3">
+                <span>Distrito: 
+                  {{sale.delivery?.distrito ? sale?.delivery?.distrito.name : sale?.location?.distrito.name}}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="table-sale__td " colspan="3">
+                <span>Provincia: 
+                  {{sale.delivery?.provincia ? sale?.delivery?.provincia.name : sale?.location?.provincia.name}}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="table-sale__td " colspan="3">
+                <span>Departamento: 
+                  {{sale.delivery?.departamento ? sale?.delivery?.departamento.name : sale?.location?.departamento.name}}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="sale.observation as obs">
+              <td class="table-sale__td " colspan="3">
+                <span>Observaciones: 
+                  {{obs}}
+                </span>
+              </td>
+            </tr>
+            
+          </ng-container>
+          
           <!-- <tr>
               <td class="table-sale__td "
                 colspan="2">
@@ -253,6 +348,7 @@
                   </td>
           </tr> -->
       </table>
+      
   </div>
   <!-- <div class="total-div">
       <div class="bigCheckbox">
@@ -342,7 +438,7 @@
   </mat-form-field>
 
   <!-- confirmedRequestData -->
-  <form style="display:contents" 
+  <form style="display:none" 
         (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedRequest, user)"
         [formGroup]="confirmedRequestForm" 
         *ngIf="
@@ -474,7 +570,7 @@
 
   <!-- confirmedDeliveryData -->
   <form (ngSubmit)="onSubmitForm(saleStatusOptions.confirmedDelivery, user)"
-    style="display: contents" [formGroup]="confirmedDeliveryForm" 
+    style="display: none" [formGroup]="confirmedDeliveryForm" 
     *ngIf="
       sale.status == saleStatusOptions.confirmedDocument ||
       sale.status == saleStatusOptions.confirmedDelivery
@@ -482,10 +578,10 @@
       <div style="width: 100%;
           display:flex; flex-direction: row; justify-content: space-between">
           <!-- referralGuide  -->
-          <mat-form-field style="width: 32%" appearance="outline">
+          <mat-form-field style="width: 100%" appearance="outline">
               <mat-label>Guia de remisión</mat-label>
               <input 
-                [value]="confirmedDeliveryForm.get('referralGuide').value" 
+                [value]="confirmedDeliveryForm.get('referralGuide').value?.orderCode" 
                 readonly 
                 autocomplete="off" type="text" matInput placeholder="Guia de remisión">
               <mat-error>
@@ -495,22 +591,21 @@
           </mat-form-field>
 
           <!-- documentNumber  -->
-          <mat-form-field style="width: 64%" appearance="outline">
+          <!-- <mat-form-field style="width: 64%" appearance="outline">
               <mat-label>Número de Comprobante</mat-label>
               <input 
                 [value]="confirmedDeliveryForm.get('referralGuide').value"
                 readonly
                 autocomplete="off" type="text" matInput placeholder="Número de Comprobante">
-              <!-- <mat-error>
-                  Campo requerido
-              </mat-error> -->
-          </mat-form-field>
+              
+          </mat-form-field> -->
       </div>
 
       <!-- deliveryUser  -->
       <mat-form-field style="width: 100%" class="w3-margin-top" appearance="outline">
-        <mat-label>Asignar repartidor</mat-label>
+        <mat-label>Repartidor</mat-label>
         <input 
+          placeholder="Asignar Repartidor"
           [readonly]="sale.status != saleStatusOptions.confirmedDocument"
           autocomplete="off" 
           formControlName="deliveryUser" 
@@ -542,6 +637,65 @@
           <p class="invoice_field">{{sale.companyName ? sale.companyName : 'No suministrado'}}</p>
           <p class="invoice_field">{{sale.companyAddress ? sale.companyAddress : 'No suministrado'}}</p>
       </div> -->
+  </form>
+
+  <!-- finishedData -->
+  <form (ngSubmit)="onSubmitForm(saleStatusOptions.finished, user)"
+    style="display: contents" [formGroup]="finishedForm" 
+    *ngIf="
+      sale.status == saleStatusOptions.confirmedDocument ||
+      sale.status == saleStatusOptions.confirmedDelivery ||
+      sale.status == saleStatusOptions.finished
+      ">
+
+      <!-- observation -->
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Observaciones</mat-label>
+        <textarea formControlName="observation" #observation2
+            [readonly]="sale.status != saleStatusOptions.confirmedDelivery" rows="4" matInput
+            maxlength="150"></textarea>
+        <mat-hint align="end">{{observation2.value?.length || 0}}/150</mat-hint>
+    </mat-form-field>
+
+    <ng-container *ngIf="sale?.location?.coord as coord">
+      <div class="w3-margin-top"
+        style="width: 100%;
+        display:flex; flex-direction: row; justify-content: space-around">
+
+          <a mat-stroked-button
+            style="width: 45%"
+            [href]="'https://waze.com/ul?ll='+coord.lat+','+coord.lng+'&z=10'"
+            target="_blank">
+            Waze
+          </a>
+
+          <a mat-stroked-button
+            style="width: 45%"
+            [href]="'https://www.google.com/maps/search/?api=1&query='+coord.lat+','+coord.lng"
+            target="_blank">
+            Maps
+          </a>
+      </div>
+
+      <div 
+        class="w3-margin-top w3-margin-bottom">
+        <google-map height="200px" width="100%" 
+          [center]="coord" 
+          [zoom]="15">
+
+          <map-marker [position]="coord"></map-marker>
+        </google-map>
+      </div>
+    </ng-container>
+
+    <button 
+      *ngIf="sale.status == saleStatusOptions.confirmedDelivery" 
+      class="w3-block w3-margin-top" mat-raised-button
+      color="accent" type="submit" 
+      [disabled]="(loading$ | async) || !finishedForm.valid">
+      <b>Entregar</b>
+    </button>
+
   </form>
 
 </div>

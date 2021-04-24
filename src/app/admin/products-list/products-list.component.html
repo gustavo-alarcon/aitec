@@ -49,15 +49,18 @@
                 Imagen referencial
               </th>
               <td mat-cell *matCellDef="let raw" class="w3-center ms-flex ms-flex--center" style="padding: 10px">
-                <a href="{{ raw.gallery[raw.indCover].photoURL }}" target="_blank" *ngIf="raw.gallery[raw.indCover].photoURL; else defaultPicture">
+                <a 
+                  *ngIf="raw.gallery[raw.indCover]?.photoURL as photoURL; else defaultPicture"
+                  href="{{ photoURL }}" target="_blank" >
                   <div class="reveal">
                     <div [className]="raw.promo ? ' triangleTopLeft' : ''">
                       <div class="promo" *ngIf="raw['promo']">OFERTA</div>
-                      <img [defaultImage]="defaultImage" [lazyLoad]="raw.gallery[raw.indCover].photoURL" [offset]="100"
+                      <img [defaultImage]="defaultImage" [lazyLoad]="photoURL" [offset]="100"
                         style="object-fit: contain; width: 90px; height: 90px" />
                     </div>
                   </div>
                 </a>
+
                 <ng-template #defaultPicture>
                   <div style="height: 120px; padding: 6px 6px">
                     <img src="../../../assets/images/no-image.png" style="max-width: 100%; height: 100%" />

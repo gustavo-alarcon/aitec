@@ -1,3 +1,7 @@
+/**
+ * Firestore document
+ * Path of collection: /db/aitec/config/generalConfig
+ */
 export interface GeneralConfig{
   categories: object[];
   salesRCounter: number;
@@ -8,4 +12,12 @@ export interface GeneralConfig{
     visible: boolean,
     imageURL: string
   }
+}
+
+/**
+ * Firestore document
+ * Path of collection: /db/aitec/config/salesCorrelative
+ */
+export interface SalesCorrelative{
+  rCorrelative: number;
 }

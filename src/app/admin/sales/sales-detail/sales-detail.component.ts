@@ -43,6 +43,8 @@ export class SalesDetailComponent implements OnInit {
   saleStatusOptions = new saleStatusOptions();
   status$: any;
   advisers$: Observable<Adviser[]>;
+  deliveryUser$: Observable<any[]>;
+  finishedForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -53,7 +55,7 @@ export class SalesDetailComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    //console.log(this.sale)
+    console.log(this.sale)
     this.initForm()
     this.initObservables()
   }
@@ -61,7 +63,7 @@ export class SalesDetailComponent implements OnInit {
 
 
   initForm() {
-    console.log(this.sale)
+    console.log("detail")
 
     this.searchProductControl = new FormControl("")
 
@@ -116,7 +118,44 @@ export class SalesDetailComponent implements OnInit {
       ]
     })
 
+    this.confirmedDeliveryForm = this.fb.group({
+      referralGuide: [
+        !this.sale.confirmedDeliveryData ? null :
+          this.sale.confirmedDeliveryData.referralGuide ? 
+          this.sale.confirmedDeliveryData.referralGuide : null,
+        Validators.required
+      ],
+      deliveryUser: [
+        !this.sale.confirmedDeliveryData ? null :
+          this.sale.confirmedDeliveryData.deliveryUser ? 
+          this.sale.confirmedDeliveryData.deliveryUser : null,
+        [Validators.required, this.objectValidator()]
+      ],
+    })
+
+    this.finishedForm = this.fb.group({
+      observation: !this.sale.finishedData ? null:
+        this.sale.finishedData.observation
+    })
+
     this.adviserForm = new FormControl(this.sale.adviser, this.objectValidator())
+
+  }
+
+  //initRequestConfirmed
+
+  getDateFromDB(date: Date) {
+    let parsedDate = new Date(1970);
+    parsedDate.setSeconds(date['seconds'])
+    return parsedDate
+  }
+
+  initObservables() {
+    this.status$ = this.confirmedRequestForm.valueChanges.pipe(
+      tap(res => {
+        console.log(res)
+      })
+    ).subscribe()
 
     this.advisers$ = combineLatest(
       [
@@ -154,22 +193,41 @@ export class SalesDetailComponent implements OnInit {
       })
     );
 
-  }
+    this.deliveryUser$ = combineLatest(
+      [
+        this.confirmedDeliveryForm.get("deliveryUser").valueChanges.pipe(
+          startWith(this.sale.confirmedDeliveryData?.deliveryUser)
+          ),
+        this.dbs.getDeliveryUserStatic().pipe(map(deliveryGuys => {
+          let newDeliveryGuys: User[] = []
 
-  //initRequestConfirmed
+          if(this.sale?.confirmedDeliveryData?.deliveryUser){
+            newDeliveryGuys = [
+              this.sale.confirmedDeliveryData.deliveryUser,
+              ...deliveryGuys.filter(ad => ad.uid != this.sale.confirmedDeliveryData.deliveryUser.uid)
+            ]
+          } else {
+            newDeliveryGuys = [...deliveryGuys]
+          }
 
-  getDateFromDB(date: Date) {
-    let parsedDate = new Date(1970);
-    parsedDate.setSeconds(date['seconds'])
-    return parsedDate
-  }
+          return newDeliveryGuys
+        }))
+      ]
+    ).pipe(
+      map(([value, deliveryGuys]) => {
+        console.log(value)
+        let filt = null
+        if(value){
+          filt = typeof value == 'object' ? ((<User>value).personData.name+" "+(<User>value).personData["lastName"]) : (<string>value)
+        } else {
+          filt = ""
+        }
 
-  initObservables() {
-    this.status$ = this.confirmedRequestForm.valueChanges.pipe(
-      tap(res => {
-        console.log(res)
+        return deliveryGuys.filter((el) =>
+          value ? (el.personData.name+" "+el.personData["lastName"]).toLowerCase().includes(filt.toLowerCase()) : true
+        );
       })
-    ).subscribe()
+    );
 
     //Search Product
     // this.products$ = combineLatest([
@@ -331,6 +389,7 @@ export class SalesDetailComponent implements OnInit {
       )
   }
 
+
   //newStatus will work as an old status when we edit (deshacer)
   //edit=true for deschacer
   onSubmitForm(newStatus: Sale['status'], user: User, downgrade?: boolean) {
@@ -391,6 +450,11 @@ export class SalesDetailComponent implements OnInit {
           return this.saleStatusOptions.confirmedRequest
         case this.saleStatusOptions.confirmedRequest:
           return this.saleStatusOptions.confirmedDocument
+        case this.saleStatusOptions.confirmedDocument:
+          return this.saleStatusOptions.confirmedDelivery
+        case this.saleStatusOptions.confirmedDelivery:
+          return this.saleStatusOptions.finished
+
       }
     }
   }
@@ -517,6 +581,8 @@ export class SalesDetailComponent implements OnInit {
         }
         sale.confirmedRequestData = null
         sale.confirmedDocumentData = null
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
         break;
       case this.saleStatusOptions.confirmedRequest:
         sale.confirmedRequestData = {
@@ -527,12 +593,34 @@ export class SalesDetailComponent implements OnInit {
           confirmedAt: new Date(),
         }
         sale.confirmedDocumentData = null
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
         break;
       case this.saleStatusOptions.confirmedDocument:
         sale.confirmedDocumentData = {
           documentNumber: this.confirmedDocumentForm.get("documentNumber").value,
           confirmedBy: user,
           confirmedAt: date,
+        }
+        sale.confirmedDeliveryData = null
+        sale.finishedData = null
+        break;
+      case this.saleStatusOptions.confirmedDelivery:
+        sale.confirmedDeliveryData = {
+          deliveryUser: this.confirmedDeliveryForm.get("deliveryUser").value,
+
+          referralGuide: this.sale.confirmedDeliveryData.referralGuide,
+
+          confirmedBy: user,
+          confirmedAt: date,        
+        }
+        sale.finishedData = null
+        break;
+      case this.saleStatusOptions.finished:
+        sale.finishedData = {
+          observation: this.finishedForm.get("observation").value,
+          finishedAt: date,
+          finishedBy: user
         }
     }
     
@@ -602,6 +690,10 @@ export class SalesDetailComponent implements OnInit {
 
   showAdviser(adv: Adviser): string | undefined {
     return adv ? adv.displayName : "Sin asesor";
+  }
+
+  showDeliveryUser(usr: User): string | undefined {
+    return usr ? usr.personData.name + (usr.personData["lastName"] ? (" "+ usr.personData["lastName"]) : ""):""
   }
 
   objectValidator() {

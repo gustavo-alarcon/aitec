@@ -21,7 +21,7 @@
 </div>
 <ng-template #noAdded>
   <button mat-flat-button color="primary" (click)="add(product)" class="product__add" 
-    [style.visibility]="chosen.virtualStock > 0 ? 'visible' : 'hidden'">
+    [style.visibility]="(chosen.virtualStock - (chosen.reservedStock ? chosen.reservedStock : 0)) > 0 ? 'visible' : 'hidden'">
     <mat-icon>shopping_cart</mat-icon>
     <span> Agregar al Carrito</span>
   </button>

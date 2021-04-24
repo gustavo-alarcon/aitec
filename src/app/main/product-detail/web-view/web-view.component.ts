@@ -77,7 +77,7 @@ export class WebViewComponent implements OnInit {
             let prodColor = prodDb.products.find(el => el.sku == color.sku)
             // console.log(prodColor)
             if(!!prodColor){
-              return prodColor.virtualStock > 0
+              return prodColor.virtualStock - (prodColor.reservedStock ? prodColor.reservedStock : 0) > 0
             } else {
               return false
             }

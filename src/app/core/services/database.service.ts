@@ -29,12 +29,15 @@ import { SerialNumber } from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
-import { Waybill, WaybillProductList } from '../models/waybill.model';
+import { TRANSFER_REASON, Waybill, WaybillProductList } from '../models/waybill.model';
 import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 import { Stores } from '../models/stores.model';
 import { Coupon } from '../models/coupon.model';
 import { Payments } from '../models/payments.model';
 import { Adviser } from '../models/adviser.model';
+import jsPDF from 'jspdf';
+import { saveAs } from 'file-saver';
+
 
 @Injectable({
   providedIn: 'root',
@@ -94,13 +97,16 @@ export class DatabaseService {
     // this.updateProductListWithWarehouses();
   }
 
+  reservedSalesRef: 'db/aitec/reservedSales'  = 'db/aitec/reservedSales'     //To reserve sales
+  reStockSalesRef: 'db/aitec/reStockSales'  = 'db/aitec/reStockSales'          //When deleting reserving sales, we should re stock
+  usersRef: 'users' = 'users'
+
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
   productsListColl = this.afs.firestore.collection(this.productsListRef)
   packagesListRef: `db/aitec/packagesList` = `db/aitec/packagesList`;
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
-  reStockRef: `db/aitec/reStock` = `db/aitec/reStock`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
@@ -468,14 +474,14 @@ export class DatabaseService {
 
   getPaymentsChanges(): Observable<Payments[]> {
     return this.afs
-      .collection<Payments>(`/db/aitec/config/generalConfig/payments`, (ref) =>
+      .collection<Payments>(`${this.configRef}/generalConfig/payments`, (ref) =>
         ref.orderBy('createdAt', 'desc')
       ).valueChanges().pipe(
         map(payList => {
           return payList.map(pay => {
             return {
               ...pay,
-              type: pay.voucher ? 3 : pay.name.includes('arjeta') ? 2 : 1
+              type: pay.voucher ? 3 : pay.name.toLowerCase().includes('tarjeta') ? 2 : 1
             }
           })
         })
@@ -905,9 +911,9 @@ export class DatabaseService {
   }
 
 
-  saveSale(sale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
+  reserveSale(sale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
     const batch = this.afs.firestore.batch()
-    const saleRef = this.afs.firestore.collection(this.salesRef).doc();
+    const saleRef = this.afs.firestore.collection(this.reservedSalesRef).doc();
     const usersRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid)
 
     let newSale = {...sale}
@@ -917,7 +923,7 @@ export class DatabaseService {
     //clearing bakset
     batch.update(usersRef, {shoppingCar: []})
 
-    return [batch, this.afs.collection(this.salesRef).doc<Sale>(saleRef.id)]
+    return [batch, this.afs.collection(this.reservedSalesRef).doc<Sale>(saleRef.id)]
 
   }
 
@@ -1009,7 +1015,7 @@ export class DatabaseService {
   cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch{
     const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
     const userRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid);
-    const reStockRef = this.afs.firestore.collection(this.reStockRef).doc(sale.id);
+    const reStockRef = this.afs.firestore.collection(this.reStockSalesRef).doc(sale.id);
 
     let batch = this.afs.firestore.batch()
     batch.set(reStockRef, sale)
@@ -1058,9 +1064,9 @@ export class DatabaseService {
   }
 
   getPayingSales(userId: string): Observable<Sale> {
-    let status = (new saleStatusOptions()).paying
+    let status = "Pagando"
     return this.afs
-      .collection<Sale>(`/db/aitec/sales`, (ref) =>
+      .collection<Sale>(this.reservedSalesRef, (ref) =>
         ref.where('user.uid', '==', userId).where('status', '==', status).limit(1)
       )
       .valueChanges().pipe(map(sales => sales[0]));
@@ -1075,10 +1081,44 @@ export class DatabaseService {
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
-          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc").limitToLast(3)
+          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc")
       )
       .valueChanges();
   }
+
+  getSalesRanking(date: { begin: Date; end: Date }): Observable<Sale[]> {
+    let real = {
+      begin: new Date(date.begin),
+      end: new Date(date.end)
+    }
+    return this.afs
+      .collection<Sale>(this.salesRef, (ref) =>
+        ref
+          .where('createdAt', '<=', real.end)
+          .where('createdAt', '>=', real.begin)
+          .orderBy("createdAt", "asc")
+      )
+      .valueChanges().pipe(map(sale => {
+        return sale.filter(el => !!el.rateData)
+      }));
+  }
+
+  getSalesFilteredStatus(date: { begin: Date; end: Date }, statusList: Array<Sale["status"]>): Observable<Sale[]> {
+    let real = {
+      begin: new Date(date.begin),
+      end: new Date(date.end)
+    }
+    return this.afs
+      .collection<Sale>(this.salesRef, (ref) =>
+        ref
+          .where('createdAt', '<=', real.end)
+          .where('createdAt', '>=', real.begin)
+          .where('status', 'in', statusList)
+          .orderBy("createdAt", "asc")
+      )
+      .valueChanges();
+  }
+
   getSaleId(saleId: string): Observable<Sale>{
     return this.afs.collection(this.salesRef).doc<Sale>(saleId).valueChanges()
   }
@@ -1435,19 +1475,11 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  editCustomerType(user: User, customerType: string) {
-    const userRef = this.afs.firestore.collection(`/users/`).doc(user.uid);
+  editUserType(userId: string, type: "mayoristUser" | "deliveryUser", action: boolean): firebase.default.firestore.WriteBatch{
+    const userDoc = this.afs.firestore.collection(this.userRef).doc(userId);
     const batch = this.afs.firestore.batch();
-
-    user.customerType = customerType;
-
-    batch.update(userRef, user);
-
-    batch.commit().then(
-      ref => {
-
-      }
-    );
+    batch.update(userDoc, {[type]: action})
+    return batch
   }
 
   getOneCoupon(id) {
@@ -1638,8 +1670,8 @@ export class DatabaseService {
 
     let kardex: Kardex = {
       id: kardexProductRef.id,
-      type: '1',
-      operationType: '1',
+      type: 1,
+      operationType: 1,
       invoice: invoice,
       waybill: waybill,
       inflow: serialList.length,
@@ -1766,6 +1798,57 @@ export class DatabaseService {
           referralGuide: waybill
         }
       })
+
+      //Saving kardex
+      let idProdList = Array.from(new Set(sale.requestedProducts.map(el => el.product.id)))
+
+      let idStockChange = idProdList.map(id => {
+        
+        let products = sale.requestedProducts.filter(el => el.product.id == id)
+        let quantity = products.reduce((prev, curr) => prev + curr.quantity, 0)
+        let unitPrice = this.giveProductPrice({product: products[0].product, quantity}, user.mayoristUser) / quantity
+
+        return {
+          productId: id,
+          quantity,
+          unitPrice
+        }
+      })
+
+      idStockChange.forEach(el => {
+
+        let kardexDoc = this.afs.firestore.collection(this.productsListRef+`/${el.productId}/stockChange`).doc()
+        let kardex: Kardex = {
+          id: kardexDoc.id,
+          productId: el.productId,
+          type: sale.document == "Boleta" ? 3 : 1,
+          serie: null,
+          correlative: sale.correlative,
+          operationType: 1,     //Venta
+  
+          invoice: sale.confirmedDocumentData.documentNumber,
+          waybill: waybill.orderCode,
+        
+          inflow: false,        //se extraen productos
+        
+          quantity: el.quantity,
+          unitPrice: el.unitPrice,
+          totalPrice: el.quantity*el.unitPrice,
+
+          finalUpdated: false,
+          finalQuantity: null,
+          finalUnitPrice: null,
+          finalTotalPrice: null,
+        
+          createdBy: sale.user,
+          createdAt: new Date(),
+        }
+        
+        //update kardex
+        batch.set(kardexDoc, kardex)
+      })
+
+      
     }
 
     batch.set(referralRef, waybill);
@@ -1872,27 +1955,227 @@ export class DatabaseService {
   }
 
   //Calculator functions
-  //mayorista is given in user.customerType == "Mayorista"
-  giveProductPrice(item: {product: Product, quantity: number}, customerType: string): number {
-    let may = (customerType == "Mayorista")
-    if (!may && item.product.promo) {
-      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.product.priceMay;
-      return promTotalPrice + noPromTotalPrice;
+  giveProductPrice(item: {product: Product, quantity: number}, mayorist: boolean): number {
+    if (item.product.promo) {
+
+      if(((item.product.promoData.type == 1) && (!mayorist)) || 
+        ((item.product.promoData.type == 2) && (mayorist)) || 
+        ((item.product.promoData.type == 3))){
+
+          let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+          let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+          let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+          let noPromTotalPrice = noPromTotalQuantity * (mayorist ? item.product.priceMay : item.product.priceMin);
+
+          return promTotalPrice + noPromTotalPrice;
+
+        }
+      
     }
     else {
-      return item.quantity * item.product.priceMin
+      return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
     }
   }
 
-  giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], user: User): number{
+  giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], mayorist: boolean): number{
     let sum = [...requestedProducts]
-      .map((el) => this.giveProductPrice(el, user.customerType))
+      .map((el) => this.giveProductPrice(el, mayorist))
       .reduce((a, b) => a + b, 0);
 
     return sum
   }
+
+  //Waybill printing
+  printWaybillPdf(data: Waybill){
+    console.log(data)
+    let doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    })
+
+    //Importando Plantilla
+    let img = new Image(595,842)
+    img.src = '../../../assets/images/guia_rem.png';
+
+    let itemsNumber = data.productList.length
+    let itemIndex = 0
+
+    for(let j = 0; j<Math.ceil(itemsNumber/15); j++){
+      doc.addImage(img, 'PNG', 0, 11, 210, 272);
+
+      //Setting body styles
+      doc.setFontSize(10)
+
+      //writing body
+      //Header
+        //N° de guia de remisión
+        doc.setFontSize(16)
+        doc.text(data.orderCode, 137, 57, {maxWidth: 48, align: "left"})
+        doc.setFontSize(10)
+        //Nombre de destinatario
+        doc.text(
+          doc.splitTextToSize(data.addressee, 57).slice(0,2).join(" "), 
+          55, 76, {align: "left", maxWidth: 57})
+        //Destinatario RUC
+        doc.text(String(data.dni), 145, 76, {align: "left"})
+        //Dirección de llegada
+        doc.text(
+          doc.splitTextToSize(data.arrivalPoint, 57).slice(0,2).join(" "), 
+          55, 84, {align: "left", maxWidth: 57})
+        //Fecha de emisión
+        let emisionDate: {
+          year: number;
+          month: string;
+          day: string;
+          hours: number;
+          minutes: string;
+        } = null
+        if(data.createdAt instanceof Date){
+          emisionDate = this.getDateFromSec(data.createdAt.valueOf()/1000)
+        } else {
+          emisionDate = this.getDateFromSec(data.createdAt["seconds"])
+        }
+        doc.text(`${emisionDate.day}/${emisionDate.month}/${emisionDate.year}`, 145, 84, {align: "left"})
+        //Direccion de partida
+        doc.text(
+          doc.splitTextToSize(data.startingPoint, 57).slice(0,2), 
+          55, 92, {align: "left"})
+        //Fecha de inicio de traslado
+        let transferDate: {
+          year: number;
+          month: string;
+          day: string;
+          hours: number;
+          minutes: string;
+        } = null
+        if(data.transferDate instanceof Date){
+          transferDate = this.getDateFromSec(data.transferDate.valueOf()/1000)
+        } else {
+          transferDate = this.getDateFromSec(data.transferDate["seconds"])
+        }
+        doc.text(`${transferDate.day}/${transferDate.month}/${transferDate.year}`, 145, 92, {align: "left"})
+      //Item list
+      for(let i = 0; (i<15) && (itemIndex < itemsNumber); itemIndex++, i++){
+        //Number
+        doc.text((itemIndex+1).toString().padStart(2,"0"), 25, 114+6*i, {align:"center"})
+        //code
+        doc.text(data.productList[itemIndex].mainCode, 34, 114+6*i, {align: "left"})
+        //description
+        doc.text(
+          doc.splitTextToSize(data.productList[itemIndex].description, 69)[0], 
+          57, 114+6*i, {align:"left", maxWidth: 69})
+        //cantidad
+        doc.text(data.productList[itemIndex].quantity.toString().padStart(2,"0"), 136,114+6*i, {align: "center"})
+        //unit of measurement
+        doc.text(data.productList[itemIndex].unit, 165, 114+6*i, {align:"center"})
+        //weight
+        doc.text(data.productList[itemIndex].totalWeight ? data.productList[itemIndex].totalWeight.toString().padStart(2,"0") : "--", 185, 114+6*i, {align:"center"})
+      }
+      //Footer
+        //Cross of reason
+        let reasonDim = this.findWaybillTransferReason(data.transferReason)
+        doc.text("X", reasonDim.x, reasonDim.y, {align:"center"})
+        //Observation
+        doc.text(
+          doc.splitTextToSize(data.observations, 105).slice(0, 6).join(" "), 
+          18, 255, {align:"left", maxWidth: 105})
+      //New page
+      if(itemIndex != itemsNumber){
+        doc.addPage("a4", "portrait")
+      }
+    }
+
+    let blob = doc.output('blob');
+
+    saveAs(blob);
+
+  }
+
+  findWaybillTransferReason(reason: Waybill["transferReason"]): {x: number, y: number}{
+    let i = TRANSFER_REASON.findIndex(el => el.toLowerCase() == reason.toLowerCase())
+    let x = 0
+    if(i<5){
+      x=58.5
+      switch(i){
+        case 0:
+          return {x, y: 218.3};
+        case 1:
+          return {x, y: 224.2};
+        case 2:
+          return {x, y: 229.5};
+        case 3:
+          return {x, y: 234.8};
+        case 4:
+          return {x, y: 240.6};
+      }
+    } else if(i<9){
+      x=120
+      switch(i){
+        case 5:
+          return {x, y: 218.3};
+        case 6:
+          return {x, y: 225};
+        case 7:
+          return {x, y: 230};
+        case 8:
+          return {x, y: 235.2};
+      }
+    } else {
+      x=189.5
+      switch(i){
+        case 5:
+          return {x, y: 220.3};
+        case 6:
+          return {x, y: 226.2};
+        case 7:
+          return {x, y: 231.4};
+        case 8:
+          return {x, y: 236.6};
+        case 8:
+          return {x, y: 242.5};
+      }
+    }
+  }
+
+  getDateFromSec(seconds: number): {
+    year: number;
+    month: string;
+    day: string;
+    hours: number;
+    minutes: string;
+  } {
+    let date = new Date(1970);
+    date.setSeconds(seconds)
+    let month = '' + (date.getMonth() + 1);
+    let day = '' + date.getDate();
+    let year = date.getFullYear();
+    let hours = date.getHours();
+    let minutes = '' + date.getMinutes();
+
+    if (minutes.length < 2)
+      minutes = '0' + minutes;
+    if (month.length < 2)
+      month = '0' + month;
+    if (day.length < 2)
+      day = '0' + day;
+
+    return {year, month, day, hours, minutes}
+  }
+
+  //Used to update mayorist user. Delete
+  // updateUser(user: User[]){
+  //   let batch = this.afs.firestore.batch()
+  //   user.forEach( el => {
+    
+  //     let coll = this.afs.firestore.collection(this.userRef).doc(el.uid)
+  //     let bool = el.customerType == 'Mayorista'
+
+  //     batch.update(coll, {mayoristUser: bool})
+
+  //   })
+  //   return batch
+
+  // }
 
 }

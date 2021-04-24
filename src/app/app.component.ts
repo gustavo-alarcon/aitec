@@ -64,7 +64,7 @@ export class AppComponent {
       take(1),
       switchMap(user => {
         this.dbs.uidUser = user.uid
-        if (user.customerType == 'Mayorista') {
+        if (user.mayoristUser) {
           this.dbs.isMayUser.next(true)
         }else{
           this.dbs.isMayUser.next(false)

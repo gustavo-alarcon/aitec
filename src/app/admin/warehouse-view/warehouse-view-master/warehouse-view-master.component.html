@@ -38,7 +38,7 @@
           <button 
             (click)="downloadXls(salesFiltered)" mat-raised-button [disabled]="!salesFiltered.length"
             class="w3-margin-bottom"
-            color="accent" type="button" >
+            color="primary" type="button" >
               Descargar Excel
           </button>
       </div>
@@ -132,7 +132,7 @@
                 <div class="divider"></div>
                 <div class="status">
 
-                    <button color="primary" 
+                    <button color="accent" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b>{{sale.status}}</b>
@@ -140,15 +140,15 @@
                     <button 
                         [disabled]="sale?.confirmedDeliveryData?.referralGuide"
                         (click)="onCheckreferralGuide(sale, true, $event)"
-                        color="accent" 
+                        color="primary" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b style="color: white;">Generar guia</b>
                     </button>
                     <button 
                         [disabled]="!sale?.confirmedDeliveryData?.referralGuide"
-                        (click)="printPdf(sale)"
-                        color="accent" 
+                        (click)="printPdf(sale.confirmedDeliveryData.referralGuide)"
+                        color="primary" 
                         style="overflow: auto;"
                         mat-flat-button type=button>
                         <b style="color: white;">Ver guia</b>

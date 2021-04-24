@@ -46,13 +46,14 @@ export interface unitProduct {
   stock?:number;            //NO FUNCIONA
   realStock?: number;       
   virtualStock?: number;
+  reservedStock?: number;
 }
 
 interface PromoData {
   quantity: number;
-  promoPrice: number;
-  offer?: number;
-  type?: string;
+  promoPrice: number;       //precio unitario
+  offer?: number;           //percentage of disccount
+  type?: 1|2|3;             //1 for minorista, 2 for mayorista, 3 for todos
 }
 
 interface Gallery {

@@ -82,12 +82,14 @@ export class ShoppingCarService {
               map(prodListDB => {
                 //We validate stock
                 return reqProdList.some(reqProd => {
-                  //We first find the right product on prodListDB and then the color
-                  let prodColorDbStock = prodListDB.find(prodDb => (prodDb.sku == reqProd.product.sku)).products
-                                          .find(prodDbColor => prodDbColor.sku == reqProd.chosenProduct.sku)
-                                          .virtualStock
                   
-                  return (reqProd.quantity > prodColorDbStock) || (reqProd.quantity <1)
+                  //We first find the right product on prodListDB and then the color
+                  let prodColorDb = prodListDB.find(prodDb => (prodDb.sku == reqProd.product.sku)).products
+                                          .find(prodDbColor => prodDbColor.sku == reqProd.chosenProduct.sku)
+                  let reservedStock = !!prodColorDb.reservedStock ? prodColorDb.reservedStock : 0
+                  let prodDbStock = prodColorDb.virtualStock - reservedStock
+                  
+                  return (reqProd.quantity > prodDbStock) || (reqProd.quantity <1)
                 })
   
               })
@@ -114,7 +116,7 @@ export class ShoppingCarService {
   }
 
   varyProdNumber(prodSku: string, prodColSku: string, numb: number){
-    let prodList = [...this.getProdList()]
+    let prodList = this.getProdList() ? [...this.getProdList()] : []
     prodList.find(el => 
       (el.product.sku == prodSku) && (el.chosenProduct.sku == prodColSku)).quantity += numb
     this.reqProdListSubject.next(prodList)
@@ -130,7 +132,7 @@ export class ShoppingCarService {
 
   //Adding or deleting product
   addProd(prod: SaleRequestedProducts){
-    let prodList = [...this.getProdList()]
+    let prodList = this.getProdList() ? [...this.getProdList()] : []
     let product = prodList.find(el => 
       (el.product.sku == prod.product.sku) && (el.chosenProduct.sku == prod.chosenProduct.sku))
 
@@ -170,9 +172,9 @@ export class ShoppingCarService {
       // console.log("Product change")
       // console.log(reqProdList)
       // console.log(this.reqProdListSubject.getValue())
-      let found = reqProdList.find(res => 
+      let found = reqProdList ? reqProdList.find(res => 
         (res.product.sku == prodSku) && (res.chosenProduct.sku == prodColSku)
-        )
+        ) : null
       // console.log("returning")
       // console.log(found)
       return !!found ? found : null

@@ -1,7 +1,7 @@
 <div mat-dialog-title>
   <h2 class="ms-font-rubik ms-color-2b" style="font-size:1.2em">
     <mat-icon style="vertical-align:middle">place</mat-icon>
-    <b>Ubicación</b>
+    <b>{{data.deliveryPickUp ? 'Recojo en tienda' : 'Ubicación'}}</b>
   </h2>
   <mat-divider></mat-divider>
 </div>
@@ -12,7 +12,9 @@
     <input readonly autocomplete="off" [formControl]="adress" type="text" matInput>
   </mat-form-field>
 
-  <mat-form-field style="margin-bottom: 8px; display: block;" appearance="outline">
+  <mat-form-field 
+    *ngIf="reference"
+    style="margin-bottom: 8px; display: block;" appearance="outline">
     <mat-label>Referencia</mat-label>
     <input readonly autocomplete="off" [formControl]="reference" type="text" matInput>
   </mat-form-field>
@@ -37,7 +39,8 @@
     [latitude]="data.location.coord.lat" [longitude]="data.location.coord.lng">
     <agm-marker [latitude]="data.location.coord.lat" [longitude]="data.location.coord.lng"></agm-marker>
   </agm-map-->
-  <google-map height="280px" width="100%" [center]="center" [zoom]="zoom">
+  <google-map *ngIf="center"
+    height="280px" width="100%" [center]="center" [zoom]="zoom">
     <map-marker [position]="center"></map-marker>
   </google-map>
 </mat-dialog-content>

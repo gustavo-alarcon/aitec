@@ -112,7 +112,6 @@ export class ProductEditPromoComponent implements OnInit {
         },
         err => {
           this.dialogRef.close(false);
-        })
-      ;
+        });
   }
 }

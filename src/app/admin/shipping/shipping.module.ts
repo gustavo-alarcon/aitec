@@ -24,15 +24,16 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { ShippingComponent } from './shipping.component';
 import { ShippingRoutingModule } from './shipping-routing.module';
 import { ShippingMasterComponent } from './shipping-master/shipping-master.component';
-import { TotalQuantityPipe } from './total-quantity.pipe';
+import { ShippingDetailComponent } from './shipping-detail/shipping-detail.component';
+import { SharedModule } from 'src/app/core/shared/shared.module';
 
 
 
 @NgModule({
   declarations: [
     ShippingComponent,
+    ShippingDetailComponent,
     ShippingMasterComponent,
-    TotalQuantityPipe
   ],
   imports: [
     CommonModule,
@@ -57,7 +58,8 @@ import { TotalQuantityPipe } from './total-quantity.pipe';
     Ng2ImgMaxModule,
     LazyLoadImageModule,
     MatNativeDateModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    SharedModule
   ]
 })
 export class ShippingModule { }

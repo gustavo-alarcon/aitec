@@ -5,14 +5,15 @@ import { PlacesService } from '../../../core/services/places.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DatabaseService } from '../../../core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter } from 'rxjs/operators';
+import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter, shareReplay } from 'rxjs/operators';
 import { Warehouse } from '../../../core/models/warehouse.model';
 import { WarehouseProduct } from '../../../core/models/warehouseProduct.model';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
 import { Product } from 'src/app/core/models/product.model';
-import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
+import { TRANSFER_REASON, Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
 import { Sale } from 'src/app/core/models/sale.model';
+import { User } from 'c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',
@@ -56,22 +57,8 @@ export class ReferralGuideDialogComponent implements OnInit {
   actionAddSerie = new BehaviorSubject<boolean>(false);
   actionAddSerie$ = this.actionAddSerie.asObservable();
 
-  radioOptions = {
-    "1": "Ventas",
-    "2": "Translado de establecimiento de la misma empresa",
-    "3": "Importación",
-    "4": "Venta sujeto a confirmacion del comprador",
-    "5": "Translado de bienes para transformacion",
-    "6": "Exportación",
-    "7": "Compra",
-    "8": "Recojo de bines",
-    "9": "Venta con entrega a terceros",
-    "10": "Consignación",
-    "11": "Translado por emison de itenerante de comprobante de pago",
-    "12": "Otros no incluidos en los puntos anteriores tales como exhibición, demostración, etc.",
-    "13": "Devolución",
-    "14": "Translado de zona primaria",
-  };
+  radioOptions = TRANSFER_REASON;
+  user$: Observable<import("c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model").User>;
 
   constructor(
     public places: PlacesService,
@@ -92,7 +79,7 @@ export class ReferralGuideDialogComponent implements OnInit {
       orderCode: [null, Validators.required],
       addressee: [null, Validators.required],
       dni: [null, Validators.required],
-      transferDate: [null, Validators.required],
+      transferDate: [new Date(), Validators.required],
       startingPoint: [null, Validators.required],
       arrivalPoint: [null, Validators.required],
       transferReason: [null, Validators.required],
@@ -108,6 +95,7 @@ export class ReferralGuideDialogComponent implements OnInit {
   }
 
   initObservables(): void {
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
     this.warehouses$ = this.dbs.getWarehouseList();
 
     this.entryProducts$ = combineLatest(
@@ -308,7 +296,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.arrayProducts.splice(index, 1);
   }
 
-  saveWaybill() {
+  saveWaybill(user: User) {
     if (!this.arrayProducts.length) {
       this.snackbar.open(`🚨 La lista de productos de emisión esta vacía!`, 'Aceptar', {
         duration: 6000
@@ -318,68 +306,78 @@ export class ReferralGuideDialogComponent implements OnInit {
 
     this.loading.next(true);
 
-    this.auth.user$
+    const data: Waybill = this.getWaybill(user)
+
+    this.dbs.createWaybill(data, user, this.sale)
       .pipe(
         take(1)
-      )
-      .subscribe(user => {
+      ).subscribe(batch => {
+        batch.commit()
+          .then(() => {
+            this.snackbar.open(`☑️ Actualizando números de serie`, 'Aceptar', {
+              duration: 6000
+            });
 
-        const data: Waybill = {
-          id: '',
-          orderCode: this.guideFormGroup.value['orderCode'],
-          addressee: this.guideFormGroup.value['addressee'],
-          dni: this.guideFormGroup.value['dni'],
-          transferDate: this.guideFormGroup.value['transferDate'],
-          startingPoint: this.guideFormGroup.value['startingPoint'],
-          arrivalPoint: this.guideFormGroup.value['arrivalPoint'],
-          transferReason: this.radioOptions[this.guideFormGroup.value['transferReason']],
-          observations: this.guideFormGroup.value['observations'],
-          warehouse: this.entryWarehouseControl.value,
-          productList: this.arrayProducts,
-          createdAt: new Date(),
-          createdBy: user,
-          editedAt: null,
-          editedBy: null
-        }
-
-        this.dbs.createWaybill(data, user, this.sale)
-          .pipe(
-            take(1)
-          ).subscribe(batch => {
-            batch.commit()
-              .then(() => {
-                this.snackbar.open(`☑️ Actualizando números de serie`, 'Aceptar', {
-                  duration: 6000
-                });
-
-                this.dbs.waybillSerialNumbers(this.arrayProducts, user)
-                  .then(res => {
-                    if (res) {
-                      res.pipe(
-                        take(1)
-                      ).subscribe(batch => {
-                        batch.commit()
-                          .then(() => {
-                            this.loading.next(false);
-                            this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
-                              duration: 6000
-                            });
-                            if(this.sale){
-                              this.closeDialog.emit(null)
-                            }
-                          })
+            this.dbs.waybillSerialNumbers(this.arrayProducts, user)
+              .then(res => {
+                if (res) {
+                  res.pipe(
+                    take(1)
+                  ).subscribe(batch => {
+                    batch.commit()
+                      .then(() => {
+                        this.loading.next(false);
+                        this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
+                          duration: 6000
+                        });
+                        if(this.sale){
+                          this.closeDialog.emit(null)
+                        }
                       })
-                    }
                   })
-              })
-              .catch(err => {
-                console.log(err);
-                this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
-                  duration: 6000
-                });
+                }
               })
           })
+          .catch(err => {
+            console.log(err);
+            this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
+              duration: 6000
+            });
+          })
       })
+  }
+
+  printWaybill(user: User){
+    let wayBill = this.getWaybill(user)
+    this.dbs.printWaybillPdf(wayBill)
+  }
+
+  getWaybill(user: User): Waybill{
+    let waybill: Waybill = {
+      id: '',
+      orderCode: this.guideFormGroup.value['orderCode'] ? this.guideFormGroup.value['orderCode'] : "--",
+      addressee: this.guideFormGroup.value['addressee'] ? this.guideFormGroup.value['addressee'] : "--",
+      dni: this.guideFormGroup.value['dni'] ? this.guideFormGroup.value['dni'] : "--",
+      transferDate: this.guideFormGroup.value['transferDate'] ? this.guideFormGroup.value['transferDate'] : new Date(),
+      startingPoint: this.guideFormGroup.value['startingPoint'] ? this.guideFormGroup.value['startingPoint'] : "--",
+      arrivalPoint: this.guideFormGroup.value['arrivalPoint'] ? this.guideFormGroup.value['arrivalPoint'] : "--",
+      transferReason: this.guideFormGroup.value['transferReason'] ? this.guideFormGroup.value['transferReason'] : "--",
+      observations: this.guideFormGroup.value['observations'] ? this.guideFormGroup.value['observations'] : "--",
+      warehouse: this.entryWarehouseControl.value,
+      productList: this.arrayProducts,
+      createdAt: new Date(),
+      createdBy: user,
+      editedAt: null,
+      editedBy: null
+    }
+    if(this.sale){
+      waybill.saleOrder = this.sale.id
+    }
+    return waybill
+  }
+
+  getCorrelative(corr: number) {
+    return corr.toString().padStart(6, '0')
   }
 
 }

@@ -112,12 +112,12 @@
         <div *ngIf="promo && selectedProduct.promoData.quantity > 1" class="w3-center product__promoDiv">
           OFERTA: {{selectedProduct.promoData.quantity}} x {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
         </div>
-        <div class="product__stock" *ngIf="productSelected.virtualStock==1;else stock">
+        <div class="product__stock" *ngIf="productSelected.virtualStock - (productSelected.reservedStock ? productSelected.reservedStock : 0)==1; else stock">
           Último stock disponible
         </div>
         <ng-template #stock>
           <div class="product__stock">
-            {{ productSelected.virtualStock }} Unidades disponibles
+            {{ productSelected.virtualStock - (productSelected.reservedStock ? productSelected.reservedStock : 0) }} Unidades disponibles
           </div>
         </ng-template>
 
@@ -154,7 +154,7 @@
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"
-              [style.visibility]="selectedProduct['realStock'] > 0 ? 'visible' : 'hidden'">
+              [style.visibility]="selectedProduct['realStock'] - (selectedProduct.reservedStock ? selectedProduct.reservedStock : 0) > 0 ? 'visible' : 'hidden'">
               <mat-icon>shopping_cart</mat-icon>
               <span> Agregar al Carrito</span>
             </button>

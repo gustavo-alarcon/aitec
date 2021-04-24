@@ -1,4 +1,7 @@
 <div style="overflow-y: hidden;">
+  <b *ngIf="sale" style="font-size: 28px;">
+    #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
+  </b>
   <div [formGroup]="guideFormGroup" autocomplete="off">
 
     <div class="arrival">
@@ -47,27 +50,9 @@
       <div class="container-relocated">
         <mat-radio-group aria-label="Seleccione una opción" formControlName="transferReason" color="primary">
           <div class="grid-relocated">
-            <mat-radio-button class="w3-small w3-margin-right item" value="1">Ventas</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="2">Translado de establecimiento de la misma
-              empresa</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="3">Importación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="4">Venta sujeto a confirmacion del comprador
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="5">Translado de bienes para transformacion
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="6">Exportación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="7">Compra</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="8">Recojo de bines</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="9">Venta con entrega a terceros
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="10">Consignación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="11">Translado por emison de itenerante de
-              comprobante de pago</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="12">Otros no incluidos en los puntos
-              anteriores tales como <br>
-              exhibición, demostración, etc.</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="13">Devolución</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="14">Translado de zona primaria
+            <mat-radio-button *ngFor="let option of radioOptions"
+              class="w3-small w3-margin-right item" [value]="option">
+              {{option | titlecase}}
             </mat-radio-button>
           </div>
         </mat-radio-group>
@@ -189,10 +174,13 @@
 </div>
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
-<div *ngIf="arrayProducts.length>0" class="w3-margin-left">
-  <button mat-raised-button color="primary" class="btn w3-margin-right" (click)="saveWaybill()">Guardar</button>
-  <button mat-raised-button color="primary" class="btn" printSectionId="print-section" ngxPrint> Imprimir</button>
-</div>
+<ng-container *ngIf="user$|async as user">
+  <div *ngIf="arrayProducts.length>0" class="w3-margin-left">
+    <button mat-raised-button color="primary" class="btn w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
+    <button mat-raised-button color="primary" class="btn" (click)="printWaybill(user)"> Imprimir</button>
+  </div>
+</ng-container>
+
 
 <div id="print-section" style="transform: scale(0.01); margin: 10px 10px 10px 30px;">
   <div style="margin: 20px 10px 10px 10px; width: 100%;">

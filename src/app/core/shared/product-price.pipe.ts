@@ -14,13 +14,7 @@ export class ProductPricePipe implements PipeTransform {
   ){}
 
   transform(item: {product: Product, chosenProduct: unitProduct, quantity: number}, user: User): unknown {
-    let reqProduct: SaleRequestedProducts = {
-      ...item,
-      color: null,
-      price: null
-    }
-
-    return this.dbs.giveProductPrice(reqProduct, user.customerType)
+    return this.dbs.giveProductPrice(item, user.mayoristUser)
   }
 
 }

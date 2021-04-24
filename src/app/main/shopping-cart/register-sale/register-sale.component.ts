@@ -215,9 +215,7 @@ export class RegisterSaleComponent implements OnInit {
     ]).pipe(
       map(([user, ord, delivery]) => {
         if (ord.length) {
-          let sum = [...ord]
-            .map((el) => this.dbs.giveProductPrice(el, user.customerType))
-            .reduce((a, b) => a + b, 0);
+          let sum = this.dbs.giveProductPriceOfSale(ord, user.mayoristUser)
           return sum + delivery;
         } else {
           return 0;
@@ -258,9 +256,7 @@ export class RegisterSaleComponent implements OnInit {
             let coup = res[0]
             let reqProdList = res[1]
             return this.auth.user$.pipe(map(user => {
-              let sum = [...reqProdList]
-                .map((el) => this.dbs.giveProductPrice(el, user.customerType))
-                .reduce((a, b) => a + b, 0);
+              let sum = this.dbs.giveProductPriceOfSale(reqProdList, user.mayoristUser)
               //We finally calculate discount:
               if(sum > coup.from){
                 switch(coup.type){
@@ -445,7 +441,7 @@ export class RegisterSaleComponent implements OnInit {
 
     console.log(newSale);
 
-    let [batch, ref] = this.dbs.saveSale(newSale)
+    let [batch, ref] = this.dbs.reserveSale(newSale)
 
     batch.commit()
       .then(res => {
