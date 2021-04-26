@@ -178,39 +178,39 @@ export class DatabaseService {
   }
 
 
+  //not used
+  // saveWarehouses(products, name) {
+  //   const batch = this.afs.firestore.batch();
+  //   let warehouseRef = this.afs.firestore.collection(`db/aitec/warehouses`).doc();
+  //   batch.set(warehouseRef, {
+  //     id: warehouseRef.id,
+  //     name: name
+  //   })
+  //   products.forEach(el => {
+  //     let productRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseRef.id}/products`).doc(el.id);
 
-  saveWarehouses(products, name) {
-    const batch = this.afs.firestore.batch();
-    let warehouseRef = this.afs.firestore.collection(`db/aitec/warehouses`).doc();
-    batch.set(warehouseRef, {
-      id: warehouseRef.id,
-      name: name
-    })
-    products.forEach(el => {
-      let productRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseRef.id}/products`).doc(el.id);
+  //     el.series.forEach(lo => {
+  //       const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/products/${el.id}/series`).doc();
+  //       batch.set(serieRef, {
+  //         id: serieRef.id,
+  //         idProduct: el.id,
+  //         skuProduct: el.sku,
+  //         serie: lo
+  //       })
+  //     })
 
-      el.series.forEach(lo => {
-        const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/products/${el.id}/series`).doc();
-        batch.set(serieRef, {
-          id: serieRef.id,
-          idProduct: el.id,
-          skuProduct: el.sku,
-          serie: lo
-        })
-      })
+  //     batch.set(productRef, {
+  //       id: el.id,
+  //       series: el.series
+  //     });
 
-      batch.set(productRef, {
-        id: el.id,
-        series: el.series
-      });
+  //   })
 
-    })
+  //   batch.commit().then(() => {
+  //     console.log('all');
 
-    batch.commit().then(() => {
-      console.log('all');
-
-    })
-  }
+  //   })
+  // }
 
   getCurrentMonthOfViewDate(): { from: Date; to: Date } {
     const date = new Date();
@@ -1660,32 +1660,86 @@ export class DatabaseService {
       batch.set(serialRef, data);
     });
 
-    // Adding quantity to product
-    let productRef = this.afs.firestore.doc(`db/aitec/productsList/${product.id}`);
-    batch.update(productRef, { virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
-    batch.update(productRef, { realStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
-
     // Adding entry to product's kardex
     let kardexProductRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/kardex`).doc();
 
     let kardex: Kardex = {
       id: kardexProductRef.id,
-      type: 1,
-      operationType: 1,
+      productId: product.id,
+      type: 1,          //Factura
+      serie: null,
+      operationType: 2, //Compra
+
       invoice: invoice,
       waybill: waybill,
-      inflow: serialList.length,
-      outflow: 0,
+
+      inflow: true,     //Se ingresan productos
+
+      quantity: serialList.length,
+      
+
       createdBy: user,
       createdAt: new Date(),
-      editedBy: null,
-      editedAt: null
     }
 
     batch.set(kardexProductRef, kardex);
 
     return of(batch);
   }
+
+  // saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
+  //   /**
+  //    * IMPORTANT!
+  //    * This function assumes that only serial numbers of the same type (same product) will be processed.
+  //    * 
+  //    * */
+
+  //   let batch = this.afs.firestore.batch();
+
+  //   // Saving serial numbers to warehouse product
+  //   serialList.forEach(serial => {
+  //     let serialRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/series`).doc();
+
+  //     let data: SerialNumber = {
+  //       id: serialRef.id,
+  //       barcode: serial.barcode,
+  //       color: serial.color,
+  //       status: 'stored',
+  //       sku: serial.sku,
+  //       createdBy: user,
+  //       createdAt: new Date(),
+  //       editedBy: null,
+  //       editedAt: null
+  //     }
+
+  //     batch.set(serialRef, data);
+  //   });
+
+  //   // Adding quantity to product
+  //   let productRef = this.afs.firestore.doc(`db/aitec/productsList/${product.id}`);
+  //   batch.update(productRef, { virtualStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
+  //   batch.update(productRef, { realStock: firebase.default.firestore.FieldValue.increment(serialList.length) });
+
+  //   // Adding entry to product's kardex
+  //   let kardexProductRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouse.id}/products/${product.id}/kardex`).doc();
+
+  //   let kardex: Kardex = {
+  //     id: kardexProductRef.id,
+      
+  //     type: 1,
+  //     operationType: 1,
+  //     invoice: invoice,
+  //     waybill: waybill,
+  //     inflow: true,
+  //     quantity: serialList.length,
+  //     createdBy: user,
+  //     createdAt: new Date(),
+  //   }
+
+  //   batch.set(kardexProductRef, kardex);
+
+  //   return of(batch);
+  // }
 
 
 
@@ -1888,7 +1942,7 @@ export class DatabaseService {
 
                 // construct update data based in frequency
                 let updateData = [];
-                productDoc.products.forEach(element => {
+                (<Product>productDoc).products.forEach(element => {
                   if (frequencySerialList[element.sku]) {
                     element.realStock = element.realStock - frequencySerialList[element.sku];
                     updateData.push(element)

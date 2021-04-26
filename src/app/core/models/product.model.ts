@@ -51,7 +51,7 @@ export interface unitProduct {
 
 interface PromoData {
   quantity: number;
-  promoPrice: number;       //precio unitario
+  promoPrice: number;       //precio en bloque
   offer?: number;           //percentage of disccount
   type?: 1|2|3;             //1 for minorista, 2 for mayorista, 3 for todos
 }

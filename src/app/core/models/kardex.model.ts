@@ -9,7 +9,7 @@ export interface Kardex {
   productId: string;
   type: keyof typeof TIPO_COMPROBANTE;
   serie: string;
-  correlative: number;      //Refers to the correlative number of sale
+  correlative?: number;      //Refers to the correlative number of sale
   operationType: keyof typeof OPERATION_TYPE;
 
   invoice: string;        //Numero de documento (de la boleta o factura)
@@ -26,11 +26,11 @@ export interface Kardex {
 
   //The following fields will be calculated and set with a scheduler, and when it is not,
   //will be calculated and displayed ad-hoc with observables
-  finalUpdated: boolean;    //Whether final quantity, unitprice and unitotalPrice was calculated
+  finalUpdated?: boolean;    //Whether final quantity, unitprice and unitotalPrice was calculated
                             //+- depends on whether it is inflow or not
-  finalQuantity: number;    //Quantity remaining after operation (sum of last quantity +- quantity)
-  finalUnitPrice: number;   //finalTotalPrice / finalQuantity
-  finalTotalPrice: number;  //last finalTotalPrice +- totalPrice
+  finalQuantity?: number;    //Quantity remaining after operation (sum of last quantity +- quantity)
+  finalUnitPrice?: number;   //finalTotalPrice / finalQuantity
+  finalTotalPrice?: number;  //last finalTotalPrice +- totalPrice
 }
 
 const OPERATION_TYPE = <const>{
