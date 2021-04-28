@@ -473,6 +473,7 @@ exports.reserveSaleChanged = functions.firestore.document(`${reservedSalesRef}/{
     const userDoc = db.collection(usersRef).doc(sale.user.uid)
     //const emailRef = db.collection(emailRef).doc()
     const productsListColl = db.collection(productsListRef)
+    const couponColl = db.collection(couponsRef)
 
     console.log("Initiating transaction");
 
@@ -565,6 +566,14 @@ exports.reserveSaleChanged = functions.firestore.document(`${reservedSalesRef}/{
           salesCount: admin.firestore.FieldValue.increment(1),
           shoppingCar: []
         })
+
+        //We now fill cupoun
+        if(!!newSale.coupon){
+          let ocupId = newSale.coupon.id
+          if(ocupId){
+            transaction.update(couponColl.doc(ocupId), {users: admin.firestore.FieldValue.arrayUnion(newSale.user.uid)})
+          }
+        }
 
         //We send confirmation email
         // const email = {

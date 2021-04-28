@@ -5,6 +5,8 @@ import { User } from "./user.model";
 //El numero de serie solo esta figurando en barcode
 export interface SerialNumber {     
   id: string;
+  productId: string;
+  warehouseId: string;
   barcode: string;  //SKU+NUM serie
   sku: string;      //codigo de color
   color: {
@@ -12,7 +14,6 @@ export interface SerialNumber {
     name: string
   };
   status: "stored"|"sold";
-  waybill?: string;       //Guia de remision
   createdAt: Date;
   createdBy: User;
   editedAt: Date;

@@ -7,7 +7,6 @@ import { DatabaseService } from '../../../core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter, shareReplay } from 'rxjs/operators';
 import { Warehouse } from '../../../core/models/warehouse.model';
-import { WarehouseProduct } from '../../../core/models/warehouseProduct.model';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
 import { Product } from 'src/app/core/models/product.model';
@@ -22,7 +21,7 @@ import { User } from 'c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/model
 })
 export class ReferralGuideDialogComponent implements OnInit {
   @Input() sale: Sale
-  @Output() closeDialog = new EventEmitter()
+  @Output() closeDialog = new EventEmitter()  //Used when checking sales on logistics
 
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
@@ -38,7 +37,7 @@ export class ReferralGuideDialogComponent implements OnInit {
   entryselectProductControl: FormControl;
 
   warehouses$: Observable<Warehouse[]>;
-  entryProducts$: Observable<WarehouseProduct[]>;
+  entryProducts$: Observable<Product[]>;
 
   selectedProduct = new BehaviorSubject<any>(null);
   selectedProduct$ = this.selectedProduct.asObservable();
@@ -58,7 +57,13 @@ export class ReferralGuideDialogComponent implements OnInit {
   actionAddSerie$ = this.actionAddSerie.asObservable();
 
   radioOptions = TRANSFER_REASON;
-  user$: Observable<import("c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model").User>;
+  user$: Observable<User>;
+  availableSeries$: Observable<{
+    series: SerialNumber[],
+    warehouseId: string,
+    productId: string
+  }>;
+  products$: Observable<Product[]>;
 
   constructor(
     public places: PlacesService,
@@ -98,11 +103,14 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.user$ = this.auth.user$.pipe(shareReplay(1))
     this.warehouses$ = this.dbs.getWarehouseList();
 
-    this.entryProducts$ = combineLatest(
+    this.products$ = this.dbs.getProductsOrdered().pipe(shareReplay(1))
+
+
+    this.entryProducts$ = combineLatest([
       this.entryWarehouseControl.valueChanges
         .pipe(
           startWith(''),
-          switchMap(warehouse => { return this.dbs.getWarehouseProducts(warehouse) })
+          switchMap(warehouse => { return this.products$ })
         ),
       this.entryProductControl.valueChanges
         .pipe(
@@ -110,24 +118,44 @@ export class ReferralGuideDialogComponent implements OnInit {
           debounceTime(300),
           distinctUntilChanged(),
           map(product => product.description ? product.description : product)
-        )
+        )]
     ).pipe(
       map(([products, entryProduct]) => {
         return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) })
       })
     )
 
-    this.scanValidation$ = combineLatest(
+    this.availableSeries$ = combineLatest([
       this.entryWarehouseControl.valueChanges,
-      this.entryProductControl.valueChanges,
+      this.entryProductControl.valueChanges
+    ]).pipe(
+      switchMap(([warehouse, product]) => {
+        if(warehouse && product){
+          if(warehouse.id && product.id){
+            return this.dbs.getSeriesStored(warehouse.id, product.id).pipe(map(res => ({
+              series: res,
+              warehouseId: warehouse.id,
+              productId: product.id
+            })))
+          }
+        }
+        return of(null)
+        
+      }),
+      shareReplay(1)
+    )
+
+    this.scanValidation$ = combineLatest([
+      this.availableSeries$,
       this.entryScanControl.valueChanges.pipe(distinctUntilChanged(), filter(scan => !(scan === ''))),
-      this.actionAddSerie$.pipe(distinctUntilChanged())
+      this.actionAddSerie$.pipe(distinctUntilChanged())]
     ).pipe(
-      switchMap(([warehouse, product, scan, add]) => {
+      switchMap(([series, scan, add]) => {
 
         this.validatingScan.next(true);
-        if (warehouse && product && add) {
-          return this.dbs.getStoredSerialNumbers(warehouse.id, product.id).pipe(
+
+        if (series && add) {
+          return of(series.series).pipe(
             map(serials => { 
               console.log(serials)
               return serials.find(serial => serial.barcode === scan) 
@@ -135,7 +163,7 @@ export class ReferralGuideDialogComponent implements OnInit {
             tap(serial => {
 
               if (serial) {
-                this.addSerie(serial.id);
+                this.addSerie(serial.id, series.warehouseId, series.productId);
               } else {
                 this.entryScanControl.setErrors(null)
                 this.entryScanControl.markAsTouched()
@@ -167,7 +195,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.actionAddSerie.next(true);
   }
 
-  addSerie(id: string) {
+  addSerie(id: string, warehouseId: string, productId: string) {
     let scan = this.entryScanControl.value.trim();
 
     // First, lets check if the scanned code is part of our inventory
@@ -187,6 +215,8 @@ export class ReferralGuideDialogComponent implements OnInit {
 
         let data: SerialNumber = {
           id: id,
+          warehouseId: warehouseId,
+          productId: productId,
           barcode: scan,
           color: validation.product.color,
           sku: validation.product.sku,
@@ -214,11 +244,11 @@ export class ReferralGuideDialogComponent implements OnInit {
   }
 
   checkSKU(code: string): { exists: boolean, product: { color: { color: string, name: string }, sku: string } } {
-    let product = this.entryProductControl.value;
+    let product = <Product>this.entryProductControl.value;
     let exist = false;
     let skuData;
 
-    product.skuArray.every(product => {
+    product.products.every(product => {
       exist = code.startsWith(product.sku);
       skuData = product
       return !exist;
@@ -240,7 +270,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     return exist;
   }
 
-  showEntryProduct(product: WarehouseProduct): string | null {
+  showEntryProduct(product: Product): string | null {
     return product.description ? product.description : null;
   }
 
@@ -248,8 +278,6 @@ export class ReferralGuideDialogComponent implements OnInit {
     this.selectedProduct.next(event.option.value);
     this.actualProduct = event.option.value;
   }
-
-
 
 
   // AQUUIIIII ME QUEDE, AGREGANDO LA LISTA DE SERIES A LA LISTA DE PRODUCTOS
@@ -272,6 +300,17 @@ export class ReferralGuideDialogComponent implements OnInit {
         duration: 6000
       });
       return;
+    }
+
+    //We check if product exist on sale. We do this to ensure integrity of data when registering
+    //kardex
+    if(this.sale){
+      if(!this.sale.requestedProducts.find(el => el.product.id == this.actualProduct.id)){
+        this.snackbar.open(`🚨 Este producto no se encuentra en la lista de compra!`, 'Aceptar', {
+          duration: 6000
+        });
+        return;
+      }
     }
 
     let data: WaybillProductList = {
@@ -308,42 +347,22 @@ export class ReferralGuideDialogComponent implements OnInit {
 
     const data: Waybill = this.getWaybill(user)
 
-    this.dbs.createWaybill(data, user, this.sale)
-      .pipe(
-        take(1)
-      ).subscribe(batch => {
-        batch.commit()
-          .then(() => {
-            this.snackbar.open(`☑️ Actualizando números de serie`, 'Aceptar', {
-              duration: 6000
-            });
+    let batch = this.dbs.createWaybill(data, user, this.sale)
+    batch.commit()
+      .then(() => {
+        this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
+          duration: 6000
+        });
 
-            this.dbs.waybillSerialNumbers(this.arrayProducts, user)
-              .then(res => {
-                if (res) {
-                  res.pipe(
-                    take(1)
-                  ).subscribe(batch => {
-                    batch.commit()
-                      .then(() => {
-                        this.loading.next(false);
-                        this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
-                          duration: 6000
-                        });
-                        if(this.sale){
-                          this.closeDialog.emit(null)
-                        }
-                      })
-                  })
-                }
-              })
-          })
-          .catch(err => {
-            console.log(err);
-            this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
-              duration: 6000
-            });
-          })
+        if(this.sale){
+          this.closeDialog.emit(null)
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
+          duration: 6000
+        });
       })
   }
 

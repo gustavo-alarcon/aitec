@@ -1,5 +1,6 @@
 import { User } from "./user.model";
 
+//Not used anymore
 export interface WarehouseProduct {
   id: string;
   description: string;

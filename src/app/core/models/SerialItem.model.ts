@@ -1,3 +1,4 @@
+import { Product } from "./product.model";
 import { User } from "./user.model";
 
 export interface SerialItem {
@@ -7,4 +8,5 @@ export interface SerialItem {
     color: string,
     name: string
   };
+  product: Product
 }

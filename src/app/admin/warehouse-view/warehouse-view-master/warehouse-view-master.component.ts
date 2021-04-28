@@ -162,15 +162,15 @@ export class WarehouseViewMasterComponent implements OnInit {
   //   })
   // }
 
-  // onCheckreferralGuide(sale: Sale, edit: boolean, event) {
-  //   event.stopPropagation()
-  //   if(edit){
-  //     this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
-  //       data: sale,
-  //     })
-  //   }
+  onCheckreferralGuide(sale: Sale, edit: boolean, event) {
+    event.stopPropagation()
+    if(edit){
+      this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
+        data: sale,
+      })
+    }
     
-  // }
+  }
 
   getName(displayName: string): string {
     let name = displayName.split(" ");

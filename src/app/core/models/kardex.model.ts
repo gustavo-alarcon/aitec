@@ -7,8 +7,9 @@ import { User } from "./user.model";
 export interface Kardex {
   id: string;
   productId: string;
+  warehouseId: string;
+
   type: keyof typeof TIPO_COMPROBANTE;
-  serie: string;
   correlative?: number;      //Refers to the correlative number of sale
   operationType: keyof typeof OPERATION_TYPE;
 

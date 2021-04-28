@@ -98,7 +98,12 @@
               <mat-option *ngFor="let product of entryProducts$ | async" style="font-size: 12px;" [value]="product">
                 {{product.description}}</mat-option>
             </mat-autocomplete>
-            <mat-hint>Escriba y seleccione un producto</mat-hint>
+            <mat-hint *ngIf="(availableSeries$ | async) as series; else noSeries">
+              <span>{{series.series.length}} disponibles</span>
+            </mat-hint>
+            <ng-template #noSeries>
+              <mat-hint>Escriba y seleccione un producto</mat-hint>
+            </ng-template>
             <mat-error>* Campo requerido</mat-error>
           </mat-form-field>
 

@@ -77,9 +77,9 @@ export class PaymentCardFormComponent implements OnInit {
       vads_theme_config: `SUBMIT_BUTTON_LABEL=PAGAR S/.${(total/100).toFixed(2)};FORM_TARGET=_top; RESPONSIVE_MODEL=Model_2`,
       vads_trans_date: dateNumber,
       vads_trans_id: this.makeid(6),
-      vads_url_cancel: `http://localhost:4200/main/carrito/?action=cancelled&saleId=${this.sale.id}`,
-      vads_url_refused: `http://localhost:4200/main/carrito/?action=refused&saleId=${this.sale.id}`,
-      vads_url_success: `http://localhost:4200/main/carrito/?action=success&saleId=${this.sale.id}`,
+      vads_url_cancel: `https://aitecperu.com.pe/main/carrito/?action=cancelled&saleId=${this.sale.id}`,
+      vads_url_refused: `https://aitecperu.com.pe/main/carrito/?action=refused&saleId=${this.sale.id}`,
+      vads_url_success: `https://aitecperu.com.pe/main/carrito/?action=success&saleId=${this.sale.id}`,
       vads_version: "V2"
     }
     //console.log(this.paymentData)

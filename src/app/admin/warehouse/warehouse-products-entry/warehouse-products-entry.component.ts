@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { MapBaseLayer } from '@angular/google-maps';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
-import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take } from 'rxjs/operators';
+import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take, shareReplay } from 'rxjs/operators';
+import { Product, unitProduct } from 'src/app/core/models/product.model';
+import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
-import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ProductCategoryComponent } from 'src/app/main/product-detail/product-category/product-category.component';
@@ -25,13 +27,18 @@ export class WarehouseProductsEntryComponent implements OnInit {
   entrySKUControl: FormControl;
   entryScanControl: FormControl;
 
-  entryProducts$: Observable<WarehouseProduct[]>;
+  entryProducts$: Observable<Product[]>;
   warehouses$: Observable<Warehouse[]>;
 
   selectedProduct = new BehaviorSubject<any>(null);
   selectedProduct$ = this.selectedProduct.asObservable();
 
-  serialList: Array<any> = [];
+  serialList: Array<{
+    barcode: string,
+    color: {name: string, color: string},
+    sku: string,
+    product: Product
+  }> = [];
   entryStock: number = 0;
 
   scanValidation = new BehaviorSubject<boolean>(false);
@@ -42,6 +49,9 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   actionAddSerie = new BehaviorSubject<boolean>(false);
   actionAddSerie$ = this.actionAddSerie.asObservable();
+  products$: Observable<Product[]>;
+  warehouseproduct$: Observable<{ warehouse: Warehouse; product: Product; }>;
+  costControl: FormControl;
 
   constructor(
     private fb: FormBuilder,
@@ -64,14 +74,15 @@ export class WarehouseProductsEntryComponent implements OnInit {
   }
 
   initObservables() {
-    this.warehouses$ =
-      this.dbs.getWarehouses();
+    this.warehouses$ = this.dbs.getWarehouses();
+
+    this.products$ = this.dbs.getProductsOrdered().pipe(shareReplay(1))
 
     this.entryProducts$ = combineLatest(
       this.entryWarehouseControl.valueChanges
         .pipe(
           startWith(''),
-          switchMap(warehouse => { return this.dbs.getWarehouseProducts(warehouse) })
+          switchMap(warehouse => { return this.products$ })
         ),
       this.entryProductControl.valueChanges
         .pipe(
@@ -82,21 +93,38 @@ export class WarehouseProductsEntryComponent implements OnInit {
         )
     ).pipe(
       map(([products, entryProduct]) => {
-        return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) })
+        return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) }).slice(0,25)
       })
     )
 
-    this.scanValidation$ = combineLatest(
+    this.warehouseproduct$ = combineLatest([
       this.entryWarehouseControl.valueChanges,
-      this.entryProductControl.valueChanges,
+      this.entryProductControl.valueChanges
+    ]).pipe(
+      map(([warehouse, product]) => {
+        if(warehouse && product){
+          if(warehouse.id && product.id){
+            return ({
+              warehouse: warehouse,
+              product: product
+            })
+          }
+        }
+        return null
+        
+      })
+    )
+
+    this.scanValidation$ = combineLatest([
+      this.warehouseproduct$,
       this.entryScanControl.valueChanges.pipe(distinctUntilChanged(), filter(scan => !(scan === ''))),
       this.actionAddSerie$.pipe(distinctUntilChanged())
-    ).pipe(
-      switchMap(([warehouse, product, scan, add]) => {
+    ]).pipe(
+      switchMap(([warehouseproduct, scan, add]) => {
 
         this.validatingScan.next(true);
-        if (warehouse && product) {
-          return this.dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
+        if (warehouseproduct && add) {
+          return this.dbs.getSeriesOfProduct(scan, warehouseproduct.product.id).pipe(
             map(serials => { return !!serials.find(serial => serial.barcode === scan) ? true : false }),
             tap(res => {
 
@@ -105,12 +133,12 @@ export class WarehouseProductsEntryComponent implements OnInit {
                 this.entryScanControl.setErrors({
                   repeated: true
                 });
-                this.snackbar.open(`🚨 El código escaneado ya existe en este almacén!`, 'Aceptar', {
+                this.snackbar.open(`🚨 El código escaneado ya existe!`, 'Aceptar', {
                   duration: 6000
                 });
               } else {
                 if (add) {
-                  this.addSerie();
+                  this.addSerie(scan, warehouseproduct.product);
                 }
                 this.entryScanControl.setErrors(null)
               }
@@ -132,30 +160,14 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   }
 
-  showEntryProduct(product: WarehouseProduct): string | null {
-    return product.description ? product.description : null;
-  }
+  addSerie(barcode: string, product: Product) {
+    let scan = barcode.trim();
 
-  selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value);
-  }
-
-  showEntrySKU(product: any): string | null {
-    return product ? product.sku + ' | ' + product.color.name : null
-  }
-
-  selectedEntrySKU(event: any): void {
-    this.entryStock = event.option.value.stock;
-  }
-
-  addSerie() {
-    let scan = this.entryScanControl.value.trim();
-
-    // First, lets check if the scanned code is part of our inventory
-    let validation = this.checkSKU(scan);
+    // First, lets check if the scanned code's color is part of our inventory (the sku, as barcode should start with sku)
+    let validation = this.checkSKU(scan, product);
 
     if (validation.exists) {
-      // If exist in our inventory, then check if the barcode already exists in the product serial numbers
+      // If exist in our inventory (the cholor), then check if the barcode already exists in the product serial numbers
       if (this.checkSerialList(scan)) {
         this.entryScanControl.markAsTouched()
         this.entryScanControl.setErrors({
@@ -167,9 +179,10 @@ export class WarehouseProductsEntryComponent implements OnInit {
       } else {
         
         let data = {
-          barcode: scan,
+          barcode: scan.trim(),
           color: validation.product.color,
-          sku: validation.product.sku
+          sku: validation.product.sku,
+          product: product,
         }
 
         this.serialList.unshift(data);
@@ -177,26 +190,18 @@ export class WarehouseProductsEntryComponent implements OnInit {
         this.entryScanControl.setValue('');
       }
     } else {
-      // If not exists, we have to add the SKU to the current product
-      this.addNewSKUToProduct(this.entryProductControl.value);
+      // If not exists, we don't add anything
+      this.snackbar.open(`🚨 Este color no existe!`, 'Aceptar', {
+        duration: 6000
+      });
     }
   }
 
-  dispatchAddSerie(): void {
-    this.actionAddSerie.next(true);
-  }
-
-  removeSerie(i) {
-    this.serialList.splice(i, 1)
-    this.entryStock = this.serialList.length;
-  }
-
-  checkSKU(code: string): { exists: boolean, product: {color: {color: string, name: string}, sku: string} } {
-    let product = this.entryProductControl.value;
+  checkSKU(code: string, product: Product): { exists: boolean, product: unitProduct } {
     let exist = false;
     let skuData;
 
-    product.skuArray.every(product => {
+    product.products.every(product => {
       exist = code.startsWith(product.sku);
       skuData = product
       return !exist;
@@ -205,18 +210,41 @@ export class WarehouseProductsEntryComponent implements OnInit {
     return { exists: exist, product: skuData };
   }
 
+
+  showEntryProduct(product: Product): string | null {
+    return product.description ? product.description : null;
+  }
+
+  selectedEntryProduct(event: any): void {
+    this.selectedProduct.next(event.option.value);
+  }
+
+  selectedEntrySKU(event: any): void {
+    this.entryStock = event.option.value.stock;
+  }
+
+  dispatchAddSerie(): void {
+    console.log("emitting")
+    this.actionAddSerie.next(true);
+  }
+
+  removeSerie(i) {
+    this.serialList.splice(i, 1)
+    this.entryStock = this.serialList.length;
+  }
+
   checkSerialList(barcode: string): boolean {
     let exist = false;
 
     this.serialList.every(serie => {
-      exist = serie === barcode;
+      exist = serie.barcode === barcode;
       return !exist
     })
 
     return exist;
   }
 
-  addNewSKUToProduct(product: WarehouseProduct): void {
+  addNewSKUToProduct(product: Product): void {
     console.log('new sku');
   }
 
@@ -235,7 +263,6 @@ export class WarehouseProductsEntryComponent implements OnInit {
               this.entryWaybillControl.value,
               this.serialList,
               this.entryWarehouseControl.value,
-              this.entryProductControl.value,
               user)
           })
         )
