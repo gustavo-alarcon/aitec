@@ -10,6 +10,7 @@ export interface Kardex {
   warehouseId: string;
 
   type: keyof typeof TIPO_COMPROBANTE;
+  //serie Separado por guion
   correlative?: number;      //Refers to the correlative number of sale
   operationType: keyof typeof OPERATION_TYPE;
 

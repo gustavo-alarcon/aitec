@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const cardPass = require('./card-pass.json')
 const formKeys = require('./form-keys.json')
 
-const gaxios = require('gaxios')
+const gaxios = require('gaxios');
 
 
 let app = admin.initializeApp();
@@ -19,6 +19,7 @@ const productsListRef = 'db/aitec/productsList'
 const usersRef = 'users'
 const genConfigRef = `db/aitec/config`
 const couponsRef = `db/aitec/coupons`
+const seriesPreprocessingRef = `db/aitec/seriesPreprocessingRef`
 const salesCorrelativeDoc = db.collection(genConfigRef).doc(`salesCorrelative`)
 
 //const emailLoc = `/mail`
@@ -598,42 +599,6 @@ exports.reserveSaleChanged = functions.firestore.document(`${reservedSalesRef}/{
     )
   })
 
-//Used  to request form for usage on javascript library
-// exports.reqForm = functions.https.onRequest((req, res) => {
-//   return cors(req, res, ()=>{
-//     const mode = req.query.mode
-//     const data = req['body']
-    
-//     const username = cardPass.USER;
-//     const password = mode == "TEST" ? cardPass.TEST : (mode=="PROD" ? cardPass.PROD : "ERROR");
-
-//     console.log("mode: "+mode)
-//     var auth = 'Basic '+ Buffer.from(username+":"+password).toString('base64')
-
-//     const options = {
-//       url: '/api-payment/V4/Charge/CreatePayment',
-//       method: 'POST',
-//       baseURL: 'https://api.micuentaweb.pe',
-//       headers: {
-//          'Content-Type': 'application/json',
-//          'Authorization': auth       
-//         },
-//       data: data
-//     }
-
-//     return gaxios.request(options)
-//       .then(res2 => {
-//         console.log(`status: ${res2.data.status}`)
-//         //console.log(res2.data.answer.formToken)
-//         res.status(200).send(res2.data.answer.formToken)
-//       })
-//       .catch(error => {
-//         console.error(error)
-//         res.status(400).send(error)
-//       })
-//   })
-// })
-
 //reqVadsForm handles http request to encode vads fields needed to get html form for payment
 exports.reqVadsForm = functions.https.onRequest((req, res) => {
   console.log("receiving request")
@@ -651,3 +616,160 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
     res.status(200).send(signature)
   })
 })
+
+//Function gets new series created, and adds changes respective stock
+exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{seriesPreId}`)
+  .onWrite(event => {
+    let seriesList = event.after.data()
+    /*let seriesList= {
+      invoice: "string",        //Comprobante
+      waybill: "string",        //GR
+      type: "Ingreso de Productos",
+      changeVirtualStock: false,
+      sale: null,
+      kardexType: "type",
+      kardexOperationType: "operationType",
+      createdBy: {
+        uid: string
+      },
+      createdAt: "sdfasdfas",
+      list: [{
+        list: [{
+          id: "string",
+          productId: "string",
+          warehouseId: "string",
+          barcode: "string",  //SKU+NUM serie
+          sku: "string",      //codigo de color
+          color: {
+            color: "string",
+            name: "string"
+          },
+          status: "stored"|"sold",
+        }],
+        cost: 25,
+        product: {
+          id: "asdfasd"
+        },
+        warehouse: {
+          id: "asdfasdf"
+        },
+      }],
+    }*/
+
+    const productsListColl = db.collection(productsListRef)
+    const seriesListColl = db.collection(seriesPreprocessingRef)
+
+    console.log("Initiating transaction");
+
+    let productDocArray = Array.from(new Set(seriesList.list.map(serie => serie.product.id)))
+                          .map((prodId)=> productsListColl.doc(prodId))
+
+    let incStock = seriesList.type == "Ingreso de Productos" ? 1 : (-1)
+
+    return db.runTransaction((transaction)=> {
+      return transaction.getAll(...productDocArray).then((sf)=> {
+
+        let productsList = sf.filter(el => el.exists).map(el => el.data())   //This contains each Product object
+
+        console.log("UpdatingProduct")
+        //Updating product data (warehouseStock and colorStock)
+        productsList.forEach(prod => {
+
+          //filtProductSeries filtered by product
+          let filtProductSeries = seriesList.list.filter(el => el.product.id == prod.id)
+          
+          //We update virtualStock and realStock for each Color
+          prod.products.forEach(unitProduct => {
+
+            let serialNumberfiltColorSeries = []
+
+            filtProductSeries.forEach(SerialNumberWithPrice => {
+              SerialNumberWithPrice.list.forEach(SerialNumber => {
+                if(SerialNumber.sku == unitProduct.sku){
+                  serialNumberfiltColorSeries.push(SerialNumber)
+                }
+              })
+            })
+
+            //We get each color for each product in DB. Then, we change the virtualStock
+            let quantity = serialNumberfiltColorSeries.length
+
+            if(seriesList.changeVirtualStock){
+              unitProduct.virtualStock = (unitProduct.virtualStock ? unitProduct.virtualStock : 0) + (incStock)*quantity
+            }
+            unitProduct.realStock = (unitProduct.realStock ? unitProduct.realStock : 0) + (incStock)*quantity
+          })
+
+          //We update warehouseStock
+          let warehouseIdListProduct = Array.from(new Set(filtProductSeries.map(series => series.warehouse.id)))
+
+          let updateData = warehouseIdListProduct.reduce((prev, currWareId) => {
+
+            //filtProductSeries was already filtered by productId
+            let filtPerWareProd = filtProductSeries.find(el => (
+              (el.warehouse.id == currWareId)
+              ))
+            let quantity = filtPerWareProd.list.length
+
+            //Parenthesis - We update Kardex
+            //Setting kardex
+            let kardexProductRef = db.collection(`${productsListRef}/${prod.id}/kardex`).doc();
+
+            let kardex = {
+              id: kardexProductRef.id,
+              productId: prod.id,
+              warehouseId: currWareId,
+
+              type: seriesList.kardexType,          
+              operationType: seriesList.kardexOperationType,
+
+              invoice: seriesList.invoice,
+              waybill: seriesList.waybill,
+
+              inflow: incStock === 1 ? true : false,
+
+              quantity: quantity,
+              unitPrice: filtProductSeries[0].cost,
+              totalPrice: quantity*filtProductSeries[0].cost,
+
+              createdBy: seriesList.createdBy,
+              createdAt: new Date(),
+            }
+
+            if(seriesList.sale){
+              kardex.correlative = seriesList.sale.correlative
+            }
+
+            transaction.set(kardexProductRef, kardex)
+
+            /////////////////
+
+            if(quantity){
+              return ({
+                ...prev,
+                ["warehouseStock."+currWareId]: admin.firestore.FieldValue.increment(incStock*quantity)
+              })
+            } else {
+              return {...prev}
+            }
+
+          }, {})
+          
+          //We update complete product
+          let prodRef = productsListColl.doc(prod.id)
+          transaction.update(prodRef, {products: prod.products, ...updateData})
+
+          //Setting series
+          filtProductSeries.forEach(series => {
+            series.list.forEach(serialNumber => {
+              let seriesRef = db.collection(productsListRef+"/"+prod.id+"/series").doc(serialNumber.id)
+              transaction.set(seriesRef, serialNumber)
+            })
+          })
+
+        })
+
+      })
+    })
+
+  })

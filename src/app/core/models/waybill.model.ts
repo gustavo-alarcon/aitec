@@ -13,7 +13,6 @@ export interface Waybill {
   arrivalPoint: string;
   transferReason: typeof TRANSFER_REASON[number];
   observations: string;
-  warehouse: Warehouse;
   productList: Array<WaybillProductList>;
   createdAt: Date;
   createdBy: User;

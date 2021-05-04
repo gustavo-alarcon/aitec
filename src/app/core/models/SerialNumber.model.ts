@@ -1,4 +1,8 @@
+import { Kardex } from "./kardex.model";
+import { Product } from "./product.model";
+import { Sale } from "./sale.model";
 import { User } from "./user.model";
+import { Warehouse } from "./warehouse.model";
 //Dentro de cada warehouseproduct
 ///db/aitec/warehouses/lujOB8TwOHuI2EuSUr9w/products/N1mAlubvitsj76J9emPv/series
 
@@ -18,4 +22,26 @@ export interface SerialNumber {
   createdBy: User;
   editedAt: Date;
   editedBy: User;
+}
+
+export interface SerialNumberWithPrice {
+  list: SerialNumber[] | string[],
+  cost: number,
+  product: Product,
+  warehouse: Warehouse
+}
+
+export interface serialProcess {
+  id: string;
+  invoice: string;        //Comprobante
+  waybill: string;        //GR
+  type: "Ingreso de Productos" | "Retiro de Productos" | "Venta" | "Retiro por Guía de Remisión"
+  changeVirtualStock ?: boolean;
+  list: SerialNumberWithPrice[];
+  sale: Sale;
+  kardexType: Kardex["type"];
+  kardexOperationType: Kardex["operationType"];
+  observations: string;
+  createdBy: User;
+  createdAt: Date;
 }

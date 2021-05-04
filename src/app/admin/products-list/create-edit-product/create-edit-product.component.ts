@@ -16,6 +16,8 @@ import { Product } from 'src/app/core/models/product.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { Location } from "@angular/common";
 import { Category } from 'src/app/core/models/category.model';
+import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
+import { Kardex } from 'src/app/core/models/kardex.model';
 
 @Component({
   selector: 'app-create-edit-product',
@@ -690,40 +692,87 @@ export class CreateEditProductComponent implements OnInit {
         newProduct.editedBy = user
         newProduct.createdBy = user
 
+        let serialNumbersList: SerialNumber[] = []
+
         this.warehouseList.forEach(el => {
-          const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouses/${el.warehouse.id}/products`).doc(newProduct.id);
-          batch.set(warehouseRef, {
-            id: newProduct.id,
-            description: newProduct.description,
-            createdAt: new Date(),
-            createdBy: user,
-            editedAt: new Date(),
-            editedBy: user,
-            sku: newProduct.sku,
-            weight: newProduct.weight,
-            skuArray: newProduct.colors.map((col, k) => {
-              return {
-                color: col,
-                sku: newProduct.skuArray[k]
-              }
-            })
-          })
+          // const warehouseRef = this.afs.firestore.collection(`/db/aitec/warehouses/${el.warehouse.id}/products`).doc(newProduct.id);
+          // batch.set(warehouseRef, {
+          //   id: newProduct.id,
+          //   description: newProduct.description,
+          //   createdAt: new Date(),
+          //   createdBy: user,
+          //   editedAt: new Date(),
+          //   editedBy: user,
+          //   sku: newProduct.sku,
+          //   weight: newProduct.weight,
+          //   skuArray: newProduct.colors.map((col, k) => {
+          //     return {
+          //       color: col,
+          //       sku: newProduct.skuArray[k]
+          //     }
+          //   })
+          // })
 
           el.series.forEach(lo => {
-            const serieRef = this.afs.firestore.collection(`/db/aitec/warehouses/${el.warehouse.id}/products/${newProduct.id}/series`).doc();
-            batch.set(serieRef, {
+            const serieRef = this.afs.firestore.collection(`${this.dbs.productsListRef}/${newProduct.id}/series`).doc();
+
+            let serialNumber: SerialNumber = {
               id: serieRef.id,
+              productId: newProduct.id,
+              warehouseId: el.warehouse.id,
+              barcode: lo.serie,     //We want all codes to be uppercase
+              sku: lo.sku,      //codigo de color
+              color: lo.color,
+              status: "stored",
+        
               createdAt: new Date(),
               createdBy: user,
               editedAt: new Date(),
               editedBy: user,
-              sku: lo.sku,
-              barcode: lo.serie,
-              color: lo.color,
-              status: 'stored'
-            })
+            }
+
+            serialNumbersList.push(serialNumber)
+
+            batch.set(serieRef, serialNumber)
+
           })
         })
+
+        //We add warehouse stock data to product and register a kardex entry
+        let warehouseStock = {}
+
+        Array.from(new Set(serialNumbersList.map(el => el.warehouseId))).forEach(waId => {
+          let quantity = serialNumbersList.filter(el2 => el2.warehouseId == waId).length
+          warehouseStock[waId] = quantity
+
+          let kardexRef = this.afs.firestore.collection(`${this.dbs.productsListRef}/${newProduct.id}/kardex`).doc();
+
+          let kardex: Kardex = {
+            id: kardexRef.id,
+            productId: newProduct.id,
+            warehouseId: waId,
+
+            type: 1,          
+            operationType: 2,
+
+            invoice: "Creación",
+            waybill: "Creación",
+
+            inflow: true,
+
+            quantity: quantity,
+            unitPrice: newProduct.cost,
+            totalPrice: quantity*newProduct.cost,
+
+            createdBy: user,
+            createdAt: new Date(),
+          }
+
+          batch.set(kardexRef, kardex)
+
+        })
+
+        newProduct.warehouseStock = warehouseStock
 
         batch.set(productRef, newProduct)
 

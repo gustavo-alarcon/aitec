@@ -7,7 +7,7 @@
       >
 
       <mat-form-field color="primary" class="w3-small w3-margin-bottom" appearance="outline">
-        <mat-label>Comprobante de compra</mat-label>
+        <mat-label>Comprobante</mat-label>
         <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
         <input matInput type="text" [formControl]="entryInvoiceControl" placeholder="F001-1020" autocomplete="off">
         <mat-hint>Número de factura, boleta, ...</mat-hint>
@@ -27,7 +27,7 @@
 
       <app-select-series
         [sale]="null"
-        [entry]="true"
+        [entry]="false"
         [cumSeriesList]="cumSeriesList">
       </app-select-series>
 
@@ -40,7 +40,7 @@
       <span class="ms-fill"></span>
       <button 
         [disabled]="(loading$ | async) || !entryInvoiceControl.valid || !entryWaybillControl.valid"
-        mat-raised-button color="primary" (click)="save()">Guardar ingreso</button>
+        mat-raised-button color="primary" (click)="save()">Retirar</button>
     </div>
   </mat-card-actions>
 

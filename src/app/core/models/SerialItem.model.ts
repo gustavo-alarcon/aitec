@@ -2,8 +2,8 @@ import { Product } from "./product.model";
 import { User } from "./user.model";
 
 export interface SerialItem {
-  barcode: string;
-  sku: string;
+  barcode: string;    //color+barcode
+  sku: string;        //refers to color
   color: {
     color: string,
     name: string

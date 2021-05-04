@@ -36,6 +36,8 @@ import { WarehouseInventoryComponent } from './warehouse-inventory/warehouse-inv
 import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-create-edit.component';
 import { WarehouseProductsEntryComponent } from './warehouse-products-entry/warehouse-products-entry.component';
 import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-guide-dialog.component';
+import { SelectSeriesComponent } from './select-series/select-series.component';
+import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out/warehouse-products-take-out.component';
 
 
 @NgModule({
@@ -47,6 +49,8 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     WarehouseCreateEditComponent,
     WarehouseProductsEntryComponent,
     ReferralGuideDialogComponent,
+    SelectSeriesComponent,
+    WarehouseProductsTakeOutComponent,
   ],
   imports: [
     CommonModule,

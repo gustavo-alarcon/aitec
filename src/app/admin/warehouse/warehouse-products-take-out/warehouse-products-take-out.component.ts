@@ -12,11 +12,11 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 import { ProductCategoryComponent } from 'src/app/main/product-detail/product-category/product-category.component';
 
 @Component({
-  selector: 'app-warehouse-products-entry',
-  templateUrl: './warehouse-products-entry.component.html',
-  styleUrls: ['./warehouse-products-entry.component.scss']
+  selector: 'app-warehouse-products-take-out',
+  templateUrl: './warehouse-products-take-out.component.html',
+  styleUrls: ['./warehouse-products-take-out.component.scss']
 })
-export class WarehouseProductsEntryComponent implements OnInit {
+export class WarehouseProductsTakeOutComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
@@ -61,10 +61,10 @@ export class WarehouseProductsEntryComponent implements OnInit {
                 this.cumSeriesList,
                 user,
                 "---",
-                "Ingreso de Productos",
+                "Retiro de Productos",
                 true,
                 1,
-                2,
+                12,
                 null
               ))
           })

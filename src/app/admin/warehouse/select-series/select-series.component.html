@@ -1,0 +1,166 @@
+<div class="transported">
+  <p>Datos del bien transportados</p>
+
+  <div class="serial-container">
+    <form [formGroup]="formGroup" class="serial-form">
+
+      <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
+        <mat-label>Almacén</mat-label>
+        <mat-icon matPrefix>corporate_fare</mat-icon>
+        <input formControlName="warehouseList" matInput type="text" [matAutocomplete]="wareAuto"
+          placeholder="Escriba..." >
+        <mat-autocomplete #wareAuto="matAutocomplete" [displayWith]="showWarehouse">
+          <mat-option *ngFor="let warehouse of (warehouseListValue$ | async)" [value]="warehouse">
+            {{warehouse.name}}</mat-option>
+        </mat-autocomplete>
+        <mat-hint>Escriba y seleccione un almacén</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
+
+      <ng-container *ngIf="warehouseListStatus$ | async"></ng-container>
+
+      <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
+        <mat-label>Producto</mat-label>
+        <mat-icon matPrefix>local_offer</mat-icon>
+        <input formControlName="productList" matInput type="text" [matAutocomplete]="prodAuto"
+          placeholder="Escriba..." >
+        <mat-autocomplete #prodAuto="matAutocomplete" [displayWith]="showProduct">
+          <mat-option *ngFor="let product of productListValue$ | async" [value]="product">
+            {{product.description}}</mat-option>
+        </mat-autocomplete>
+        <mat-hint>Escriba y seleccione un producto</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
+
+      <ng-container *ngIf="productListStatus$ | async"></ng-container>
+
+      <ng-container *ngIf="!entry; else entry2">
+        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
+          <mat-label>Código</mat-label>
+          <mat-icon matPrefix>qr_code_2</mat-icon>
+          <input formControlName="seriesList" matInput type="text" [matAutocomplete]="seriesAuto"
+            (keyup.enter)="(entry && formGroup.get('seriesList').valid) ? addSerie() : null"
+            placeholder="Escriba..." >
+          <mat-autocomplete #seriesAuto="matAutocomplete" [displayWith]="showSeries">
+            <mat-option *ngFor="let series of seriesList$ | async" [value]="series">
+              {{series.barcode}}</mat-option>
+          </mat-autocomplete>
+          <mat-hint>Escriba y seleccione un código.</mat-hint>
+          <mat-error>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcode">
+              Este código ya se encuentra en la lista.
+            </span>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.required">
+              * Campo requerido
+            </span>
+          </mat-error>
+        </mat-form-field>
+      </ng-container>
+
+      <ng-template #entry2>
+        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
+          <mat-label>Código</mat-label>
+          <mat-icon matPrefix>qr_code_2</mat-icon>
+          <input formControlName="seriesList" matInput type="text"
+            (keyup.enter)="formGroup.get('seriesList').valid ? addSerie() : null"
+            placeholder="PL001-0000" autocomplete="off">
+
+          <mat-progress-bar *ngIf="formGroup.get('seriesList').pending" mode="indeterminate"></mat-progress-bar>
+
+          <mat-hint>Escriba y presione ENTER para agregar.</mat-hint>
+          <mat-error>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.invalidCode">
+              Este código es Inválido.
+            </span>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.invalidColor">
+              Este color no existe en el producto.
+            </span>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcode">
+              Este código ya se encuentra en la lista.
+            </span>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcodeDB">
+              Este código ya se encuentra almacenado.
+            </span>
+            <span *ngIf="formGroup.get('seriesList')?.errors?.required">
+              * Campo requerido
+            </span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
+          <mat-label>Costo.</mat-label>
+          <mat-icon matPrefix>S/.</mat-icon>
+          <input 
+            formControlName="cost" matInput type="number"
+            placeholder="Ingrese el costo">
+          <mat-hint>Ingrese el costo del producto.</mat-hint>
+          <mat-error>
+            <span *ngIf="formGroup.get('cost')?.errors?.required">
+              * Campo requerido
+            </span>
+            <span *ngIf="formGroup.get('cost')?.errors?.min">
+              Precio mínimo de S/.0.00
+            </span>
+          </mat-error>
+        </mat-form-field>
+      </ng-template>
+      
+    </form>
+
+    <div *ngIf="seriesList.length else scanDefault" class="info info--default">
+      <div *ngFor="let item of seriesList; let i=index" class="info_barcode">
+        <div>{{item.barcode}}</div>
+        <div class="ms-fill"></div>
+        <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(item.barcode)">remove_circle
+        </mat-icon>
+      </div>
+    </div>
+
+    <button 
+      *ngIf="seriesList.length"
+      (click)="addSerieList()"
+      mat-raised-button color="primary" style="width: 100%" class="w3-margin">
+      Añadir
+    </button>
+
+  </div>
+
+  <ng-template #scanDefault>
+    <div class="info info--default">
+      <mat-icon style="transform: rotateZ(90deg);">line_weight</mat-icon>
+      <p>Aquí se mostrará la lista de productos escaneados.</p>
+    </div>
+  </ng-template>
+
+</div>
+
+<div class="listProduct" *ngIf="cumSeriesList.length">
+  <p style="font-weight: bold;">Lista de productos</p>
+
+  <table class="table table-striped">
+    <thead class="w3-border-bottom w3-margin-bottom">
+      <tr class="grid-listProduct">
+        <th>N°</th>
+        <th>Producto</th>
+        <th>Almacén</th>
+        <th>N° de Serie</th>
+        <th>Total</th>
+        <th *ngIf="entry">Precio/Costo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of cumSeriesList; let i=index" class="grid-listProduct">
+        <td> {{i + 1}} </td>
+        <td>{{item.product.description}}</td>
+        <td>{{item.warehouse.name}}</td>
+        <td><span *ngFor="let serial of item.list" class="w3-small">{{serial.barcode}}, </span></td>
+        <td> {{item.list.length}}</td>
+        <td *ngIf="entry"> {{item.cost | currency:'S/.'}}</td>
+        <td> <i class="material-icons" (click)="remSerieList(item)" style="cursor: pointer;">remove_circle</i></td>
+      </tr>
+    </tbody>
+  </table>
+
+
+</div>

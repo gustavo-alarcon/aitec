@@ -3,7 +3,7 @@
   <h2 class="title">
     <span class="w3-margin-right">
       <mat-icon>inventory</mat-icon>
-      Existencias
+      {{view}}
     </span>
     <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
       <mat-label>Acciones</mat-label>
@@ -200,6 +200,11 @@
   <!-- guide referral -->
   <ng-container *ngIf="view === 'Generar guía de remisión'">
     <app-referral-guide-dialog></app-referral-guide-dialog>
+  </ng-container>
+
+  <!-- take out -->
+  <ng-container *ngIf="view === 'Retirar productos'">
+    <app-warehouse-products-take-out></app-warehouse-products-take-out>
   </ng-container>
 
   <ng-template #default>

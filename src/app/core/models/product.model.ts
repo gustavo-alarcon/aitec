@@ -36,7 +36,13 @@ export interface Product {
   questions?: number;
   realStock: number;
   zones?: Zone[]
+
+  warehouseStock?: {
+    [s: string]: number         //id refers to warehouseID and it will contain a number
+  }
 }
+
+
 
 export interface unitProduct {
   //This SKU refers to the color code, not the SKU of the product

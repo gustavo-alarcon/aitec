@@ -24,7 +24,7 @@ import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Warehouse } from '../models/warehouse.model';
-import { SerialNumber } from '../models/SerialNumber.model';
+import { SerialNumber, SerialNumberWithPrice, serialProcess } from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
@@ -111,6 +111,7 @@ export class DatabaseService {
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
   advisersRef: `/db/aitec/config/generalConfig/adviser` = `/db/aitec/config/generalConfig/adviser`
   warehousesRef: `db/aitec/warehouses` = `db/aitec/warehouses`
+  seriesPreprocessingRef: `db/aitec/seriesPreprocessingRef`= `db/aitec/seriesPreprocessingRef`
   salesCorrColl = this.afs.firestore.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
 
 
@@ -177,40 +178,6 @@ export class DatabaseService {
     })
   }
 
-
-  //not used
-  // saveWarehouses(products, name) {
-  //   const batch = this.afs.firestore.batch();
-  //   let warehouseRef = this.afs.firestore.collection(`db/aitec/warehouses`).doc();
-  //   batch.set(warehouseRef, {
-  //     id: warehouseRef.id,
-  //     name: name
-  //   })
-  //   products.forEach(el => {
-  //     let productRef = this.afs.firestore.collection(`db/aitec/warehouses/${warehouseRef.id}/products`).doc(el.id);
-
-  //     el.series.forEach(lo => {
-  //       const serieRef = this.afs.firestore.collection(`/db/aitec/warehouse/${warehouseRef.id}/products/${el.id}/series`).doc();
-  //       batch.set(serieRef, {
-  //         id: serieRef.id,
-  //         idProduct: el.id,
-  //         skuProduct: el.sku,
-  //         serie: lo
-  //       })
-  //     })
-
-  //     batch.set(productRef, {
-  //       id: el.id,
-  //       series: el.series
-  //     });
-
-  //   })
-
-  //   batch.commit().then(() => {
-  //     console.log('all');
-
-  //   })
-  // }
 
   getCurrentMonthOfViewDate(): { from: Date; to: Date } {
     const date = new Date();
@@ -1580,6 +1547,19 @@ export class DatabaseService {
 
   }
 
+  getSeriesStoredOfProductInWarehouse(productId: string, warehouseId: string): Observable<SerialNumber[]>{
+
+    return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
+        ref.where("status", "==", "stored").where("warehouseId", "==", warehouseId)
+      ).valueChanges().pipe(
+        map(series => {
+          return series
+        })
+      )
+
+  }
+
+  //getSeriesOfProduct deprecated
   getSeriesOfProduct(barcode: string, productId: string): Observable<SerialNumber[]>{
 
     return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
@@ -1596,8 +1576,24 @@ export class DatabaseService {
 
   }
 
+  validateSeriesOfProduct(barcode: string, productId: string): Observable<SerialNumber[]>{
+
+    return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
+        ref.where("status", "==", "stored").where("barcode", "==", barcode)
+      ).get({source: "server"}).pipe(
+        map(doc => {
+          if(doc.empty){
+            return []
+          } else {
+            return doc.docs.map(el => (<SerialNumber>el.data()))
+          }
+        })
+      )
+
+  }
+
   getProductsOrdered(): Observable<Product[]>{
-    return this.afs.collection<Product>(this.productsListRef, ref =>ref.orderBy("description")).valueChanges()
+    return this.afs.collection<Product>(this.productsListRef, ref =>ref.orderBy("description")).valueChanges().pipe(shareReplay(1))
   }
 
   getProductsByWarehouse(warehouse: Warehouse): Observable<Product[]> {
@@ -1654,72 +1650,54 @@ export class DatabaseService {
       )
   }
 
-  saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, user: User): Observable<firebase.default.firestore.WriteBatch> {
+  getFirebaseId(){
+    let aux = this.afs.firestore.collection(`series`).doc()
+    return aux.id
+  }
+
+  saveSerialNumbers(
+    batch0: firebase.default.firestore.WriteBatch,
+    invoice: string, waybill: string, serialList: SerialNumberWithPrice[], user: User,
+    observations: string, type: serialProcess["type"], changeVirtualStock: boolean, 
+    kardexType: Kardex["type"], kardexOperationType: Kardex["operationType"], sale: Sale): firebase.default.firestore.WriteBatch {
     /**
      * IMPORTANT!
-     * This function assumes that only serial numbers of the same type (same product) will be processed.
+     * Serial numbers of different types processed
      * 
      * */
 
-    let batch = this.afs.firestore.batch();
+    let batch = batch0 ? batch0 : this.afs.firestore.batch();
+    let date = new Date()
 
-    // Saving serial numbers
-    serialList.forEach(serial => {
-      let serialRef = this.afs.firestore.collection(`${this.productsListRef}/${serial.product.id}/series`).doc();
-
-      let data: SerialNumber = {
-        id: serialRef.id,
-        productId: serial.product.id,
-        warehouseId: warehouse.id,
-        barcode: serial.barcode.trim(),
-        color: serial.color,
-        status: 'stored',
-        sku: serial.sku.trim(),
-        createdBy: user,
-        createdAt: new Date(),
-        editedBy: null,
-        editedAt: null
-      }
-      batch.set(serialRef, data);
+    // Updating data from serial numbers
+    serialList.forEach(serialNumberWithPrice => {
+      (<SerialNumber[]>serialNumberWithPrice.list).forEach(serialNumber => {
+        serialNumber.createdAt = date
+        serialNumber.createdBy = user
+      })
     });
 
-    let prodIdSet = new Set(serialList.map(el => el.product.id))
+    //Building serialProcess
+    let serialProcessData: serialProcess = {
+      id: this.getFirebaseId(),
+      invoice,
+      waybill,
+      type: type,
+      changeVirtualStock: !!changeVirtualStock,
+      list: serialList,
+      sale: sale,
+      kardexType,
+      kardexOperationType,
+      observations: observations,
+      createdBy: user,
+      createdAt: date,
+    }
 
-    prodIdSet.forEach(prodId => {
-      let productList = serialList.filter(el => el.product.id == prodId)
-      let unitPrice = 0;
-      if(productList.length){
-        unitPrice = productList[0].product.cost
-      }
-      // Adding entry to product's kardex
-      let kardexProductRef = this.afs.firestore.collection(`${this.productsListRef}/${prodId}/kardex`).doc();
+    //Uploading serialProcess
+    let seriesPreprocessingRef = this.afs.firestore.collection(`${this.seriesPreprocessingRef}`).doc(serialProcessData.id);
+    batch.set(seriesPreprocessingRef, serialProcessData)
 
-      let kardex: Kardex = {
-        id: kardexProductRef.id,
-        productId: prodId,
-        warehouseId: warehouse.id,
-
-        type: 1,          //Factura
-        operationType: 2, //Compra
-
-        invoice: invoice,
-        waybill: waybill,
-
-        inflow: true,     //Se ingresan productos
-
-        quantity: productList.length,
-        unitPrice: unitPrice,
-        totalPrice: productList.length*unitPrice,
-
-        createdBy: user,
-        createdAt: new Date(),
-      }
-
-      batch.set(kardexProductRef, kardex);
-    })
-    
-
-    return of(batch);
+    return batch;
   }
 
   // saveSerialNumbers(invoice: string, waybill: string, serialList: SerialItem[], warehouse: Warehouse, product: WarehouseProduct, user: User): Observable<firebase.default.firestore.WriteBatch> {
@@ -1833,15 +1811,14 @@ export class DatabaseService {
    * Creates a waybill based in the products registered
    * @param {Waybill} products - Content of the form used to generate waybills
    */
-  createWaybill(waybill: Waybill, user: User, sale?: Sale): firebase.default.firestore.WriteBatch {
-    const batch = this.afs.firestore.batch();
+  createWaybill(waybill: Waybill, serialList: SerialNumberWithPrice[], user: User, sale?: Sale): firebase.default.firestore.WriteBatch {
+    let batch = this.afs.firestore.batch();
     const referralRef = this.afs.firestore.collection(`/db/aitec/waybills`).doc();
 
     waybill.id = referralRef.id;
     batch.set(referralRef, waybill);
 
     //In the case we include a sale, we should do a kardex register.
-    //We won't update realStock anymore, as we will use an observable to calculate it
     if(sale){
       //We include waybill on sales data
       const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id)
@@ -1851,57 +1828,55 @@ export class DatabaseService {
         }
       })
 
-      //Updating serial numbers
-      waybill.productList.forEach(product => {
+      let auxSerialList = [...serialList]
 
-        // create a kardex entry
-        let kardexDoc = this.afs.firestore.collection(`${this.productsListRef}/${product.productId}/kardex`).doc();
-
-        //WE find corresponding product on sale to get corresponding price
-        let requestedProductSale = sale.requestedProducts.map(el => el.product).find(el => el.id == product.productId)
-        let quantity = product.serialList.length
-        let unitPrice = this.giveProductPrice({product: requestedProductSale, quantity}, user.mayoristUser) / quantity
-
-        let kardexData: Kardex = {
-
-          id: kardexDoc.id,
-          productId: product.productId,
-          warehouseId: product.warehouseId,
-
-          type: sale.document == "Boleta" ? 3 : 1,
-          correlative: sale.correlative,
-          operationType: 1,     //Venta
-
-          invoice: sale.confirmedDocumentData.documentNumber,
-          waybill: waybill.orderCode,
-        
-          inflow: false,        //se extraen productos
-        
-          quantity: quantity,
-          unitPrice: unitPrice,
-          totalPrice: quantity*unitPrice,
-
-          finalUpdated: false,
-          finalQuantity: null,
-          finalUnitPrice: null,
-          finalTotalPrice: null,
-        
-          createdBy: sale.user,
-          createdAt: new Date(),
-
-        };
-
-        batch.set(kardexDoc, kardexData);
-
-        // update serial numbers to "sold" status
-        product.serialList.forEach(serial => {
-          let serialnumberRef =
-            this.afs.firestore.collection(`${this.productsListRef}/${product.productId}/series`).doc(serial.id)
-
-          batch.update(serialnumberRef, { waybill: product.waybill, status: 'sold', editedBy: user, editedAt: new Date() });
-        });
+      auxSerialList.forEach(el => {
+        (<SerialNumber[]>el.list).forEach(el2 => {
+          el2.status = "sold"
+          el2.editedBy= user, 
+          el2.editedAt= new Date()
+        })
       })
+
+      batch = this.saveSerialNumbers(
+        batch,
+        sale.confirmedDocumentData.documentNumber,
+        waybill.orderCode,
+        serialList,
+        user,
+        waybill.observations,
+        "Venta",
+        false,
+        sale.document == "Boleta" ? 3 : 1,    //BOLETA O FACTURA
+        1,      //VENTA
+        sale
+      )
+    } else {
+      let auxSerialList = [...serialList]
+
+      auxSerialList.forEach(el => {
+        (<SerialNumber[]>el.list).forEach(el2 => {
+          el2.status = "sold"
+          el2.editedBy= user, 
+          el2.editedAt= new Date()
+        })
+      })
+
+      batch = this.saveSerialNumbers(
+        batch,
+        waybill.orderCode,
+        waybill.orderCode,
+        serialList,
+        user,
+        waybill.observations,
+        "Retiro por Guía de Remisión",
+        true,
+        1,    //Kardex type: Factura
+        99,    //Kardex opType: OTROS
+        null
+      )
     }
+
     return batch;
   }
 

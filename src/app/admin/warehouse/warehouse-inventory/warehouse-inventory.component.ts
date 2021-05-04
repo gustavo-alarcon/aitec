@@ -69,7 +69,7 @@ export class WarehouseInventoryComponent implements OnInit {
     'Existencias',
     'Ingresar productos',
     'Generar guía de remisión',
-    'Ajustar inventario'
+    'Retirar productos'
   ]
 
   constructor(
