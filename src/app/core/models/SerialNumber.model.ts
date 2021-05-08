@@ -3,10 +3,9 @@ import { Product } from "./product.model";
 import { Sale } from "./sale.model";
 import { User } from "./user.model";
 import { Warehouse } from "./warehouse.model";
-//Dentro de cada warehouseproduct
-///db/aitec/warehouses/lujOB8TwOHuI2EuSUr9w/products/N1mAlubvitsj76J9emPv/series
 
 //El numero de serie solo esta figurando en barcode
+//productList/productId/series
 export interface SerialNumber {     
   id: string;
   productId: string;
@@ -31,6 +30,7 @@ export interface SerialNumberWithPrice {
   warehouse: Warehouse
 }
 
+//seriesPreprocessingRef: `db/aitec/seriesPreprocessingRef`= `db/aitec/seriesPreprocessingRef`
 export interface serialProcess {
   id: string;
   invoice: string;        //Comprobante

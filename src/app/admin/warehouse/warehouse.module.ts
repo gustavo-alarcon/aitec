@@ -38,6 +38,16 @@ import { WarehouseProductsEntryComponent } from './warehouse-products-entry/ware
 import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-guide-dialog.component';
 import { SelectSeriesComponent } from './select-series/select-series.component';
 import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out/warehouse-products-take-out.component';
+import { SharedModule } from 'src/app/core/shared/shared.module';
+import { ListSeriesComponent } from './list-series/list-series.component';
+import { MatListModule } from '@angular/material/list';
+import { KardexDialogComponent } from './kardex-dialog/kardex-dialog.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DatePipe } from '@angular/common';
+import { MovementsComponent } from './movements/movements.component';
+import { MovementsDetailDialogComponent } from './movements-detail-dialog/movements-detail-dialog.component';
+import { TakeOutConfirmDialogComponent } from './take-out-confirm-dialog/take-out-confirm-dialog.component';
 
 
 @NgModule({
@@ -51,14 +61,21 @@ import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out
     ReferralGuideDialogComponent,
     SelectSeriesComponent,
     WarehouseProductsTakeOutComponent,
+    ListSeriesComponent,
+    KardexDialogComponent,
+    MovementsComponent,
+    MovementsDetailDialogComponent,
+    TakeOutConfirmDialogComponent
   ],
   imports: [
     CommonModule,
+    SharedModule,
     WarehouseRoutingModule,
     MatMenuModule,
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
+    MatListModule,
     MatButtonModule,
     MatInputModule,
     ReactiveFormsModule,
@@ -75,10 +92,12 @@ import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out
     MatTabsModule,
     MatTooltipModule,
     LazyLoadImageModule,
+    MatCheckboxModule,
     MatCardModule,
     MatStepperModule,
     MatRadioModule,
     MatNativeDateModule,
+    MatProgressSpinnerModule,
     FormsModule,
     NgxPrintModule, 
   ],
@@ -86,6 +105,7 @@ import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out
     ReferralGuideDialogComponent,
     MatFormFieldModule,
     CommonModule
-  ]
+  ],
+  providers: [DatePipe],
 })
 export class WarehouseModule { }

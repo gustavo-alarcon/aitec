@@ -91,6 +91,7 @@ export class WarehouseProductsEntryComponent implements OnInit {
       this.snackbar.open('🚨 No hay números de serie!', 'Aceptar', {
         duration: 6000
       });
+      this.loading.next(false);
     }
   }
 

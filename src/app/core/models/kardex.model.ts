@@ -2,7 +2,9 @@ import { User } from "./user.model";
 
 /**
  * Firestore document
- * Path of collection: db/aitec/productsList/{productId}/stockChange
+ * Path of collection: db/aitec/productsList/{productId}/kardex
+ * Doc of last updated kardex: db/aitec/productsList/{productId}/lastKardex/{warehouseId}
+ * We use last kardex to get info through transaction and update kardex data
  */
 export interface Kardex {
   id: string;
@@ -28,8 +30,7 @@ export interface Kardex {
 
   //The following fields will be calculated and set with a scheduler, and when it is not,
   //will be calculated and displayed ad-hoc with observables
-  finalUpdated?: boolean;    //Whether final quantity, unitprice and unitotalPrice was calculated
-                            //+- depends on whether it is inflow or not
+  finalUpdated?: boolean     //+- depends on whether it is inflow or not
   finalQuantity?: number;    //Quantity remaining after operation (sum of last quantity +- quantity)
   finalUnitPrice?: number;   //finalTotalPrice / finalQuantity
   finalTotalPrice?: number;  //last finalTotalPrice +- totalPrice

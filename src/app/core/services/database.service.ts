@@ -106,6 +106,7 @@ export class DatabaseService {
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
   salesRef: `db/aitec/sales` = `db/aitec/sales`;
+  cancelledSaleRef: `db/aitec/cancelledSales` = `db/aitec/cancelledSales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
   couponRef: `db/aitec/coupons`= `db/aitec/coupons`
@@ -549,11 +550,42 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  getWarehouseSeriesValueChanges(id): Observable<Product[]> {
+  getWarehouseSeriesValueChanges(productId: string, warehouseId?: string): Observable<SerialNumber[]> {
+    if(warehouseId){
+      return this.afs
+        .collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, 
+          ref => ref.where("warehouseId", "==", warehouseId).where("status", "==", "stored"))
+        .valueChanges();
+    } else {
+      return this.afs
+        .collection<SerialNumber>(`${this.productsListRef}/${productId}/series`,
+        ref => ref.where("status", "==", "stored"))
+        .valueChanges();
+    }
+    
+  }
+
+  getKardex(productId: string, date: {begin: Date, end: Date}, warehouseId: string): Observable<Kardex[]>{
+    if(warehouseId){
+      return this.afs
+        .collection<Kardex>(`${this.productsListRef}/${productId}/kardex`, 
+          ref => ref.where("warehouseId", "==", warehouseId)
+                    .where("createdAt", ">=", date.begin)
+                    .where("createdAt", "<=", date.end))
+        .valueChanges();
+    } else {
+      return this.afs
+        .collection<Kardex>(`${this.productsListRef}/${productId}/kardex`)
+        .valueChanges();
+    }
+  }
+
+  getMovementsValueChanges(date: {begin: Date, end: Date}): Observable<serialProcess[]>{
     return this.afs
-      .collection<Product>(`/db/aitec/warehouse/${id}/series`)
-      .valueChanges()
-      .pipe(shareReplay(1));
+        .collection<serialProcess>(`${this.seriesPreprocessingRef}`, 
+          ref => ref.where("createdAt", ">=", date.begin)
+                    .where("createdAt", "<=", date.end))
+        .valueChanges();
   }
 
   getWarehouseByProduct(id) {
@@ -1098,6 +1130,13 @@ export class DatabaseService {
     let batch = this.afs.firestore.batch();
 
     batch.set(saleRef, saleData);
+
+    if(sale.status == this.saleStatus.cancelled){
+      let cancelledSaleDoc: DocumentReference = this.afs.firestore
+        .collection(this.cancelledSaleRef)
+        .doc(sale.id);
+      batch.set(cancelledSaleDoc, saleData)
+    }
     return batch;
   }
 
@@ -1601,7 +1640,9 @@ export class DatabaseService {
       return of([])
     }
 
-    return this.afs.collection<Product>(`/db/aitec/productsList`, ref => ref.where('warehouse', 'array-contains', warehouse.name))
+    return this.afs.collection<Product>(this.productsListRef, ref => 
+      ref.where(`warehouseStock.${warehouse.id}`, '>=', 0)
+      )
       .valueChanges()
       .pipe(
         shareReplay(1)
@@ -2104,5 +2145,6 @@ export class DatabaseService {
   //   return batch
 
   // }
+
 
 }

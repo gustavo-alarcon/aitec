@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ProductPricePipe } from './product-price.pipe';
 import { SalePricePipe } from './sale-price.pipe';
 import { TotalQuantityPipe } from './total-quantity.pipe';
+import { WarehouseStockPipe } from './warehouse-stock.pipe';
+import { ProductStockPipe } from './product-stock.pipe';
 
 
 
@@ -10,7 +12,9 @@ import { TotalQuantityPipe } from './total-quantity.pipe';
   declarations: [
     SalePricePipe,
     ProductPricePipe,
-    TotalQuantityPipe
+    TotalQuantityPipe,
+    WarehouseStockPipe,
+    ProductStockPipe
   ],
   imports: [
     CommonModule
@@ -19,6 +23,8 @@ import { TotalQuantityPipe } from './total-quantity.pipe';
     SalePricePipe,
     ProductPricePipe,
     TotalQuantityPipe,
+    WarehouseStockPipe,
+    ProductStockPipe,
     CommonModule,
   ]
 })

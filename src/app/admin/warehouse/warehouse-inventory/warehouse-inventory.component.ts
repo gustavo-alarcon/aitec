@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -11,7 +11,10 @@ import { Product } from 'src/app/core/models/product.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { ReferralGuideDialogComponent } from '../referral-guide-dialog/referral-guide-dialog.component';
+import { KardexDialogComponent } from '../kardex-dialog/kardex-dialog.component';
+import { ListDialogComponent } from '../list-dialog/list-dialog.component';
+import * as XLSX from 'xlsx';
+
 
 @Component({
   selector: 'app-warehouse-inventory',
@@ -35,7 +38,7 @@ export class WarehouseInventoryComponent implements OnInit {
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
     'index', 'photoURL', 'description', 'sku', 'category', 'virtualStock',
-    'realStock', 'list', 'actions'
+    'realStock', 'warehouseStock', 'list', 'actions'
   ]
 
   productsObservable$: Observable<Product[]>
@@ -69,14 +72,17 @@ export class WarehouseInventoryComponent implements OnInit {
     'Existencias',
     'Ingresar productos',
     'Generar guía de remisión',
-    'Retirar productos'
+    'Retirar productos',
+    'Registro movimientos'
   ]
 
   constructor(
     private fb: FormBuilder,
     public snackbar: MatSnackBar,
     private dbs: DatabaseService,
-    public auth: AuthService
+    public auth: AuthService,
+    private dialog: MatDialog
+
   ) { }
 
   ngOnInit(): void {
@@ -105,6 +111,7 @@ export class WarehouseInventoryComponent implements OnInit {
           return this.dbs.getProductsByWarehouse(warehouseSelected)
         }),
         tap(res => {
+          console.log(res)
           this.productsTableDataSource.data = res;
           this.loading.next(false);
         })
@@ -125,13 +132,33 @@ export class WarehouseInventoryComponent implements OnInit {
     return category ? category.name : null
   }
 
+  openDialog(product: Product, warehouseId: string) {
+    let dialogRef: MatDialogRef<ListDialogComponent>
+    dialogRef = this.dialog.open(ListDialogComponent, {
+      minWidth: '350px',
+      data: {
+        product,
+        warehouseId
+      }
+    });
+  }
+
+  openKardex(product: Product, warehouseId: string) {
+    let dialogRef: MatDialogRef<KardexDialogComponent>
+    dialogRef = this.dialog.open(KardexDialogComponent, {
+      data: {
+        product,
+        warehouseId
+      }
+    });
+  }
 
   downloadXls(): void {
-    /*
+    
     let table_xlsx: any[] = [];
     let headersXlsx = [
-      'Descripcion', 'SKU', 'Categoría', 'Precio',
-      'Descripción de Unidad', 'Abreviación', 'Stock Real', 'Mínimio de alerta', 'Publicado'
+      'Descripcion', 'SKU', 'Categoría',
+      'Stock Virtual', 'Stock Real', 'Stock en Almacén'
     ]
 
     table_xlsx.push(headersXlsx);
@@ -140,13 +167,10 @@ export class WarehouseInventoryComponent implements OnInit {
       const temp = [
         product.description,
         product.sku,
-        product.category,
-        product.price,
-        product.unit.description,
-        product.unit.abbreviation,
-        product.realStock,
-        product.alertMinimum,
-        product.published ? "Sí" : "No"
+        product["category"],
+        product.products.reduce((prev,curr)=> (prev+curr.virtualStock), 0),
+        product.products.reduce((prev,curr)=> (prev+curr.realStock), 0),
+        product.warehouseStock[(<Warehouse>this.warehouseForm.value).id] ? product.warehouseStock[(<Warehouse>this.warehouseForm.value).id] : 0,
       ];
 
       table_xlsx.push(temp);
@@ -157,8 +181,8 @@ export class WarehouseInventoryComponent implements OnInit {
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Lista_de_productos');
 
-    const name = 'Lista_de_productos' + '.xlsx';
-    XLSX.writeFile(wb, name);*/
+    const name = 'Lista_de_productos_'+ (<Warehouse>this.warehouseForm.value).name + '.xlsx';
+    XLSX.writeFile(wb, name);
   }
 
   changeView(view): void {

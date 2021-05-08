@@ -20,6 +20,7 @@ const usersRef = 'users'
 const genConfigRef = `db/aitec/config`
 const couponsRef = `db/aitec/coupons`
 const seriesPreprocessingRef = `db/aitec/seriesPreprocessingRef`
+const cancelledSaleRef = `db/aitec/cancelledSales`;
 const salesCorrelativeDoc = db.collection(genConfigRef).doc(`salesCorrelative`)
 
 //const emailLoc = `/mail`
@@ -599,6 +600,106 @@ exports.reserveSaleChanged = functions.firestore.document(`${reservedSalesRef}/{
     )
   })
 
+  exports.cancelledSale = functions.firestore.document(`${cancelledSaleRef}/{saleId}`)
+  .onCreate(event => {
+    let sale = event.data()
+    let newSale = {...sale}
+
+    console.log("Sale payed: "+ sale.id)
+
+    const saleDoc = db.collection(salesRef).doc(sale.id)
+    const cancelledSalesDoc = db.collection(cancelledSaleRef).doc(sale.id)
+    const userDoc = db.collection(usersRef).doc(sale.user.uid)
+    //const emailRef = db.collection(emailRef).doc()
+    const productsListColl = db.collection(productsListRef)
+    const couponColl = db.collection(couponsRef)
+
+    console.log("Initiating transaction");
+
+    let productDocArray = Array.from(new Set(sale.requestedProducts.map(prod => (
+      //Should be updated if we consider packages
+      //We use set to get unique ids
+      prod.product.id
+    )))).map((prodId)=> productsListColl.doc(prodId))
+
+    console.log("Initiating transaction");
+
+    return db.runTransaction((transaction)=> {
+      return transaction.getAll(salesCorrelativeDoc, ...productDocArray).then((sf)=> {
+        
+        let sfDoc = sf[0]     //Contains general config
+        let productsList = sf.slice(1).filter(el => el.exists).map(el => el.data())   //This contains each Product object
+        
+        if(sf.slice(1).length != productsList.length){
+          console.log("One product document does not exist.")
+        }
+
+        let correlative = 0
+
+        if(!sfDoc.exists){
+          correlative = 1
+        } else {
+          correlative = (!!sfDoc.data().rCorrelative) ? (sfDoc.data().rCorrelative + 1) : 1
+        }
+
+        let productsTrans = [...productsList]
+
+        //Changing stock
+        console.log("Validating Stock")
+        productsTrans.forEach(el => {
+          let productDB = el;
+          console.log("In productDB evaluating stock of: "+ productDB.id)
+          //console.log(productDB.products)
+
+          let filteredReqProducts = sale.requestedProducts.filter(el2 => 
+              //We get the requested products (in sale) that match
+              //the current product from DB
+              el2.product.id == productDB.id
+            )
+          
+          filteredReqProducts.forEach(el2 =>{
+              //We now check if there is at least one requested product
+              //whose color does not have enough stock
+              console.log("In sale evaluating stock of: "+ el2.chosenProduct.sku)
+              //console.log(el2)
+
+              let productColor = productDB.products.find(prodColor => 
+                //We find the product corresponding to the color
+                prodColor.sku == el2.chosenProduct.sku
+                )
+              console.log("Product Color found in productDB: "+ productColor.sku)
+              console.log(productColor);
+
+              console.log("DB stock virtual stock: ", productColor.virtualStock)
+              console.log("DB stock real stock: ", productColor.realStock)
+              console.log("Quantity: ", el2.quantity)
+
+              console.log("ProductDB editted")
+              productColor.virtualStock += el2.quantity
+
+            })
+          //console.log("ProductDB result: ")
+          //console.log(productDB.products)
+
+          
+          //Update product quantity
+          transaction.update(productsListColl.doc(productDB.id), productDB)
+        })
+
+      })
+    }).then(
+      success => {
+        console.log("Successful sale deletion.")
+      },
+      err => {
+        console.log("Error writing sale.")
+        console.log(err)
+        newSale.status = "Error"
+        return cancelledSalesDoc.set(newSale)
+      }
+    )
+  })
+
 //reqVadsForm handles http request to encode vads fields needed to get html form for payment
 exports.reqVadsForm = functions.https.onRequest((req, res) => {
   console.log("receiving request")
@@ -619,7 +720,7 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
 
 //Function gets new series created, and adds changes respective stock
 exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{seriesPreId}`)
-  .onWrite(event => {
+  .onCreate(event => {
     let seriesList = event.after.data()
     /*let seriesList= {
       invoice: "string",        //Comprobante
@@ -772,4 +873,39 @@ exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{
       })
     })
 
+  })
+
+  //updateKardex is executed everytime a kardex update is created. Used to fill final data and update
+  //lastKardex
+  exports.updateKardex = functions.firestore.document(`${productsListRef}/{productId}/kardex/{kardexId}`)
+  .onCreate(event => {
+    let actKardex = {...event.data()}
+
+    let actKardexDoc = db.collection(`${productsListRef}/${actKardex.productId}/kardex`).doc(actKardex.id)
+    let lastKardexDoc = db.collection(`${productsListRef}/${actKardex.productId}/lastKardex`).doc(actKardex.warehouseId)
+
+    return db.runTransaction((transaction)=> {
+      return transaction.get(lastKardexDoc).then((lastKardexSf)=> {
+        let mult = actKardex.inflow ? 1:-1;
+
+        actKardex.finalUpdated = true
+        
+        if(!lastKardexSf.exists){
+          actKardex.finalQuantity = mult*actKardex.quantity
+          actKardex.finalTotalPrice = mult*actKardex.totalPrice
+          actKardex.finalUnitPrice = actKardex.finalTotalPrice/actKardex.finalQuantity
+
+          transaction.set(actKardexDoc, actKardex)
+        } else {
+          let lastKardex = {...lastKardexSf.data()}
+
+          actKardex.finalQuantity = lastKardex.finalQuantity + mult*actKardex.quantity
+          actKardex.finalTotalPrice = lastKardex.finalTotalPrice + mult*actKardex.totalPrice
+          actKardex.finalUnitPrice = actKardex.finalTotalPrice/actKardex.finalQuantity
+
+          transaction.set(actKardexDoc, actKardex)
+        }
+
+        transaction.set(lastKardexDoc, actKardex)
+      })})
   })

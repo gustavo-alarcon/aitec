@@ -1,0 +1,255 @@
+<div mat-dialog-title>
+  <div class="ms-flex">
+    <h2 style="font-weight: 600;font-size: 1em;">
+      <mat-icon style="vertical-align: middle;">history</mat-icon> Kardex
+    </h2>
+    <span class="ms-fill"></span>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+  <p style="color: gray; margin: 0px" class="w3-small">
+    <mat-icon style="vertical-align: middle;">info</mat-icon> Cada movimiento de stock se encuentra
+    registrado en esta lista
+  </p>
+</div>
+
+<div mat-dialog-content>
+  <div style="
+    display: flex; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    width: 100%">
+    <mat-form-field class="w3-block" style="max-width: 240px;" appearance="outline">
+      <mat-label>FECHA/PERIODO</mat-label>
+      <mat-date-range-input [formGroup]="dateForm" [rangePicker]="picker">
+        <input readonly matStartDate formControlName="begin" placeholder="Fecha Inicio">
+        <input readonly matEndDate formControlName="end" placeholder="Fecha Final">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+
+    <mat-checkbox color="primary" [formControl]="valuedKardexForm">Kardex valorado</mat-checkbox>
+
+    <button (click)="downloadXls()" mat-raised-button [disabled]="!dataSource.data.length" color="primary"
+      type="button">
+      <mat-icon style="vertical-align: middle;">cloud_download</mat-icon>
+      Descargar
+    </button>
+  </div>
+
+
+  <mat-progress-bar mode="indeterminate" *ngIf="loadingHistory$ | async"></mat-progress-bar>
+
+  <ng-container *ngIf="init$ | async as history; else loading">
+
+    <ng-container *ngIf="history.length; else default">
+
+      <div class="mat-elevation-z8 w3-margin-top w3-round-large w3-hide-small"
+        style="border-radius: 10px 10px 10px 10px; margin-bottom: 16px">
+        <div style="overflow:auto; border-radius: 10px 10px 10px 10px; max-height: 65vh">
+          <table mat-table [dataSource]="dataSource" matSort style="width:100%">
+
+            <ng-container matColumnDef="index">
+              <th mat-header-cell *matHeaderCellDef [attr.rowspan]="2"
+                style="background:#eaeaea;padding: 0px 1em 0px 1em">N°
+              </th>
+              <td mat-cell *matCellDef="let request; let l = count; let i = index"
+                style="color:#2b2b2b; padding: 0px 1em 0px 1em">
+                {{ 1 +i +paginator1.pageIndex * paginator1.pageSize}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="document">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="3"
+                style="background:#eaeaea;padding: 0px 1em 0px 1em">
+                Datos de operación
+              </th>
+            </ng-container>
+
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1em 0px 1em; border-left:1px solid lightgrey">Fecha/hora de
+                movimiento
+              </th>
+              <td mat-cell *matCellDef="let request" class="w3-center"
+                style="color:#2b2b2b; padding:0px 1em 0px 1em; border-left:1px solid lightgrey; min-width: 100px">
+                <span class="w3-small" style="font-weight:500">
+                  {{request.createdAt['seconds'] * 1000 | date :'dd.MM.yyyy'}}, 
+                </span>
+                <span class="w3-small">
+                  {{request.createdAt['seconds'] * 1000 | date : 'hh:mm:ss a'}}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Tipo</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{request?.type}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="invoice">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Documento</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey;">
+                {{request?.invoice}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="operationType">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.rowspan]="2"
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Tipo de Operación</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{request?.operationType}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="movement">
+              <th mat-header-cell *matHeaderCellDef [attr.colspan]="lastRowSpan$ | async"
+                style="background:#eaeaea;padding: 0px 1em 0px 1em">
+                Movimientos
+              </th>
+            </ng-container>
+
+            <ng-container matColumnDef="inQuantity">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Entradas</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{request.inflow ? request.quantity : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="inPrice">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                S/.</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{request.inflow ? request.unitPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="inTotal">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Total</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{request.inflow ? request.totalPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outQuantity">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Salidas</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.inflow ? request.quantity : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outPrice">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                S/.</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.inflow ? request.unitPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="outTotal">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Total</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.inflow ? request.totalPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="finalQuantity">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Saldo Final</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.finalUpdated ? request.finalQuantity : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="finalUnitPrice">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                S/.</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.finalUpdated ? request.finalUnitPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="finalTotalPrice">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey">
+                Saldo Total</th>
+              <td mat-cell *matCellDef="let request"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; ">
+                {{!request.finalUpdated ? request.finalTotalPrice : 0}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="createdBy">
+              <th mat-header-cell *matHeaderCellDef [attr.rowspan]="2"
+                style="background:#eaeaea;padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey; min-width: 200px">
+                Creado por:
+              </th>
+              <td mat-cell *matCellDef="let request;"
+                style="color:#2b2b2b; padding:0px 1.5em 0px 1em; border-left:1px solid lightgrey;">
+                {{request?.createdBy?.personData?.name }}
+                {{request?.createdBy?.personData?.lastName ? request?.createdBy?.personData?.lastName : ''}}
+              </td>
+            </ng-container>
+
+            
+  
+            <tr mat-header-row *matHeaderRowDef="thirdColumns; sticky: true"></tr>
+            <tr mat-header-row *matHeaderRowDef="(valuedKardexColumn$ | async); sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: (this.valuedKardexRow$ | async);"></tr>
+
+          </table>
+        </div>
+        <mat-paginator #paginator1 class="w3-round-large" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </ng-container>
+
+    <ng-template #default>
+      <div
+        class="w3-container w3-center ms-empty-container w3-round-large mat-elevation-z8 w3-margin-top w3-margin-bottom"
+        style="margin: 16px 0px">
+        <h2 class="ms-empty-list">
+          Parece que no hay resultados
+        </h2>
+      </div>
+    </ng-template>
+
+  </ng-container>
+  <ng-template #loading>
+    <div style="display: flex; flex-direction: row; justify-content: center;">
+      <mat-spinner></mat-spinner>
+    </div>
+  </ng-template>
+
+</div>
