@@ -6,8 +6,8 @@
 
     <div class="arrival">
       <mat-form-field class="w3-block w3-small size-item" appearance="outline">
-        <mat-label>Codigo de pedido / operación</mat-label>
-        <input matInput type="text" formControlName="orderCode" placeholder="Codigo de pedido" autocomplete="off">
+        <mat-label>N° de Guía de Remisión</mat-label>
+        <input matInput type="text" formControlName="orderCode" placeholder="N° de Guía de Remisión" autocomplete="off">
         <mat-error> Requerido * </mat-error>
       </mat-form-field>
 
@@ -83,9 +83,9 @@
 
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
 <ng-container *ngIf="user$|async as user">
-  <div *ngIf="cumSeriesList.length>0" class="w3-margin-left w3-margin-top">
-    <button [disable]="loading | async" mat-raised-button color="primary" class="btn w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
-    <button mat-raised-button color="primary" class="btn" (click)="printWaybill(user)"> Imprimir</button>
+  <div *ngIf="cumSeriesList.length>0" class="w3-margin-left w3-margin-top" style="text-align: end;">
+    <button [disabled]="(loading$ | async)" mat-raised-button color="primary" class="w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
+    <button mat-raised-button color="primary" (click)="printWaybill(user)"> Imprimir</button>
   </div>
 </ng-container>
 

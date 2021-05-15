@@ -445,6 +445,7 @@
                     {{adviser.displayName}}
                   </mat-option>
                 </mat-autocomplete>
+                <mat-error>Elija un asesor válido.</mat-error>
               </mat-form-field>
               <p class="resume__small">*El Nombre o correo de tu asesor ayudará a que podamos hacer mejor seguimiento a
                 tu pedido</p>
@@ -452,7 +453,7 @@
             <div class="resume__title w3-section">Total: S/. {{ totalAll$ | async }}</div>
             <div class="w3-center w3-margin-bottom">
               <button 
-                [disabled]="secondButtonVal$ | async"
+                [disabled]="(secondButtonVal$ | async) || !adviserForm.valid"
                 (click)="secondView()" 
                 mat-raised-button color="primary" class="resume__button">
                 Continuar
@@ -475,7 +476,7 @@
               <button 
                 (click)="thirdView()"
                 mat-raised-button 
-                [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async)" 
+                [disabled]="(!deliveryForm.valid) || (secondButtonVal$ | async) || !adviserForm.valid" 
                 color="primary"
                 class="resume__button">
                 Continuar</button>
@@ -487,7 +488,7 @@
               type="button"
               *ngIf="finishObservable$|async as finishData"
               [disabled]="(uploadingSale$ | async) || (!deliveryForm.valid) || 
-                          (secondButtonVal$ | async) || (!documentForm.valid)" 
+                          (secondButtonVal$ | async) || (!documentForm.valid) || !adviserForm.valid" 
               (click)="finish(finishData)" 
               mat-raised-button color="primary" class="resume__button">
               Proceder a Pago

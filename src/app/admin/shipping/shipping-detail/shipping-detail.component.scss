@@ -8,7 +8,7 @@
 }
 
 table {
-  font-weight: bold;
+  font-weight: normal;
   opacity: 0.8;
   // table-layout: fixed;
 }
@@ -40,11 +40,11 @@ table .price_header {
 }
 
 .table-sale__th {
-  padding: 4px;
+  padding: 8px 4px;
 }
 
 .table-sale__td {
-  padding: 4px;
+  padding: 8px 4px;
 }
 
 .table-sale__td--border {

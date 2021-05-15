@@ -1,6 +1,6 @@
 <div mat-dialog-title>
   <div style="display: flex; flex-direction: row; justify-content: space-between;">
-    <h2 class="title-login">
+    <h2 class="title-login" style="margin: 0px">
       {{(correlative$ | async) ? "Gracias por tu compra" : "Espere..."}}
     </h2>
     
@@ -17,9 +17,11 @@
     <p>Gracias por elegir Aitec Group, {{data.name | titlecase}}.</p>
     <p>Hemos recibido tu pedido, el número es: <strong> #R{{corr}}</strong>. Procesaremos tu
       compra y nos pondremos en contacto para coordinar la entrega. </p>
-    <p *ngIf="data.asesor">Elegiste al asesor de ventas: {{data.asesor.displayName}}, comunicate al número:
-      {{data.asesor.phone}}</p>
+    
     <p>Te llegará un correo electrónico a <strong>{{data.email}}</strong> con la confirmación de tu pedido.</p>
+
+    <p *ngIf="data.asesor">También puedes comunicarte con tu asesor: <strong>{{data.asesor.displayName}}</strong>, cel:
+      <strong>{{data.asesor.phone}}</strong></p>
 
     <div style="text-align: right;" class="w3-section">
       <img src="../../../../assets/images/logo-black.png" width="100px" alt="">
@@ -34,11 +36,11 @@
     </div>
   </ng-template>
 </div>
-<div mat-dialog-actions>
-  <!-- <button 
+<!-- <div mat-dialog-actions>
+  <button 
     [disabled]="!(correlative$ | async)"
     type="button"
     mat-button mat-dialog-close>
     Aceptar
-  </button> -->
-</div>
+  </button>
+</div> -->

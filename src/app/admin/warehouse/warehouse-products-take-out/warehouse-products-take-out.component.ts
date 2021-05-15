@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take, shareReplay } from 'rxjs/operators';
+import { Kardex, OPERATION_TYPE } from 'src/app/core/models/kardex.model';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
 import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
@@ -23,9 +24,12 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
   loading$ = this.loading.asObservable();
 
   cumSeriesList: SerialNumberWithPrice[] = []
+  invoiceType = Object.values(TIPO_COMPROBANTE)
 
   entryInvoiceControl: FormControl;
   entryWaybillControl: FormControl;
+  entryInvoiceType: FormControl;
+  
 
   constructor(
     private fb: FormBuilder,
@@ -42,6 +46,7 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
   initForms() {
     this.entryInvoiceControl = this.fb.control(null, Validators.required);
     this.entryWaybillControl = this.fb.control("---", Validators.required);
+    this.entryInvoiceType = this.fb.control(null, Validators.required);
   }
 
   save(): void {
@@ -69,7 +74,7 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
     })
 
     dialogRef.afterClosed().pipe(
-      switchMap(res => {
+      switchMap((res: {action: string, lastObservation: string}) => {
         if(!res){
           return of(null)
         } else {
@@ -86,10 +91,10 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
                     this.entryWaybillControl.value,
                     this.cumSeriesList,
                     user,
-                    "---",
+                    res.lastObservation,
                     "Retiro de Productos",
                     true,
-                    1,
+                    <Kardex["type"]>Number(Object.keys(OPERATION_TYPE).find(key => OPERATION_TYPE[key] === this.entryInvoiceType.value)),
                     12,
                     null
                   ))
@@ -103,6 +108,8 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
           .then(() => {
             this.loading.next(false);
             this.cumSeriesList =[];
+            this.entryInvoiceControl.setValue(null);
+            this.entryInvoiceControl.markAsUntouched();
             this.snackbar.open('✅ Números de serie retirados con éxito!', 'Aceptar', {
               duration: 6000
             });
@@ -127,3 +134,7 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
   }
 
 }
+function TIPO_COMPROBANTE(TIPO_COMPROBANTE: any) {
+  throw new Error('Function not implemented.');
+}
+

@@ -36,7 +36,7 @@ export interface Kardex {
   finalTotalPrice?: number;  //last finalTotalPrice +- totalPrice
 }
 
-const OPERATION_TYPE = <const>{
+export const OPERATION_TYPE = <const>{
   1:	"VENTA",
   2:	"COMPRA",
   3:	"CONSIGNACIÓN RECIBIDA",

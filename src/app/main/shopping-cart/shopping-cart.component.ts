@@ -43,7 +43,7 @@ export class ShoppingCartComponent implements OnInit {
             this.dialog.open(SaleDialogComponent, {
               closeOnNavigation: false,
               disableClose: true,
-              maxWidth: "330px",
+              maxWidth: "350px",
               data: {
                 name: params.vads_cust_first_name,
                 number: params.vads_order_id,

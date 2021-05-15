@@ -5,8 +5,7 @@
     <form [formGroup]="formGroup" class="serial-form">
 
       <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-        <mat-label>Almacén</mat-label>
-        <mat-icon matPrefix>corporate_fare</mat-icon>
+        <mat-label><span>Almacén&nbsp;&nbsp;&nbsp;</span></mat-label>
         <input formControlName="warehouseList" matInput type="text" [matAutocomplete]="wareAuto"
           placeholder="Escriba..." >
         <mat-autocomplete #wareAuto="matAutocomplete" [displayWith]="showWarehouse">
@@ -15,12 +14,14 @@
         </mat-autocomplete>
         <mat-hint>Escriba y seleccione un almacén</mat-hint>
         <mat-error>* Campo requerido</mat-error>
+        <mat-icon matPrefix>corporate_fare</mat-icon>
+
       </mat-form-field>
 
       <ng-container *ngIf="warehouseListStatus$ | async"></ng-container>
 
       <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-        <mat-label>Producto</mat-label>
+        <mat-label>Producto&nbsp;&nbsp;&nbsp;</mat-label>
         <mat-icon matPrefix>local_offer</mat-icon>
         <input formControlName="productList" matInput type="text" [matAutocomplete]="prodAuto"
           placeholder="Escriba..." >
@@ -36,7 +37,7 @@
 
       <ng-container *ngIf="!entry; else entry2">
         <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Código</mat-label>
+          <mat-label>Código&nbsp;&nbsp;&nbsp;</mat-label>
           <mat-icon matPrefix>qr_code_2</mat-icon>
           <input formControlName="seriesList" matInput type="text" [matAutocomplete]="seriesAuto"
             (keyup.enter)="(entry && formGroup.get('seriesList').valid) ? addSerie() : null"
@@ -59,7 +60,7 @@
 
       <ng-template #entry2>
         <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Código</mat-label>
+          <mat-label>Código&nbsp;&nbsp;&nbsp;</mat-label>
           <mat-icon matPrefix>qr_code_2</mat-icon>
           <input formControlName="seriesList" matInput type="text"
             (keyup.enter)="formGroup.get('seriesList').valid ? addSerie() : null"
@@ -88,7 +89,7 @@
         </mat-form-field>
 
         <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Costo.</mat-label>
+          <mat-label>Costo.&nbsp;&nbsp;&nbsp;</mat-label>
           <mat-icon matPrefix>S/.</mat-icon>
           <input 
             formControlName="cost" matInput type="number"

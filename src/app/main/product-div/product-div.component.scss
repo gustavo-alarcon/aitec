@@ -3,7 +3,7 @@
   box-sizing: border-box;
   position: relative;
   cursor: pointer;
-  height: 400px;
+  height: 435px;
   &__star {
     position: absolute;
     top: 0;
@@ -87,7 +87,7 @@
 
 @media (max-width: 600px) {
   .product {
-    max-height: 300px;
+    max-height: 350px;
     &__star {
       &--icon {
         height: 24px;

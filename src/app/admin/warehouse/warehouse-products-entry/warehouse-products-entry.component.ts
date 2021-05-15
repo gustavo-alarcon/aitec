@@ -4,6 +4,7 @@ import { MapBaseLayer } from '@angular/google-maps';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take, shareReplay } from 'rxjs/operators';
+import { Kardex, OPERATION_TYPE } from 'src/app/core/models/kardex.model';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
 import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
@@ -22,8 +23,11 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   cumSeriesList: SerialNumberWithPrice[] = []
 
+  invoiceType = Object.values(TIPO_COMPROBANTE)
+
   entryInvoiceControl: FormControl;
   entryWaybillControl: FormControl;
+  entryInvoiceType: FormControl;
 
   constructor(
     private fb: FormBuilder,
@@ -39,12 +43,14 @@ export class WarehouseProductsEntryComponent implements OnInit {
   initForms() {
     this.entryInvoiceControl = this.fb.control(null, Validators.required);
     this.entryWaybillControl = this.fb.control(null, Validators.required);
+    this.entryInvoiceType = this.fb.control(null, Validators.required);
+
   }
 
   save(): void {
     console.log("saving")
     console.log(this.cumSeriesList)
-    this.loading.next(true);
+    //this.loading.next(true);
     if (this.cumSeriesList.length > 0) {
 
       this.auth.user$
@@ -63,7 +69,7 @@ export class WarehouseProductsEntryComponent implements OnInit {
                 "---",
                 "Ingreso de Productos",
                 true,
-                1,
+                <Kardex["type"]>Number(Object.keys(OPERATION_TYPE).find(key => OPERATION_TYPE[key] === this.entryInvoiceType.value)),
                 2,
                 null
               ))
@@ -74,6 +80,10 @@ export class WarehouseProductsEntryComponent implements OnInit {
             .then(() => {
               this.loading.next(false);
               this.cumSeriesList =[];
+              this.entryInvoiceControl.setValue(null)
+              this.entryWaybillControl.setValue(null)
+              this.entryInvoiceControl.markAsUntouched()
+              this.entryWaybillControl.markAsUntouched()
               this.snackbar.open('✅ Números de serie almacenados con éxito!', 'Aceptar', {
                 duration: 6000
               });
@@ -96,3 +106,8 @@ export class WarehouseProductsEntryComponent implements OnInit {
   }
 
 }
+
+function TIPO_COMPROBANTE(TIPO_COMPROBANTE: any) {
+  throw new Error('Function not implemented.');
+}
+

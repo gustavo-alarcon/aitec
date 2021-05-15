@@ -1,0 +1,62 @@
+<div class="w3-section animated fadeInUp delay-2 ms-container">
+  <div
+    style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-end; flex-wrap: wrap;">
+    <h2 class="title">
+      <div class="containerMobile">
+        <button mat-icon-button *ngIf="detail$ | async" (click)="back()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+      </div>
+      <mat-icon>assignment</mat-icon>
+      Historial de compras
+    </h2>
+    <!-- <div [class.w3-hide-small]="(detail$ | async)"
+      style="display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center;">
+      <div>
+        <button color="accent" mat-raised-button><b>Analítica</b></button>
+      </div> 
+      <ng-container *ngIf="auth.user$ | async as user">
+        <div *ngIf="user.admin || user.accountant" color="primary" class="totalPrice">
+          {{totalPriceSubj | async | currency:"S/."}}</div>
+      </ng-container>
+
+    </div> -->
+  </div>
+  <mat-divider></mat-divider>
+  <div style="margin-top: 1em;">
+
+    <div class="containerDesktop">
+      <app-sales-master style="width: 700px;" [totalPriceSubject]="totalPriceSubj" [locationSubject]="locationSubject"
+        [detailSubject]="detailSubject">
+      </app-sales-master>
+
+      <!-- <div *ngIf="detail$ | async as detail" class="shadow-color" style="padding: 32px; border-radius: 10px;"
+        [ngStyle]="{'padding-top': (locationPadding$ | async)}"> -->
+      <div *ngIf="detail$ | async as detail" class="shadow-color" style="padding: 32px; border-radius: 10px;">
+        <div>
+          <app-sales-detail class="animated fadeIn" style="width: 435px" [sale]="detail"
+            [detailSubject]="detailSubject">
+          </app-sales-detail>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="containerMobile">
+      <ng-template #master>
+        <app-sales-master style="width:100%" [totalPriceSubject]="totalPriceSubj" [locationSubject]="locationSubject"
+          [detailSubject]="detailSubject">
+        </app-sales-master>
+      </ng-template>
+
+      <ng-container *ngIf="detail$ | async as detail else master">
+        <app-sales-detail class="animated fadeIn " style="width:100%; min-width:300px" [sale]="detail"
+          [detailSubject]="detailSubject">
+        </app-sales-detail>
+
+      </ng-container>
+    </div>
+
+
+  </div>
+</div>

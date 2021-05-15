@@ -36,7 +36,7 @@ export class RegisterSaleComponent implements OnInit {
 
   uploadingSale$: Observable<boolean|Sale> = null;
 
-  adviserForm: FormControl = new FormControl('', this.objectValidator())
+  adviserForm: FormControl = new FormControl('', [Validators.required, this.objectValidator()])
   advisers$: Observable<any>;
 
 
@@ -109,6 +109,8 @@ export class RegisterSaleComponent implements OnInit {
       name: [null, Validators.required],
       address: [null, Validators.required],
     });
+
+    this.adviserForm.markAsTouched()
 
   }
 
@@ -216,6 +218,7 @@ export class RegisterSaleComponent implements OnInit {
       map(([user, ord, delivery]) => {
         if (ord.length) {
           let sum = this.dbs.giveProductPriceOfSale(ord, user.mayoristUser)
+          console.log("sum ",sum)
           return sum + delivery;
         } else {
           return 0;
@@ -252,6 +255,7 @@ export class RegisterSaleComponent implements OnInit {
           }
         }),
         switchMap((res: [Coupon, SaleRequestedProducts[]])=> {
+          console.log(res)
           if(res.length){
             let coup = res[0]
             let reqProdList = res[1]
@@ -267,8 +271,14 @@ export class RegisterSaleComponent implements OnInit {
                   case 2:
                     //Calculate discount
                     let disc = Math.round(sum * coup.discount)/100.0
+                    console.log("case 2:"+disc)
+                    console.log("case 2:"+coup.limit)
                     //If it exceeds limit, we return limit, if not, disc
-                    return disc > coup.limit ? coup.limit : disc
+                    if(coup.limit != null){
+                      return disc > coup.limit ? coup.limit : disc
+                    } else {
+                      return disc
+                    }
                 }
               } else {
                 return 0
@@ -279,6 +289,7 @@ export class RegisterSaleComponent implements OnInit {
           }
         }),
         startWith(0),
+        tap(console.log),
         shareReplay(1)
     )
 
@@ -314,9 +325,19 @@ export class RegisterSaleComponent implements OnInit {
       map(([value, advisers]) => {
 
         let filt = typeof value == 'object' ? value.displayName : value
-        return advisers.filter((el) =>
-          value ? el['displayName'].toLowerCase().includes(filt.toLowerCase()) : true
-        );
+
+        let filtered = advisers.filter((el) =>{
+          return value ? (el['displayName'].toLowerCase().includes(filt.toLowerCase())) : true
+        });
+
+        let asesorV = filtered.find(el => el.name.toLowerCase().startsWith("asesor"))
+        if(asesorV){
+          return [asesorV, ...filtered.filter(el => el != asesorV)]
+        } else {
+          return filtered
+        }
+
+       
       })
     );
 
@@ -511,6 +532,7 @@ export class RegisterSaleComponent implements OnInit {
 
   openMap(user: User, index: number, edit: boolean) {
     this.dialog.open(LocationDialogComponent, {
+      maxWidth: "400px",
       data: {
         user: user,
         edit: edit,
@@ -524,9 +546,9 @@ export class RegisterSaleComponent implements OnInit {
       let type = control.value
       if(type){
         if(typeof type == 'object'){
-          return {noObject: true}
-        } else {
           return null
+        } else {
+          return {noObject: true}
         }
       } else {
         return null

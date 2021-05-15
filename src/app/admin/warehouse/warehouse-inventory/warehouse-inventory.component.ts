@@ -37,8 +37,8 @@ export class WarehouseInventoryComponent implements OnInit {
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'category', 'virtualStock',
-    'realStock', 'warehouseStock', 'list', 'actions'
+    'index', 'photoURL', 'description', 'sku', 'category', 'warehouseStock', 'realStock', 
+    'virtualStock', 'list', 'actions'
   ]
 
   productsObservable$: Observable<Product[]>

@@ -121,10 +121,19 @@
 
             <ng-container matColumnDef="realStock">
               <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
-                Stock
+                Stock Real
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                {{ raw.realStock }}
+                {{ raw | productStock:true }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="virtualStock">
+              <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
+                Stock Virtual
+              </th>
+              <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
+                {{ raw | productStock:false }}
               </td>
             </ng-container>
 

@@ -14,6 +14,7 @@ import {
   take,
   mapTo,
   debounceTime,
+  tap,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
 import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError, combineLatest } from 'rxjs';
@@ -583,7 +584,8 @@ export class DatabaseService {
   getMovementsValueChanges(date: {begin: Date, end: Date}): Observable<serialProcess[]>{
     return this.afs
         .collection<serialProcess>(`${this.seriesPreprocessingRef}`, 
-          ref => ref.where("createdAt", ">=", date.begin)
+          ref => ref.orderBy("createdAt", "desc")
+                    .where("createdAt", ">=", date.begin)
                     .where("createdAt", "<=", date.end))
         .valueChanges();
   }
@@ -962,44 +964,19 @@ export class DatabaseService {
   }
 
   finishPayment(newSale: Sale): Promise<{success: boolean, sale?: Sale}>{
-    const saleRef = this.afs.firestore.collection(this.salesRef).doc(newSale.id);
-    const genConfigRef = this.salesCorrColl
-    const couponColl = this.afs.firestore.collection(`db/aitec/coupons`)
+    const saleReqRef = this.afs.firestore.collection(this.reservedSalesRef).doc(newSale.id);
     const userColl = this.afs.firestore.collection(this.userRef)
 
+    const batch = this.afs.firestore.batch()
+
+
     let sale = {...newSale}
+    sale.status == this.saleStatus.requested
+
+    batch.update(userColl.doc(sale.user.uid), {pendingPayment: false, shoppingCar: []})
+    batch.update(saleReqRef, sale)
     
-    
-    return this.afs.firestore.runTransaction((transaction)=> {
-      return transaction.get(genConfigRef).then((sfDoc)=> {
-        
-        let correlative = 0
-
-
-        if(!sfDoc.exists){
-          correlative = 1
-        } else {
-          correlative = (!!sfDoc.data().rCorrelative) ? (sfDoc.data().rCorrelative + 1) : 1
-        }
-
-        //We set current correlative in config
-        transaction.set(genConfigRef, {rCorrelative: correlative})
-
-        //We update sale
-        sale.correlative = correlative
-        transaction.set(saleRef, sale)
-
-        //We now fill cupoun
-        if(!!sale.coupon){
-          let ocupId = sale.coupon.id
-          if(ocupId){
-            transaction.update(couponColl.doc(ocupId), {users: firebase.default.firestore.FieldValue.arrayUnion(sale.user.uid)})
-          }
-        }
-
-        transaction.update(userColl.doc(sale.user.uid), {pendingPayment: false})
-
-      }).then(
+    return batch.commit().then(
         success => {
           return {success: true, sale}
         },
@@ -1008,7 +985,6 @@ export class DatabaseService {
         }
        )
 
-    })
   }
 
   cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch{
@@ -1054,13 +1030,7 @@ export class DatabaseService {
 
   // })
 
-  getSalesUser(userId: string): Observable<Sale[]> {
-    return this.afs
-      .collection<Sale>(`/db/aitec/sales`, (ref) =>
-        ref.where('user.uid', '==', userId)
-      )
-      .valueChanges();
-  }
+
 
   getPayingSales(userId: string): Observable<Sale> {
     let status = "Pagando"
@@ -1081,6 +1051,21 @@ export class DatabaseService {
         ref
           .where('createdAt', '<=', real.end)
           .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc")
+      )
+      .valueChanges();
+  }
+
+  getSalesUser(user:  User, date: { begin: Date; end: Date }): Observable<Sale[]> {
+    let real = {
+      begin: new Date(date.begin),
+      end: new Date(date.end)
+    }
+    return this.afs
+      .collection<Sale>(this.salesRef, (ref) =>
+        ref
+          .where('createdAt', '<=', real.end)
+          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc")
+          .where('user.uid', '==', user.uid)
       )
       .valueChanges();
   }
@@ -1587,12 +1572,15 @@ export class DatabaseService {
   }
 
   getSeriesStoredOfProductInWarehouse(productId: string, warehouseId: string): Observable<SerialNumber[]>{
-
     return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
         ref.where("status", "==", "stored").where("warehouseId", "==", warehouseId)
-      ).valueChanges().pipe(
-        map(series => {
-          return series
+      ).get({source: "server"}).pipe(
+        map(sf => {
+          if(sf.empty){
+            return []
+          } else {
+            return sf.docs.map(el => (<SerialNumber>el.data()))
+          }
         })
       )
 
@@ -1940,9 +1928,7 @@ export class DatabaseService {
         }
       
     }
-    else {
-      return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
-    }
+    return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
   }
 
   giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], mayorist: boolean): number{
@@ -2147,4 +2133,33 @@ export class DatabaseService {
   // }
 
 
+  resetStocks(){
+    return this.afs.collection(this.productsListRef).get({source: "server"}).pipe(
+      tap(res => {
+        let batch = this.afs.firestore.batch()
+        let products: Product[] = res.docs.map(el => <Product>el.data())
+        products.forEach(el => {
+          let prodDoc = this.afs.firestore.collection(this.productsListRef).doc(el.id)
+          let elNew = {...el}
+          elNew.products.forEach(el2 => {
+            el2.realStock = 0
+            el2.reservedStock = 0
+            el2.virtualStock = 0
+            el2.stock = 0
+          })
+          elNew.warehouseStock = null
+          batch.update(prodDoc, {products: elNew.products, warehouseStock: null})
+        })
+        batch.commit().then(
+          res => {
+            console.log("success!")
+          },
+          err => {
+            console.log("error")
+          }
+        )
+      })
+    )
+    
+  }
 }

@@ -25,7 +25,13 @@ import { ToolbarMobileComponent } from './toolbars/toolbar-mobile/toolbar-mobile
 import { MatExpansionModule } from '@angular/material/expansion';
 import { NewsDialogComponent } from './news-dialog/news-dialog.component';
 @NgModule({
-  declarations: [MainComponent, RateDialogComponent, ToolbarWebComponent, ToolbarMobileComponent, NewsDialogComponent],
+  declarations: [
+    MainComponent, 
+    RateDialogComponent, 
+    ToolbarWebComponent, 
+    ToolbarMobileComponent, 
+    NewsDialogComponent
+  ],
   imports: [
     CommonModule,
     MainRoutingModule,

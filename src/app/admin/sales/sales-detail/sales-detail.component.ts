@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, Validators, FormControl, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Observable, BehaviorSubject, merge, combineLatest, iif, of, throwError, empty } from 'rxjs';
-import { Sale, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/models/sale.model';
+import { Sale, SaleEmailData, SaleRequestedProducts, saleStatusOptions } from 'src/app/core/models/sale.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { startWith, map, tap, take, switchMap, debounceTime, pairwise, filter, first } from 'rxjs/operators';
@@ -45,6 +45,7 @@ export class SalesDetailComponent implements OnInit {
   advisers$: Observable<Adviser[]>;
   deliveryUser$: Observable<any[]>;
   finishedForm: FormGroup;
+  dateFilter: Date;
 
   constructor(
     private fb: FormBuilder,
@@ -63,7 +64,9 @@ export class SalesDetailComponent implements OnInit {
 
 
   initForm() {
-    console.log("detail")
+    this.dateFilter = new Date(1970)
+    this.dateFilter.setMilliseconds(this.sale.createdAt["seconds"]*1000)
+    this.dateFilter.setHours(0, 0, 1)
 
     this.searchProductControl = new FormControl("")
 
@@ -94,6 +97,8 @@ export class SalesDetailComponent implements OnInit {
           })
       )
     })
+
+
 
     this.confirmedRequestForm = this.fb.group({
       // desiredDate: [this.getDateFromDB(this.sale.requestDate)],
@@ -653,27 +658,7 @@ export class SalesDetailComponent implements OnInit {
   //   });
   //   return requestedProducts
   // }
-
-  giveProductPrice(item: SaleRequestedProducts): number {
-    if (item.product.promo) {
-      let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-      let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-      let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-      let noPromTotalPrice = noPromTotalQuantity * item.product.price;
-      return promTotalPrice + noPromTotalPrice;
-    }
-    else {
-      return item.quantity * item.product.price
-    }
-  }
-
-  
-  getTotalPrice(): number {
-    let items: SaleRequestedProducts[] = this.productForm.get('productList').value;
-    return items.reduce((a, b) => a + this.giveProductPrice(b), 0)
-  }
-
-  
+ 
 
   displayFn(input: Product) {
     if (!input) return '';
@@ -711,5 +696,80 @@ export class SalesDetailComponent implements OnInit {
       }
       
     }
+  }
+
+  getSaleEmail(sale: Sale){
+    let date = new Date(1970)
+    date.setMilliseconds(sale.createdAt["seconds"]*1000)
+
+    let monthString= ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", 
+                      "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"]
+
+    let firstTotal = this.giveProductPriceOfSale(sale.requestedProducts, sale.createdBy.mayoristUser)
+
+    let saleEmailData: SaleEmailData = {
+      adviser: !!sale.adviser,
+      adviserMail: sale.adviser ? sale.adviser.email : "---",
+      adviserNumber: sale.adviser ? sale.adviser.phone : "---",
+
+      correlative: `${sale.correlativeType} ${sale.correlative.toString().padStart(4, "0")}`,
+      createdAt: `${date.getDate()} ${monthString[date.getMonth()]}, ${date.getFullYear()}`,
+
+      paymentMethod: sale.payType.name,
+
+      document: sale.document,
+      documentInfoNumber: sale.documentInfo.number,
+      documentInfoName: sale.documentInfo.name,
+      documentInfoAddress: sale.document == "Factura" ? sale.documentInfo.address : "---",
+
+      deliveryType: !sale.delivery ? "A coordinar" : sale.deliveryPickUp ? "Recojo en tienda" : "Envío",
+      departamento: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["departamento"].name: sale.location.departamento.name,
+      provincia: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["provincia"].name: sale.location.provincia.name,
+      distrito: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["distrito"].name: sale.location.distrito.name,
+      address: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["address"]: sale.location.address,
+
+      productData: [],
+      subTotal: (firstTotal/1.18).toFixed(2),
+      igv: (firstTotal/1.18*0.18).toFixed(2),
+      sum: firstTotal.toFixed(2),
+      promotionalDiscount: sale.couponDiscount.toFixed(2),
+      delivery: sale.deliveryPrice.toFixed(2),
+      total: (firstTotal+sale.deliveryPrice-sale.couponDiscount).toFixed(2),
+    }
+
+    saleEmailData.productData = sale.requestedProducts.map(el => ({
+      description: `${el.product.description} (${el.chosenProduct.color.name})`,
+      quantity: el.quantity,
+      total: this.giveProductPrice(el, sale.user.mayoristUser).toFixed(2),
+    }))
+    
+  }
+
+  giveProductPrice(item: {product: Product, quantity: number}, mayorist: boolean): number {
+    if (item.product.promo) {
+
+      if(((item.product.promoData.type == 1) && (!mayorist)) || 
+        ((item.product.promoData.type == 2) && (mayorist)) || 
+        ((item.product.promoData.type == 3))){
+
+          let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+          let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+          let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+          let noPromTotalPrice = noPromTotalQuantity * (mayorist ? item.product.priceMay : item.product.priceMin);
+
+          return promTotalPrice + noPromTotalPrice;
+
+        }
+      
+    }
+    return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
+  }
+
+  giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], mayorist: boolean): number{
+    let sum = [...requestedProducts]
+      .map((el) => this.giveProductPrice(el, mayorist))
+      .reduce((a, b) => a + b, 0);
+
+    return sum
   }
 }

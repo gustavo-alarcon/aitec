@@ -718,8 +718,8 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
   })
 })
 
-//Function gets new series created, and adds changes respective stock
-exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{seriesPreId}`)
+  //Function gets new series created, and adds changes respective stock
+  exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{seriesPreId}`)
   .onCreate(event => {
     let seriesList = event.after.data()
     /*let seriesList= {
@@ -887,6 +887,9 @@ exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{
     return db.runTransaction((transaction)=> {
       return transaction.get(lastKardexDoc).then((lastKardexSf)=> {
         let mult = actKardex.inflow ? 1:-1;
+        console.log("Inflow: " + (actKardex.inflow ? "Yes": "Not"))
+        console.log("lastKardexSf exists: " + (lastKardexSf.exists ? "Yes": "Not"))
+
 
         actKardex.finalUpdated = true
         
@@ -900,8 +903,18 @@ exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{
           let lastKardex = {...lastKardexSf.data()}
 
           actKardex.finalQuantity = lastKardex.finalQuantity + mult*actKardex.quantity
-          actKardex.finalTotalPrice = lastKardex.finalTotalPrice + mult*actKardex.totalPrice
-          actKardex.finalUnitPrice = actKardex.finalTotalPrice/actKardex.finalQuantity
+          if(actKardex.finalQuantity === 0){
+            actKardex.finalTotalPrice = 0
+            actKardex.finalUnitPrice = 0
+          } else {
+            actKardex.finalTotalPrice = lastKardex.finalTotalPrice + mult*actKardex.totalPrice
+            actKardex.finalUnitPrice = actKardex.finalTotalPrice/actKardex.finalQuantity
+          }
+
+          console.log("actKardex.finalQuantity" + actKardex.finalQuantity)
+          console.log("actKardex.finalTotalPrice" + actKardex.finalTotalPrice)
+          console.log("actKardex.finalUnitPrice" + actKardex.finalUnitPrice)
+
 
           transaction.set(actKardexDoc, actKardex)
         }
@@ -909,3 +922,172 @@ exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{
         transaction.set(lastKardexDoc, actKardex)
       })})
   })
+
+  //Send email using sendGrid API
+  exports.saleConfirmationEmail = functions.firestore.document(`${salesRef}/{saleID}`)
+    .onCreate((event) => {
+        let doc = event.data();
+
+        console.log("receiving request")
+
+        let emailData = getSaleEmail(doc)
+
+        let data = {
+            personalizations: [{
+                to: emailData.adviser ? [{
+                    email: doc.user.email,
+                    name: doc.user.personData.name ? doc.user.personData.name : "---"
+                  },{
+                    email: emailData.adviserMail,
+                    name: emailData.adviserName ? emailData.adviserName : "---"
+                  }] : [{
+                    email: doc.user.email,
+                    name: doc.user.personData.name ? doc.user.personData.name : "---"
+                  }],
+                dynamic_template_data: emailData,
+                subject: "Venta registrada - Aitec",
+            }],
+            from: {
+                email: "ventas@aitecperu.com.pe",  //Here should be a verified
+                name: "Aitec Perú"
+            },
+            // reply_to: {
+            //     email: "jobando@meraki-s.com",
+            //     name: "No responder"
+            // },
+            subject: "Venta registrada - Aitec",
+            content:[
+                {
+                    type: "text/html",
+                    value: "Contenido"
+                }
+            ],
+            // attachments: [],
+            template_id: "d-629e2ba2e17b4fe6a525eb6f64daab16",
+            
+        }
+
+        if(emailData.adviser){
+          data.reply_to= {
+            email: emailData.adviserMail,
+            name: emailData.adviserName ? emailData.adviserName : "---"
+          }
+        }
+
+        const options = {
+            "method": "POST",
+            "url": "/v3/mail/send",
+            "baseURL": "https://api.sendgrid.com",
+            "port": null,
+            "headers": {
+                "authorization": `Bearer ${formKeys.SENDGRID_KEY}`,
+                "content-type": "application/json"
+            },
+            data: data
+        };
+
+        console.log("Just before sending email")
+
+        return gaxios.request(options)
+            .then(res2 => {
+                console.log(`Successful email sent!`)
+            })
+            .catch(error => {
+                console.log("Error: ")
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log(error.message);
+                }
+                console.log(error.config);
+        })
+    }
+)
+
+  function getSaleEmail(sale){
+    let date = new Date(1970)
+    date.setMilliseconds(sale.createdAt["seconds"]*1000)
+
+    let monthString= ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", 
+                      "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"]
+
+    let firstTotal = giveProductPriceOfSale(sale.requestedProducts, sale.createdBy.mayoristUser)
+
+    let saleEmailData = {
+      adviser: !!sale.adviser,
+      adviserMail: sale.adviser ? sale.adviser.email : "---",
+      adviserNumber: sale.adviser ? sale.adviser.phone : "---",
+      adviserName: sale.adviser ? sale.adviser.name : "---",
+
+      correlative: `#${sale.correlativeType}${sale.correlative.toString().padStart(4, "0")}`,
+      createdAt: `${date.getDate()} ${monthString[date.getMonth()]}, ${date.getFullYear()}`,
+
+      paymentMethod: sale.payType.name,
+
+      document: sale.document,
+      documentInfoNumber: sale.documentInfo.number,
+      documentInfoName: sale.documentInfo.name,
+      documentInfoAddress: sale.document == "Factura" ? sale.documentInfo.address : "---",
+
+      deliveryType: !sale.delivery ? "A coordinar" : sale.deliveryPickUp ? "Recojo en tienda" : "Envío",
+      departamento: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["departamento"].name: sale.location.departamento.name,
+      provincia: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["provincia"].name: sale.location.provincia.name,
+      distrito: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["distrito"].name: sale.location.distrito.name,
+      address: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["address"]: sale.location.address,
+
+      productData: [],
+      subTotal: (firstTotal/1.18).toFixed(2),
+      igv: (firstTotal/1.18*0.18).toFixed(2),
+      sum: firstTotal.toFixed(2),
+      promotionalDiscount: sale.couponDiscount.toFixed(2),
+      delivery: sale.deliveryPrice.toFixed(2),
+      total: (firstTotal+sale.deliveryPrice-sale.couponDiscount).toFixed(2),
+    }
+
+    saleEmailData.productData = sale.requestedProducts.map(el => ({
+      description: `${el.product.description} (${el.chosenProduct.color.name})`,
+      quantity: el.quantity,
+      total: giveProductPrice(el, sale.user.mayoristUser).toFixed(2),
+    }))
+
+    return saleEmailData
+    
+  }
+
+  function giveProductPrice(item, mayorist) {
+    if (item.product.promo) {
+
+      if(((item.product.promoData.type == 1) && (!mayorist)) || 
+        ((item.product.promoData.type == 2) && (mayorist)) || 
+        ((item.product.promoData.type == 3))){
+
+          let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
+          let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
+          let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
+          let noPromTotalPrice = noPromTotalQuantity * (mayorist ? item.product.priceMay : item.product.priceMin);
+
+          return promTotalPrice + noPromTotalPrice;
+
+        }
+      
+    }
+    return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
+  }
+
+  function giveProductPriceOfSale(requestedProducts, mayorist) {
+    let sum = [...requestedProducts]
+      .map((el) => giveProductPrice(el, mayorist))
+      .reduce((a, b) => a + b, 0);
+
+    return sum
+  }

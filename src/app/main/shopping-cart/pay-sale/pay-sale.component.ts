@@ -231,7 +231,7 @@ export class PaySaleComponent implements OnInit {
                   {
                     closeOnNavigation: false,
                     disableClose: true,
-                    maxWidth: '260px',
+                    maxWidth: '350px',
                     data: { 
                       name: !!sale.user.name ? sale.user.name : sale.user.personData.name, 
                       email: sale.user.email, 

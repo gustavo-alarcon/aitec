@@ -92,7 +92,6 @@ export class LocationDialogComponent implements OnInit {
   selectDistritos(option) {
     this.distritos = this.pl.getDistritos(option.id);
     this.firstFormGroup.get('distrito').enable();
-
   }
 
   save() {
@@ -118,7 +117,7 @@ export class LocationDialogComponent implements OnInit {
     } else {
       savelocations.push(newLoacation)
     }
-/*
+
     batch.update(userRef, {
       location: savelocations
     })
@@ -130,7 +129,7 @@ export class LocationDialogComponent implements OnInit {
       this.dialogRef.close();
       this.loading.next(false)
       this.firstFormGroup.enable()
-    })*/
+    })
   }
 
 

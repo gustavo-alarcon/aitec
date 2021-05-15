@@ -7,7 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
 import { filter, map, startWith, switchMap, tap } from 'rxjs/operators';
-import { serialProcess } from 'src/app/core/models/SerialNumber.model';
+import { SerialNumber, serialProcess } from 'src/app/core/models/SerialNumber.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import * as XLSX from 'xlsx';
 import { MovementsDetailDialogComponent } from '../movements-detail-dialog/movements-detail-dialog.component';
@@ -26,7 +26,7 @@ export class MovementsComponent implements OnInit {
   movementFilter: FormControl;
   movementDataSource = new MatTableDataSource<serialProcess>();
   movementDisplayedColumns: string[] = [
-    'index', 'createdAt', 'type', 'invoice', 'waybill', 'createdBy', 'detail'
+    'index', 'createdAt', 'type', 'invoice', 'waybill', 'createdBy', 'observations', 'detail'
   ];
 
   @ViewChild("movementPaginator", { static: false }) set contentRat(paginator: MatPaginator) {
@@ -102,7 +102,12 @@ export class MovementsComponent implements OnInit {
     let table_xlsx: any[] = [];
 
     let headersXlsx = [
-      'Fecha', 'Tipo', 'Comprobante', 'GR/Documento', 'Guía de Remisión', 'Responsable'
+      'Fecha', 'Tipo', 'Comprobante', 'GR/Documento', 'Responsable', 'Observaciones',
+      'Almacén',
+      'Código de producto',
+      'Producto',
+      'Cantidad',
+      'Series'
     ] 
 
     table_xlsx.push(headersXlsx);
@@ -113,10 +118,24 @@ export class MovementsComponent implements OnInit {
         trans.type,
         trans.invoice,
         trans.waybill,
-        trans.createdBy.personData.name +" "+ (trans.createdBy.personData.type == "natural" ? trans.createdBy.personData["lastName"]: "")
+        trans.createdBy.personData.name +" "+ (trans.createdBy.personData.type == "natural" ? trans.createdBy.personData["lastName"]: ""),
+        trans.observations ? trans.observations : "---"
       ]
 
-      table_xlsx.push(temp);
+      trans.list.forEach(el => {
+        let series = (<SerialNumber[]>el.list).map(el2 => el2.barcode).join("; ").slice(0, -2)
+  
+        let aux = [
+          el.warehouse.name,
+          el.product.sku,
+          el.product.description,
+          el.list.length,
+          series
+        ]
+  
+        table_xlsx.push([...temp, ...aux]);
+      })
+
     })
 
     /* generate worksheet */

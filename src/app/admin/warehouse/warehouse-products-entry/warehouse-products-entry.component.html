@@ -2,20 +2,27 @@
   <mat-card-content>
     <div>
       <div 
-        style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; 
-              flex-wrap: wrap ;padding: 12px"
-      >
+        style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center; 
+              flex-wrap: wrap ;padding: 12px">
 
-      <mat-form-field color="primary" class="w3-small w3-margin-bottom" appearance="outline">
-        <mat-label>Comprobante de compra</mat-label>
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom w3-margin-right" appearance="outline">
+        <mat-label>Tipo de comprobante</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <mat-select [formControl]="entryInvoiceType">
+            <mat-option *ngFor="let option of invoiceType" [value]="option">{{option}}</mat-option>
+        </mat-select>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom w3-margin-right" appearance="outline">
+        <mat-label>Número de Comprobante</mat-label>
         <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
         <input matInput type="text" [formControl]="entryInvoiceControl" placeholder="F001-1020" autocomplete="off">
         <mat-hint>Número de factura, boleta, ...</mat-hint>
         <mat-error>* Campo requerido</mat-error>
-      </mat-form-field>
-      
+      </mat-form-field>   
 
-      <mat-form-field color="primary" class="w3-small w3-margin-bottom" appearance="outline">
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom" appearance="outline">
         <mat-label>Guía de remisión</mat-label>
         <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
         <input matInput type="text" [formControl]="entryWaybillControl" placeholder="GR001-2010" autocomplete="off">
@@ -39,7 +46,7 @@
     <div class="entry entry_actions">
       <span class="ms-fill"></span>
       <button 
-        [disabled]="(loading$ | async) || !entryInvoiceControl.valid || !entryWaybillControl.valid"
+        [disabled]="(loading$ | async) || !entryInvoiceControl.valid || !entryWaybillControl.valid || !this.cumSeriesList.length || !entryInvoiceType.valid"
         mat-raised-button color="primary" (click)="save()">Guardar ingreso</button>
     </div>
   </mat-card-actions>

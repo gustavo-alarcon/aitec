@@ -46,7 +46,7 @@ const routes: Routes = [
       },
       {
         path: 'mispedidos',
-        loadChildren: () => import('./shopping-history/shopping-history.module').then(mod => mod.ShoppingHistoryModule)
+        loadChildren: () => import('./sales/sales.module').then(mod => mod.SalesModule)
       },
       {
         path: 'favoritos',

@@ -97,13 +97,14 @@ export class SelectSeriesComponent implements OnInit {
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
+          this.formGroup.get("cost").setValue(0)
         } else {
-          //CHANGE PRODUCT FOOOORM
           this.formGroup.get("productList").reset()
-          this.formGroup.get("productList").enable()
+          this.formGroup.get("productList").disable()
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
+          this.formGroup.get("cost").setValue(0)
         }
       })
     )
@@ -129,10 +130,14 @@ export class SelectSeriesComponent implements OnInit {
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").enable()
           this.seriesList = []
+          this.formGroup.get("cost").setValue(0)
+
         } else {
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
+          this.formGroup.get("cost").setValue(0)
+
         }
       })
     )
@@ -145,7 +150,12 @@ export class SelectSeriesComponent implements OnInit {
         filter(([wareStat, prodStat]) => (wareStat == "VALID") && (prodStat == "VALID")),
         switchMap(([wareStat, prodStat]) => (
           this.dbs.getSeriesStoredOfProductInWarehouse(this.formGroup.get("productList").value.id, this.formGroup.get("warehouseList").value.id)
-          ))
+          )),
+        tap(list => {
+          if(!list.length){
+            this.snackbar.open("Sin unidades disponibles!", "Aceptar")
+          }
+        })
         ), 
       this.formGroup.get("seriesList").valueChanges])
     .pipe(
@@ -240,11 +250,13 @@ export class SelectSeriesComponent implements OnInit {
       this.seriesList = []
       this.formGroup.get("productList").setValue(null)
       this.formGroup.get("warehouseList").setValue(null)
+      this.formGroup.get("cost").setValue(0)
     }
   }
 
   remSerieList(element: SerialNumberWithPrice) {
-    this.cumSeriesList = this.cumSeriesList.filter(el => !((el.product.id == element.product.id) && (el.warehouse.id == element.warehouse.id)))
+    let aux = this.cumSeriesList.findIndex(el => ((el.product.id == element.product.id) && (el.warehouse.id == element.warehouse.id)))
+    this.cumSeriesList.splice(aux, 1)
   }
 
   objectValidator() {
@@ -264,6 +276,7 @@ export class SelectSeriesComponent implements OnInit {
     }
   }
 
+  //Only used when taking out
   objectValidator2() {
     return (control: AbstractControl): ValidationErrors => {
 
@@ -284,7 +297,8 @@ export class SelectSeriesComponent implements OnInit {
           if(foundSeries || foundSeries2){
             return {repeatedBarcode: true}
           } else {
-            this.seriesList.push(series)
+            //We also have to update the status
+            this.seriesList.push({...series, status: "sold"})
             this.formGroup.get("seriesList").setValue("")
             return null
           }
@@ -310,6 +324,7 @@ export class SelectSeriesComponent implements OnInit {
         
             //We first validate if it is a valid barcode
             if(barcode.split("-").length != 2){
+              control.markAsTouched()
               return of({invalidCode: true})
             } else {
               let sku = barcode.split("-")[0]
@@ -321,6 +336,7 @@ export class SelectSeriesComponent implements OnInit {
         
               //We check if this code is available on the product
               if(!foundSku){
+                control.markAsTouched()
                 return of({invalidColor: true})
               } else {
         
@@ -332,6 +348,7 @@ export class SelectSeriesComponent implements OnInit {
                 })
 
                 if(foundSeries || foundSeries2){
+                  control.markAsTouched()
                   return of({repeatedBarcode: true})
                 } else {
                   console.log("checking code db")
@@ -340,6 +357,7 @@ export class SelectSeriesComponent implements OnInit {
                     map(seriesList => {
                       console.log(seriesList)
                       if(seriesList.length){
+                        control.markAsTouched()
                         return {repeatedBarcodeDB: true}
                       } else {
                         return null

@@ -165,11 +165,11 @@
               </td>
             </tr>
             <tr>
-                <td class="table-sale__td "
+                <td style="padding: 0 4px" class="table-sale__td "
                   colspan="2">
                     SubTotal
                 </td>
-                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex">
                     <span>
                       S/. 
                     </span>
@@ -182,10 +182,10 @@
 
             </tr>
             <tr>
-                <td colspan="2" class="table-sale__td">
+                <td style="padding: 0 4px" colspan="2" class="table-sale__td">
                     I.G.V
                 </td>
-                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex">
                     <span>
                       S/. 
                     </span>
@@ -197,10 +197,10 @@
 
             </tr>
             <tr>
-                <td colspan="2" class="table-sale__td">
+                <td style="padding: 0 4px" colspan="2" class="table-sale__td">
                     Total
                 </td>
-                <td class="table-sale__td table-sale__td--space table-sale__td--flex" >
+                <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex" >
                     <span>
                       S/. 
                     </span>
@@ -212,10 +212,10 @@
 
             </tr>
             <tr>
-              <td colspan="2" class="table-sale__td">
+              <td style="padding: 0 4px" colspan="2" class="table-sale__td">
                   Cargos adicionales
               </td>
-              <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+              <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex">
                 <span>
                   S/. 
                 </span>
@@ -232,10 +232,10 @@
 
             </tr>
             <tr>
-              <td colspan="2" class="table-sale__td">
+              <td style="padding: 0 4px" colspan="2" class="table-sale__td">
                   Descuento promocional
               </td>
-              <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+              <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex">
                   <span>
                     S/. 
                   </span>
@@ -245,10 +245,10 @@
               </td>
             </tr>
             <tr>
-                <td colspan="2" class="table-sale__td">
+                <td style="padding: 0 4px" colspan="2" class="table-sale__td">
                     Delivery
                 </td>
-                <td class="table-sale__td table-sale__td--space table-sale__td--flex">
+                <td style="padding: 0 4px" class="table-sale__td table-sale__td--space table-sale__td--flex">
                     
                       <span>
                         S/. 
@@ -281,8 +281,8 @@
             </ng-container>
             <ng-container *ngSwitchCase="2">
               <div class="photo">
-                <mat-icon style="font-size: xx-large; height: auto; width:auto;">
-                  redeem
+                <mat-icon style="font-size: xx-large; height: auto; width:32px;">
+                  credit_card_black
                 </mat-icon>
               </div>
               <div class="photo-number">
@@ -293,7 +293,8 @@
               <div (click)="checkVouchers(user)" class="photo">
                 <mat-icon style="font-size: xx-large; height: auto; width:auto;" *ngIf="sale.voucher.length > 1">
                     collections_bookmark</mat-icon>
-                <mat-icon style="font-size: xx-large; height: auto; width:auto;" *ngIf="sale.voucher.length == 1">book
+                <mat-icon style="font-size: xx-large; height: auto; width:auto;" *ngIf="sale.voucher.length == 1">
+                  book
                 </mat-icon>
               </div>
               <div class="photo-number">
@@ -367,6 +368,7 @@
         <mat-label>F. Asignada</mat-label>
         <input 
           readonly matInput 
+          [min]="dateFilter"
           formControlName="assignedDate"
           [matDatepicker]="assignedDatePicker">
         <mat-datepicker #assignedDatePicker></mat-datepicker>
@@ -613,3 +615,291 @@
   </form>
 
 </div>
+
+
+<!-- 
+
+  <html>
+  
+    <head>
+      <title>Compra en Aitec</title>
+    </head>
+    <body>
+    <style>
+        #header {
+            height: 50px;
+            padding: 20px 25px;
+            display: flex; 
+            flex-direction: row; 
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #018EFB 0%, #270059 100%);
+            border: 1px solid #B9B9B9;   
+            font-style: normal;
+            font-weight: bold;
+            font-size: 1.5em;
+            line-height: 42px;
+            color: #FFFFFF;
+        }
+        
+        #body {
+            font-family: Roboto;
+            padding: 20px 25px;
+            font-style: normal;
+            font-weight: 300;
+            font-size: 16px;
+            line-height: 19px;
+            color: #828282;
+        }
+        
+        td {
+            padding: 4px
+            }
+        
+        .title {
+            font-family: Raleway;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 26px;
+            line-height: 31px;
+            color: #2B2B2B;
+        }
+        
+        
+        .td-first {
+            font-family: Raleway;
+            width: 180px;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 16px;    
+            color: #555555;
+        }
+        
+        .td-second {
+            font-family: Raleway;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 14px;
+            line-height: 16px;
+            color: #000000;
+        }
+        
+
+        .title-summary {
+            text-align: right
+        }
+        
+        .button {
+            text-decoration: none;
+            font-family: Roboto;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 19px;
+            color: #FFFFFF;
+            background: #1C31EA;
+            border-radius: 5px;
+            padding: 10px 75px;
+        }
+            
+        @media (max-width: 767px) {
+            #mobileContainer {
+                display: contents;
+            }
+    }
+        
+    </style>
+    
+      <div id="header">
+          <span>¡Gracias por tu compra!</span>
+          
+          <img style="height: 100%;" src="https://firebasestorage.googleapis.com/v0/b/aitec-ecommerce.appspot.com/o/logo%2Flogo-white.png?alt=media&amp;token=b6c2f740-5bc5-4bb9-a956-d6f146e49c12"/>
+     
+      </div>
+        <div id="body">
+            {{#if adviser}}
+                <p>
+                    Tu pedido ha sido recibido y ahora está siendo procesado. Si deseas comunicarte con tu asesor puedes comunicarte al {{adviserNumber}} o al correo {{adviserMail}}.
+                </p>
+            {{else}}
+                <p>
+                    Tu pedido ha sido recibido y ahora está siendo procesado.
+                </p>
+            {{/if}}
+            
+            <p class="title">
+                Información del pedido
+            </p>
+            <table>
+                <tr>
+                    <td class="td-first">Pedido:</td>
+                    <td class="td-second">{{correlative}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Fecha de pedido:</td>
+                    <td class="td-second">{{createdAt}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Costo total:</td>
+                    <td class="td-second">{{paymentMethod}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Método de pago:</td>
+                    <td class="td-second">{{paymentMethod}}</td>
+                </tr>
+            </table>
+            <hr>
+            
+            <p class="title">
+                Datos de facturación
+            </p>
+            <table>
+                <tr>
+                    <td class="td-first">Tipo de comprobante:</td>
+                    <td class="td-second">{{document}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">DNI / RUC:</td>
+                    <td class="td-second">{{documentInfoNumber}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Nombre/Razón social:</td>
+                    <td class="td-second">{{documentInfoName}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Dirección:</td>
+                    <td class="td-second">{{documentInfoAddress}}</td>
+                </tr>
+            </table>
+            <hr>
+
+            
+            <p class="title">
+                Datos de envío
+            </p>
+            <table>
+                <tr>
+                    <td class="td-first">Tipo de entrega:</td>
+                    <td class="td-second">{{deliveryType}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Departamento:</td>
+                    <td class="td-second">{{departamento}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Provincia:</td>
+                    <td class="td-second">{{provincia}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Distrito:</td>
+                    <td class="td-second">{{distrito}}</td>
+                </tr>
+                <tr>
+                    <td class="td-first">Dirección:</td>
+                    <td class="td-second">{{address}}</td>
+                </tr>
+            </table>
+            <hr>
+            <table style="width: 100%">
+                <tr>
+                    <th class="td-first" style="width: auto">Producto</th>
+                    <th class="td-first" style="width: 120px">Precio unitario</th>
+                    <th class="td-first" style="width: 100px">Cantidad</th>
+                    <th class="td-first" style="width: 120px">Total</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td
+                        class="td-second title-summary">
+                        S/. 3000.00
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        Subtotal:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        S/. {{subTotal}}
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        Igv:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        S/. {{igv}}
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        Suma:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        S/. {{sum}}
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        Descuento Promocional:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        S/. {{promotionalDiscount}}
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        Delivery:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        S/. {{delivery}}
+                    </td>
+                </tr>
+                <tr>
+                    <td 
+                        colspan="2" 
+                        class="td-first title-summary">
+                        TOTAL:
+                    </td>
+                    <td
+                        class="td-second title-summary">
+                        <b>S/. {{total}}</b>
+                    </td>
+                </tr>
+            </table>
+            <hr>
+            <div 
+                style="display: flex; flex-direction: row; 
+                        justify-content: center; cursor: pointer">
+                <a 
+                    class="button" 
+                    href="https://aitecperu.com.pe/" 
+                    target="_blank">
+                    Ir a Aitec
+                </a>
+            </div>
+            
+            
+        </div>
+        
+    </body>
+  </html>
+
+ -->

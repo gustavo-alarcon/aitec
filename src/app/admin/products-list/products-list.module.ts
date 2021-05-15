@@ -32,12 +32,14 @@ import { ProductsListComponent } from './products-list.component';
 import { CreateEditProductComponent } from './create-edit-product/create-edit-product.component';
 import { ProductEditPromoComponent } from './product-edit-promo/product-edit-promo.component';
 import { DeleteProductComponent } from './delete-product/delete-product.component';
+import { SharedModule } from 'src/app/core/shared/shared.module';
 
 
 @NgModule({
   declarations: [ProductsListComponent, CreateEditProductComponent, ProductEditPromoComponent, DeleteProductComponent],
   imports: [
     CommonModule,
+    SharedModule,
     ProductsListRoutingModule,
     MatMenuModule,
     MatTableModule,

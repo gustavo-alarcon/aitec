@@ -66,7 +66,7 @@ export interface Sale {
   documentInfo: {
     number: string,
     name: string
-    address?: string
+    address?: string          //Only in "Factura"
   } 
   
   payType: Payments
@@ -149,4 +149,38 @@ export interface Sale {
 
   transactionCliente?: any;
   transactionSale?: any;
+}
+
+export interface SaleEmailData {
+  adviser: boolean;
+  adviserNumber: string;
+  adviserMail: string;
+
+  correlative: string;    //#000005 correlativeType+correlative
+  createdAt: string;      //20 diciembre, 2020
+  paymentMethod: string;  //Tarjeta
+
+  document: string;   //Boleta/Factura
+  documentInfoNumber: string; //DNI/RUC
+  documentInfoName: string;      //NOmbre apellido / razon social
+  documentInfoAddress: string;      //Only in case of factura
+
+  deliveryType: string;         //Recojo en Tienda, Envío, A Coordinar (here the next won't apply)
+  departamento: string;
+  provincia: string;
+  distrito: string;
+  address: string;
+
+  productData: {
+    description: string;
+    quantity: number;
+    total: string;
+  }[]
+
+  subTotal: string;
+  igv: string;
+  sum: string;    //subTotal + igv
+  promotionalDiscount: string;
+  delivery: string;
+  total: string;
 }
