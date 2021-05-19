@@ -89,7 +89,7 @@ export class PaymentCardFormComponent implements OnInit {
 
     this.loadFormSignature(string).toPromise().then((res: string) => {
       this.signature = res
-      console.log(this.signature)
+      //console.log(this.signature)
     }, err => {
       this.snackBar.open("Ocurrió un Error. Por favor, refresque la página", "Aceptar")
     }).finally(()=> {

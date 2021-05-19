@@ -35,7 +35,7 @@ export class QuantityDivImprovedComponent implements OnInit {
     ) { }
 
   ngOnInit(): void {
-    console.log("initiating quantity div")
+    //console.log("initiating quantity div")
 
     this.quantityForm$ = this.quantityForm.valueChanges.pipe(
       distinctUntilChanged(),
@@ -67,7 +67,7 @@ export class QuantityDivImprovedComponent implements OnInit {
               let reservedStock = !!foundProdDB.reservedStock ? foundProdDB.reservedStock : 0
               let prodDbStock = foundProdDB.virtualStock - reservedStock
               if(reqProd.quantity > prodDbStock){
-                console.log("setting error")
+                //console.log("setting error")
                 this.quantityForm.markAsTouched()
                 this.quantityForm.setErrors({stock: true})
               }

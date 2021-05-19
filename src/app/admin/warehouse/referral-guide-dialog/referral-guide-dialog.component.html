@@ -84,7 +84,7 @@
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
 <ng-container *ngIf="user$|async as user">
   <div *ngIf="cumSeriesList.length>0" class="w3-margin-left w3-margin-top" style="text-align: end;">
-    <button [disabled]="(loading$ | async)" mat-raised-button color="primary" class="w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
+    <button [disabled]="(loading$ | async) || !guideFormGroup.valid" mat-raised-button color="primary" class="w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
     <button mat-raised-button color="primary" (click)="printWaybill(user)"> Imprimir</button>
   </div>
 </ng-container>

@@ -49,7 +49,7 @@
             Ver productos
           </button>
 
-          <button mat-flat-button (click)="downloadXls()" color="primary">
+          <button mat-flat-button [disabled]="!productsTableDataSource.data.length" (click)="downloadXls()" color="primary">
             Descargar Excel
           </button>
 
@@ -106,7 +106,7 @@
 
             <ng-container matColumnDef="sku">
               <th mat-header-cell *matHeaderCellDef mat-sort-header class="ms-table__th w3-center w3-padding">
-                Código de existencia
+                Part Number
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
                 {{ raw.sku }}

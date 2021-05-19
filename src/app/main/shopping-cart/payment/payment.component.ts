@@ -55,7 +55,7 @@ export class PaymentComponent implements OnInit {
         await KR.setFormConfig({'kr-language': 'en-US'});
 
         this.KR = KR;
-        console.log('Library loaded');
+        //console.log('Library loaded');
       });
     }
   }
@@ -66,11 +66,11 @@ export class PaymentComponent implements OnInit {
 
     this.KR.onSubmit((response) => {
 
-      console.log('response : ', response);
+      //console.log('response : ', response);
 
       //console.log(`Form submitted : ${response.formId}`);
       if (response.clientAnswer.orderStatus === 'PAID') {
-        console.log('Payment success');
+        //console.log('Payment success');
 
         return this.payFinishSuccess(response);
         
@@ -88,12 +88,12 @@ export class PaymentComponent implements OnInit {
     // Gets a new token every time    
     const formToken = await this.db.methodPostAsync(this.data);
 
-    console.log('formToken : ',formToken)
+    //console.log('formToken : ',formToken)
 
     // Builds the form
     await this.KR.setFormToken(formToken.answer.formToken);
     await this.KR.addForm('#myPaymentForm').then(({KR, result}) => {
-      console.log(`Form added : ${result.formId}`);
+      //console.log(`Form added : ${result.formId}`);
       return KR.showForm(result.formId);
     });
   }

@@ -49,7 +49,7 @@ export class ToolbarWebComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.user$ = this.auth.user$
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
 
     this.timer$ = this.user$.pipe(
       switchMap(user => {

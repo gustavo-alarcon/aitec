@@ -26,7 +26,7 @@ export class ListDialogComponent implements OnInit {
   ngOnInit(): void {
     this.serialNumber$ = this.dbs.getWarehouseSeriesValueChanges(this.data.product.id, this.data.warehouseId).pipe(
       map(res => {
-        console.log(res)
+        //console.log(res)
         if(res.length){
           return Array.from(new Set(res.map(el => el.color.name))).map(colorName=> {
             return {

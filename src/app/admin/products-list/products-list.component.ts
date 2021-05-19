@@ -267,7 +267,7 @@ export class ProductsListComponent implements OnInit {
     
     let table_xlsx: any[] = [];
     let headersXlsx = [
-      'Descripcion', 'SKU', 'Categoría', 'Precio Mayorista', 'Precio Minorista',
+      'Descripcion', 'Part Number', 'Categoría', 'Precio Mayorista', 'Precio Minorista',
       'Stock Virtual', 'Stock Real', 'Stock Reservado', 'Publicado'
     ]
 

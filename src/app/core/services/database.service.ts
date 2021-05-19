@@ -1603,9 +1603,9 @@ export class DatabaseService {
 
   }
 
-  validateSeriesOfProduct(barcode: string, productId: string): Observable<SerialNumber[]>{
+  validateSeriesOfProduct(barcode: string): Observable<SerialNumber[]>{
 
-    return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
+    return this.afs.collectionGroup<SerialNumber>(`series`, ref => 
         ref.where("status", "==", "stored").where("barcode", "==", barcode)
       ).get({source: "server"}).pipe(
         map(doc => {
@@ -1616,6 +1616,18 @@ export class DatabaseService {
           }
         })
       )
+
+    // return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
+    //     ref.where("status", "==", "stored").where("barcode", "==", barcode)
+    //   ).get({source: "server"}).pipe(
+    //     map(doc => {
+    //       if(doc.empty){
+    //         return []
+    //       } else {
+    //         return doc.docs.map(el => (<SerialNumber>el.data()))
+    //       }
+    //     })
+    //   )
 
   }
 

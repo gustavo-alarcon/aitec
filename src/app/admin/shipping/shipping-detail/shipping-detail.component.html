@@ -657,35 +657,37 @@
         <mat-hint align="end">{{observation2.value?.length || 0}}/150</mat-hint>
     </mat-form-field>
 
-    <ng-container *ngIf="sale?.location?.coord as coord">
-      <div class="w3-margin-top"
-        style="width: 100%;
-        display:flex; flex-direction: row; justify-content: space-around">
+    <ng-container *ngIf="!sale.deliveryPickUp && !!sale.delivery">
+      <ng-container *ngIf="sale?.location?.coord as coord">
+        <div class="w3-margin-top"
+          style="width: 100%;
+          display:flex; flex-direction: row; justify-content: space-around">
 
-          <a mat-stroked-button
-            style="width: 45%"
-            [href]="'https://waze.com/ul?ll='+coord.lat+','+coord.lng+'&z=10'"
-            target="_blank">
-            Waze
-          </a>
+            <a mat-stroked-button
+              style="width: 45%"
+              [href]="'https://waze.com/ul?ll='+coord.lat+','+coord.lng+'&z=10'"
+              target="_blank">
+              Waze
+            </a>
 
-          <a mat-stroked-button
-            style="width: 45%"
-            [href]="'https://www.google.com/maps/search/?api=1&query='+coord.lat+','+coord.lng"
-            target="_blank">
-            Maps
-          </a>
-      </div>
+            <a mat-stroked-button
+              style="width: 45%"
+              [href]="'https://www.google.com/maps/search/?api=1&query='+coord.lat+','+coord.lng"
+              target="_blank">
+              Maps
+            </a>
+        </div>
 
-      <div 
-        class="w3-margin-top w3-margin-bottom">
-        <google-map height="200px" width="100%" 
-          [center]="coord" 
-          [zoom]="15">
+        <div 
+          class="w3-margin-top w3-margin-bottom">
+          <google-map height="200px" width="100%" 
+            [center]="coord" 
+            [zoom]="15">
 
-          <map-marker [position]="coord"></map-marker>
-        </google-map>
-      </div>
+            <map-marker [position]="coord"></map-marker>
+          </google-map>
+        </div>
+      </ng-container>
     </ng-container>
 
     <button 

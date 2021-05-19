@@ -97,7 +97,7 @@ export class ReferralGuideDialogComponent implements OnInit {
   }
 
   saveWaybill(user: User) {
-    //this.loading.next(true);
+    this.loading.next(true);
 
     this.addProducts()
     const data: Waybill = this.getWaybill(user)
@@ -131,7 +131,14 @@ export class ReferralGuideDialogComponent implements OnInit {
           observations: null,
         });
 
-        this.guideFormGroup.markAsUntouched()
+        this.guideFormGroup.get("orderCode").markAsUntouched()
+        this.guideFormGroup.get("addressee").markAsUntouched()
+        this.guideFormGroup.get("dni").markAsUntouched()
+        this.guideFormGroup.get("transferDate").markAsUntouched()
+        this.guideFormGroup.get("startingPoint").markAsUntouched()
+        this.guideFormGroup.get("arrivalPoint").markAsUntouched()
+        this.guideFormGroup.get("transferReason").markAsUntouched()
+        this.guideFormGroup.get("observations").markAsUntouched()
 
         if(this.sale){
           this.closeDialog.emit(null)
@@ -139,6 +146,7 @@ export class ReferralGuideDialogComponent implements OnInit {
       })
       .catch(err => {
         console.log(err);
+        this.loading.next(false);
         this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
           duration: 6000
         });
@@ -183,7 +191,7 @@ export class ReferralGuideDialogComponent implements OnInit {
     //From the list of the table
 
     summaryList = cumSeriesList.reduce((prev, curr)=> {
-      console.log("previous: ", prev)
+      //console.log("previous: ", prev)
       //We find matching prodId
       let foundProduct = prev.find(el => el.prodId == curr.product.id)
 

@@ -31,9 +31,9 @@ export class DeleteProductComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('here');
+    //console.log('here');
     
-    console.log(this.data);
+    //console.log(this.data);
     
     this.init$ = combineLatest(
       this.dbs.getWarehouseByProduct(this.data.id),
@@ -42,8 +42,8 @@ export class DeleteProductComponent implements OnInit {
       map(([warehouses, series]) => {
         this.warehouseList = warehouses.map(el => el.id)
         this.seriesList = series
-        console.log(warehouses);
-        console.log(series);
+        // console.log(warehouses);
+        // console.log(series);
         
         
       }),

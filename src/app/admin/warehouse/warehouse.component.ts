@@ -97,7 +97,7 @@ export class WarehouseComponent implements OnInit, OnDestroy {
         startWith(''),
       )
       .subscribe(res => {
-        console.log(res);
+        //console.log(res);
         
       })
   }
@@ -237,13 +237,13 @@ export class WarehouseComponent implements OnInit, OnDestroy {
 
   selectedEntrySKU(event: any): void {
     this.entryStock = event.option.value.stock;
-    console.log(event.option.value);
-    console.log(this.entryProductControl.value);
+    //(event.option.value);
+    //console.log(this.entryProductControl.value);
   }
 
   addSerie() {
     let sku = this.entrySKUControl.value.sku
-    console.log(sku);
+    //console.log(sku);
 
     if (sku) {
       let scan = this.entryScanControl.value

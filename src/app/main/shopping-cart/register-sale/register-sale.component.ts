@@ -218,7 +218,7 @@ export class RegisterSaleComponent implements OnInit {
       map(([user, ord, delivery]) => {
         if (ord.length) {
           let sum = this.dbs.giveProductPriceOfSale(ord, user.mayoristUser)
-          console.log("sum ",sum)
+          //console.log("sum ",sum)
           return sum + delivery;
         } else {
           return 0;
@@ -249,13 +249,13 @@ export class RegisterSaleComponent implements OnInit {
               }))
             }
             //Matching all
-            return ([coup, reqProdList])
+            return of([coup, reqProdList])
           } else {
             return of([])
           }
         }),
         switchMap((res: [Coupon, SaleRequestedProducts[]])=> {
-          console.log(res)
+          //console.log(res)
           if(res.length){
             let coup = res[0]
             let reqProdList = res[1]
@@ -271,8 +271,8 @@ export class RegisterSaleComponent implements OnInit {
                   case 2:
                     //Calculate discount
                     let disc = Math.round(sum * coup.discount)/100.0
-                    console.log("case 2:"+disc)
-                    console.log("case 2:"+coup.limit)
+                    //console.log("case 2:"+disc)
+                    //console.log("case 2:"+coup.limit)
                     //If it exceeds limit, we return limit, if not, disc
                     if(coup.limit != null){
                       return disc > coup.limit ? coup.limit : disc
@@ -367,7 +367,7 @@ export class RegisterSaleComponent implements OnInit {
         map((res) => {
           let saleDoc: Sale["document"] = res[0]
           let user = res[1]
-          console.log(saleDoc)
+          //console.log(saleDoc)
 
           if (user.personData.type == 'natural') {
             this.documentForm.get('number').setValue(user.personData['dni'])
@@ -416,7 +416,7 @@ export class RegisterSaleComponent implements OnInit {
   }
 
   thirdView() {
-    console.log(this.deliveryForm.value)
+    //console.log(this.deliveryForm.value)
     this.view.next(3)
   }
 
@@ -460,18 +460,18 @@ export class RegisterSaleComponent implements OnInit {
     }
 
 
-    console.log(newSale);
+    //console.log(newSale);
 
     let [batch, ref] = this.dbs.reserveSale(newSale)
 
     batch.commit()
       .then(res => {
-        console.log('Writing Sale successfull')
+        //console.log('Writing Sale successfull')
         this.snackbar.open("Validando Stock", "Aceptar")
         this.uploadingSale$ = ref.valueChanges().pipe(
           takeWhile(sale => {
             let statuses = new saleStatusOptions()
-            console.log(sale.status)
+            //console.log(sale.status)
             switch(sale.status){
               case statuses.failed:
                 this.snackbar.open("Error. Falta de Stock.", "Aceptar")
@@ -495,6 +495,7 @@ export class RegisterSaleComponent implements OnInit {
         )
       }).catch(err => {
         console.log('Writing Sale unsuccessfull')
+        console.log(err)
         this.snackbar.open("Error en conexión. Vuelva a intentarlo.", "Aceptar")
         this.uploadingSale$ = of(false)
       });
@@ -565,7 +566,7 @@ export class RegisterSaleComponent implements OnInit {
       ctrl.parent.get('couponData').setValue(null)
       return dbs.getCoupon(coupon).pipe(
         switchMap(couponDB => {
-          console.log(couponDB)
+          //console.log(couponDB)
           //There exists no coupon
           if(!couponDB){
             this.snackbar.open('Cupón inválido.', "Aceptar")

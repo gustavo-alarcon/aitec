@@ -26,7 +26,7 @@
           </div>
           <div class="w3-col m6 l6">
             <mat-form-field class="w3-block" appearance="outline">
-              <mat-label>Código de existencia</mat-label>
+              <mat-label>Part Number</mat-label>
               <input matInput autocomplete="off" formControlName="code" required>
               <mat-error>
                 <span *ngIf="firstFormGroup.get('code').errors?.required">Campo requerido</span>
@@ -231,7 +231,7 @@
           </div>
           <div class="w3-col m6 l6">
             <mat-form-field appearance="outline">
-              <mat-label>SKU</mat-label>
+              <mat-label>Código de Color</mat-label>
               <input type="text" matInput autocomplete="off" [formControl]="group" />
             </mat-form-field>
           </div>
@@ -292,7 +292,7 @@
           </div>
           <div class="w3-col m6 l6" *ngIf="skuArray | async as skus">
             <mat-form-field class="w3-block" appearance="outline">
-              <mat-label> SKU</mat-label>
+              <mat-label> Código de Color</mat-label>
               <mat-select formControlName="sku">
                 <mat-option *ngFor="let sku of skus" [value]="sku">
                   {{sku}}
@@ -377,7 +377,7 @@
       </div>
 
       <div class="w3-center w3-margin-top">
-        <button mat-flat-button color="primary" [disabled]="loadSave || !warehouseList.length" (click)="saveProduct()"
+        <button mat-flat-button color="primary" [disabled]="loadSave" (click)="saveProduct()"
           class="big-button">Guardar</button>
       </div>
     </mat-step>

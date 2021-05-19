@@ -37,7 +37,7 @@
 
       <ng-container *ngIf="!entry; else entry2">
         <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Código&nbsp;&nbsp;&nbsp;</mat-label>
+          <mat-label>Número de serie&nbsp;&nbsp;&nbsp;</mat-label>
           <mat-icon matPrefix>qr_code_2</mat-icon>
           <input formControlName="seriesList" matInput type="text" [matAutocomplete]="seriesAuto"
             (keyup.enter)="(entry && formGroup.get('seriesList').valid) ? addSerie() : null"
@@ -46,10 +46,10 @@
             <mat-option *ngFor="let series of seriesList$ | async" [value]="series">
               {{series.barcode}}</mat-option>
           </mat-autocomplete>
-          <mat-hint>Escriba y seleccione un código.</mat-hint>
+          <mat-hint>Escriba y seleccione un número de serie.</mat-hint>
           <mat-error>
             <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcode">
-              Este código ya se encuentra en la lista.
+              Este número de serie ya se encuentra en la lista.
             </span>
             <span *ngIf="formGroup.get('seriesList')?.errors?.required">
               * Campo requerido
@@ -58,29 +58,43 @@
         </mat-form-field>
       </ng-container>
 
+      <!-- Para ingresos -->
       <ng-template #entry2>
+        <mat-form-field color="primary" class="w3-small w3-block" appearance="outline">
+          <mat-label>Código de Color&nbsp;&nbsp;&nbsp;</mat-label>
+          <mat-icon matPrefix>palette</mat-icon>
+
+          <mat-select formControlName="colorList" matInput>
+            <mat-option *ngFor="let color of (colorList$|async)" [value]="color">
+              {{color}}
+            </mat-option>
+
+          </mat-select>
+          
+        </mat-form-field>
+
         <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Código&nbsp;&nbsp;&nbsp;</mat-label>
+          <mat-label>Número de serie&nbsp;&nbsp;&nbsp;</mat-label>
           <mat-icon matPrefix>qr_code_2</mat-icon>
           <input formControlName="seriesList" matInput type="text"
             (keyup.enter)="formGroup.get('seriesList').valid ? addSerie() : null"
-            placeholder="PL001-0000" autocomplete="off">
+            placeholder="00000000" autocomplete="off">
 
           <mat-progress-bar *ngIf="formGroup.get('seriesList').pending" mode="indeterminate"></mat-progress-bar>
 
           <mat-hint>Escriba y presione ENTER para agregar.</mat-hint>
           <mat-error>
             <span *ngIf="formGroup.get('seriesList')?.errors?.invalidCode">
-              Este código es Inválido.
+              Este número de serie es Inválido.
             </span>
             <span *ngIf="formGroup.get('seriesList')?.errors?.invalidColor">
               Este color no existe en el producto.
             </span>
             <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcode">
-              Este código ya se encuentra en la lista.
+              Este número de serie ya se encuentra en la lista.
             </span>
             <span *ngIf="formGroup.get('seriesList')?.errors?.repeatedBarcodeDB">
-              Este código ya se encuentra almacenado.
+              Este número de serie ya se encuentra almacenado.
             </span>
             <span *ngIf="formGroup.get('seriesList')?.errors?.required">
               * Campo requerido
@@ -155,7 +169,7 @@
         <td> {{i + 1}} </td>
         <td>{{item.product.description}}</td>
         <td>{{item.warehouse.name}}</td>
-        <td><span *ngFor="let serial of item.list" class="w3-small">{{serial.barcode}}, </span></td>
+        <td><span *ngFor="let serial of item.list" class="w3-small">{{serial.barcode}} ({{serial.sku}}), </span></td>
         <td> {{item.list.length}}</td>
         <td *ngIf="entry"> {{item.cost | currency:'S/.'}}</td>
         <td> <i class="material-icons" (click)="remSerieList(item)" style="cursor: pointer;">remove_circle</i></td>

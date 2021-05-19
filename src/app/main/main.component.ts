@@ -90,7 +90,7 @@ export class MainComponent implements OnInit {
                   dialogRef.afterClosed().pipe(
                     switchMap((rate: Sale["rateData"]) => this.dbs.onSaveRate(sales[0].id, rate)))
                     .subscribe(() => {
-                      console.log("rated!")
+                      //console.log("rated!")
                     }, console.log)
                 }
                 return user

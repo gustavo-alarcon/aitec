@@ -20,8 +20,8 @@
     
     <p>Te llegará un correo electrónico a <strong>{{data.email}}</strong> con la confirmación de tu pedido.</p>
 
-    <p *ngIf="data.asesor">También puedes comunicarte con tu asesor: <strong>{{data.asesor.displayName}}</strong>, cel:
-      <strong>{{data.asesor.phone}}</strong></p>
+    <p *ngIf="data.asesor as asesor">También puedes comunicarte con tu asesor: <strong>{{asesor.displayName}}</strong>, cel:
+      <strong>{{asesor.phone}}</strong></p>
 
     <div style="text-align: right;" class="w3-section">
       <img src="../../../../assets/images/logo-black.png" width="100px" alt="">

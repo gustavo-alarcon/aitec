@@ -41,7 +41,7 @@ export class ShoppingHistoryComponent implements OnInit {
     this.init$ = this.auth.user$.pipe(
       switchMap((user) => {
         return combineLatest(
-          this.dbs.getSalesUser(user.uid),
+          this.dbs.getSalesUser(user, this.dateForm.value),
           this.dateForm.get('start').valueChanges.pipe(
             startWith(beginDate),
             map(begin => begin.setHours(0, 0, 0, 0))
@@ -52,7 +52,7 @@ export class ShoppingHistoryComponent implements OnInit {
           )
         ).pipe(
           map(([sales, startdate,enddate]) => {
-            console.log(sales);
+            //console.log(sales);
             
             let date = {begin:startdate,end:enddate}
             return sales.filter((el) => {

@@ -111,7 +111,7 @@ export class WarehouseInventoryComponent implements OnInit {
           return this.dbs.getProductsByWarehouse(warehouseSelected)
         }),
         tap(res => {
-          console.log(res)
+          //console.log(res)
           this.productsTableDataSource.data = res;
           this.loading.next(false);
         })
@@ -157,7 +157,7 @@ export class WarehouseInventoryComponent implements OnInit {
     
     let table_xlsx: any[] = [];
     let headersXlsx = [
-      'Descripcion', 'SKU', 'Categoría',
+      'Descripcion', 'Part Number', 'Categoría',
       'Stock Virtual', 'Stock Real', 'Stock en Almacén'
     ]
 

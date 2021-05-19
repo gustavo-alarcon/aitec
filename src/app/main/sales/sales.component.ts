@@ -25,7 +25,7 @@ export class SalesComponent implements OnInit {
     this.locationPadding$ = this.locationSubject.asObservable().pipe(
       map(location => {
         let aux = location+1 > 10 ? (location % 10) : location;
-        console.log(aux);
+        //console.log(aux);
         let x = 180+180*aux;
         if(aux > 1){
           return x.toFixed(0)+"px"
@@ -62,7 +62,7 @@ export class SalesComponent implements OnInit {
     return sale.requestedProducts.reduce((a,b) => a + this.givePrice(b), 0)
   }
   locationPadding(location: number): string{
-    console.log(location);
+    //console.log(location);
     let x = 112+180*location;
     if(location > 2){
       return x.toFixed(0)+" !important"

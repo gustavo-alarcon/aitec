@@ -97,7 +97,7 @@ export class StoreComponent implements OnInit {
             let brand = null
 
             let listProd = []
-            console.log(param);
+            //console.log(param);
 
             if (param.search) {
               this.search = param.search;
@@ -223,7 +223,7 @@ export class StoreComponent implements OnInit {
   }
 
   showInfo(link) {
-    console.log(link);
+    //console.log(link);
 
   }
 }

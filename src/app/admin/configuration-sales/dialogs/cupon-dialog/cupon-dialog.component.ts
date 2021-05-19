@@ -39,7 +39,7 @@ export class CuponDialogComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data.data);
+    //console.log(this.data.data);
 
     this.createForm = this.fb.group({
       discount: [this.data.edit ? this.data.data.discount : null, [Validators.required, Validators.min(0)]],

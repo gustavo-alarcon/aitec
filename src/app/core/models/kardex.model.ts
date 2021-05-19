@@ -56,7 +56,7 @@ export const OPERATION_TYPE = <const>{
   99:	"OTROS (ESPECIFICAR)",
 }
 
-const TIPO_COMPROBANTE = <const>{
+export const TIPO_COMPROBANTE = <const>{
   0:	"Otros (especificar)",
   1:	"Factura",
   2:	"Recibo por Honorarios",

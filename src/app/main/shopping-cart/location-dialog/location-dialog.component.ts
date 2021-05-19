@@ -40,7 +40,7 @@ export class LocationDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.departamentos = this.pl.getDepartamentos()
-    console.log(this.data)
+    //console.log(this.data)
 
     if (this.data.edit) {
       this.provincias = this.pl.getProvincias(this.data.user.location[this.data.ind].departamento.id)
@@ -52,7 +52,7 @@ export class LocationDialogComponent implements OnInit {
         provincia: [this.data.user.location[this.data.ind].provincia.id, Validators.required],
         distrito: [this.data.user.location[this.data.ind].distrito.id, Validators.required]
       });
-      console.log(this.firstFormGroup.value)
+      //console.log(this.firstFormGroup.value)
       this.center = this.data.user.location[this.data.ind].coord
     } else {
       this.firstFormGroup = this.fb.group({
@@ -95,7 +95,7 @@ export class LocationDialogComponent implements OnInit {
   }
 
   save() {
-    console.log(this.firstFormGroup.value)
+    //console.log(this.firstFormGroup.value)
     this.firstFormGroup.disable()
     const userRef = this.af.firestore.collection(`/users`).doc(this.data.user.uid);
     const batch = this.af.firestore.batch()
@@ -109,7 +109,7 @@ export class LocationDialogComponent implements OnInit {
       distrito: this.distritos.find(dis => dis.id == this.firstFormGroup.get('distrito').value),
       idDistrito: this.firstFormGroup.get('distrito').value
     }
-    console.log(newLoacation)
+    //console.log(newLoacation)
 
     let savelocations = this.data.user.location ? this.data.user.location : []
     if (this.data.edit) {

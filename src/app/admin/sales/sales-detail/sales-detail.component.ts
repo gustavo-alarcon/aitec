@@ -56,7 +56,7 @@ export class SalesDetailComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.sale)
+    //console.log(this.sale)
     this.initForm()
     this.initObservables()
   }
@@ -158,7 +158,7 @@ export class SalesDetailComponent implements OnInit {
   initObservables() {
     this.status$ = this.confirmedRequestForm.valueChanges.pipe(
       tap(res => {
-        console.log(res)
+        //console.log(res)
       })
     ).subscribe()
 
@@ -184,7 +184,7 @@ export class SalesDetailComponent implements OnInit {
       ]
     ).pipe(
       map(([value, advisers]) => {
-        console.log(value)
+        //console.log(value)
         let filt = null
         if(value){
           filt = typeof value == 'object' ? (<Adviser>value).displayName : (<string>value)
@@ -220,7 +220,7 @@ export class SalesDetailComponent implements OnInit {
       ]
     ).pipe(
       map(([value, deliveryGuys]) => {
-        console.log(value)
+        //console.log(value)
         let filt = null
         if(value){
           filt = typeof value == 'object' ? ((<User>value).personData.name+" "+(<User>value).personData["lastName"]) : (<string>value)
@@ -402,7 +402,7 @@ export class SalesDetailComponent implements OnInit {
     this.loading$.next(true);
     let downNewStatus = downgrade ? this.onEditSaleGetNewStatus(newStatus, true) : null;
     let sale = downgrade ? this.onGetUpdatedSale(downNewStatus, user) : this.onGetUpdatedSale(newStatus, user);
-    console.log("updating")
+    //console.log("updating")
     of(!!downgrade).pipe(
       switchMap(downgrade => {
         if (!downgrade) {
@@ -414,7 +414,7 @@ export class SalesDetailComponent implements OnInit {
       }),
       first(),
       tap(answer => {
-        console.log(answer)
+        //console.log(answer)
         if(answer.action == "confirm"){
           let batch = this.dbs.onSaveSale(sale)
           batch.commit().then(

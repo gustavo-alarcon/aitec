@@ -30,14 +30,14 @@ export class ShoppingCartComponent implements OnInit {
     this.user$ = this.auth.user$
     this.action$ = this.route.queryParams.pipe(
       map(params => {
-      console.log(params)
+      //console.log(params)
       if(!!Object.keys(params).length){
         switch(params.action){
           case 'cancelled':
-            console.log("cancelling")
+            //console.log("cancelling")
             return true
           case 'refused':
-            console.log("refusing")
+            //console.log("refusing")
             return true
           case 'success':
             this.dialog.open(SaleDialogComponent, {

@@ -5,6 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Payments } from 'src/app/core/models/payments.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
 
 @Component({
@@ -22,7 +23,7 @@ export class PaymentMethodDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dbs: DatabaseService,
     private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: { edit: boolean, data?: any },
+    @Inject(MAT_DIALOG_DATA) public data: { edit: boolean, data?: Payments },
     private dialogRef: MatDialogRef<PaymentMethodDialogComponent>,
     private afs: AngularFirestore
   ) { }
@@ -30,7 +31,8 @@ export class PaymentMethodDialogComponent implements OnInit {
   ngOnInit(): void {
     this.createForm = this.fb.group({
       account: [this.data.edit ? this.data.data.account : null],
-      name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]]
+      name: [this.data.edit ? this.data.data.name : null, [Validators.required], [this.nameRepeatedValidator(this.data)]],
+      voucher: [this.data.edit ? this.data.data.voucher : false]
     })
   }
 

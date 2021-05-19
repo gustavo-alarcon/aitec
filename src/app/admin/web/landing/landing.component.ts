@@ -254,7 +254,7 @@ export class LandingComponent implements OnInit {
       this.snackBar.open('Cambios Guardados', 'Cerrar', {
         duration: 6000,
       });
-      console.log('done');
+      //console.log('done');
     });
   }
 

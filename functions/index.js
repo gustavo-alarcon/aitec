@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const cors = require('cors')({ origin: true });
+const cors = require('cors')({origin: ["https://aitecperu.com.pe", "https://api.micuentaweb.pe"]});
 const crypto = require('crypto');
 const cardPass = require('./card-pass.json')
 const formKeys = require('./form-keys.json')
@@ -721,8 +721,9 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
   //Function gets new series created, and adds changes respective stock
   exports.updateSeries = functions.firestore.document(`${seriesPreprocessingRef}/{seriesPreId}`)
   .onCreate(event => {
-    let seriesList = event.after.data()
+    let seriesList = event.data()
     /*let seriesList= {
+      id: "string",
       invoice: "string",        //Comprobante
       waybill: "string",        //GR
       type: "Ingreso de Productos",
@@ -871,6 +872,19 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
         })
 
       })
+    }).then(
+      success => {
+        console.log("Successful sale deletion.")
+      },
+      err => {
+        console.log("Error writing list.")
+        console.log(err)
+        return seriesListColl.doc(seriesList.id).update({observations: "ERROR: Números de serie no editados."})
+
+      }
+    ).catch(err => {
+      console.log(err)
+      seriesListColl.doc(seriesList.id).update({observations: "ERROR: Números de serie no editados."})
     })
 
   })

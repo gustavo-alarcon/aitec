@@ -5,7 +5,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take, shareReplay } from 'rxjs/operators';
-import { Kardex, OPERATION_TYPE } from 'src/app/core/models/kardex.model';
+import { Kardex, OPERATION_TYPE, TIPO_COMPROBANTE } from 'src/app/core/models/kardex.model';
 import { Product, unitProduct } from 'src/app/core/models/product.model';
 import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
@@ -50,8 +50,8 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
   }
 
   save(): void {
-    console.log("saving")
-    console.log(this.cumSeriesList)
+    //console.log("saving")
+    //console.log(this.cumSeriesList)
     this.loading.next(true);
     if (this.cumSeriesList.length > 0) {
 
@@ -94,7 +94,7 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
                     res.lastObservation,
                     "Retiro de Productos",
                     true,
-                    <Kardex["type"]>Number(Object.keys(OPERATION_TYPE).find(key => OPERATION_TYPE[key] === this.entryInvoiceType.value)),
+                    <Kardex["type"]>Number(Object.keys(TIPO_COMPROBANTE).find(key => TIPO_COMPROBANTE[key] === this.entryInvoiceType.value)),
                     12,
                     null
                   ))
@@ -134,7 +134,5 @@ export class WarehouseProductsTakeOutComponent implements OnInit {
   }
 
 }
-function TIPO_COMPROBANTE(TIPO_COMPROBANTE: any) {
-  throw new Error('Function not implemented.');
-}
+
 

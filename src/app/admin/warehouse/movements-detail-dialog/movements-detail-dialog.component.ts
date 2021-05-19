@@ -48,7 +48,7 @@ export class MovementsDetailDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this.data)
+    //console.log(this.data)
     this.dataSource.data = this.data.map(el => {
       let series = (<SerialNumber[]>el.list).map(el2 => el2.barcode).join("; ").slice(0, -2)
 
@@ -62,7 +62,7 @@ export class MovementsDetailDialogComponent implements OnInit {
 
       return aux
     })
-    console.log(this.dataSource.data)
+    //console.log(this.dataSource.data)
   }
 
 }

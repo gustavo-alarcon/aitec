@@ -75,8 +75,8 @@ export class PaymentCardComponent implements OnInit {
 
       }
     };
-    console.log("loading form")
-    console.log(data)
+    //console.log("loading form")
+    //console.log(data)
 
     //loading Form Token
     this.loadFormToken(data).toPromise()
@@ -116,26 +116,26 @@ export class PaymentCardComponent implements OnInit {
   loadPaymentLibrary(formToken: string){
     KRGlue.loadLibrary(this.API_ENDPOINT, this.API_KEY)
       .then(({KR}) => {
-        console.log("Library Loaded")
+        //console.log("Library Loaded")
         return KR.setFormConfig({
           'formToken': formToken,
           'kr-language': 'es-PE'
         })
       })
       .then(({KR}) => {
-        console.log("form config set")
+        //console.log("form config set")
         return KR.addForm("#myPaymentForm")
       })
       .then(({KR, result})=> {
-        console.log("Form added")
+        //console.log("Form added")
         this.noLoading$.next(true)
         //What to do with submission
         KR.onSubmit(
           res => {
-            console.log(res)
+            //console.log(res)
             if (res.clientAnswer.orderStatus === 'PAID') {
   
-              console.log('Payment success');
+              //console.log('Payment success');
               this.dialog.open(SaleDialogComponent, 
                 {
                   closeOnNavigation: false,

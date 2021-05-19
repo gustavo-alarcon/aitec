@@ -88,7 +88,7 @@ export class KardexDialogComponent implements OnInit {
             return this.dbs.getKardex(this.data.product.id, date, this.data.warehouseId)
               .pipe(
                 tap((res) => {
-                  console.log(res);
+                  //console.log(res);
                   this.dataSource.data = res
                   this.loadingHistory.next(false)
                 })

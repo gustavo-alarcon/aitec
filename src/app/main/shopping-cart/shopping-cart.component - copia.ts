@@ -259,7 +259,7 @@ export class ShoppingCartComponentCopy implements OnInit {
         })
 
         this.user = user
-        console.log(this.user)
+        //console.log(this.user)
         this.locations = user.location
 
         if (user.personData.type == 'natural') {
@@ -291,7 +291,7 @@ export class ShoppingCartComponentCopy implements OnInit {
   }
 
   thirdView() {
-    console.log(this.deliveryForm.value)
+    //console.log(this.deliveryForm.value)
     let valid = false
     if (this.delivery == 1) {
       if (this.deliveryForm.value) {
@@ -356,7 +356,7 @@ export class ShoppingCartComponentCopy implements OnInit {
     if (this.validatedFinishButton()) {
       this.uploadingSale$ = new BehaviorSubject(true)
 
-      console.log(this.selectedLocation)
+      //console.log(this.selectedLocation)
       let info = {
         location: !!this.user.location ? this.user.location[this.selectedLocation] : null,
         store: this.delivery == 2 ? this.stores[this.selectedStore] : null
@@ -391,7 +391,7 @@ export class ShoppingCartComponentCopy implements OnInit {
       }
 
 
-      console.log(newSale);
+      //console.log(newSale);
 
       let phot = this.photos.data.length ? this.photos : null;
 

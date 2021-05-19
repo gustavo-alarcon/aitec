@@ -49,7 +49,7 @@ export class CreatEditTestimonyComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
+    //console.log(this.data);
 
     this.createForm = this.fb.group({
       photoURL: [this.data.edit ? this.data.data.photoURL : null, Validators.required],
@@ -183,7 +183,7 @@ export class CreatEditTestimonyComponent implements OnInit {
 
   }
   onSubmitForm() {
-    console.log(this.createForm.value);
+    //(this.createForm.value);
 
     this.createForm.markAsPending();
     this.createForm.disable()

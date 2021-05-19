@@ -37,8 +37,8 @@ export class ShoppingListComponent implements OnInit {
   ngOnInit(): void {
     this.reqProdListObservable$ = this.shopCar.reqProdListObservable.pipe(
       tap(res => {
-        console.log("requesting table")
-        console.log(res)
+        //console.log("requesting table")
+        //console.log(res)
         this.dataSource.data = res
       })
     )

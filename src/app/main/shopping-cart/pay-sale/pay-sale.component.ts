@@ -8,6 +8,7 @@ import { BehaviorSubject, combineLatest, interval, Observable, of, timer } from 
 import { distinctUntilChanged, map, shareReplay, startWith, switchMap, take, takeWhile, tap } from 'rxjs/operators';
 import { Payments } from 'src/app/core/models/payments.model';
 import { Sale } from 'src/app/core/models/sale.model';
+import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
@@ -55,7 +56,7 @@ export class PaySaleComponent implements OnInit {
   //Timer used to show remaining time
   timer$: Observable<number>
   disFinishButton$: Observable<boolean>;
-  user$: Observable<import("c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model").User>;
+  user$: Observable<User>;
 
 
   constructor(
@@ -71,9 +72,7 @@ export class PaySaleComponent implements OnInit {
 
   ngOnInit(): void {
     this.shopCar.clearCar()
-    this.paymentMethod = new FormControl(null, Validators.required)
-    this.paymentMethodList$ = this.dbs.getPaymentsChanges()
-    this.paymentMethod$ = this.paymentMethod.valueChanges
+
 
     this.user$ = this.auth.user$.pipe(shareReplay(1))
 
@@ -83,6 +82,25 @@ export class PaySaleComponent implements OnInit {
       }),
       shareReplay(1)
     )
+
+    this.paymentMethod = new FormControl(null, Validators.required)
+    
+    this.paymentMethodList$ = this.sale$.pipe(
+      switchMap(sale => {
+        return this.dbs.getPaymentsChanges().pipe(
+          map(payments => {
+            let arequipa = !!sale.deliveryPickUp ? true : sale.delivery ? sale.location.departamento.name == "Arequipa" : false
+            if(arequipa){
+              return payments
+            } else {
+              return payments.filter(el => !el.name.toLowerCase().includes("contraentrega"))
+            }
+          })
+        )
+      })
+    )
+
+    this.paymentMethod$ = this.paymentMethod.valueChanges
 
     this.timer$ = this.sale$.pipe(
       switchMap(sale => {

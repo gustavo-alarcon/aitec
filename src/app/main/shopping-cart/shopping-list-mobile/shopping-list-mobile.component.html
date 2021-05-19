@@ -9,7 +9,7 @@
             <h4 class="product__name">
               {{ element["product"]["description"] | titlecase }}
             </h4>
-            <p class="product__etiquet">SKU: {{ element["chosenProduct"]["sku"] }}</p>
+            <p class="product__etiquet">Código de Color: {{ element["chosenProduct"]["sku"] }}</p>
             <div>
               <span *ngIf="element['color']">
                 <mat-icon [style.color]="element.chosenProduct.color.color">brightness_1</mat-icon>

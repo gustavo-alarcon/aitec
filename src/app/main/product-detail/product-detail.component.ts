@@ -100,7 +100,7 @@ export class ProductDetailComponent implements OnInit {
       });
     }).then(() => {
       this.count++
-      console.log('save')
+      //console.log('save')
     })
   }
 

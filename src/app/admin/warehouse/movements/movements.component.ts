@@ -71,14 +71,14 @@ export class MovementsComponent implements OnInit {
             .pipe(
               switchMap(res => {
                 this.movementDataSource.data = res
-                console.log(res)
+                //(res)
                 return this.movementFilter.valueChanges.pipe(
                   startWith(this.movementFilter.value),
                   map((filter: string) => {
                     if(filter){
                       this.movementDataSource.filter = filter
                     }
-                    console.log(this.movementDataSource.filteredData)
+                    //(this.movementDataSource.filteredData)
                     return this.movementDataSource.filteredData
                   })
                   )
@@ -104,7 +104,7 @@ export class MovementsComponent implements OnInit {
     let headersXlsx = [
       'Fecha', 'Tipo', 'Comprobante', 'GR/Documento', 'Responsable', 'Observaciones',
       'Almacén',
-      'Código de producto',
+      'Part Number',
       'Producto',
       'Cantidad',
       'Series'

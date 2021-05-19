@@ -543,7 +543,7 @@ export class CreateEditProductComponent implements OnInit {
         }
 
       } else {
-        let real = sku + value
+        let real = value
         newSerie.serie = real
         let exist = this.seriesList.findIndex(sr => sr.serie == real)
         if (exist == -1) {
@@ -554,7 +554,7 @@ export class CreateEditProductComponent implements OnInit {
       this.thirdFormGroup.get('stock').setValue(this.seriesList.length)
       this.thirdFormGroup.get('series').setValue('')
     } else {
-      this.snackBar.open('Por favor, elija SKU', 'Aceptar');
+      this.snackBar.open('Por favor, elija Código de Color', 'Aceptar');
     }
   }
 

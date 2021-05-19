@@ -105,7 +105,7 @@ export class WarehouseViewMasterComponent implements OnInit {
       this.statusForm.valueChanges.pipe(startWith('Todos'))])
       .pipe(
         map(([search, sales, saleState]) => {
-          console.log(sales);
+          //console.log(sales);
           
           let order = sales.sort((a, b) => Number(b.correlative) - Number(a.correlative))
           if (saleState == 'Todos') {

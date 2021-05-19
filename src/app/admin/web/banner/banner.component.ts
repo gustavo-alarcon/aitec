@@ -73,7 +73,7 @@ export class BannerComponent implements OnInit {
       this.snackBar.open("Cambios Guardados", "Cerrar", {
         duration: 6000
       })
-      console.log('done');
+      //('done');
 
     })
   }

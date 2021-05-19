@@ -33,6 +33,7 @@ export class SelectSeriesComponent implements OnInit {
   productListStatus$: Observable<string>;
   seriesList$: Observable<SerialNumber[]>;
   seriesListStatus$: Observable<string>;
+  colorList$: Observable<string[]>;
 
 
 
@@ -46,14 +47,21 @@ export class SelectSeriesComponent implements OnInit {
   ngOnInit(): void {
     this.initForms()
     this.initObservables()
-    console.log(this.entry)
+    //console.log(this.entry)
   }
 
   initForms() {
-    console.log("initiating forms")
+    //console.log("initiating forms")
     this.formGroup = new FormGroup({
       warehouseList: new FormControl(null, [Validators.required, this.objectValidator()]),
       productList: new FormControl({value: null, disabled: true}, [Validators.required, this.objectValidator()]),
+      colorList: !!this.entry ? 
+        new FormControl(
+          {value: null, disabled: true}, [Validators.required]
+        ) : 
+        new FormControl(
+          {value: null, disabled: true}
+        ),
       seriesList: !!this.entry ? 
         new FormControl(
           {value: null, disabled: true}, [Validators.required], [this.seriesEntryValidator()]
@@ -67,13 +75,13 @@ export class SelectSeriesComponent implements OnInit {
         [Validators.required, Validators.min(0)]
       )
     })
-    console.log(this.formGroup)
+    //console.log(this.formGroup)
   }
 
   initObservables(){
     this.warehouseList$ = this.dbs.getWarehouseList().pipe(tap(res => {
-      console.log("executing")
-      console.log(res)
+      //console.log("executing")
+      //console.log(res)
     }));
 
     this.warehouseListValue$ = combineLatest([
@@ -94,6 +102,8 @@ export class SelectSeriesComponent implements OnInit {
         if(status == "VALID"){
           this.formGroup.get("productList").reset()
           this.formGroup.get("productList").enable()
+          this.formGroup.get("colorList").reset()
+          this.formGroup.get("colorList").disable()
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
@@ -101,6 +111,8 @@ export class SelectSeriesComponent implements OnInit {
         } else {
           this.formGroup.get("productList").reset()
           this.formGroup.get("productList").disable()
+          this.formGroup.get("colorList").reset()
+          this.formGroup.get("colorList").disable()
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
@@ -127,18 +139,33 @@ export class SelectSeriesComponent implements OnInit {
     this.productListStatus$ = this.formGroup.get("productList").statusChanges.pipe(
       tap((status: string) => {
         if(status == "VALID"){
+          this.formGroup.get("colorList").reset((<Product>this.formGroup.get("productList").value).products[0].sku)
+          this.formGroup.get("colorList").enable()
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").enable()
           this.seriesList = []
           this.formGroup.get("cost").setValue(0)
 
         } else {
+          this.formGroup.get("colorList").reset()
+          this.formGroup.get("colorList").disable()
           this.formGroup.get("seriesList").reset()
           this.formGroup.get("seriesList").disable()
           this.seriesList = []
           this.formGroup.get("cost").setValue(0)
 
         }
+      })
+    )
+
+    this.colorList$ = this.formGroup.get("productList").valueChanges.pipe(
+      map((product: Product) => {
+        if(product){
+          if(product.products){
+            return product.products.map(el => el.sku)
+          }
+        }
+        return <string[]>[]
       })
     )
 
@@ -168,6 +195,8 @@ export class SelectSeriesComponent implements OnInit {
           if(filteredSeries.length == 1){
             if(filteredSeries[0].barcode == seriesValue){
               this.formGroup.get("seriesList").setValue(filteredSeries[0])
+              this.formGroup.get("seriesList").setValue("")
+              return seriesList
             }
           }
           return filteredSeries
@@ -181,15 +210,15 @@ export class SelectSeriesComponent implements OnInit {
 
   //Only used for entry of series. Will be executed only when seriesList is string
   addSerie(){
-    console.log("adding serie")
+    //console.log("adding serie")
     let barcode = (<string>this.formGroup.get("seriesList").value).trim()
 
-    let sku = barcode.split("-")[0]
-    let code = barcode.split("-")[1]
+    // let sku = barcode.split("-")[0]
+    // let code = barcode.split("-")[1]
     let product = <Product>this.formGroup.get("productList").value
     let warehouse = <Warehouse>this.formGroup.get("warehouseList").value
 
-    let foundSku = product.products.find(el => el.sku.toUpperCase() == sku.toUpperCase())
+    let foundColor = product.products.find(el => el.sku == (<string>this.formGroup.get("colorList").value))
 
     //Case when reentering?
     //let foundSeries = this.seriesList.find(el => el.barcode.toUpperCase() == (foundSku.sku+"-"+code).toUpperCase())
@@ -198,9 +227,9 @@ export class SelectSeriesComponent implements OnInit {
       id: this.dbs.getFirebaseId(),
       productId: product.id,
       warehouseId: warehouse.id,
-      barcode: foundSku.sku+"-"+code.toUpperCase(),     //We want all codes to be uppercase
-      sku: foundSku.sku,      //codigo de color
-      color: foundSku.color,
+      barcode: barcode,     
+      sku: foundColor.sku,      //codigo de color
+      color: foundColor.color,
       status: "stored",
 
       createdAt: null,
@@ -289,7 +318,7 @@ export class SelectSeriesComponent implements OnInit {
           
           //We now check if this code is already on the list
           let foundSeries = this.seriesList.find(el => el.barcode.toUpperCase() == series.barcode.toUpperCase())
-          let foundSeries2 = this.cumSeriesList.filter(el => el.product.id == series.productId).find(el=> {
+          let foundSeries2 = this.cumSeriesList/*.filter(el => el.product.id == series.productId)*/.find(el=> {
             let serialList = <SerialNumber[]>el.list
             return !!serialList.find(el2 => el2.barcode.toUpperCase() == series.barcode.toUpperCase())
           })
@@ -299,7 +328,6 @@ export class SelectSeriesComponent implements OnInit {
           } else {
             //We also have to update the status
             this.seriesList.push({...series, status: "sold"})
-            this.formGroup.get("seriesList").setValue("")
             return null
           }
           
@@ -323,39 +351,45 @@ export class SelectSeriesComponent implements OnInit {
             let barcode = value.trim()
         
             //We first validate if it is a valid barcode
-            if(barcode.split("-").length != 2){
-              control.markAsTouched()
-              return of({invalidCode: true})
-            } else {
-              let sku = barcode.split("-")[0]
-              let code = barcode.split("-")[1].toUpperCase()
-              let product = <Product>this.formGroup.get("productList").value
-              let warehouse = <Warehouse>this.formGroup.get("warehouseList").value
+            // if(barcode.split("-").length != 2){
+            //   control.markAsTouched()
+            //   return of({invalidCode: true})
+            // } else {
+              // let sku = barcode.split("-")[0]
+              // let code = barcode.split("-")[1].toUpperCase()
+              // let product = <Product>this.formGroup.get("productList").value
+              // let warehouse = <Warehouse>this.formGroup.get("warehouseList").value
         
-              let foundSku = product.products.find(el => el.sku.toUpperCase() == sku.toUpperCase())
+              // let foundSku = product.products.find(el => el.sku.toUpperCase() == sku.toUpperCase())
         
-              //We check if this code is available on the product
-              if(!foundSku){
-                control.markAsTouched()
-                return of({invalidColor: true})
-              } else {
+              // //We check if this code is available on the product
+              // if(!foundSku){
+              //   control.markAsTouched()
+              //   return of({invalidColor: true})
+              // } else {
         
                 //We now check if this code is already on the list
-                let foundSeries = this.seriesList.find(el => el.barcode.toUpperCase() == (foundSku.sku+"-"+code).toUpperCase())
-                let foundSeries2 = this.cumSeriesList.filter(el => el.product.id == product.id).find(el=> {
+                // let foundSeries = this.seriesList.find(el => el.barcode.toUpperCase() == (foundSku.sku+"-"+code).toUpperCase())
+                // let foundSeries2 = this.cumSeriesList.filter(el => el.product.id == product.id).find(el=> {
+                //   let serialList = <SerialNumber[]>el.list
+                //   return !!serialList.find(el2 => el2.barcode.toUpperCase() == (foundSku.sku+"-"+code).toUpperCase())
+                // })
+
+                let foundSeries = this.seriesList.find(el => el.barcode == barcode)
+                let foundSeries2 = this.cumSeriesList.find(el=> {
                   let serialList = <SerialNumber[]>el.list
-                  return !!serialList.find(el2 => el2.barcode.toUpperCase() == (foundSku.sku+"-"+code).toUpperCase())
+                  return !!serialList.find(el2 => el2.barcode.toUpperCase() == barcode)
                 })
 
                 if(foundSeries || foundSeries2){
                   control.markAsTouched()
                   return of({repeatedBarcode: true})
                 } else {
-                  console.log("checking code db")
+                  //console.log("checking code db")
                   //We now check if code was already registered
-                  return this.dbs.validateSeriesOfProduct(foundSku.sku+"-"+code, product.id).pipe(
+                  return this.dbs.validateSeriesOfProduct(barcode).pipe(
                     map(seriesList => {
-                      console.log(seriesList)
+                      //console.log(seriesList)
                       if(seriesList.length){
                         control.markAsTouched()
                         return {repeatedBarcodeDB: true}
@@ -366,9 +400,9 @@ export class SelectSeriesComponent implements OnInit {
                   )
                 }
         
-              }
+              // }
         
-            }
+            // }
     
           } else {
             return of(null)
