@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Ng2ImgMaxService } from 'ng2-img-max';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
-import { map, startWith, switchMap, take, takeLast, tap } from 'rxjs/operators';
+import { filter, map, startWith, switchMap, take, takeLast, tap } from 'rxjs/operators';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -114,6 +114,7 @@ export class CreateEditProductComponent implements OnInit {
 
     this.itemsFormArray = this.fb.array([])
 
+
     this.firstFormGroup = this.fb.group({
       description: [null, Validators.required],
       code: [null, [Validators.required], [this.nameRepeatedValidator()]],
@@ -131,7 +132,7 @@ export class CreateEditProductComponent implements OnInit {
       colors: [null],
       noColors: [false],
       guarantee: [null, Validators.required],
-      timeguarantee: [null]
+      timeguarantee: [{value: null, disabled: true}, Validators.required]
     })
 
     this.thirdFormGroup = this.fb.group({
@@ -153,11 +154,12 @@ export class CreateEditProductComponent implements OnInit {
         if (id.id) {
           this.edit = true
           return this.dbs.getProduct(id.id).pipe(
+            filter(prod=> !!prod),
             map(prod => {
               this.data = prod
               this.edit = true
               this.firstFormGroup.setValue({
-                description: prod.description,
+                description: prod.description ? prod.description : null,
                 category: prod.idCategory ? categories.find(ct => ct.id === prod.idCategory) : null,
                 priceMax: prod.priceMay,
                 cost: prod.cost,
@@ -266,12 +268,13 @@ export class CreateEditProductComponent implements OnInit {
     );
 
     this.guarantee$ = this.secondFormGroup.get('guarantee').valueChanges.pipe(
+      startWith(this.secondFormGroup.get('guarantee').value),
       map(bol => {
         if (bol) {
-          this.secondFormGroup.get('timeguarantee').setValidators(Validators.required)
+          this.secondFormGroup.get('timeguarantee').enable()
           return true
         } else {
-          this.secondFormGroup.get('timeguarantee').setValidators(null)
+          this.secondFormGroup.get('timeguarantee').disable()
           return false
         }
       })
@@ -563,6 +566,16 @@ export class CreateEditProductComponent implements OnInit {
     this.thirdFormGroup.get('stock').setValue(this.seriesList.length)
   }
 
+  deb(){
+    // console.log(this.zoneForm)
+    // console.log(this.zoneForm)
+    // console.log(this.itemsFormArray)
+    // console.log(this.thirdFormGroup)
+    // console.log(this.firstFormGroup)
+    // console.log(this.secondFormGroup)
+
+  }
+
   addWarehouse() {
     this.thirdFormGroup.markAsPristine();
     this.thirdFormGroup.markAsUntouched();
@@ -789,6 +802,7 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   editProduct() {
+    //console.log("edit")
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
 
     let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
@@ -843,7 +857,8 @@ export class CreateEditProductComponent implements OnInit {
 
     let change = JSON.stringify(newProduct) === JSON.stringify(oldP)
 
-    if (!change) {
+    //console.log("change ",change)
+    //if (!change) {
       this.loadSave = true
       const batch = this.afs.firestore.batch()
       const productRef = this.afs.firestore.collection(`/db/aitec/productsList`).doc(this.data.id);
@@ -873,7 +888,8 @@ export class CreateEditProductComponent implements OnInit {
                 gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
                 stock: back ? back.realStock : 0,
                 realStock: back ? back.realStock : 0,
-                virtualStock: back ? back.virtualStock : 0
+                virtualStock: back ? back.virtualStock : 0,
+                reservedStock: back ? back.reservedStock : 0
               }
             })]
 
@@ -911,9 +927,11 @@ export class CreateEditProductComponent implements OnInit {
               gallery: newProduct.gallery.filter(sk => sk.sku == this.skuList[ind]),
               stock: back ? back.realStock : 0,
               realStock: back ? back.realStock : 0,
-              virtualStock: back ? back.virtualStock : 0
+              virtualStock: back ? back.virtualStock : 0,
+              reservedStock: back? back.reservedStock ? back.reservedStock : 0 : 0
             }
           })]
+          console.log(newProduct)
 
           if (deleteP.length > 0) {
             let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
@@ -940,8 +958,24 @@ export class CreateEditProductComponent implements OnInit {
           }
         }
       })
-    }
+    //}
+  }
 
+  noEditStock(barcode: string){
+    if(this.edit){
+      let color = this.data.products.find(pr => pr.sku == barcode)
+      if(color){
+        if(!color.reservedStock && !color.virtualStock && !color.realStock){
+          return false
+        } else {
+          return true
+        }
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
   }
 
   onKeydown(event) {

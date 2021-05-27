@@ -79,6 +79,15 @@
     padding: 5px;
     font-weight: bold;
   }
+  &__noStock {
+    border: 1px solid var(--warn-color);
+    border-radius: 5px;
+    color: var(--warn-color);
+    font-size: 1.2em;
+    margin-top: 8px;
+    padding: 5px;
+    font-weight: bold;
+  }
   &__loader{
     min-height: 165px;
     height: 100%;

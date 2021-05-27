@@ -79,10 +79,11 @@ export class StoreComponent implements OnInit {
       this.route.queryParams
     ).pipe(
       switchMap(([id, param]) => {
+        console.log(param)
         this.loading.next(true)
         return combineLatest(
           this.searchForm.valueChanges.pipe(startWith('')),
-          this.dbs.getProductsListValueChanges()
+          this.dbs.getProductsListValueChanges2()
         ).pipe(
           map(([word, products]) => {
 

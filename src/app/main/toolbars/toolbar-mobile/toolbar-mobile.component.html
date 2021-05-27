@@ -61,6 +61,14 @@
           <mat-icon>favorite</mat-icon>
           <span>Mis favoritos</span>
         </button>
+        <button mat-menu-item routerLink="/main/preguntas">
+          <mat-icon>question_answer</mat-icon>
+          <span>Mis Preguntas</span>
+        </button>
+        <button *ngIf="(user$ | async)?.role =='admin'" mat-menu-item routerLink="/admin">
+          <mat-icon>settings</mat-icon>
+          <span>Administrar</span>
+        </button>
       </mat-menu>
 
       <button 

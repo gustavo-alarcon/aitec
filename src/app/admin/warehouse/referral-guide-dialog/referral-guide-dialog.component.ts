@@ -104,6 +104,7 @@ export class ReferralGuideDialogComponent implements OnInit {
 
     if(this.sale){
       if(!this.validateSaleMatch(this.cumSeriesList, this.sale.requestedProducts)){
+        this.loading.next(false);
         return
       } 
     }

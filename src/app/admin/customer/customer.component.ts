@@ -17,7 +17,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class CustomerComponent implements OnInit {
 
   dataSource = new MatTableDataSource();
-  displayedColumns: string[] = ['index', 'name', 'phone', 'customerType', 'deliveryUser', 'type', 'document', 'address', 'contactPerson', 'actions'];
+  displayedColumns: string[] = ['index', 'name', 'phone', 'customerType', 'deliveryUser', 'adminUser', 'type', 'document', 'address', 'contactPerson', 'actions'];
 
   @ViewChild("paginatorList", { static: false }) set content(paginator: MatPaginator) {
     this.dataSource.paginator = paginator;
@@ -63,12 +63,13 @@ export class CustomerComponent implements OnInit {
     this.dataSource.filterPredicate =
       (user: User, filterText: string) => {
         let filter = filterText.trim().toUpperCase();
+
         let dataString = user.personData.name + 
         (user.personData["lastName"] ? user.personData["lastName"] :"") + 
         String(user.personData.phone) + 
         (user.personData.type == "natural" ? user.personData.dni : user.personData.ruc)+
         (user.deliveryUser ? "Repartidor" : "") + (user.mayoristUser ? "Mayorista":"Minorista")+
-        user.personData.type
+        user.personData.type + (user.role == "admin" ? "Administrador" : "")
         return (dataString.toUpperCase().includes(filter))
       }
 
@@ -131,6 +132,18 @@ export class CustomerComponent implements OnInit {
   onDeliveryUser(user: User){
     let action = !user.deliveryUser
     this.dbs.editUserType(user.uid, "deliveryUser", action).commit().then(
+      res => {
+        this.snackbar.open("Edición Satisfactoria!", "Aceptar")
+      },
+      err => {
+        console.log(err)
+        this.snackbar.open("Ocurrió un error. Vuelva a intentarlo", "Aceptar")
+      }
+    )
+  }
+  onAdminUser(user: User){
+    let action = user.role == "admin"
+    this.dbs.editUserType(user.uid, "role", action ? "" : "admin").commit().then(
       res => {
         this.snackbar.open("Edición Satisfactoria!", "Aceptar")
       },

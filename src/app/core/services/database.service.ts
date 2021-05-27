@@ -485,6 +485,19 @@ export class DatabaseService {
       );
   }
 
+  getProductsList2(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.orderBy('priority', 'desc')
+      )
+      .valueChanges()
+      .pipe(
+        map((res) => {
+          return res.filter(el => !!el.published);
+        })
+      );
+  }
+
   getLastProducts(): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
@@ -515,6 +528,15 @@ export class DatabaseService {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
         ref.orderBy('priority', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
+  }
+
+  getProductsListValueChanges2(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.orderBy('priority', 'desc').where("published", "==", true)
       )
       .valueChanges()
       .pipe(shareReplay(1));
@@ -1299,6 +1321,19 @@ export class DatabaseService {
       );
   }
 
+  getProduct2(id: string): Observable<Product> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.where('sku', '==', id).where("published", "==", true)
+      )
+      .valueChanges()
+      .pipe(
+        map((snap) => {
+          return snap[0]
+        })
+      );
+  }
+
   getProductObs(id: string): Observable<Product> {
     return this.afs
       .doc<Product>(`${this.productsListRef}/${id}`)
@@ -1466,7 +1501,7 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  editUserType(userId: string, type: "mayoristUser" | "deliveryUser", action: boolean): firebase.default.firestore.WriteBatch{
+  editUserType(userId: string, type: "mayoristUser" | "deliveryUser" | "role", action: boolean | string): firebase.default.firestore.WriteBatch{
     const userDoc = this.afs.firestore.collection(this.userRef).doc(userId);
     const batch = this.afs.firestore.batch();
     batch.update(userDoc, {[type]: action})

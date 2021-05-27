@@ -180,7 +180,7 @@
           </tr>
           <tr>
             <td class="table-sale__td " colspan="3">
-              <span>Nombre del cliente: 
+              <span><b>Nombre del cliente: </b>
                 {{sale.user.personData.name}} 
                 {{sale.user.personData.lastName ? sale.user.personData.lastName : ""}}
               </span>
@@ -188,14 +188,14 @@
           </tr>
           <tr>
             <td class="table-sale__td " colspan="3">
-              <span>Comprobante: 
+              <span><b>Comprobante: </b>
                 {{sale.document}} {{sale.confirmedDocumentData.documentNumber}}
               </span>
             </td>
           </tr>
           <tr>
             <td class="table-sale__td " colspan="3">
-              <span>Teléfono: 
+              <span><b>Teléfono: </b>
                 {{sale.user.personData.phone}}
               </span>
             </td>
@@ -203,7 +203,7 @@
           
           <tr>
             <td class="table-sale__td " colspan="3">
-              <span>Tipo de entrega: 
+              <span><b>Tipo de entrega: </b>
                 {{sale.deliveryPickUp ? "En tienda" : sale.delivery ? "Delivery" : "A coordinar"}}
               </span>
             </td>
@@ -212,42 +212,42 @@
           <ng-container *ngIf="sale.delivery">
             <tr>
               <td class="table-sale__td " colspan="3">
-                <span>Dirección: 
+                <span><b>Dirección: </b>
                   {{sale.delivery?.address ? sale?.delivery?.address : sale?.location?.address}}
                 </span>
               </td>
             </tr>
             <tr *ngIf="sale.location?.reference">
               <td class="table-sale__td " colspan="3">
-                <span>Referencia: 
+                <span><b>Referencia: </b>
                   {{sale.location.reference}}
                 </span>
               </td>
             </tr>
             <tr>
               <td class="table-sale__td " colspan="3">
-                <span>Distrito: 
+                <span><b>Distrito: </b>
                   {{sale.delivery?.distrito ? sale?.delivery?.distrito.name : sale?.location?.distrito.name}}
                 </span>
               </td>
             </tr>
             <tr>
               <td class="table-sale__td " colspan="3">
-                <span>Provincia: 
+                <span><b>Provincia: </b>
                   {{sale.delivery?.provincia ? sale?.delivery?.provincia.name : sale?.location?.provincia.name}}
                 </span>
               </td>
             </tr>
             <tr>
               <td class="table-sale__td " colspan="3">
-                <span>Departamento: 
+                <span><b>Departamento: </b>
                   {{sale.delivery?.departamento ? sale?.delivery?.departamento.name : sale?.location?.departamento.name}}
                 </span>
               </td>
             </tr>
             <tr *ngIf="sale.observation as obs">
               <td class="table-sale__td " colspan="3">
-                <span>Observaciones: 
+                <span><b>Observaciones: </b>
                   {{obs}}
                 </span>
               </td>

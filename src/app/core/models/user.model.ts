@@ -3,7 +3,7 @@ import { SaleRequestedProducts } from "./sale.model";
 export interface User {
   uid?: string;
   email: string;
-  role?:string;
+  role?:string;     //"admin"
 
   //customerType?:"Mayorista" | "Minorista";         //'Mayorista'
   orders?:number;

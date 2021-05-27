@@ -236,10 +236,10 @@
                     </div>
                     <mat-hint>*Campo requerido</mat-hint>
 
-                    <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width: 100%"
+                    <mat-progress-bar *ngIf="photos?.resizing$?.photoURL | async" style="width: 100%"
                       mode="indeterminate">
                     </mat-progress-bar>
-                    <span *ngIf="photos.resizing$.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
+                    <span *ngIf="photos.resizing$?.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
                       style="width: 100%">*comprimiendo</span>
                     <input style="display: none" #photoURL type="file" accept="image/*"
                       (change)="addNewPhoto('photoURL', photoURL.files)" />

@@ -38,7 +38,7 @@ export class ProductsListComponent implements OnInit {
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
     'index', 'photoURL', 'description', 'sku', 'category', 'pricemin', 'pricemay',
-    'realStock', 'virtualStock', 'published', 'actions'
+    'realStock', 'virtualStock', 'reservedStock', 'published', 'actions'
   ]
 
   productsObservable$: Observable<Product[]>
@@ -210,8 +210,15 @@ export class ProductsListComponent implements OnInit {
 
   onCreateEditItem(edit: boolean, product?: Product) {
     if (edit) {
-      this.router.navigate(['/admin/products/edit', product.sku]);
-
+      if(product.published){
+        this.snackBar.open("Por favor, asegurese de ocultar el producto antes de editarlo.", "Aceptar")
+      } else {
+        if(this.getReservedStock(product)){
+          this.snackBar.open("Por favor, asegurese de que el stock reservado se encuentre en 0.", "Aceptar")
+        } else {
+          this.router.navigate(['/admin/products/edit', product.sku]);
+        }
+      }
     } else {
       this.router.navigate(['/admin/products/create']);
     }
@@ -260,6 +267,12 @@ export class ProductsListComponent implements OnInit {
         }
       })
     }*/
+  }
+
+  getReservedStock(product: Product): number{
+    return product.products.reduce((prev, curr)=> {
+      return prev + (curr.reservedStock ? curr.reservedStock : 0)
+    }, 0  )
   }
 
 

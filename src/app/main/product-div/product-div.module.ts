@@ -8,6 +8,7 @@ import { QuantityDivModule } from '../quantity-div/quantity-div.module';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { MatDialogModule } from '@angular/material/dialog';
 import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div-improved.module';
+import { SharedModule } from 'src/app/core/shared/shared.module';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { QuantityDivImprovedModule } from '../quantity-div-improved/quantity-div
     QuantityDivModule,
     QuantityDivImprovedModule,
     LazyLoadImageModule,
-    MatDialogModule 
+    MatDialogModule,
+    SharedModule
   ],
   exports:[
     ProductDivComponent

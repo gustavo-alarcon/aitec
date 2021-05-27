@@ -156,7 +156,7 @@
                   <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
                     <div class="w3-block w3-margin-bottom categories__brand mat-elevation-z2">
                       <div class=" categories__brand--image">
-                        <img [defaultImage]="defaultImage" [lazyLoad]="brand.photoURL" [offset]="100"
+                        <img [defaultImage]="defaultImage" [lazyLoad]="brand?.photoURL" [offset]="100"
                           (click)="navigateBrand(brand.name)" alt="brand.name" />
                       </div>
                     </div>

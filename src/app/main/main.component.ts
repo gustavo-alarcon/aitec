@@ -113,7 +113,7 @@ export class MainComponent implements OnInit {
       this.searchForm.valueChanges.pipe(
         filter((input) => input !== null),
       ),
-      this.dbs.getProductsList()
+      this.dbs.getProductsList2()
     ).pipe(
 
       map(([value, products]) => {

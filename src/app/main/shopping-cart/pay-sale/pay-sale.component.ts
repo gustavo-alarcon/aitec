@@ -89,7 +89,7 @@ export class PaySaleComponent implements OnInit {
       switchMap(sale => {
         return this.dbs.getPaymentsChanges().pipe(
           map(payments => {
-            let arequipa = !!sale.deliveryPickUp ? true : sale.delivery ? sale.location.departamento.name == "Arequipa" : false
+            let arequipa = !!sale.deliveryPickUp ? true : sale.delivery ? sale.location ? sale.location.departamento.name == "Arequipa" : false : false
             if(arequipa){
               return payments
             } else {

@@ -137,6 +137,15 @@
               </td>
             </ng-container>
 
+            <ng-container matColumnDef="reservedStock">
+              <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
+                Stock Reservado
+              </th>
+              <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
+                {{ getReservedStock(raw) }}
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="published">
               <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
                 Estado

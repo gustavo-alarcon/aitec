@@ -61,7 +61,7 @@ export class ToolbarMobileComponent implements OnInit {
       this.searchForm.valueChanges.pipe(
         map((value) => typeof value == 'string' ? value : value.description)
       ),
-      this.dbs.getProductsList()
+      this.dbs.getProductsList2()
     ).pipe(
 
       map(([val, products]) => {

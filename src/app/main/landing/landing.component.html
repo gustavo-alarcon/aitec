@@ -3,11 +3,11 @@
   <ngx-slick-carousel class="carousel-web" #slickModal="slick-carousel" [config]="slideConfig">
     <div ngxSlickItem class="slide" *ngFor="let ban of banners">
       <a *ngIf="ban.redirectTo == 'Link externo';else noLink" [href]="ban.link" target="_blank">
-        <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
+        <img [src]="ban?.photoURL" class="w3-block-banner" alt="banner" />
       </a>
       <ng-template #noLink>
         <a (click)="navigateBrand(ban)" style="cursor: pointer;">
-          <img [src]="ban.photoURL" class="w3-block-banner" alt="banner" />
+          <img [src]="ban?.photoURL" class="w3-block-banner" alt="banner" />
         </a>
       </ng-template>
     </div>
@@ -34,7 +34,7 @@
 
   <div class="img-oferta">
     <a (click)="navigateBrand(pro)" *ngFor="let pro of promo;  let i = index">
-      <img [src]="pro.photoURL" class="w3-block-{{i}}" alt="promo" />
+      <img [src]="pro?.photoURL" class="w3-block-{{i}}" alt="promo" />
     </a>
   </div>
 
@@ -59,7 +59,7 @@
           </div>
         </div>
         <div class="w3-col m6 l6">
-          <img [src]="middle.photoURL" class="w3-block" alt="" />
+          <img [src]="middle?.photoURL" class="w3-block" alt="" />
         </div>
       </div>
     </div>
@@ -136,7 +136,7 @@
           <div class="w3-padding">
             <div class="customer">
               <div class="customer__image w3-padding">
-                <img [src]="slide.photoURL" class="w3-block w3-circle" alt="" />
+                <img [src]="slide?.photoURL" class="w3-block w3-circle" alt="" />
               </div>
               <div class="customer__content">
                 <h3 class="customer__title">{{slide.name}}</h3>

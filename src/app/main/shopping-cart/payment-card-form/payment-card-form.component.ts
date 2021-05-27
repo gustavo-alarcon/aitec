@@ -56,7 +56,7 @@ export class PaymentCardFormComponent implements OnInit {
     this.paymentData = {
       vads_action_mode: "INTERACTIVE",
       vads_amount: total,
-      vads_ctx_mode: "TEST",//PRODUCTION, TEST
+      vads_ctx_mode: "PRODUCTION",//PRODUCTION, TEST
       vads_currency: 604,
       vads_cust_email: this.sale.user.email,
       vads_cust_first_name : this.sale.user.personData.name,
@@ -109,7 +109,7 @@ export class PaymentCardFormComponent implements OnInit {
     let url = "https://us-central1-aitec-ecommerce.cloudfunctions.net/reqVadsForm";
 
     //You should choose which mode you want
-    let mode: "TEST"|"PROD" = "TEST"
+    let mode: "TEST"|"PROD" = "PROD"
 
     const httpOptions = {
       headers: new HttpHeaders({

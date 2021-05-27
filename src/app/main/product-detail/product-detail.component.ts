@@ -5,6 +5,7 @@ import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product-detail',
@@ -36,7 +37,8 @@ export class ProductDetailComponent implements OnInit {
     public auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -45,10 +47,15 @@ export class ProductDetailComponent implements OnInit {
       switchMap((param) => {
         window.scroll(0, 0);
         return combineLatest(
-          this.dbs.getProduct(param.id),
+          this.dbs.getProduct2(param.id),
           this.dbs.isMayUser$
         ).pipe(
           map(([product, user]) => {
+            if(!product){
+              this.snackBar.open("Este producto no está disponible!", "Aceptar")
+              this.router.navigate(['main'])
+              return null
+            }
             this.price = product.priceMin
             this.promo = product.promo
             if (user) {
@@ -61,8 +68,10 @@ export class ProductDetailComponent implements OnInit {
         );
       }),
       tap(res => {
-        this.searchNumber(res)
-        this.loading.next(false)
+        if(res){
+          this.searchNumber(res)
+          this.loading.next(false)
+        }
       })
     );
 

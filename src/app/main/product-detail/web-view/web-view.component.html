@@ -7,14 +7,14 @@
           <div class="gallery__side">
             <div class="gallery__div border--primary w3-block" *ngFor="let img of galleryImg"
               [ngClass]="img.ind == selectImage.ind ? 'gallery__div--select' : 'none'">
-              <img [defaultImage]="defaultImage" [lazyLoad]="img.photoURL" [offset]="100"
+              <img [defaultImage]="defaultImage" [lazyLoad]="img?.photoURL" [offset]="100"
                 (click)="changeSelectImage(img)" class="gallery__div--image" alt="" />
             </div>
           </div>
           <figure #image class="zoom" (mousemove)="zoom($event)"
-            [style.background-image]="'url(' + selectImage.photoURL + ')'">
+            [style.background-image]="'url(' + selectImage?.photoURL + ')'">
             <div style="background-color: white">
-              <img [defaultImage]="defaultImage" [lazyLoad]="selectImage.photoURL" [offset]="100"
+              <img [defaultImage]="defaultImage" [lazyLoad]="selectImage?.photoURL" [offset]="100"
                 class="gallery__image" />
             </div>
           </figure>
@@ -42,7 +42,7 @@
         <div class="small">
           <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
             <div ngxSlickItem *ngFor="let slide of galleryImg" class="slide">
-              <img [defaultImage]="defaultImage" [lazyLoad]="slide.photoURL" [offset]="100" class="gallery__image"
+              <img [defaultImage]="defaultImage" [lazyLoad]="slide?.photoURL" [offset]="100" class="gallery__image"
                 alt="gallery-img" />
             </div>
           </ngx-slick-carousel>
