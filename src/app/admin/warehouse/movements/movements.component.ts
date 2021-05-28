@@ -123,7 +123,7 @@ export class MovementsComponent implements OnInit {
       ]
 
       trans.list.forEach(el => {
-        let series = (<SerialNumber[]>el.list).map(el2 => el2.barcode).join("; ").slice(0, -2)
+        let series = (<SerialNumber[]>el.list).map(el2 => el2.barcode).join("; ")
   
         let aux = [
           el.warehouse.name,

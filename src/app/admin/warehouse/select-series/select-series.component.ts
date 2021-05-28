@@ -338,6 +338,9 @@ export class SelectSeriesComponent implements OnInit {
       
     }
   }
+  deb(){
+    console.log(this.formGroup.get("serialList"))
+  }
 
   seriesEntryValidator(){
     return (control: AbstractControl): Observable<ValidationErrors> => {
