@@ -4,11 +4,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import * as e from 'express';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, filter, map, startWith, switchMap, switchMapTo, tap } from 'rxjs/operators';
+import { Product } from 'src/app/core/models/product.model';
 import { Sale } from 'src/app/core/models/sale.model';
 import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
+import { Warehouse } from 'src/app/core/models/warehouse.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
-import { Product } from 'c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/product.model';
-import { Warehouse } from 'c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/warehouse.model';
 
 @Component({
   selector: 'app-select-series',

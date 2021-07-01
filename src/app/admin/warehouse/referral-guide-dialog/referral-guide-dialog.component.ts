@@ -1,18 +1,16 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { PlacesService } from '../../../core/services/places.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DatabaseService } from '../../../core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter, shareReplay } from 'rxjs/operators';
-import { Warehouse } from '../../../core/models/warehouse.model';
+import { shareReplay } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
-import { Product } from 'src/app/core/models/product.model';
 import { TRANSFER_REASON, Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
 import { Sale, SaleRequestedProducts } from 'src/app/core/models/sale.model';
-import { User } from 'c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model';
+import { User } from 'src/app/core/models/user.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',

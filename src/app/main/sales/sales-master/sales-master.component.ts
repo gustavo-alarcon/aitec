@@ -8,10 +8,10 @@ import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
-import { Zone } from 'src/app/core/models/product.model';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 import { Waybill } from 'src/app/core/models/waybill.model';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { User } from 'src/app/core/models/user.model';
 
 
 @Component({
@@ -41,7 +41,7 @@ export class SalesMasterComponent implements OnInit {
   sales$: Observable<Sale[]>;
   status: string[] = [];
   search$: Observable<string>;
-  user$: Observable<import("c:/Users/Junjiro/Documents/Meraki/aitec/src/app/core/models/user.model").User>;
+  user$: Observable<User>;
 
   constructor(
     private dbs: DatabaseService,

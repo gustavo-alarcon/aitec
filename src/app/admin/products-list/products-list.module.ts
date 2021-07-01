@@ -66,7 +66,8 @@ import { SharedModule } from 'src/app/core/shared/shared.module';
     MatRadioModule,
     MatCheckboxModule,
     NgxSummernoteModule,
-    HttpClientModule
+    HttpClientModule,
+    MatSlideToggleModule
   ]
 })
 export class ProductsListModule { }

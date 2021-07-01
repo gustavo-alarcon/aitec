@@ -151,7 +151,7 @@
                 Estado
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                {{ raw.published ? "Publicado" : "Oculto" }}
+                <span class="tag" [ngClass]="{'tag--published':raw.published, 'tag--hidden':!raw.published}">{{ raw.published ? "Publicado" : "Oculto" }}</span>
               </td>
             </ng-container>
 

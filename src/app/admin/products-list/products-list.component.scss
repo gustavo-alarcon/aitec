@@ -19,3 +19,20 @@
   font-size: 0.7em;
   letter-spacing: 0.2em;
 }
+
+.tag {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  padding: 8px 12px;
+
+  &--published {
+    border-radius: 8px 8px;
+    background: rgb(116, 223, 10);
+  }
+
+  &--hidden {
+    border-radius: 8px 8px;
+    background: gold;
+  }
+}

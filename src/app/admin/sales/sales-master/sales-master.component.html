@@ -104,10 +104,15 @@
                         </b>
                     </div>
                     <div class="overflow_container">
+                      <span>
                         <mat-icon>chrome_reader_mode</mat-icon>
                         <b>
                             {{sale.documentInfo.number}}
                         </b>
+                      </span>
+                      <span>
+                        ({{sale.user?.personData?.phone}})
+                      </span>
                     </div>
                     <div class="overflow_container">
                         <mat-icon>mail</mat-icon>
@@ -130,7 +135,8 @@
                           *ngIf="sale.user?.personData?.phone else noPhone"
                           class="actions" [href]="'tel:'+ sale.user?.personData?.phone"
                             (click)="$event.stopPropagation()">
-                            <button style="width:100%" color="primary" 
+                            <button style="width:100%" color="primary"
+                            [matTooltip]="sale.user?.personData?.phone" 
                                 mat-raised-button type=button>
                                 <mat-icon>local_phone</mat-icon>
                             </button>
