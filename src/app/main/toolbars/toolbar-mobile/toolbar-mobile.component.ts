@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { combineLatest, interval, Observable, of } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, takeWhile } from 'rxjs/operators';
+import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
@@ -28,6 +29,7 @@ export class ToolbarMobileComponent implements OnInit {
 
   shopCarNumber$: Observable<number>
   pendingPayment$: Observable<boolean>;
+  user$: Observable<User>;
 
   constructor(
     public auth: AuthService,
@@ -37,6 +39,8 @@ export class ToolbarMobileComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
+
     this.shopCarNumber$ = this.shopCar.reqProdListObservable.pipe(
       map(list => {
         if(list){

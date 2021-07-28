@@ -948,18 +948,21 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
 
         let data = {
             personalizations: [{
-                to: emailData.adviser ? [{
-                    email: doc.user.email,
-                    name: doc.user.personData.name ? doc.user.personData.name : "---"
-                  },{
-                    email: emailData.adviserMail,
-                    name: emailData.adviserName ? emailData.adviserName : "---"
-                  }] : [{
-                    email: doc.user.email,
-                    name: doc.user.personData.name ? doc.user.personData.name : "---"
-                  }],
-                dynamic_template_data: emailData,
-                subject: "Venta registrada - Aitec",
+              to: emailData.adviser ?  doc.user.email != emailData.adviserMail ? [{
+                  email: doc.user.email,
+                  name: doc.user.personData.name ? doc.user.personData.name : "---"
+                },{
+                  email: emailData.adviserMail,
+                  name: emailData.adviserName ? emailData.adviserName : "---"
+                }] : [{
+                  email: doc.user.email,
+                  name: doc.user.personData.name ? doc.user.personData.name : "---"
+                }] : [{
+                  email: doc.user.email,
+                  name: doc.user.personData.name ? doc.user.personData.name : "---"
+                }],
+              dynamic_template_data: emailData,
+              subject: "Venta registrada - Aitec",
             }],
             from: {
                 email: "ventas@aitecperu.com.pe",  //Here should be a verified
@@ -1053,11 +1056,17 @@ exports.reqVadsForm = functions.https.onRequest((req, res) => {
       documentInfoName: sale.documentInfo.name,
       documentInfoAddress: sale.document == "Factura" ? sale.documentInfo.address : "---",
 
-      deliveryType: !sale.delivery ? "A coordinar" : sale.deliveryPickUp ? "Recojo en tienda" : "Envío",
-      departamento: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["departamento"].name: sale.location.departamento.name,
-      provincia: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["provincia"].name: sale.location.provincia.name,
-      distrito: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["distrito"].name: sale.location.distrito.name,
-      address: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["address"]: sale.location.address,
+      deliveryType: sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Envío" : "A coordinar",
+      departamento: sale.deliveryPickUp ? sale.delivery["departamento"].name : sale.location ? sale.location.departamento.name : "---",
+      provincia: sale.deliveryPickUp ? sale.delivery["provincia"].name : sale.location ? sale.location.provincia.name : "---",
+      distrito: sale.deliveryPickUp ? sale.delivery["distrito"].name : sale.location ? sale.location.distrito.name : "---",
+      address: sale.deliveryPickUp ? sale.delivery["address"] : sale.location ? sale.location.address : "---",
+
+      // deliveryType: !sale.delivery ? "A coordinar" : sale.deliveryPickUp ? "Recojo en tienda" : "Envío",
+      // departamento: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["departamento"].name : (sale.location ? sale.location.departamento.name : "---"),
+      // provincia: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["provincia"].name : (sale.location ? sale.location.provincia.name : "---"),
+      // distrito: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["distrito"].name : (sale.location ? sale.location.distrito.name : "---"),
+      // address: !sale.delivery ? "---" : sale.deliveryPickUp ? sale.delivery["address"]: (sale.location ? sale.location.address : "---"),
 
       productData: [],
       subTotal: (firstTotal/1.18).toFixed(2),

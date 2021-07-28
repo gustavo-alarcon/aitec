@@ -264,10 +264,19 @@ export class PaySaleComponent implements OnInit {
                 this.uploadingSale$.next(true)
               }
             }
-          )
+          ).catch(err => {
+            this.snackbar.open("Error. Por favor, intente de nuevo.")
+            this.uploadingSale$.next(true)          
+          })
           return false
         })
-      ).subscribe()
+      ).subscribe(
+        res => {},
+        err => {
+          this.snackbar.open("Ocurrió un error. Por favor, intente de nuevo.")
+          this.uploadingSale$.next(true)   
+        }
+      )
   }
 
   cancelSale(sale: Sale){

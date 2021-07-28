@@ -58,7 +58,7 @@
     color="accent" style="overflow: auto; color:white;" type=button>
     <b>Cobrar {{((sale.requestedProducts | salePrice: sale.user) 
         + (sale.deliveryPrice ? sale.deliveryPrice : 0)
-        + (sale.couponDiscount ? sale.couponDiscount : 0 )
+        - (sale.couponDiscount ? sale.couponDiscount : 0 )
         + (sale.additionalPrice ? sale.additionalPrice : 0))
         | currency:'S/.'}}</b>
   </button>

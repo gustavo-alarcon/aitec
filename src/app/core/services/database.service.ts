@@ -1769,7 +1769,12 @@ export class DatabaseService {
       createdAt: date,
     }
 
+
     //Uploading serialProcess
+    console.log("-----")
+    console.log("copiar lo de abajo para el soporte (hacer click en triangulo para expandir):")
+    console.log(serialProcessData)
+    console.log("-----")
     let seriesPreprocessingRef = this.afs.firestore.collection(`${this.seriesPreprocessingRef}`).doc(serialProcessData.id);
     batch.set(seriesPreprocessingRef, serialProcessData)
 
