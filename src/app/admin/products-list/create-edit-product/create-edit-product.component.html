@@ -240,9 +240,9 @@
         </div>
         <div class="w3-margin-bottom w3-row-padding">
           <div class="w3-margin-bottom w3-col s2 m4 l2" style="position: relative"
-            *ngFor="let image of filterPhotos(i); let f=index">
+            *ngFor="let image of filterPhotos(i); let f=index">            
             <img (click)="selectPhoto(image)" class="w3-block" style="object-fit: contain;height: 150px;"
-              [src]="image.img" alt="fotografía" />
+              [src]="image.img" alt="fotografía" onError="this.src='../../../../assets/images/icono-aitec-01.png'" />
             <div class="ms-flex w3-block w3-padding" style="position: absolute; top: 0">
               <span class="ms-fill"></span>
               <button type="button" mat-mini-fab color="primary" style="margin-left:8px"
