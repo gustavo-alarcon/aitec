@@ -389,6 +389,7 @@ export class CreateEditProductComponent implements OnInit {
 
   //fotos
   addNewPhoto(formControlName: string, image: File[], ind) {
+
     if (image.length === 0) return;
     let reader = new FileReader();
     this.photos[ind].resizing$ = of(true);
@@ -401,8 +402,8 @@ export class CreateEditProductComponent implements OnInit {
           let d = new Date();
           let n = d.getTime();
 
-          let name = formControlName + n +
-            result.name.match(/\..*$/)
+          let name = formControlName + n + result.name.match(/\..*$/);
+
           this.photos[ind].data.push(
             new File(
               [result],
@@ -424,6 +425,7 @@ export class CreateEditProductComponent implements OnInit {
           this.snackBar.open('Por favor, elija una imagen en formato JPG, o PNG', 'Aceptar');
         }
       );
+
   }
 
   filterPhotos(i) {
@@ -431,7 +433,7 @@ export class CreateEditProductComponent implements OnInit {
   }
 
   eliminatedphoto(id, f, imag) {
-
+    
     if (!this.edit) {
       this.photos[id].data.splice(f, 1);
     } else {
@@ -441,13 +443,14 @@ export class CreateEditProductComponent implements OnInit {
       }
       this.deletePhotos.push(imag.img)
     }
-
+    
     if (this.choosePicture >= this.photosList.length) {
       this.choosePicture = this.photosList.length - 1
     }
-
+    
     let indx = this.photosList.findIndex(el => el.img == imag.img)
-    this.photosList.splice(indx, 1);
+    this.photosList.splice(indx, 1);  
+
   }
 
   selectPhoto(img) {
@@ -804,14 +807,14 @@ export class CreateEditProductComponent implements OnInit {
   editProduct() {
     //console.log("edit")
     let phots = this.photos.map(el => el.data).reduce((a, b) => a.concat(b), [])
-
+    
     let skuPhotos = this.photosList.filter(p => p.img.includes('data:')).map(pho => {
       return {
         sku: this.skuList[pho.sku],
         name: pho['name']
       }
     })
-
+    
     let deleteP = this.data.gallery.filter(gal => this.deletePhotos.includes(gal.photoURL))
     let originP = this.data.gallery.filter(gal => !this.deletePhotos.includes(gal.photoURL))
 
@@ -866,6 +869,7 @@ export class CreateEditProductComponent implements OnInit {
         newProduct['editedBy'] = user
         newProduct['editedAt'] = new Date()
         if (phots.length) {
+          
           let photos = [...phots.map(el => this.dbs.uploadPhotoProduct(newProduct.sku, el))]
           forkJoin(photos).pipe(
             takeLast(1),
@@ -894,18 +898,18 @@ export class CreateEditProductComponent implements OnInit {
             })]
 
             if (deleteP.length > 0) {
-              let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
-              forkJoin(phot$).subscribe(res => {
+              deleteP.map(el => {
+                this.dbs.deletePhoto(el.photoPath);                    
+               });
+    
                 batch.update(productRef, newProduct)
-
-
+    
                 batch.commit().then(() => {
                   this.loading.next(false)
                   this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
                   this.router.navigate(['/admin/products'])
                   this.loadSave = false
                 })
-              })
             } else {
 
               batch.update(productRef, newProduct)
@@ -931,9 +935,9 @@ export class CreateEditProductComponent implements OnInit {
               reservedStock: back? back.reservedStock ? back.reservedStock : 0 : 0
             }
           })]
-          console.log(newProduct)
 
           if (deleteP.length > 0) {
+           /*  
             let phot$ = deleteP.map(el => this.dbs.deletePhoto(el.photoPath))
             forkJoin(phot$).subscribe(res => {
               batch.update(productRef, newProduct)
@@ -944,7 +948,23 @@ export class CreateEditProductComponent implements OnInit {
                 this.router.navigate(['/admin/products'])
                 this.loadSave = false
               })
-            })
+            })           
+            */
+
+           deleteP.map(el => {
+            this.dbs.deletePhoto(el.photoPath);                    
+           });
+
+            batch.update(productRef, newProduct)
+
+            batch.commit().then(() => {
+              this.loading.next(false)
+              this.snackBar.open('Se editó el producto satisfactoriamente', 'Aceptar', { duration: 5000 });
+              this.router.navigate(['/admin/products'])
+              this.loadSave = false
+            })       
+     
+
           } else {
 
             batch.update(productRef, newProduct)
