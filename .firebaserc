@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "aitec-ecommerce"
+  },
+  "targets": {
+    "aitec-ecommerce": {
+      "hosting": {
+        "aitec": [
+          "aitec-ecommerce"
+        ]
+      }
+    }
   }
 }

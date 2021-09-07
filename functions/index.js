@@ -2,8 +2,8 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const cors = require('cors')({origin: ["https://aitecperu.com.pe", "https://www.aitecperu.com.pe", "https://api.micuentaweb.pe"]});
 const crypto = require('crypto');
-const cardPass = require('./card-pass.json')
-const formKeys = require('./form-keys.json')
+// const cardPass = require('./card-pass.json')
+// const formKeys = require('./form-keys.json')
 
 const gaxios = require('gaxios');
 
