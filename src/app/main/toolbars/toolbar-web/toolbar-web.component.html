@@ -55,10 +55,10 @@
           <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
         </button>
       </ng-template>
-      <div *ngIf="auth.user$ | async as user; else login">
+      <div *ngIf="user$ | async as user; else login">
         <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
           <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
-          {{ getName(user) }}
+          {{ user.alternativeName }}
         </button>
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="logOut()">

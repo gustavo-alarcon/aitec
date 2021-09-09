@@ -590,6 +590,8 @@ export class DatabaseService {
       .valueChanges()
       .pipe(
         map((res) => {
+          console.log('product2');
+          
           return res.filter((el) => !!el.published);
         })
       );

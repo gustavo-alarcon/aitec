@@ -117,7 +117,6 @@ export class LandingComponent implements OnInit {
       this.products$
     ).pipe(
       map(([carousel, promo, testList, confi]) => {
-        console.log(promo);
         
         this.banners = carousel;
         this.promo = promo;
@@ -141,7 +140,6 @@ export class LandingComponent implements OnInit {
   }
 
   navigateBrand(banner) {
-    console.log('NavigatetBrand');
     switch (banner['redirectTo']) {
       case 'Categoría/subcategoría':
         let category = this.allCategories
@@ -181,7 +179,6 @@ export class LandingComponent implements OnInit {
         });
         break;
       case 'Producto':
-        console.log(banner);
         
         if (banner.products.length > 1) {
           this.router.navigate(['/main/productos'], {
