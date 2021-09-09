@@ -1,25 +1,40 @@
-<div *ngIf="init$ | async;else loader">
-
-  <ngx-slick-carousel class="carousel-web" #slickModal="slick-carousel" [config]="slideConfig">
+<div *ngIf="init$ | async; else loader">
+  <ngx-slick-carousel
+    class="carousel-web"
+    #slickModal="slick-carousel"
+    [config]="slideConfig"
+  >
     <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-      <a *ngIf="ban.redirectTo == 'Link externo';else noLink" [href]="ban.link" target="_blank">
+      <a
+        *ngIf="ban.redirectTo == 'Link externo'; else noLink"
+        [href]="ban.link"
+        target="_blank"
+      >
         <img [src]="ban?.photoURL" class="w3-block-banner" alt="banner" />
       </a>
       <ng-template #noLink>
-        <a (click)="navigateBrand(ban)" style="cursor: pointer;">
+        <a (click)="navigateBrand(ban)" style="cursor: pointer">
           <img [src]="ban?.photoURL" class="w3-block-banner" alt="banner" />
         </a>
       </ng-template>
     </div>
   </ngx-slick-carousel>
 
-  <ngx-slick-carousel class="carousel-movil" #slickModal="slick-carousel" [config]="slideConfig">
+  <ngx-slick-carousel
+    class="carousel-movil"
+    #slickModal="slick-carousel"
+    [config]="slideConfig"
+  >
     <div ngxSlickItem class="slide" *ngFor="let ban of banners">
-      <a *ngIf="ban.redirectTo == 'Link externo';else noLinkMovil" [href]="ban.link" target="_blank">
+      <a
+        *ngIf="ban.redirectTo == 'Link externo'; else noLinkMovil"
+        [href]="ban.link"
+        target="_blank"
+      >
         <img [src]="ban.photomovilURL" class="w3-block-banner" alt="banner" />
       </a>
       <ng-template #noLinkMovil>
-        <a (click)="navigateBrand(ban)" style="cursor: pointer;">
+        <a (click)="navigateBrand(ban)" style="cursor: pointer">
           <img [src]="ban.photomovilURL" class="w3-block-banner" alt="banner" />
         </a>
       </ng-template>
@@ -27,22 +42,26 @@
   </ngx-slick-carousel>
   <div class="w3-padding w3-center">
     <div class="font--primary">
-      <mat-icon fontSet="material-icons-outlined" class="section__icon">offline_bolt</mat-icon>
+      <mat-icon fontSet="material-icons-outlined" class="section__icon"
+        >offline_bolt</mat-icon
+      >
     </div>
     <h2 class="title-section">Ofertas</h2>
   </div>
 
   <div class="img-oferta">
-    <a (click)="navigateBrand(pro)" *ngFor="let pro of promo;  let i = index">
-      <img [src]="pro?.photoURL" class="w3-block-{{i}}" alt="promo" />
+    <a (click)="navigateBrand(pro)" *ngFor="let pro of promo; let i = index">
+      <img [src]="pro?.photoURL" class="w3-block-{{ i }}" alt="promo" />
     </a>
   </div>
 
-
-
   <div class="w3-section ms-container">
     <div class="section">
-      <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig2">
+      <ngx-slick-carousel
+        class="carousel"
+        #slickModal="slick-carousel"
+        [config]="slideConfig2"
+      >
         <div ngxSlickItem *ngFor="let slide of offers" class="slide">
           <div class="w3-padding">
             <app-product-div [product]="slide"></app-product-div>
@@ -54,7 +73,7 @@
       <div class="ms-flex">
         <div class="w3-col m6 l6" style="display: flex; align-items: center">
           <div class="w3-center">
-            <h2 class="section__title font--primary">{{middle.title}}</h2>
+            <h2 class="section__title font--primary">{{ middle.title }}</h2>
             <div class="section__paragraph" [innerHTML]="middle.descrip"></div>
           </div>
         </div>
@@ -70,34 +89,54 @@
         </div>
         <h2 class="title-section">Nuestros Productos</h2>
       </div>
-      <mat-tab-group class="section__tab w3-margin-top" mat-align-tabs="center" color="primary">
-        <mat-tab label="Los más buscados" *ngIf="listproducts.length">
+      <mat-tab-group
+        class="section__tab w3-margin-top"
+        mat-align-tabs="center"
+        color="primary"
+      >
+        <mat-tab label="Los más buscados" *ngIf="mostSearched.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of listproducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
-                <div style="padding:0 8px">
+              <div
+                *ngFor="let prod of mostSearched"
+                class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom"
+              >
+                <div style="padding: 0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
             </div>
             <div class="w3-center w3-margin-top w3-margin-bottom">
-              <button routerLink="/main/productos" mat-flat-button color="primary" class="section__button">
+              <button
+                routerLink="/main/productos"
+                mat-flat-button
+                color="primary"
+                class="section__button"
+              >
                 <span> Ver más</span>
               </button>
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Últimos productos" *ngIf="lastProducts.length">
+        <mat-tab label="Últimos productos" *ngIf="latestProducts.length">
           <div class="w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of lastProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
-                <div style="padding:0 8px">
+              <div
+                *ngFor="let prod of latestProducts"
+                class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom"
+              >
+                <div style="padding: 0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
             </div>
             <div class="w3-center w3-margin-top">
-              <button mat-flat-button routerLink="/main/productos" color="primary" class="section__button">
+              <button
+                mat-flat-button
+                routerLink="/main/productos"
+                color="primary"
+                class="section__button"
+              >
                 <span> Ver más</span>
               </button>
             </div>
@@ -106,14 +145,22 @@
         <mat-tab label="Ofertas" *ngIf="offersProducts.length">
           <div class="w3-padding w3-margin-top">
             <div class="w3-row">
-              <div *ngFor="let prod of offersProducts" class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom">
-                <div style="padding:0 8px">
+              <div
+                *ngFor="let prod of offersProducts"
+                class="w3-col col-xs-6 col-sm-4 col-xxl-3 w3-margin-bottom"
+              >
+                <div style="padding: 0 8px">
                   <app-product-div [product]="prod"></app-product-div>
                 </div>
               </div>
             </div>
             <div class="w3-center w3-margin-top">
-              <button mat-flat-button color="primary" routerLink="/main/productos" class="section__button">
+              <button
+                mat-flat-button
+                color="primary"
+                routerLink="/main/productos"
+                class="section__button"
+              >
                 <span> Ver más</span>
               </button>
             </div>
@@ -131,25 +178,32 @@
       <h2 class="title-section">Lo que nuestros clientes opinan</h2>
     </div>
     <div class="section w3-margin-top">
-      <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig3">
+      <ngx-slick-carousel
+        class="carousel"
+        #slickModal="slick-carousel"
+        [config]="slideConfig3"
+      >
         <div ngxSlickItem *ngFor="let slide of testimonies" class="slide">
           <div class="w3-padding">
             <div class="customer">
               <div class="customer__image w3-padding">
-                <img [src]="slide?.photoURL" class="w3-block w3-circle" alt="" />
+                <img
+                  [src]="slide?.photoURL"
+                  class="w3-block w3-circle"
+                  alt=""
+                />
               </div>
               <div class="customer__content">
-                <h3 class="customer__title">{{slide.name}}</h3>
+                <h3 class="customer__title">{{ slide.name }}</h3>
                 <p class="customer__comment">
-                  {{slide.message}}
+                  {{ slide.message }}
                 </p>
                 <div class="customer__rating">
-                  <span *ngFor="let star of getStars(slide.rating)">
-                    <mat-icon *ngIf="star;else nofill">star</mat-icon>
+                  <span *ngFor="let star of slide.stars">
+                    <mat-icon *ngIf="star; else nofill">star</mat-icon>
                     <ng-template #nofill>
                       <mat-icon>star_outline</mat-icon>
                     </ng-template>
-
                   </span>
                 </div>
               </div>
@@ -159,12 +213,22 @@
       </ngx-slick-carousel>
     </div>
   </div>
-
 </div>
 
 <ng-template #loader>
-  <div style="height: 100vh;display: flex;align-items: center;justify-content: center;">
-    <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+  <div
+    style="
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <mat-progress-spinner
+      class="example-margin"
+      color="primary"
+      mode="indeterminate"
+    >
     </mat-progress-spinner>
   </div>
 </ng-template>

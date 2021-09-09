@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { LOCALE_ID, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,12 +11,9 @@ import {
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import * as firebase from 'firebase';
 
-import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -46,10 +43,10 @@ import { USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/firestore'
     //DatePipe,
     { provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: { duration: 5000 } },
     { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
-    // {
-    //   provide: USE_AUTH_EMULATOR,
-    //   useValue: environment.useEmulators ? ['localhost', 9099] : undefined,
-    // },
+    {
+      provide: USE_AUTH_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 9099] : undefined,
+    },
     {
       provide: USE_FIRESTORE_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 8080] : undefined,

@@ -1,4 +1,8 @@
-import { Sale, SaleRequestedProducts, saleStatusOptions } from './../models/sale.model';
+import {
+  Sale,
+  SaleRequestedProducts,
+  saleStatusOptions,
+} from './../models/sale.model';
 import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
@@ -17,7 +21,16 @@ import {
   tap,
 } from 'rxjs/operators';
 import { GeneralConfig } from '../models/generalConfig.model';
-import { Observable, concat, of, interval, BehaviorSubject, forkJoin, throwError, combineLatest } from 'rxjs';
+import {
+  Observable,
+  concat,
+  of,
+  interval,
+  BehaviorSubject,
+  forkJoin,
+  throwError,
+  combineLatest,
+} from 'rxjs';
 import { User } from '../models/user.model';
 import { AngularFireStorage } from '@angular/fire/storage';
 import * as firebase from 'firebase';
@@ -25,11 +38,19 @@ import { Package } from '../models/package.model';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Warehouse } from '../models/warehouse.model';
-import { SerialNumber, SerialNumberWithPrice, serialProcess } from '../models/SerialNumber.model';
+import {
+  SerialNumber,
+  SerialNumberWithPrice,
+  serialProcess,
+} from '../models/SerialNumber.model';
 import { SerialItem } from '../models/SerialItem.model';
 import { Category } from '../models/category.model';
 import { Kardex } from '../models/kardex.model';
-import { TRANSFER_REASON, Waybill, WaybillProductList } from '../models/waybill.model';
+import {
+  TRANSFER_REASON,
+  Waybill,
+  WaybillProductList,
+} from '../models/waybill.model';
 import { ProductsListComponent } from 'src/app/admin/products-list/products-list.component';
 import { Stores } from '../models/stores.model';
 import { Coupon } from '../models/coupon.model';
@@ -37,7 +58,6 @@ import { Payments } from '../models/payments.model';
 import { Adviser } from '../models/adviser.model';
 import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
-
 
 @Injectable({
   providedIn: 'root',
@@ -66,7 +86,7 @@ export class DatabaseService {
   >([]);
   public orderObs$ = this.orderObs.asObservable();
 
-  public uidUser: string = ''
+  public uidUser: string = '';
   public isMayUser = new BehaviorSubject<boolean>(false);
   public isMayUser$ = this.isMayUser.asObservable();
 
@@ -85,7 +105,7 @@ export class DatabaseService {
   // public opening = new BehaviorSubject<Array<{ opening: string, closing: string }>>([]);
   public opening$: Observable<Array<{ opening: string; closing: string }>>;
 
-  public openConfi: boolean = true
+  public openConfi: boolean = true;
 
   constructor(
     private afs: AngularFirestore,
@@ -97,12 +117,12 @@ export class DatabaseService {
     // this.updateProductListWithWarehouses();
   }
 
-  reservedSalesRef: 'db/aitec/reservedSales'  = 'db/aitec/reservedSales'     //To reserve sales
-  reStockSalesRef: 'db/aitec/reStockSales'  = 'db/aitec/reStockSales'          //When deleting reserving sales, we should re stock
-  usersRef: 'users' = 'users'
+  reservedSalesRef: 'db/aitec/reservedSales' = 'db/aitec/reservedSales'; //To reserve sales
+  reStockSalesRef: 'db/aitec/reStockSales' = 'db/aitec/reStockSales'; //When deleting reserving sales, we should re stock
+  usersRef: 'users' = 'users';
 
   productsListRef: `db/aitec/productsList` = `db/aitec/productsList`;
-  productsListColl = this.afs.firestore.collection(this.productsListRef)
+  productsListColl = this.afs.firestore.collection(this.productsListRef);
   packagesListRef: `db/aitec/packagesList` = `db/aitec/packagesList`;
   recipesRef: `db/aitec/recipes` = `db/aitec/recipes`;
   buysRef: `db/aitec/buys` = `db/aitec/buys`;
@@ -110,21 +130,22 @@ export class DatabaseService {
   cancelledSaleRef: `db/aitec/cancelledSales` = `db/aitec/cancelledSales`;
   configRef: `db/aitec/config` = `db/aitec/config`;
   userRef: `users` = `users`;
-  couponRef: `db/aitec/coupons`= `db/aitec/coupons`
-  advisersRef: `/db/aitec/config/generalConfig/adviser` = `/db/aitec/config/generalConfig/adviser`
-  warehousesRef: `db/aitec/warehouses` = `db/aitec/warehouses`
-  seriesPreprocessingRef: `db/aitec/seriesPreprocessingRef`= `db/aitec/seriesPreprocessingRef`
-  salesCorrColl = this.afs.firestore.collection(`db/aitec/config`).doc('salesCorrelative') //Used to update and get correlative
+  couponRef: `db/aitec/coupons` = `db/aitec/coupons`;
+  advisersRef: `/db/aitec/config/generalConfig/adviser` = `/db/aitec/config/generalConfig/adviser`;
+  warehousesRef: `db/aitec/warehouses` = `db/aitec/warehouses`;
+  seriesPreprocessingRef: `db/aitec/seriesPreprocessingRef` = `db/aitec/seriesPreprocessingRef`;
+  salesCorrColl = this.afs.firestore
+    .collection(`db/aitec/config`)
+    .doc('salesCorrelative'); //Used to update and get correlative
 
-
-  saleStatus = new saleStatusOptions()
+  saleStatus = new saleStatusOptions();
 
   generalConfigDoc = this.afs
     .collection(this.configRef)
     .doc<GeneralConfig>('generalConfig');
 
   changeOpenSide() {
-    this.openConfi = !this.openConfi
+    this.openConfi = !this.openConfi;
   }
 
   getOpening(): Observable<Array<{ opening: string; closing: string }>> {
@@ -141,45 +162,44 @@ export class DatabaseService {
   saveAll(products: Product[]) {
     const batch = this.afs.firestore.batch();
 
-    products.forEach(el => {
-      let productRef = this.afs.firestore.collection(`db/aitec/productsList`).doc(el.id);
+    products.forEach((el) => {
+      let productRef = this.afs.firestore
+        .collection(`db/aitec/productsList`)
+        .doc(el.id);
 
-      let prods = el.products.map(pr => {
-        pr.realStock = pr.stock
-        pr.virtualStock = pr.stock
-        return pr
-      })
-      batch.update(productRef, {
-        products: prods
+      let prods = el.products.map((pr) => {
+        pr.realStock = pr.stock;
+        pr.virtualStock = pr.stock;
+        return pr;
       });
-
-    })
+      batch.update(productRef, {
+        products: prods,
+      });
+    });
 
     batch.commit().then(() => {
       console.log('all');
-
-    })
+    });
   }
 
   saveCategoriesAll(products: Category[]) {
     const batch = this.afs.firestore.batch();
 
-    products.forEach(el => {
-      let productRef = this.afs.firestore.collection(`/db/aitec/config/generalConfig/allCategories`).doc(el.id);
+    products.forEach((el) => {
+      let productRef = this.afs.firestore
+        .collection(`/db/aitec/config/generalConfig/allCategories`)
+        .doc(el.id);
 
       batch.update(productRef, {
         name: el.name.trim(),
-        completeName: el.completeName.trim()
+        completeName: el.completeName.trim(),
       });
-
-    })
+    });
 
     batch.commit().then(() => {
       console.log('all');
-
-    })
+    });
   }
-
 
   getCurrentMonthOfViewDate(): { from: Date; to: Date } {
     const date = new Date();
@@ -236,8 +256,6 @@ export class DatabaseService {
       );
   }
 
-
-
   getProvidersDoc(): Observable<any> {
     return this.generalConfigDoc.get().pipe(
       map((snap) => {
@@ -261,7 +279,9 @@ export class DatabaseService {
     return this.afs
       .collection(`/db/aitec/config/generalConfig/categories`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
+      )
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
@@ -269,50 +289,101 @@ export class DatabaseService {
   }
 
   getAllCategories(): Observable<Category[]> {
-    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-      ref.orderBy('createdAt', 'desc')
-    ).valueChanges().pipe(shareReplay(1));
+    return this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
   //deph Level refers to how many fields do we have in coupon Category
   getCategoryListFromCoupon(coupon: Coupon): Observable<Category[]> {
-    let dephLevel = <1|2|3>(Number(!!coupon.category.id) + Number(!!coupon.category.idCategory) +
-                            Number(!!coupon.category.idSubCategory))
-    let catId = coupon.category.id
+    let dephLevel = <1 | 2 | 3>(
+      (Number(!!coupon.category.id) +
+        Number(!!coupon.category.idCategory) +
+        Number(!!coupon.category.idSubCategory))
+    );
+    let catId = coupon.category.id;
 
-    let id = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-              ref.where('id', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
-    let idCategory = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-              ref.where('idCategory', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
-    let idSubCategory = this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-              ref.where('idSubCategory', '==', catId)).get().pipe(map(snap => snap.empty ? [] : snap.docs.map(doc => <Category>doc.data())))
-  
+    let id = this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('id', '==', catId)
+      )
+      .get()
+      .pipe(
+        map((snap) =>
+          snap.empty ? [] : snap.docs.map((doc) => <Category>doc.data())
+        )
+      );
+    let idCategory = this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('idCategory', '==', catId)
+      )
+      .get()
+      .pipe(
+        map((snap) =>
+          snap.empty ? [] : snap.docs.map((doc) => <Category>doc.data())
+        )
+      );
+    let idSubCategory = this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('idSubCategory', '==', catId)
+      )
+      .get()
+      .pipe(
+        map((snap) =>
+          snap.empty ? [] : snap.docs.map((doc) => <Category>doc.data())
+        )
+      );
+
     //For more info check coupon model Category
-    switch(dephLevel){
+    switch (dephLevel) {
       case 1:
-        return combineLatest([id, idCategory]).pipe(map(([idRes, idCatRes]) => [...idRes, ...idCatRes]))
+        return combineLatest([id, idCategory]).pipe(
+          map(([idRes, idCatRes]) => [...idRes, ...idCatRes])
+        );
       case 2:
-        return combineLatest([id, idSubCategory]).pipe(map(([idRes, idSubCatRes]) => [...idRes, ...idSubCatRes]))
+        return combineLatest([id, idSubCategory]).pipe(
+          map(([idRes, idSubCatRes]) => [...idRes, ...idSubCatRes])
+        );
       case 3:
-        return of([coupon.category])
+        return of([coupon.category]);
     }
   }
 
   getSubCategories(id): Observable<Category[]> {
-    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-      ref.where('idCategory', '==', id)
-    ).valueChanges().pipe(shareReplay(1));
+    return this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('idCategory', '==', id)
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
   getSubSubCategories(id): Observable<Category[]> {
-    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-      ref.where('idSubCategory', '==', id)
-    ).valueChanges().pipe(shareReplay(1));
+    return this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('idSubCategory', '==', id)
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
   getAllCategoriesDoc(): Observable<Category[]> {
-    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`
-      , (ref) => ref.orderBy('createdAt', 'desc')).get().pipe(
+    return this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.orderBy('createdAt', 'desc')
+      )
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => <Category>el.data());
         })
@@ -320,21 +391,29 @@ export class DatabaseService {
   }
 
   getOneCategory(id: string): Observable<Category> {
-    return this.afs.collection<Category>(`/db/aitec/config/generalConfig/allCategories`, (ref) =>
-      ref.where('id', '==', id)
-    ).valueChanges().pipe(
-      shareReplay(1),
-      map((snap) => {
-        return snap[0]
-      })
-    );
+    return this.afs
+      .collection<Category>(
+        `/db/aitec/config/generalConfig/allCategories`,
+        (ref) => ref.where('id', '==', id)
+      )
+      .valueChanges()
+      .pipe(
+        shareReplay(1),
+        map((snap) => {
+          return snap[0];
+        })
+      );
   }
 
   getListProductsByCategory(list): Observable<Product[]> {
-    return this.afs.collection<Product>(this.productsListRef).valueChanges().pipe
-      (map((products) => {
-        return products.filter(pr => list.includes(pr.idCategory))
-      }));
+    return this.afs
+      .collection<Product>(this.productsListRef)
+      .valueChanges()
+      .pipe(
+        map((products) => {
+          return products.filter((pr) => list.includes(pr.idCategory));
+        })
+      );
   }
 
   getBrands() {
@@ -350,7 +429,9 @@ export class DatabaseService {
     return this.afs
       .collection(`/db/aitec/config/generalConfig/brands`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
+      )
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
@@ -375,24 +456,30 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  getCoupon(coupon: string): Observable<Coupon>{
-    return this.afs.collection<Coupon>(`/db/aitec/coupons`, (ref) =>
-        ref.where('name', '==', coupon).limit(1)).get({source: "server"}).pipe(
-          map(res => {
-            if(res.empty){
-              return null
-            } else {
-              return (<Coupon>res.docs[0].data())
-            }
-          })
-        )
+  getCoupon(coupon: string): Observable<Coupon> {
+    return this.afs
+      .collection<Coupon>(`/db/aitec/coupons`, (ref) =>
+        ref.where('name', '==', coupon).limit(1)
+      )
+      .get({ source: 'server' })
+      .pipe(
+        map((res) => {
+          if (res.empty) {
+            return null;
+          } else {
+            return <Coupon>res.docs[0].data();
+          }
+        })
+      );
   }
 
   getCouponsDoc(): Observable<any> {
     return this.afs
       .collection(`/db/aitec/coupons`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
+      )
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
@@ -403,21 +490,25 @@ export class DatabaseService {
     return this.afs
       .collection<Adviser>(this.advisersRef, (ref) =>
         ref.orderBy('displayName', 'desc')
-      ).get().pipe(
+      )
+      .get()
+      .pipe(
         map((snap) => {
-          return snap.docs.map((el) => (<Adviser>el.data()));
-        }),
+          return snap.docs.map((el) => <Adviser>el.data());
+        })
       );
   }
 
   getDeliveryUserStatic(): Observable<User[]> {
     return this.afs
       .collection<User>(this.userRef, (ref) =>
-        ref.orderBy('personData.name', 'desc').where("deliveryUser", "==", true)
-      ).get().pipe(
+        ref.orderBy('personData.name', 'desc').where('deliveryUser', '==', true)
+      )
+      .get()
+      .pipe(
         map((snap) => {
-          return snap.docs.map((el) => (<User>el.data()));
-        }),
+          return snap.docs.map((el) => <User>el.data());
+        })
       );
   }
 
@@ -432,11 +523,11 @@ export class DatabaseService {
 
   getAdvisersDoc(): Observable<Adviser[]> {
     return this.afs
-      .collection(this.advisersRef, (ref) =>
-        ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
+      .collection(this.advisersRef, (ref) => ref.orderBy('createdAt', 'desc'))
+      .get()
+      .pipe(
         map((snap) => {
-          return snap.docs.map((el) => (<Adviser>el.data()));
+          return snap.docs.map((el) => <Adviser>el.data());
         })
       );
   }
@@ -445,14 +536,20 @@ export class DatabaseService {
     return this.afs
       .collection<Payments>(`${this.configRef}/generalConfig/payments`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      ).valueChanges().pipe(
-        map(payList => {
-          return payList.map(pay => {
+      )
+      .valueChanges()
+      .pipe(
+        map((payList) => {
+          return payList.map((pay) => {
             return {
               ...pay,
-              type: pay.voucher ? 3 : pay.name.toLowerCase().includes('tarjeta') ? 2 : 1
-            }
-          })
+              type: pay.voucher
+                ? 3
+                : pay.name.toLowerCase().includes('tarjeta')
+                ? 2
+                : 1,
+            };
+          });
         })
       );
   }
@@ -461,14 +558,14 @@ export class DatabaseService {
     return this.afs
       .collection(`/db/aitec/config/generalConfig/payments`, (ref) =>
         ref.orderBy('createdAt', 'desc')
-      ).get().pipe(
+      )
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
       );
   }
-
-
 
   ////////////////////////////////////////////////////////////////////////////////
   //Products list/////////////////////////////////////////////////////////////////
@@ -493,7 +590,7 @@ export class DatabaseService {
       .valueChanges()
       .pipe(
         map((res) => {
-          return res.filter(el => !!el.published);
+          return res.filter((el) => !!el.published);
         })
       );
   }
@@ -501,7 +598,7 @@ export class DatabaseService {
   getLastProducts(): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
-        ref.orderBy('createdAt', 'desc')
+        ref.orderBy('createdAt', 'desc').limit(30)
       )
       .get()
       .pipe(
@@ -513,11 +610,17 @@ export class DatabaseService {
 
   getSearchsProducts(): Observable<Product[]> {
     return this.afs
-      .collection<Product>(`db/aitec/searchProducts`, (ref) =>
-        ref.orderBy('searchNumber', 'desc')
+      .collection<{id: string, searchNumber: number}>(`db/aitec/searchProducts`, (ref) =>
+        ref.orderBy('searchNumber', 'desc').limit(6)
       )
       .get()
       .pipe(
+        switchMap(snap => {
+          // trasnform to id list to be used in query
+          const idsList = snap.docs.map(searchedProduct => searchedProduct.data().id);
+          // getting the products based in id list
+          return this.afs.collection(this.productsListRef, ref => ref.where('id', 'in', idsList)).get()
+        }),
         map((snap) => {
           return snap.docs.map((el) => <Product>el.data());
         })
@@ -536,7 +639,7 @@ export class DatabaseService {
   getProductsListValueChanges2(): Observable<Product[]> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
-        ref.orderBy('priority', 'desc').where("published", "==", true)
+        ref.orderBy('priority', 'desc').where('published', '==', true)
       )
       .valueChanges()
       .pipe(shareReplay(1));
@@ -573,28 +676,45 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  getWarehouseSeriesValueChanges(productId: string, warehouseId?: string): Observable<SerialNumber[]> {
-    if(warehouseId){
+  getWarehouseSeriesValueChanges(
+    productId: string,
+    warehouseId?: string
+  ): Observable<SerialNumber[]> {
+    if (warehouseId) {
       return this.afs
-        .collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, 
-          ref => ref.where("warehouseId", "==", warehouseId).where("status", "==", "stored"))
+        .collection<SerialNumber>(
+          `${this.productsListRef}/${productId}/series`,
+          (ref) =>
+            ref
+              .where('warehouseId', '==', warehouseId)
+              .where('status', '==', 'stored')
+        )
         .valueChanges();
     } else {
       return this.afs
-        .collection<SerialNumber>(`${this.productsListRef}/${productId}/series`,
-        ref => ref.where("status", "==", "stored"))
+        .collection<SerialNumber>(
+          `${this.productsListRef}/${productId}/series`,
+          (ref) => ref.where('status', '==', 'stored')
+        )
         .valueChanges();
     }
-    
   }
 
-  getKardex(productId: string, date: {begin: Date, end: Date}, warehouseId: string): Observable<Kardex[]>{
-    if(warehouseId){
+  getKardex(
+    productId: string,
+    date: { begin: Date; end: Date },
+    warehouseId: string
+  ): Observable<Kardex[]> {
+    if (warehouseId) {
       return this.afs
-        .collection<Kardex>(`${this.productsListRef}/${productId}/kardex`, 
-          ref => ref.where("warehouseId", "==", warehouseId)
-                    .where("createdAt", ">=", date.begin)
-                    .where("createdAt", "<=", date.end))
+        .collection<Kardex>(
+          `${this.productsListRef}/${productId}/kardex`,
+          (ref) =>
+            ref
+              .where('warehouseId', '==', warehouseId)
+              .where('createdAt', '>=', date.begin)
+              .where('createdAt', '<=', date.end)
+        )
         .valueChanges();
     } else {
       return this.afs
@@ -603,13 +723,18 @@ export class DatabaseService {
     }
   }
 
-  getMovementsValueChanges(date: {begin: Date, end: Date}): Observable<serialProcess[]>{
+  getMovementsValueChanges(date: {
+    begin: Date;
+    end: Date;
+  }): Observable<serialProcess[]> {
     return this.afs
-        .collection<serialProcess>(`${this.seriesPreprocessingRef}`, 
-          ref => ref.orderBy("createdAt", "desc")
-                    .where("createdAt", ">=", date.begin)
-                    .where("createdAt", "<=", date.end))
-        .valueChanges();
+      .collection<serialProcess>(`${this.seriesPreprocessingRef}`, (ref) =>
+        ref
+          .orderBy('createdAt', 'desc')
+          .where('createdAt', '>=', date.begin)
+          .where('createdAt', '<=', date.end)
+      )
+      .valueChanges();
   }
 
   getWarehouseByProduct(id) {
@@ -626,7 +751,6 @@ export class DatabaseService {
       .collectionGroup('series', (ref) => ref.where('idProduct', '==', id))
       .valueChanges();
   }
-
 
   getProductsListCategoriesValueChanges(): Observable<any[]> {
     return this.getGeneralConfigDoc().pipe(
@@ -705,7 +829,6 @@ export class DatabaseService {
       }
     }*/
 
-
   publishProduct(
     published: boolean,
     product: Product,
@@ -743,7 +866,6 @@ export class DatabaseService {
     return batch;
   }
 
-
   deletePhoto(path: string): Observable<any> {
     let st = this.storage.ref(path);
     return st.delete().pipe(takeLast(1));
@@ -767,7 +889,7 @@ export class DatabaseService {
         promoPrice: promoData.promoPrice,
         quantity: promoData.quantity,
         offer: promoData.offer,
-        type: promoData.type
+        type: promoData.type,
       },
     });
     return batch;
@@ -795,7 +917,6 @@ export class DatabaseService {
       .valueChanges()
       .pipe(shareReplay(1));
   }
-
 
   createEditPackage(
     edit: boolean,
@@ -885,7 +1006,7 @@ export class DatabaseService {
   }
 
   uploadPhotoPackage(id: string, file: File): Observable<string | number> {
-    console.log("uploadPhotoPackage")
+    console.log('uploadPhotoPackage');
     const path = `/packagesList/pictures/${id}-${file.name}`;
 
     // Reference to storage bucket
@@ -910,7 +1031,6 @@ export class DatabaseService {
     return st.delete().pipe(takeLast(1));
   }
 
-
   /*sales*/
 
   uploadPhotoVoucher(id: string, file: File): Observable<string | number> {
@@ -933,90 +1053,106 @@ export class DatabaseService {
     return upload$;
   }
 
-
-  reserveSale(sale: Sale): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>]{
-    const batch = this.afs.firestore.batch()
+  reserveSale(
+    sale: Sale
+  ): [firebase.default.firestore.WriteBatch, AngularFirestoreDocument<Sale>] {
+    const batch = this.afs.firestore.batch();
     const saleRef = this.afs.firestore.collection(this.reservedSalesRef).doc();
-    const usersRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid)
+    const usersRef = this.afs.firestore
+      .collection(this.userRef)
+      .doc(sale.user.uid);
 
-    let newSale = {...sale}
-    newSale.id = saleRef.id
-    
+    let newSale = { ...sale };
+    newSale.id = saleRef.id;
+
     batch.set(saleRef, newSale);
     //clearing bakset
-    batch.update(usersRef, {shoppingCar: []})
+    batch.update(usersRef, { shoppingCar: [] });
 
-    return [batch, this.afs.collection(this.reservedSalesRef).doc<Sale>(saleRef.id)]
-
+    return [
+      batch,
+      this.afs.collection(this.reservedSalesRef).doc<Sale>(saleRef.id),
+    ];
   }
 
-  saveSalePayment(sale: Sale, phot?: {data: File[]}): Observable<Promise<{success: boolean, sale?:Sale}>>{
+  saveSalePayment(
+    sale: Sale,
+    phot?: { data: File[] }
+  ): Observable<Promise<{ success: boolean; sale?: Sale }>> {
     console.log('here');
 
+    let newSale = { ...sale };
+    newSale.status = this.saleStatus.requested;
 
-    let newSale = {...sale}
-    newSale.status = this.saleStatus.requested
-
-    switch(sale.payType.type){
-      case 1://Case of contraentrega
-      case 2://Case of tarjeta
-        return of(this.finishPayment(newSale))
-      case 3://Case of voucher
-        let photos = [...phot.data.map(el => (
-          this.uploadPhotoPackage(newSale.id, el).pipe(takeLast(1))
-          ))]
+    switch (sale.payType.type) {
+      case 1: //Case of contraentrega
+      case 2: //Case of tarjeta
+        return of(this.finishPayment(newSale));
+      case 3: //Case of voucher
+        let photos = [
+          ...phot.data.map((el) =>
+            this.uploadPhotoPackage(newSale.id, el).pipe(takeLast(1))
+          ),
+        ];
         return forkJoin(photos).pipe(
           takeLast(1),
           map((res: string[]) => {
-            
             //We update voucher field
-            newSale.voucher = [...phot.data.map((el, i) => {
-              return {
-                voucherPhoto: res[i],
-                voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`
-              }
-            })]
+            newSale.voucher = [
+              ...phot.data.map((el, i) => {
+                return {
+                  voucherPhoto: res[i],
+                  voucherPath: `/sales/vouchers/${newSale.id}-${el.name}`,
+                };
+              }),
+            ];
 
             //We now get the firestore batch
-            return this.finishPayment(newSale)
+            return this.finishPayment(newSale);
           })
-        )
+        );
     }
-
   }
 
-  finishPayment(newSale: Sale): Promise<{success: boolean, sale?: Sale}>{
-    const saleReqRef = this.afs.firestore.collection(this.reservedSalesRef).doc(newSale.id);
-    const userColl = this.afs.firestore.collection(this.userRef)
+  finishPayment(newSale: Sale): Promise<{ success: boolean; sale?: Sale }> {
+    const saleReqRef = this.afs.firestore
+      .collection(this.reservedSalesRef)
+      .doc(newSale.id);
+    const userColl = this.afs.firestore.collection(this.userRef);
 
-    const batch = this.afs.firestore.batch()
+    const batch = this.afs.firestore.batch();
 
+    let sale = { ...newSale };
+    sale.status == this.saleStatus.requested;
 
-    let sale = {...newSale}
-    sale.status == this.saleStatus.requested
+    batch.update(userColl.doc(sale.user.uid), {
+      pendingPayment: false,
+      shoppingCar: [],
+    });
+    batch.update(saleReqRef, sale);
 
-    batch.update(userColl.doc(sale.user.uid), {pendingPayment: false, shoppingCar: []})
-    batch.update(saleReqRef, sale)
-    
     return batch.commit().then(
-        success => {
-          return {success: true, sale}
-        },
-        err => {
-          return {success: false}
-        }
-       )
-
+      (success) => {
+        return { success: true, sale };
+      },
+      (err) => {
+        return { success: false };
+      }
+    );
   }
 
-  cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch{
+  cancelSalePayment(sale: Sale): firebase.default.firestore.WriteBatch {
     const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
-    const userRef = this.afs.firestore.collection(this.userRef).doc(sale.user.uid);
-    const reStockRef = this.afs.firestore.collection(this.reStockSalesRef).doc(sale.id);
+    const userRef = this.afs.firestore
+      .collection(this.userRef)
+      .doc(sale.user.uid);
+    const reStockRef = this.afs.firestore
+      .collection(this.reStockSalesRef)
+      .doc(sale.id);
 
-    let batch = this.afs.firestore.batch()
-    batch.set(reStockRef, sale)
-    return batch
+    let batch = this.afs.firestore.batch();
+    batch.set(reStockRef, sale);
+    return batch;
   }
 
   // return this.afs.firestore.runTransaction((transaction) => {
@@ -1052,41 +1188,48 @@ export class DatabaseService {
 
   // })
 
-
-
   getPayingSales(userId: string): Observable<Sale> {
-    let status = "Pagando"
+    let status = 'Pagando';
     return this.afs
       .collection<Sale>(this.reservedSalesRef, (ref) =>
-        ref.where('user.uid', '==', userId).where('status', '==', status).limit(1)
+        ref
+          .where('user.uid', '==', userId)
+          .where('status', '==', status)
+          .limit(1)
       )
-      .valueChanges().pipe(map(sales => sales[0]));
+      .valueChanges()
+      .pipe(map((sales) => sales[0]));
   }
 
   getSales(date: { begin: Date; end: Date }): Observable<Sale[]> {
     let real = {
       begin: new Date(date.begin),
-      end: new Date(date.end)
-    }
+      end: new Date(date.end),
+    };
     return this.afs
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
-          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc")
+          .where('createdAt', '>=', real.begin)
+          .orderBy('createdAt', 'asc')
       )
       .valueChanges();
   }
 
-  getSalesUser(user:  User, date: { begin: Date; end: Date }): Observable<Sale[]> {
+  getSalesUser(
+    user: User,
+    date: { begin: Date; end: Date }
+  ): Observable<Sale[]> {
     let real = {
       begin: new Date(date.begin),
-      end: new Date(date.end)
-    }
+      end: new Date(date.end),
+    };
     return this.afs
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
-          .where('createdAt', '>=', real.begin).orderBy("createdAt", "asc")
+          .where('createdAt', '>=', real.begin)
+          .orderBy('createdAt', 'asc')
           .where('user.uid', '==', user.uid)
       )
       .valueChanges();
@@ -1095,38 +1238,44 @@ export class DatabaseService {
   getSalesRanking(date: { begin: Date; end: Date }): Observable<Sale[]> {
     let real = {
       begin: new Date(date.begin),
-      end: new Date(date.end)
-    }
+      end: new Date(date.end),
+    };
     return this.afs
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
           .where('createdAt', '>=', real.begin)
-          .orderBy("createdAt", "asc")
+          .orderBy('createdAt', 'asc')
       )
-      .valueChanges().pipe(map(sale => {
-        return sale.filter(el => !!el.rateData)
-      }));
+      .valueChanges()
+      .pipe(
+        map((sale) => {
+          return sale.filter((el) => !!el.rateData);
+        })
+      );
   }
 
-  getSalesFilteredStatus(date: { begin: Date; end: Date }, statusList: Array<Sale["status"]>): Observable<Sale[]> {
+  getSalesFilteredStatus(
+    date: { begin: Date; end: Date },
+    statusList: Array<Sale['status']>
+  ): Observable<Sale[]> {
     let real = {
       begin: new Date(date.begin),
-      end: new Date(date.end)
-    }
+      end: new Date(date.end),
+    };
     return this.afs
       .collection<Sale>(this.salesRef, (ref) =>
         ref
           .where('createdAt', '<=', real.end)
           .where('createdAt', '>=', real.begin)
           .where('status', 'in', statusList)
-          .orderBy("createdAt", "asc")
+          .orderBy('createdAt', 'asc')
       )
       .valueChanges();
   }
 
-  getSaleId(saleId: string): Observable<Sale>{
-    return this.afs.collection(this.salesRef).doc<Sale>(saleId).valueChanges()
+  getSaleId(saleId: string): Observable<Sale> {
+    return this.afs.collection(this.salesRef).doc<Sale>(saleId).valueChanges();
   }
 
   onSaveSale(sale: Sale): firebase.default.firestore.WriteBatch {
@@ -1138,24 +1287,23 @@ export class DatabaseService {
 
     batch.set(saleRef, saleData);
 
-    if(sale.status == this.saleStatus.cancelled){
+    if (sale.status == this.saleStatus.cancelled) {
       let cancelledSaleDoc: DocumentReference = this.afs.firestore
         .collection(this.cancelledSaleRef)
         .doc(sale.id);
-      batch.set(cancelledSaleDoc, saleData)
+      batch.set(cancelledSaleDoc, saleData);
     }
     return batch;
   }
 
-  onSaveRate(saleid: string, sale: Sale["rateData"]): Promise<void> {
+  onSaveRate(saleid: string, sale: Sale['rateData']): Promise<void> {
     let saleRef: DocumentReference = this.afs.firestore
       .collection(this.salesRef)
       .doc(saleid);
-    let rateData: Sale["rateData"] = sale;
+    let rateData: Sale['rateData'] = sale;
 
     return saleRef.update({ rateData });
   }
-
 
   onUpdateSaleVoucher(
     saleId: string,
@@ -1298,7 +1446,6 @@ export class DatabaseService {
       return batch
   }*/
 
-
   getConfiUsers(): Observable<User[]> {
     return this.afs
       .collection<User>(`/users`, (ref) => ref.where('role', '>=', ''))
@@ -1316,7 +1463,7 @@ export class DatabaseService {
       .valueChanges()
       .pipe(
         map((snap) => {
-          return snap[0]
+          return snap[0];
         })
       );
   }
@@ -1324,12 +1471,12 @@ export class DatabaseService {
   getProduct2(id: string): Observable<Product> {
     return this.afs
       .collection<Product>(this.productsListRef, (ref) =>
-        ref.where('sku', '==', id).where("published", "==", true)
+        ref.where('sku', '==', id).where('published', '==', true)
       )
       .valueChanges()
       .pipe(
         map((snap) => {
-          return snap[0]
+          return snap[0];
         })
       );
   }
@@ -1342,24 +1489,34 @@ export class DatabaseService {
   }
 
   getUserFinishedSales(user: User): Observable<Sale[]> {
-    return this.afs.collection<Sale>(this.salesRef,
-      ref => ref.where("user.uid", "==", user.uid)
-        .where("status", "==", (new saleStatusOptions()).finished)
-        .orderBy("createdAt", "desc").limit(5))
-      .get().pipe(map((snap) => {
-        return snap.docs
-          .map(el => <Sale>el.data())
-          .filter(el => (((el.rateData === undefined))))
-      }));
+    return this.afs
+      .collection<Sale>(this.salesRef, (ref) =>
+        ref
+          .where('user.uid', '==', user.uid)
+          .where('status', '==', new saleStatusOptions().finished)
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+      )
+      .get()
+      .pipe(
+        map((snap) => {
+          return snap.docs
+            .map((el) => <Sale>el.data())
+            .filter((el) => el.rateData === undefined);
+        })
+      );
   }
 
   getRecommendedProducts(number: number): Observable<Product[]> {
-    return this.afs.collection<Product>(this.productsListRef,
-      ref => ref.orderBy("purchaseNumber", "desc").limit(number)).valueChanges();
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.orderBy('purchaseNumber', 'desc').limit(number)
+      )
+      .valueChanges();
   }
 
   /*purchase*/
-/*
+  /*
   reduceStock(user, newSale, phot) {
     return this.afs.firestore.runTransaction((transaction) => {
       let promises = []
@@ -1399,9 +1556,7 @@ export class DatabaseService {
 
   }*/
 
-  
-  
-/*
+  /*
   sendEmail(newSale) {
     const batch = this.afs.firestore.batch()
     const emailRef = this.afs.firestore.collection(`/mail`).doc();
@@ -1448,8 +1603,6 @@ export class DatabaseService {
   }
 */
 
-  
-
   //products
 
   uploadPhotoProduct(id: string, file: File): Observable<string | number> {
@@ -1472,8 +1625,6 @@ export class DatabaseService {
     return upload$;
   }
 
-
-
   // User
   getUserDisplayName(userId: string): Observable<string> {
     return this.afs
@@ -1484,12 +1635,15 @@ export class DatabaseService {
         take<User>(1),
         map((user) => {
           if (user.name && user.lastName) {
-            return user.name.split(" ")[0] + " " + user.lastName.split(" ")[0];
+            return user.name.split(' ')[0] + ' ' + user.lastName.split(' ')[0];
           }
           if (user.personData) {
-            return user.personData.name.split(" ")[0] + user.personData['lastName'].split(" ")[0];
+            return (
+              user.personData.name.split(' ')[0] +
+              user.personData['lastName'].split(' ')[0]
+            );
           }
-          return "Sin nombre";
+          return 'Sin nombre';
         })
       );
   }
@@ -1501,11 +1655,15 @@ export class DatabaseService {
       .pipe(shareReplay(1));
   }
 
-  editUserType(userId: string, type: "mayoristUser" | "deliveryUser" | "role", action: boolean | string): firebase.default.firestore.WriteBatch{
+  editUserType(
+    userId: string,
+    type: 'mayoristUser' | 'deliveryUser' | 'role',
+    action: boolean | string
+  ): firebase.default.firestore.WriteBatch {
     const userDoc = this.afs.firestore.collection(this.userRef).doc(userId);
     const batch = this.afs.firestore.batch();
-    batch.update(userDoc, {[type]: action})
-    return batch
+    batch.update(userDoc, { [type]: action });
+    return batch;
   }
 
   getOneCoupon(id) {
@@ -1517,48 +1675,54 @@ export class DatabaseService {
 
   //Payment
   async methodPostAsync(data): Promise<any> {
-
     try {
-
       const username = '13421879';
-      const password = 'testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
+      const password =
+        'testpassword_MrLOJyprSofwHEEbSrJYyIwv5DZsTG76WwiOq9msFmj6L';
 
-      var auth = 'Basic ' + btoa(username + ":" + password);
+      var auth = 'Basic ' + btoa(username + ':' + password);
       //var url = "https://api.micuentaweb.pe/api-payment/V4/Charge/CreatePayment";
-      var url = "/api-payment/V4/Charge/CreatePayment";
+      var url = '/api-payment/V4/Charge/CreatePayment';
 
       const httpOptions = {
         headers: new HttpHeaders({
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
           Authorization: auth,
-        })
+        }),
       };
 
-      let res = await this.http.post(url, JSON.stringify(data), httpOptions).toPromise();;
-
+      let res = await this.http
+        .post(url, JSON.stringify(data), httpOptions)
+        .toPromise();
 
       return res;
     } catch (error) {
       await console.log(error);
     }
-
   }
   // WAREHOUSE
   getWarehouses(): Observable<any> {
     return this.afs
-      .collection(this.warehousesRef, (ref) =>
-        ref.orderBy('name', 'asc')
-      ).get().pipe(
+      .collection(this.warehousesRef, (ref) => ref.orderBy('name', 'asc'))
+      .get()
+      .pipe(
         map((snap) => {
           return snap.docs.map((el) => el.data());
         })
       );
   }
 
-  createEditWarehouse(edit: boolean, user: User, data: any, id?: string): firebase.default.firestore.WriteBatch {
+  createEditWarehouse(
+    edit: boolean,
+    user: User,
+    data: any,
+    id?: string
+  ): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
-    let warehouseRef = this.afs.firestore.collection('db/aitec/warehouses').doc();
+    let warehouseRef = this.afs.firestore
+      .collection('db/aitec/warehouses')
+      .doc();
 
     let newData: Warehouse = {
       id: warehouseRef.id,
@@ -1570,8 +1734,8 @@ export class DatabaseService {
       createdAt: new Date(),
       createdBy: user,
       editedAt: null,
-      editedBy: null
-    }
+      editedBy: null,
+    };
 
     if (edit) {
       warehouseRef = this.afs.firestore.doc(`db/aitec/warehouses/${id}`);
@@ -1580,7 +1744,7 @@ export class DatabaseService {
       batch.set(warehouseRef, newData);
     }
 
-    return batch
+    return batch;
   }
 
   deleteWarehouse(id: string): firebase.default.firestore.WriteBatch {
@@ -1592,67 +1756,88 @@ export class DatabaseService {
     return batch;
   }
 
-  getSeriesStoredInWarehouse(warehouseId: string, productId: string): Observable<SerialNumber[]>{
-
-    return this.afs.collectionGroup<SerialNumber>(`series`, ref => 
-        ref.where("warehouseId", "==", warehouseId)
-            .where("status", "==", "stored")
-            .where("productId", "==", productId)
-      ).valueChanges().pipe(
-        map(series => {
-          return series
-        })
+  getSeriesStoredInWarehouse(
+    warehouseId: string,
+    productId: string
+  ): Observable<SerialNumber[]> {
+    return this.afs
+      .collectionGroup<SerialNumber>(`series`, (ref) =>
+        ref
+          .where('warehouseId', '==', warehouseId)
+          .where('status', '==', 'stored')
+          .where('productId', '==', productId)
       )
-
+      .valueChanges()
+      .pipe(
+        map((series) => {
+          return series;
+        })
+      );
   }
 
-  getSeriesStoredOfProductInWarehouse(productId: string, warehouseId: string): Observable<SerialNumber[]>{
-    return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
-        ref.where("status", "==", "stored").where("warehouseId", "==", warehouseId)
-      ).get({source: "server"}).pipe(
-        map(sf => {
-          if(sf.empty){
-            return []
+  getSeriesStoredOfProductInWarehouse(
+    productId: string,
+    warehouseId: string
+  ): Observable<SerialNumber[]> {
+    return this.afs
+      .collection<SerialNumber>(
+        `${this.productsListRef}/${productId}/series`,
+        (ref) =>
+          ref
+            .where('status', '==', 'stored')
+            .where('warehouseId', '==', warehouseId)
+      )
+      .get({ source: 'server' })
+      .pipe(
+        map((sf) => {
+          if (sf.empty) {
+            return [];
           } else {
-            return sf.docs.map(el => (<SerialNumber>el.data()))
+            return sf.docs.map((el) => <SerialNumber>el.data());
           }
         })
-      )
-
+      );
   }
 
   //getSeriesOfProduct deprecated
-  getSeriesOfProduct(barcode: string, productId: string): Observable<SerialNumber[]>{
-
-    return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
-        ref.where("barcode", "==", barcode)
-      ).get({source: "server"}).pipe(
-        map(doc => {
-          if(doc.empty){
-            return []
+  getSeriesOfProduct(
+    barcode: string,
+    productId: string
+  ): Observable<SerialNumber[]> {
+    return this.afs
+      .collection<SerialNumber>(
+        `${this.productsListRef}/${productId}/series`,
+        (ref) => ref.where('barcode', '==', barcode)
+      )
+      .get({ source: 'server' })
+      .pipe(
+        map((doc) => {
+          if (doc.empty) {
+            return [];
           } else {
-            return doc.docs.map(el => (<SerialNumber>el.data()))
+            return doc.docs.map((el) => <SerialNumber>el.data());
           }
         })
-      )
-
+      );
   }
 
-  validateSeriesOfProduct(barcode: string): Observable<SerialNumber[]>{
-
-    return this.afs.collectionGroup<SerialNumber>(`series`, ref => 
-        ref.where("status", "==", "stored").where("barcode", "==", barcode)
-      ).get({source: "server"}).pipe(
-        map(doc => {
-          if(doc.empty){
-            return []
+  validateSeriesOfProduct(barcode: string): Observable<SerialNumber[]> {
+    return this.afs
+      .collectionGroup<SerialNumber>(`series`, (ref) =>
+        ref.where('status', '==', 'stored').where('barcode', '==', barcode)
+      )
+      .get({ source: 'server' })
+      .pipe(
+        map((doc) => {
+          if (doc.empty) {
+            return [];
           } else {
-            return doc.docs.map(el => (<SerialNumber>el.data()))
+            return doc.docs.map((el) => <SerialNumber>el.data());
           }
         })
-      )
+      );
 
-    // return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref => 
+    // return this.afs.collection<SerialNumber>(`${this.productsListRef}/${productId}/series`, ref =>
     //     ref.where("status", "==", "stored").where("barcode", "==", barcode)
     //   ).get({source: "server"}).pipe(
     //     map(doc => {
@@ -1663,40 +1848,46 @@ export class DatabaseService {
     //       }
     //     })
     //   )
-
   }
 
-  getProductsOrdered(): Observable<Product[]>{
-    return this.afs.collection<Product>(this.productsListRef, ref =>ref.orderBy("description")).valueChanges().pipe(shareReplay(1))
+  getProductsOrdered(): Observable<Product[]> {
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.orderBy('description')
+      )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
   getProductsByWarehouse(warehouse: Warehouse): Observable<Product[]> {
     if (!warehouse.id) {
-      return of([])
+      return of([]);
     }
 
-    return this.afs.collection<Product>(this.productsListRef, ref => 
-      ref.where(`warehouseStock.${warehouse.id}`, '>=', 0)
+    return this.afs
+      .collection<Product>(this.productsListRef, (ref) =>
+        ref.where(`warehouseStock.${warehouse.id}`, '>=', 0)
       )
       .valueChanges()
-      .pipe(
-        shareReplay(1)
-      )
-
+      .pipe(shareReplay(1));
   }
-  getWarehouseProductSerial(warehouse, warehouseProduct): Observable<SerialItem[]> {
+  getWarehouseProductSerial(
+    warehouse,
+    warehouseProduct
+  ): Observable<SerialItem[]> {
     console.log('warehouse : ', warehouse);
     console.log('warehouseProduct : ', warehouseProduct);
 
     if (!warehouse.id) {
-      return of([])
+      return of([]);
     }
 
-    return this.afs.collection<SerialItem>(`/db/aitec/warehouses/${warehouse.id}/products/${warehouseProduct.id}/series`)
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
+    return this.afs
+      .collection<SerialItem>(
+        `/db/aitec/warehouses/${warehouse.id}/products/${warehouseProduct.id}/series`
       )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
   /*  getWarehouseProductSerial(warehouse: Warehouse,warehouseProduct:WarehouseProduct): Observable<SerialItem[]> {
      if (!warehouse.id) {
@@ -1710,47 +1901,64 @@ export class DatabaseService {
        )
    } */
 
-  getProductSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
-    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`)
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
+  getProductSerialNumbers(
+    warehouseId: string,
+    productId: string
+  ): Observable<SerialNumber[]> {
+    return this.afs
+      .collection<SerialNumber>(
+        `/db/aitec/warehouses/${warehouseId}/products/${productId}/series`
       )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
-  getStoredSerialNumbers(warehouseId: string, productId: string): Observable<SerialNumber[]> {
-    return this.afs.collection<SerialNumber>(`/db/aitec/warehouses/${warehouseId}/products/${productId}/series`, ref => ref.where('status', '==', 'stored'))
-      .valueChanges()
-      .pipe(
-        shareReplay(1)
+  getStoredSerialNumbers(
+    warehouseId: string,
+    productId: string
+  ): Observable<SerialNumber[]> {
+    return this.afs
+      .collection<SerialNumber>(
+        `/db/aitec/warehouses/${warehouseId}/products/${productId}/series`,
+        (ref) => ref.where('status', '==', 'stored')
       )
+      .valueChanges()
+      .pipe(shareReplay(1));
   }
 
-  getFirebaseId(){
-    let aux = this.afs.firestore.collection(`series`).doc()
-    return aux.id
+  getFirebaseId() {
+    let aux = this.afs.firestore.collection(`series`).doc();
+    return aux.id;
   }
 
   saveSerialNumbers(
     batch0: firebase.default.firestore.WriteBatch,
-    invoice: string, waybill: string, serialList: SerialNumberWithPrice[], user: User,
-    observations: string, type: serialProcess["type"], changeVirtualStock: boolean, 
-    kardexType: Kardex["type"], kardexOperationType: Kardex["operationType"], sale: Sale): firebase.default.firestore.WriteBatch {
+    invoice: string,
+    waybill: string,
+    serialList: SerialNumberWithPrice[],
+    user: User,
+    observations: string,
+    type: serialProcess['type'],
+    changeVirtualStock: boolean,
+    kardexType: Kardex['type'],
+    kardexOperationType: Kardex['operationType'],
+    sale: Sale
+  ): firebase.default.firestore.WriteBatch {
     /**
      * IMPORTANT!
      * Serial numbers of different types processed
-     * 
+     *
      * */
 
     let batch = batch0 ? batch0 : this.afs.firestore.batch();
-    let date = new Date()
+    let date = new Date();
 
     // Updating data from serial numbers
-    serialList.forEach(serialNumberWithPrice => {
-      (<SerialNumber[]>serialNumberWithPrice.list).forEach(serialNumber => {
-        serialNumber.createdAt = date
-        serialNumber.createdBy = user
-      })
+    serialList.forEach((serialNumberWithPrice) => {
+      (<SerialNumber[]>serialNumberWithPrice.list).forEach((serialNumber) => {
+        serialNumber.createdAt = date;
+        serialNumber.createdBy = user;
+      });
     });
 
     //Building serialProcess
@@ -1767,16 +1975,19 @@ export class DatabaseService {
       observations: observations,
       createdBy: user,
       createdAt: date,
-    }
-
+    };
 
     //Uploading serialProcess
-    console.log("-----")
-    console.log("copiar lo de abajo para el soporte (hacer click en triangulo para expandir):")
-    console.log(serialProcessData)
-    console.log("-----")
-    let seriesPreprocessingRef = this.afs.firestore.collection(`${this.seriesPreprocessingRef}`).doc(serialProcessData.id);
-    batch.set(seriesPreprocessingRef, serialProcessData)
+    console.log('-----');
+    console.log(
+      'copiar lo de abajo para el soporte (hacer click en triangulo para expandir):'
+    );
+    console.log(serialProcessData);
+    console.log('-----');
+    let seriesPreprocessingRef = this.afs.firestore
+      .collection(`${this.seriesPreprocessingRef}`)
+      .doc(serialProcessData.id);
+    batch.set(seriesPreprocessingRef, serialProcessData);
 
     return batch;
   }
@@ -1785,7 +1996,7 @@ export class DatabaseService {
   //   /**
   //    * IMPORTANT!
   //    * This function assumes that only serial numbers of the same type (same product) will be processed.
-  //    * 
+  //    *
   //    * */
 
   //   let batch = this.afs.firestore.batch();
@@ -1819,7 +2030,7 @@ export class DatabaseService {
 
   //   let kardex: Kardex = {
   //     id: kardexProductRef.id,
-      
+
   //     type: 1,
   //     operationType: 1,
   //     invoice: invoice,
@@ -1835,16 +2046,12 @@ export class DatabaseService {
   //   return of(batch);
   // }
 
-
-
-
   // NEWS CONFIGURATION
   uploadPhotoNews(file: File): Observable<string | number> {
     console.log(file);
 
     const path = `/news/${file.name}`;
     console.log(path);
-
 
     // Reference to storage bucket
     const ref = this.storage.ref(path);
@@ -1863,61 +2070,71 @@ export class DatabaseService {
     return upload$;
   }
 
-  updateNewsVisibility(visible: boolean, photo: File): Observable<firebase.default.firestore.WriteBatch> {
-
+  updateNewsVisibility(
+    visible: boolean,
+    photo: File
+  ): Observable<firebase.default.firestore.WriteBatch> {
     if (!photo) {
       let batch = this.afs.firestore.batch();
-      batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
+      batch.update(this.generalConfigDoc.ref, { 'news.visible': visible });
       return of(batch);
     } else {
-      return this.uploadPhotoNews(photo)
-        .pipe(
-          switchMap(res => {
-            let batch = this.afs.firestore.batch();
-            if (typeof res == 'string') {
-              batch.update(this.generalConfigDoc.ref, { news: { visible: visible, imageURL: res } });
-            } else {
-              batch.update(this.generalConfigDoc.ref, { "news.visible": visible });
-            }
+      return this.uploadPhotoNews(photo).pipe(
+        switchMap((res) => {
+          let batch = this.afs.firestore.batch();
+          if (typeof res == 'string') {
+            batch.update(this.generalConfigDoc.ref, {
+              news: { visible: visible, imageURL: res },
+            });
+          } else {
+            batch.update(this.generalConfigDoc.ref, {
+              'news.visible': visible,
+            });
+          }
 
-            return of(batch);
-          })
-        )
+          return of(batch);
+        })
+      );
     }
-
   }
 
   //virtualStock was already updated when confirming sale
-    /**
+  /**
    * Creates a waybill based in the products registered
    * @param {Waybill} products - Content of the form used to generate waybills
    */
-  createWaybill(waybill: Waybill, serialList: SerialNumberWithPrice[], user: User, sale?: Sale): firebase.default.firestore.WriteBatch {
+  createWaybill(
+    waybill: Waybill,
+    serialList: SerialNumberWithPrice[],
+    user: User,
+    sale?: Sale
+  ): firebase.default.firestore.WriteBatch {
     let batch = this.afs.firestore.batch();
-    const referralRef = this.afs.firestore.collection(`/db/aitec/waybills`).doc();
+    const referralRef = this.afs.firestore
+      .collection(`/db/aitec/waybills`)
+      .doc();
 
     waybill.id = referralRef.id;
     batch.set(referralRef, waybill);
 
     //In the case we include a sale, we should do a kardex register.
-    if(sale){
+    if (sale) {
       //We include waybill on sales data
-      const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id)
+      const saleRef = this.afs.firestore.collection(this.salesRef).doc(sale.id);
       batch.update(saleRef, {
         confirmedDeliveryData: {
-          referralGuide: waybill
-        }
-      })
+          referralGuide: waybill,
+        },
+      });
 
-      let auxSerialList = [...serialList]
+      let auxSerialList = [...serialList];
 
-      auxSerialList.forEach(el => {
-        (<SerialNumber[]>el.list).forEach(el2 => {
-          el2.status = "sold"
-          el2.editedBy= user, 
-          el2.editedAt= new Date()
-        })
-      })
+      auxSerialList.forEach((el) => {
+        (<SerialNumber[]>el.list).forEach((el2) => {
+          el2.status = 'sold';
+          (el2.editedBy = user), (el2.editedAt = new Date());
+        });
+      });
 
       batch = this.saveSerialNumbers(
         batch,
@@ -1926,22 +2143,21 @@ export class DatabaseService {
         serialList,
         user,
         waybill.observations,
-        "Venta",
+        'Venta',
         false,
-        sale.document == "Boleta" ? 3 : 1,    //BOLETA O FACTURA
-        1,      //VENTA
+        sale.document == 'Boleta' ? 3 : 1, //BOLETA O FACTURA
+        1, //VENTA
         sale
-      )
+      );
     } else {
-      let auxSerialList = [...serialList]
+      let auxSerialList = [...serialList];
 
-      auxSerialList.forEach(el => {
-        (<SerialNumber[]>el.list).forEach(el2 => {
-          el2.status = "sold"
-          el2.editedBy= user, 
-          el2.editedAt= new Date()
-        })
-      })
+      auxSerialList.forEach((el) => {
+        (<SerialNumber[]>el.list).forEach((el2) => {
+          el2.status = 'sold';
+          (el2.editedBy = user), (el2.editedAt = new Date());
+        });
+      });
 
       batch = this.saveSerialNumbers(
         batch,
@@ -1950,196 +2166,256 @@ export class DatabaseService {
         serialList,
         user,
         waybill.observations,
-        "Retiro por Guía de Remisión",
+        'Retiro por Guía de Remisión',
         true,
-        1,    //Kardex type: Factura
-        99,    //Kardex opType: OTROS
+        1, //Kardex type: Factura
+        99, //Kardex opType: OTROS
         null
-      )
+      );
     }
 
     return batch;
   }
 
-
   //Calculator functions
-  giveProductPrice(item: {product: Product, quantity: number}, mayorist: boolean): number {
+  giveProductPrice(
+    item: { product: Product; quantity: number },
+    mayorist: boolean
+  ): number {
     if (item.product.promo) {
+      if (
+        (item.product.promoData.type == 1 && !mayorist) ||
+        (item.product.promoData.type == 2 && mayorist) ||
+        item.product.promoData.type == 3
+      ) {
+        let promTotalQuantity = Math.floor(
+          item.quantity / item.product.promoData.quantity
+        );
+        let promTotalPrice =
+          promTotalQuantity * item.product.promoData.promoPrice;
+        let noPromTotalQuantity =
+          item.quantity % item.product.promoData.quantity;
+        let noPromTotalPrice =
+          noPromTotalQuantity *
+          (mayorist ? item.product.priceMay : item.product.priceMin);
 
-      if(((item.product.promoData.type == 1) && (!mayorist)) || 
-        ((item.product.promoData.type == 2) && (mayorist)) || 
-        ((item.product.promoData.type == 3))){
-
-          let promTotalQuantity = Math.floor(item.quantity / item.product.promoData.quantity);
-          let promTotalPrice = promTotalQuantity * item.product.promoData.promoPrice;
-          let noPromTotalQuantity = item.quantity % item.product.promoData.quantity;
-          let noPromTotalPrice = noPromTotalQuantity * (mayorist ? item.product.priceMay : item.product.priceMin);
-
-          return promTotalPrice + noPromTotalPrice;
-
-        }
-      
+        return promTotalPrice + noPromTotalPrice;
+      }
     }
-    return item.quantity * (mayorist ? item.product.priceMay: item.product.priceMin)
+    return (
+      item.quantity * (mayorist ? item.product.priceMay : item.product.priceMin)
+    );
   }
 
-  giveProductPriceOfSale(requestedProducts: {product: Product, quantity: number}[], mayorist: boolean): number{
+  giveProductPriceOfSale(
+    requestedProducts: { product: Product; quantity: number }[],
+    mayorist: boolean
+  ): number {
     let sum = [...requestedProducts]
       .map((el) => this.giveProductPrice(el, mayorist))
       .reduce((a, b) => a + b, 0);
 
-    return sum
+    return sum;
   }
 
   //Waybill printing
-  printWaybillPdf(data: Waybill){
-    console.log(data)
+  printWaybillPdf(data: Waybill) {
+    console.log(data);
     let doc = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4"
-    })
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
 
     //Importando Plantilla
-    let img = new Image(595,842)
+    let img = new Image(595, 842);
     img.src = '../../../assets/images/guia_rem.png';
 
-    let itemsNumber = data.productList.length
-    let itemIndex = 0
+    let itemsNumber = data.productList.length;
+    let itemIndex = 0;
 
-    for(let j = 0; j<Math.ceil(itemsNumber/15); j++){
+    for (let j = 0; j < Math.ceil(itemsNumber / 15); j++) {
       doc.addImage(img, 'PNG', 0, 11, 210, 272);
 
       //Setting body styles
-      doc.setFontSize(10)
+      doc.setFontSize(10);
 
       //writing body
       //Header
-        //N° de guia de remisión
-        doc.setFontSize(16)
-        doc.text(data.orderCode, 137, 57, {maxWidth: 48, align: "left"})
-        doc.setFontSize(10)
-        //Nombre de destinatario
-        doc.text(
-          doc.splitTextToSize(data.addressee, 57).slice(0,2).join(" "), 
-          55, 76, {align: "left", maxWidth: 57})
-        //Destinatario RUC
-        doc.text(String(data.dni), 145, 76, {align: "left"})
-        //Dirección de llegada
-        doc.text(
-          doc.splitTextToSize(data.arrivalPoint, 57).slice(0,2).join(" "), 
-          55, 84, {align: "left", maxWidth: 57})
-        //Fecha de emisión
-        let emisionDate: {
-          year: number;
-          month: string;
-          day: string;
-          hours: number;
-          minutes: string;
-        } = null
-        if(data.createdAt instanceof Date){
-          emisionDate = this.getDateFromSec(data.createdAt.valueOf()/1000)
-        } else {
-          emisionDate = this.getDateFromSec(data.createdAt["seconds"])
-        }
-        doc.text(`${emisionDate.day}/${emisionDate.month}/${emisionDate.year}`, 145, 84, {align: "left"})
-        //Direccion de partida
-        doc.text(
-          doc.splitTextToSize(data.startingPoint, 57).slice(0,2), 
-          55, 92, {align: "left"})
-        //Fecha de inicio de traslado
-        let transferDate: {
-          year: number;
-          month: string;
-          day: string;
-          hours: number;
-          minutes: string;
-        } = null
-        if(data.transferDate instanceof Date){
-          transferDate = this.getDateFromSec(data.transferDate.valueOf()/1000)
-        } else {
-          transferDate = this.getDateFromSec(data.transferDate["seconds"])
-        }
-        doc.text(`${transferDate.day}/${transferDate.month}/${transferDate.year}`, 145, 92, {align: "left"})
+      //N° de guia de remisión
+      doc.setFontSize(16);
+      doc.text(data.orderCode, 137, 57, { maxWidth: 48, align: 'left' });
+      doc.setFontSize(10);
+      //Nombre de destinatario
+      doc.text(
+        doc.splitTextToSize(data.addressee, 57).slice(0, 2).join(' '),
+        55,
+        76,
+        { align: 'left', maxWidth: 57 }
+      );
+      //Destinatario RUC
+      doc.text(String(data.dni), 145, 76, { align: 'left' });
+      //Dirección de llegada
+      doc.text(
+        doc.splitTextToSize(data.arrivalPoint, 57).slice(0, 2).join(' '),
+        55,
+        84,
+        { align: 'left', maxWidth: 57 }
+      );
+      //Fecha de emisión
+      let emisionDate: {
+        year: number;
+        month: string;
+        day: string;
+        hours: number;
+        minutes: string;
+      } = null;
+      if (data.createdAt instanceof Date) {
+        emisionDate = this.getDateFromSec(data.createdAt.valueOf() / 1000);
+      } else {
+        emisionDate = this.getDateFromSec(data.createdAt['seconds']);
+      }
+      doc.text(
+        `${emisionDate.day}/${emisionDate.month}/${emisionDate.year}`,
+        145,
+        84,
+        { align: 'left' }
+      );
+      //Direccion de partida
+      doc.text(
+        doc.splitTextToSize(data.startingPoint, 57).slice(0, 2),
+        55,
+        92,
+        { align: 'left' }
+      );
+      //Fecha de inicio de traslado
+      let transferDate: {
+        year: number;
+        month: string;
+        day: string;
+        hours: number;
+        minutes: string;
+      } = null;
+      if (data.transferDate instanceof Date) {
+        transferDate = this.getDateFromSec(data.transferDate.valueOf() / 1000);
+      } else {
+        transferDate = this.getDateFromSec(data.transferDate['seconds']);
+      }
+      doc.text(
+        `${transferDate.day}/${transferDate.month}/${transferDate.year}`,
+        145,
+        92,
+        { align: 'left' }
+      );
       //Item list
-      for(let i = 0; (i<15) && (itemIndex < itemsNumber); itemIndex++, i++){
+      for (let i = 0; i < 15 && itemIndex < itemsNumber; itemIndex++, i++) {
         //Number
-        doc.text((itemIndex+1).toString().padStart(2,"0"), 25, 114+6*i, {align:"center"})
+        doc.text((itemIndex + 1).toString().padStart(2, '0'), 25, 114 + 6 * i, {
+          align: 'center',
+        });
         //code
-        doc.text(data.productList[itemIndex].mainCode, 34, 114+6*i, {align: "left"})
+        doc.text(data.productList[itemIndex].mainCode, 34, 114 + 6 * i, {
+          align: 'left',
+        });
         //description
         doc.text(
-          doc.splitTextToSize(data.productList[itemIndex].description, 69)[0], 
-          57, 114+6*i, {align:"left", maxWidth: 69})
+          doc.splitTextToSize(data.productList[itemIndex].description, 69)[0],
+          57,
+          114 + 6 * i,
+          { align: 'left', maxWidth: 69 }
+        );
         //cantidad
-        doc.text(data.productList[itemIndex].quantity.toString().padStart(2,"0"), 136,114+6*i, {align: "center"})
+        doc.text(
+          data.productList[itemIndex].quantity.toString().padStart(2, '0'),
+          136,
+          114 + 6 * i,
+          { align: 'center' }
+        );
         //unit of measurement
-        doc.text(data.productList[itemIndex].unit, 165, 114+6*i, {align:"center"})
+        doc.text(data.productList[itemIndex].unit, 165, 114 + 6 * i, {
+          align: 'center',
+        });
         //weight
-        doc.text(data.productList[itemIndex].totalWeight ? data.productList[itemIndex].totalWeight.toString().padStart(2,"0") : "--", 185, 114+6*i, {align:"center"})
+        doc.text(
+          data.productList[itemIndex].totalWeight
+            ? data.productList[itemIndex].totalWeight
+                .toString()
+                .padStart(2, '0')
+            : '--',
+          185,
+          114 + 6 * i,
+          { align: 'center' }
+        );
       }
       //Footer
-        //Cross of reason
-        let reasonDim = this.findWaybillTransferReason(data.transferReason)
-        doc.text("X", reasonDim.x, reasonDim.y, {align:"center"})
-        //Observation
-        doc.text(
-          doc.splitTextToSize(data.observations, 105).slice(0, 6).join(" "), 
-          18, 255, {align:"left", maxWidth: 105})
+      //Cross of reason
+      let reasonDim = this.findWaybillTransferReason(data.transferReason);
+      doc.text('X', reasonDim.x, reasonDim.y, { align: 'center' });
+      //Observation
+      doc.text(
+        doc.splitTextToSize(data.observations, 105).slice(0, 6).join(' '),
+        18,
+        255,
+        { align: 'left', maxWidth: 105 }
+      );
       //New page
-      if(itemIndex != itemsNumber){
-        doc.addPage("a4", "portrait")
+      if (itemIndex != itemsNumber) {
+        doc.addPage('a4', 'portrait');
       }
     }
 
     let blob = doc.output('blob');
 
     saveAs(blob);
-
   }
 
-  findWaybillTransferReason(reason: Waybill["transferReason"]): {x: number, y: number}{
-    let i = TRANSFER_REASON.findIndex(el => el.toLowerCase() == reason.toLowerCase())
-    let x = 0
-    if(i<5){
-      x=58.5
-      switch(i){
+  findWaybillTransferReason(reason: Waybill['transferReason']): {
+    x: number;
+    y: number;
+  } {
+    let i = TRANSFER_REASON.findIndex(
+      (el) => el.toLowerCase() == reason.toLowerCase()
+    );
+    let x = 0;
+    if (i < 5) {
+      x = 58.5;
+      switch (i) {
         case 0:
-          return {x, y: 218.3};
+          return { x, y: 218.3 };
         case 1:
-          return {x, y: 224.2};
+          return { x, y: 224.2 };
         case 2:
-          return {x, y: 229.5};
+          return { x, y: 229.5 };
         case 3:
-          return {x, y: 234.8};
+          return { x, y: 234.8 };
         case 4:
-          return {x, y: 240.6};
+          return { x, y: 240.6 };
       }
-    } else if(i<9){
-      x=120
-      switch(i){
+    } else if (i < 9) {
+      x = 120;
+      switch (i) {
         case 5:
-          return {x, y: 218.3};
+          return { x, y: 218.3 };
         case 6:
-          return {x, y: 225};
+          return { x, y: 225 };
         case 7:
-          return {x, y: 230};
+          return { x, y: 230 };
         case 8:
-          return {x, y: 235.2};
+          return { x, y: 235.2 };
       }
     } else {
-      x=189.5
-      switch(i){
+      x = 189.5;
+      switch (i) {
         case 5:
-          return {x, y: 220.3};
+          return { x, y: 220.3 };
         case 6:
-          return {x, y: 226.2};
+          return { x, y: 226.2 };
         case 7:
-          return {x, y: 231.4};
+          return { x, y: 231.4 };
         case 8:
-          return {x, y: 236.6};
+          return { x, y: 236.6 };
         case 8:
-          return {x, y: 242.5};
+          return { x, y: 242.5 };
       }
     }
   }
@@ -2152,28 +2428,25 @@ export class DatabaseService {
     minutes: string;
   } {
     let date = new Date(1970);
-    date.setSeconds(seconds)
+    date.setSeconds(seconds);
     let month = '' + (date.getMonth() + 1);
     let day = '' + date.getDate();
     let year = date.getFullYear();
     let hours = date.getHours();
     let minutes = '' + date.getMinutes();
 
-    if (minutes.length < 2)
-      minutes = '0' + minutes;
-    if (month.length < 2)
-      month = '0' + month;
-    if (day.length < 2)
-      day = '0' + day;
+    if (minutes.length < 2) minutes = '0' + minutes;
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
 
-    return {year, month, day, hours, minutes}
+    return { year, month, day, hours, minutes };
   }
 
   //Used to update mayorist user. Delete
   // updateUser(user: User[]){
   //   let batch = this.afs.firestore.batch()
   //   user.forEach( el => {
-    
+
   //     let coll = this.afs.firestore.collection(this.userRef).doc(el.uid)
   //     let bool = el.customerType == 'Mayorista'
 
@@ -2184,34 +2457,40 @@ export class DatabaseService {
 
   // }
 
-
-  resetStocks(){
-    return this.afs.collection(this.productsListRef).get({source: "server"}).pipe(
-      tap(res => {
-        let batch = this.afs.firestore.batch()
-        let products: Product[] = res.docs.map(el => <Product>el.data())
-        products.forEach(el => {
-          let prodDoc = this.afs.firestore.collection(this.productsListRef).doc(el.id)
-          let elNew = {...el}
-          elNew.products.forEach(el2 => {
-            el2.realStock = 0
-            el2.reservedStock = 0
-            el2.virtualStock = 0
-            el2.stock = 0
-          })
-          elNew.warehouseStock = null
-          batch.update(prodDoc, {products: elNew.products, warehouseStock: null})
+  resetStocks() {
+    return this.afs
+      .collection(this.productsListRef)
+      .get({ source: 'server' })
+      .pipe(
+        tap((res) => {
+          let batch = this.afs.firestore.batch();
+          let products: Product[] = res.docs.map((el) => <Product>el.data());
+          products.forEach((el) => {
+            let prodDoc = this.afs.firestore
+              .collection(this.productsListRef)
+              .doc(el.id);
+            let elNew = { ...el };
+            elNew.products.forEach((el2) => {
+              el2.realStock = 0;
+              el2.reservedStock = 0;
+              el2.virtualStock = 0;
+              el2.stock = 0;
+            });
+            elNew.warehouseStock = null;
+            batch.update(prodDoc, {
+              products: elNew.products,
+              warehouseStock: null,
+            });
+          });
+          batch.commit().then(
+            (res) => {
+              console.log('success!');
+            },
+            (err) => {
+              console.log('error');
+            }
+          );
         })
-        batch.commit().then(
-          res => {
-            console.log("success!")
-          },
-          err => {
-            console.log("error")
-          }
-        )
-      })
-    )
-    
+      );
   }
 }

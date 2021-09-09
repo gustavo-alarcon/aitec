@@ -236,7 +236,7 @@ exports.reStockPurshase = functions.firestore.document(`${reStockSalesRef}/{sale
 
 
 
-exports.scheduleReStockPurshase = functions.pubsub.schedule('every 15 minutes')
+exports.scheduleReStockPurshase = functions.pubsub.schedule('every 60 minutes')
   .timeZone('America/Lima')
   .onRun((context) => {
     const payingSalesColl = db.collection(reservedSalesRef).where("status", "==", 'Pagando')

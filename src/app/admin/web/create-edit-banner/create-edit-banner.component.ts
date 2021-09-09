@@ -238,6 +238,8 @@ export class CreateEditBannerComponent implements OnInit {
   }
 
   editBanner(product: any, type: string, photo?: File, photomovil?: File) {
+    console.log(product);
+    
     let productRef: DocumentReference = this.afs.firestore.collection(`/db/aitec/config/generalConfig/banners`).doc(product.id);
     let productData = product;
     let batch = this.afs.firestore.batch();
@@ -319,7 +321,7 @@ export class CreateEditBannerComponent implements OnInit {
       photoPath: '',
       photomovilPath: '',
       published: true,
-      products: this.products.map(el => { return { id: el['sku'], description: el['description'] } }),
+      products: this.products.map(el => { return { id: el['sku'], description: el['description'], sku: el['sku'] } }),
       position: this.data.index
     }
     this.createBanner(newBanner, this.photos.data.photoURL, this.photos.data.photomovilURL)
@@ -372,7 +374,7 @@ export class CreateEditBannerComponent implements OnInit {
     change = newP.length > 0 || old.length > 0
 
     if (change) {
-      update['products'] = this.products.map(el => { return { id: el['id'], description: el['description'] } })
+      update['products'] = this.products.map(el => { return { id: el['id'], description: el['description'], sku: el['sku'] }; })
     }
 
     if (photo && movil) {
