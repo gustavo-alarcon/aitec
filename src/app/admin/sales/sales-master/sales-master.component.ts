@@ -8,6 +8,9 @@ import { MatDialog } from '@angular/material/dialog';
 import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { SalesAddressDialogComponent } from '../sales-address-dialog/sales-address-dialog.component';
+import { Zone } from 'src/app/core/models/product.model';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
+import { Waybill } from 'src/app/core/models/waybill.model';
 
 
 @Component({
@@ -41,7 +44,8 @@ export class SalesMasterComponent implements OnInit {
   constructor(
     private dbs: DatabaseService,
     private dialog: MatDialog,
-    public datePipe: DatePipe
+    public datePipe: DatePipe,
+    public shopCar: ShoppingCarService,
 
   ) { }
 
@@ -64,7 +68,7 @@ export class SalesMasterComponent implements OnInit {
       end: new FormControl(endDate)
     });
 
-    this.status = Object.values(new saleStatusOptions())
+    this.status = Object.values(this.saleStatusOptions)
 
     this.statusForm = new FormControl('Todos')
     this.search = new FormControl('');
@@ -72,11 +76,10 @@ export class SalesMasterComponent implements OnInit {
 
   initObservables() {
     const view = this.dbs.getCurrentMonthOfViewDate();
-console.log(this.getCurrentMonthOfViewDate());
 
     let beginDate = view.from;
     let endDate = new Date();
-    this.sales$ = combineLatest(
+    this.sales$ = combineLatest([
       this.dateForm.get('begin').valueChanges.pipe(
         startWith(beginDate),
         map(begin => begin.setHours(0, 0, 0, 0))
@@ -84,10 +87,9 @@ console.log(this.getCurrentMonthOfViewDate());
       this.dateForm.get('end').valueChanges.pipe(
         startWith(endDate),
         map(end =>  end?end.setHours(23, 59, 59):null)
-      )
+      )]
     ).pipe(
       switchMap(([startdate,enddate]) => {
-        
         return this.dbs.getSales({ begin: startdate, end: enddate })
       }),
       map(sales => {
@@ -98,13 +100,13 @@ console.log(this.getCurrentMonthOfViewDate());
     this.search$ = this.search.valueChanges;
 
 
-    this.salesFiltered$ = combineLatest(
+    this.salesFiltered$ = combineLatest([
       this.search$.pipe(startWith('')),
       this.sales$,
-      this.statusForm.valueChanges.pipe(startWith('Todos')))
+      this.statusForm.valueChanges.pipe(startWith('Todos'))])
       .pipe(
         map(([search, sales, saleState]) => {
-          console.log(sales);
+          //console.log(sales);
           
           let order = sales.sort((a, b) => Number(b.correlative) - Number(a.correlative))
           if (saleState == 'Todos') {
@@ -115,11 +117,8 @@ console.log(this.getCurrentMonthOfViewDate());
             return order.filter(el => {
               return el.correlative.toString().includes(search) ||
                 el.user.email?.includes(search.toLowerCase()) ||
-                el.user.personData.name?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.personData['lastName']?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.name?.toLowerCase().includes(search.toLowerCase()) ||
-                el.user.personData['ruc']?.toString().toLowerCase().includes(search.toLowerCase())
+                el.documentInfo.name?.toLowerCase().includes(search.toLowerCase()) ||
+                el.documentInfo.number?.toString().toLowerCase().includes(search.toLowerCase())
             });
 
           } else {
@@ -164,6 +163,16 @@ console.log(this.getCurrentMonthOfViewDate());
     })
   }
 
+  // onCheckreferralGuide(sale: Sale, edit: boolean, event) {
+  //   event.stopPropagation()
+  //   if(edit){
+  //     this.dialog.open(WarehouseViewReferralGuideDialogComponent, {
+  //       data: sale,
+  //     })
+  //   }
+    
+  // }
+
   getName(displayName: string): string {
     let name = displayName.split(" ");
     switch (name.length) {
@@ -189,145 +198,164 @@ console.log(this.getCurrentMonthOfViewDate());
   downloadXls(sales: Sale[]): void {
     //console.log(sales);
     let table_xlsx: any[] = [];
+    
     let headersXlsx = [
       'Correlativo',
       'Usuario',
-      'DNI',
-      'e-mail',
+      'DNI/RUC',
+      'Correo',
       'Teléfono',
       'Estado',
+      'Tipo de entrega',      //Recojo en tienda, Entrega, A coordinar
       'Dirección',
+      'Departamento',
       'Distrito',
-      'Referencia',
-      // 'Sub-Total',
-      // 'Delivery',
+      'Provincia',
+      'Referencia',           //Solo en el caso de entrega
+
       'Tipo Documento',
       'RUC',
-      'Nombre de empresa',
+      'Nombre/Razón social',
       'Dirección de empresa',
-      'Total',
-      'OP',
+
       'Tipo de pago',
+
+      'Asesor',
+
       'Fecha de Solicitud',
-      //'Fecha de Envio Deseada', 
-      'Usuario Responsable',
-      'Fecha de Atención',
-      'Usuario de Confirmación de Solicitud',
+
+      'Fecha de Atención', 
+      'Usuario responsable',
+
       'Fecha de Confirmación de Solicitud',
+      'Usuario de Confirmación de Solicitud',
       'Fecha Asignada',
-      'Usuario de Confirmación de Comprobante',
+      'Codigo de seguimiento',
+      'Observación',
+
       'Fecha de Confirmación de Comprobante',
-      //'Fecha de Confirmación de Delivery', 
-      //'Fecha de Asignación de Conductor', 
-      //'Fecha de Entrega',
-      'Usuario de Anulación',
+      'Usuario de Confirmación de Comprobante',
+      'Número de comprobante',
+
+      'Guía de remisión',
+      'Usuario de delivery',
+      'Fecha de Confirmación de Delivery',
+      'Usuario de Confirmación de Delivery',
+
+      'Fecha de Entrega',
+      'Usuario de Entrega',
+      'Observaciones de Entrega',
+
       'Fecha de Anulación',
-      'Sub Total', 'IGV', 'Total', 'Delivery', 'Total con Delivery',
-      'Paquete', 'Descripción', 'Cantidad', 'Peso Unitario', 'Peso Total', 'Precio Total']
+      'Usuario de Anulación',
+
+      'Calificación de servicio',
+      'Calificación de productos',
+      'Calificación de delivery',
+      'Observación',
+
+      'Sub-total',
+      'IGV',
+      'Precio por delivery',
+      'Descuento por cupón',
+      'Precio adicional',
+      'Total',
+
+      'Producto',
+      'Color',
+      'Cantidad',
+      'Precio'
+
+    ];
 
     table_xlsx.push(headersXlsx);
 
+
+    let noData = "--"
+
     sales.forEach(sale => {
       const temp = [
-        /*
         sale.correlative.toString().padStart(6, "0"),
-        sale.user.name ? sale.user.lastName1 ? sale.user.lastName2 ?
-          sale.user.name + " " + sale.user.lastName1 + " " + sale.user.lastName2 :
-          sale.user.name + " " + sale.user.lastName1 : sale.user.name :
-          (sale.user.displayName ? sale.user.displayName : "Sin nombre"),
-        sale.user.dni ? sale.user.dni : "Sin DNI",
+        sale.user.personData.name,
+        !!sale.user.personData["dni"] ? sale.user.personData["dni"] : !!sale.user.personData["ruc"] ? sale.user.personData["ruc"] : "Sin documento",
         sale.user.email,
-        sale.location.address ? sale.location.phone : '',
+        sale.user.personData.phone ?  sale.user.personData.phone: 'Sin número',
         sale.status,
-        sale.location.address ? sale.location.address : '',
-        sale.location.address ? sale.location.district['name'] : '',
-        sale.location.address ? sale.location.reference : '',
+        sale.deliveryPickUp ? "Recojo en tienda" : sale.location ? "Entrega" : "A coordinar",
+
+        sale.deliveryPickUp ? sale.delivery["address"] : sale.location ? sale.location.address : noData,
+        sale.deliveryPickUp ? sale.delivery["departamento"] : sale.location ? sale.location.departamento : noData,
+        sale.deliveryPickUp ? sale.delivery["distrito"] : sale.location ? sale.location.distrito : noData,
+        sale.deliveryPickUp ? sale.delivery["provincia"] : sale.location ? sale.location.provincia : noData,
+        sale.deliveryPickUp ? noData : sale.location ? sale.location.reference : noData,
+
         sale.document,
-        sale.ruc,
-        sale.companyName,
-        sale.companyAddress,
-        (this.giveTotalPrice(sale) + sale.deliveryPrice).toFixed(2),
-        '',
-        typeof sale.payType == 'string' ? sale.payType : sale.payType.name,
-        sale.createdAt ? this.getXlsDate(sale.createdAt) : "-",
-        //sale.requestDate ? this.getXlsDate(sale.requestDate) : "-",
-        sale.attendedData ?
-          sale.attendedData.attendedBy.name ? sale.attendedData.attendedBy.lastName1 ? sale.attendedData.attendedBy.lastName2 ?
-            sale.attendedData.attendedBy.name + " " + sale.attendedData.attendedBy.lastName1 + " " + sale.attendedData.attendedBy.lastName2 :
-            sale.attendedData.attendedBy.name + " " + sale.attendedData.attendedBy.lastName1 : sale.attendedData.attendedBy.name :
-            (sale.attendedData.attendedBy.displayName ? sale.attendedData.attendedBy.displayName : "Sin nombre") : "-",
-        sale.attendedData ? this.getXlsDate(sale.attendedData.attendedAt) : "-",
-        sale.confirmedRequestData ?
-          sale.confirmedRequestData.confirmedBy.name ? sale.confirmedRequestData.confirmedBy.lastName1 ? sale.confirmedRequestData.confirmedBy.lastName2 ?
-            sale.confirmedRequestData.confirmedBy.name + " " + sale.confirmedRequestData.confirmedBy.lastName1 + " " + sale.confirmedRequestData.confirmedBy.lastName2 :
-            sale.confirmedRequestData.confirmedBy.name + " " + sale.confirmedRequestData.confirmedBy.lastName1 : sale.confirmedRequestData.confirmedBy.name :
-            (sale.confirmedRequestData.confirmedBy.displayName ? sale.confirmedRequestData.confirmedBy.displayName : "Sin nombre") : "-",
-        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.confirmedAt) : "-",
-        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.assignedDate) : "-",
-        sale.confirmedDocumentData ?
-          sale.confirmedDocumentData.confirmedBy.name ? sale.confirmedDocumentData.confirmedBy.lastName1 ? sale.confirmedDocumentData.confirmedBy.lastName2 ?
-            sale.confirmedDocumentData.confirmedBy.name + " " + sale.confirmedDocumentData.confirmedBy.lastName1 + " " + sale.confirmedDocumentData.confirmedBy.lastName2 :
-            sale.confirmedDocumentData.confirmedBy.name + " " + sale.confirmedDocumentData.confirmedBy.lastName1 : sale.confirmedDocumentData.confirmedBy.name :
-            (sale.confirmedDocumentData.confirmedBy.displayName ? sale.confirmedDocumentData.confirmedBy.displayName : "Sin nombre") : "-",
-        sale.confirmedDocumentData ? this.getXlsDate(sale.confirmedDocumentData.confirmedAt) : "-",
-        //sale.confirmedDeliveryData ? this.getXlsDate(sale.confirmedDeliveryData.confirmedAt) : "-",
-        //sale.driverAssignedData ? this.getXlsDate(sale.driverAssignedData.assignedAt) : "-",
-        //sale.finishedData ? this.getXlsDate(sale.finishedData.finishedAt) : "-",
-        sale.cancelledData ?
-          sale.cancelledData.cancelledBy.name ? sale.cancelledData.cancelledBy.lastName1 ? sale.cancelledData.cancelledBy.lastName2 ?
-            sale.cancelledData.cancelledBy.name + " " + sale.cancelledData.cancelledBy.lastName1 + " " + sale.cancelledData.cancelledBy.lastName2 :
-            sale.cancelledData.cancelledBy.name + " " + sale.cancelledData.cancelledBy.lastName1 : sale.cancelledData.cancelledBy.name :
-            (sale.cancelledData.cancelledBy.displayName ? sale.cancelledData.cancelledBy.displayName : "Sin nombre") : "-",
-        sale.cancelledData ? this.getXlsDate(sale.cancelledData.cancelledAt) : "-",
-        (this.giveTotalPrice(sale) - this.giveTotalPrice(sale) / 1.18 * 0.18).toFixed(2), //Soles
-        (this.giveTotalPrice(sale) / 1.18 * 0.18).toFixed(2),
-        (this.giveTotalPrice(sale)).toFixed(2),
-        (sale.deliveryPrice).toFixed(2),
-        (this.giveTotalPrice(sale) + sale.deliveryPrice).toFixed(2),*/
+        sale.documentInfo.number,
+        sale.documentInfo.name,
+        sale.documentInfo.address ? sale.documentInfo.address : noData,
+
+        sale.payType.name,
+
+        sale.adviser?.displayName ? sale.adviser?.displayName : "Sin asesor",
+
+        sale.createdAt ? this.getXlsDate(sale.createdAt) : noData,
+
+        sale.attendedData ? this.getXlsDate(sale.attendedData.attendedAt) : noData,
+        sale.attendedData ? sale.attendedData.attendedBy.personData.name : noData,
+
+        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.confirmedAt) : noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.confirmedBy.personData.name : noData,
+        sale.confirmedRequestData ? this.getXlsDate(sale.confirmedRequestData.assignedDate) : noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.trackingCode: noData,
+        sale.confirmedRequestData ? sale.confirmedRequestData.observation: noData,
+
+        sale.confirmedDocumentData ? this.getXlsDate(sale.confirmedDocumentData.confirmedAt) : noData,
+        sale.confirmedDocumentData ? sale.confirmedDocumentData.confirmedBy : noData,
+        sale.confirmedDocumentData ? sale.confirmedDocumentData.documentNumber : noData,
+
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.referralGuide ? sale.confirmedDeliveryData.referralGuide.orderCode : noData : noData,
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.deliveryUser.personData.name : noData,
+        sale.confirmedDeliveryData ? this.getXlsDate(sale.confirmedDeliveryData.confirmedAt) : noData,
+        sale.confirmedDeliveryData ? sale.confirmedDeliveryData.confirmedBy.personData.name : noData,
+
+        sale.finishedData ? this.getXlsDate(sale.finishedData.finishedAt) : noData,
+        sale.finishedData ? sale.finishedData.finishedBy : noData,
+        sale.finishedData ? sale.finishedData.observation : noData,
+
+        sale.cancelledData ? this.getXlsDate(sale.cancelledData.cancelledAt) : noData,
+        sale.cancelledData ? sale.cancelledData.cancelledBy.personData.name : noData,
+
+        sale.rateData ? sale.rateData.serviceRate : noData,
+        sale.rateData ? sale.rateData.productRate : noData,
+        sale.rateData ? sale.rateData.deliveryRate : noData,
+        sale.rateData ? sale.rateData.observation ? sale.rateData.observation : noData : noData,
+
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) / 1.18).toFixed(2),
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) / 1.18 * 0.18).toFixed(2),
+        sale.deliveryPrice ? sale.deliveryPrice : "0",
+        sale.couponDiscount ? sale.couponDiscount : "0",
+        sale.additionalPrice ? sale.additionalPrice : "0",
+
+        (this.dbs.giveProductPriceOfSale(sale.requestedProducts, sale.user.mayoristUser) + 
+        (sale.deliveryPrice ? sale.deliveryPrice : 0)-
+        (sale.couponDiscount ? sale.couponDiscount : 0)+
+        (sale.additionalPrice ? sale.additionalPrice : 0)).toFixed(2),
+
       ];
-      //      'Producto', 'Cantidad', 'Precio'
+      //      'Producto', 'Color', 'Cantidad', 'Precio'
 
       sale.requestedProducts.forEach(prod => {       
-        // console.log(prod);
-
-        // let temp2 = [
-        //   ...temp,
-        //   !prod.product.package ? prod.product.description : prod.product.description+"("+
-        //     prod.chosenOptions.map(el => el ? el.description : "Sin elegir").join("; ")
-        //   +")",
-        //   prod.quantity,
-        //   prod.product.unit.weight,
-        //   (prod.quantity*prod.product.unit.weight),
-        //   "S/. "+this.givePrice(prod).toFixed(2)
-        // ]
-        // table_xlsx.push(temp2);
         let temp2;
 
-        if (!prod.product.package) {
-          temp2 = [
-            ...temp,
-            '-',
-            prod.product.description,
-            prod.quantity,
-            (prod.quantity),
-            this.givePrice(prod).toFixed(2) //Soles
-          ]
-          table_xlsx.push(temp2);
-        } else {
-          prod['chosenOptions'].map(el => {
-            if (el) {
-              temp2 = [
-                ...temp,
-                prod.product.description,
-                el.description,
-                prod.quantity,
-                (prod.quantity),
-                this.givePrice(prod).toFixed(2)
-              ]
-              table_xlsx.push(temp2);
-            }
-          })
-        }
+        temp2 = [
+          ...temp,
+          prod.product.description,
+          prod.chosenProduct.color.name,
+          prod.quantity,
+          prod.price
+        ]
+        
+        table_xlsx.push(temp2);
       })
     })
 
@@ -364,7 +392,7 @@ console.log(this.getCurrentMonthOfViewDate());
   }
 
   getCorrelative(corr: number) {
-    return corr.toString().padStart(4, '0')
+    return corr.toString().padStart(6, '0')
   }
 
   getUser(userId): Observable<string> {
@@ -378,31 +406,36 @@ console.log(this.getCurrentMonthOfViewDate());
     return this.datePipe.transform(dateObj, 'dd/MM/yyyy');
   }
 
-  givePrice(item: SaleRequestedProducts): number {
-    let amount = item['quantity']
-    let price = item['product']['price']
-    if (item.product.promo) {
-      let promo = item['product']['promoData']['quantity']
-      let pricePromo = item['product']['promoData']['promoPrice']
+  // givePrice(item: SaleRequestedProducts): number {
+  //   let amount = item['quantity']
+  //   let price = item['product']['price']
+  //   if (item.product.promo) {
+  //     let promo = item['product']['promoData']['quantity']
+  //     let pricePromo = item['product']['promoData']['promoPrice']
 
-      if (amount >= promo) {
-        let wp = amount % promo
-        let op = Math.floor(amount / promo)
-        return wp * price + op * pricePromo
-      } else {
-        return amount * price
-      }
-    } else {
-      return amount * price
-    }
-  }
-  giveTotalPrice(sale: Sale): number {
-    return sale.requestedProducts.reduce((a, b) => a + this.givePrice(b), 0)
-  }
+  //     if (amount >= promo) {
+  //       let wp = amount % promo
+  //       let op = Math.floor(amount / promo)
+  //       return wp * price + op * pricePromo
+  //     } else {
+  //       return amount * price
+  //     }
+  //   } else {
+  //     return amount * price
+  //   }
+  // }
 
   giveTotalSalesPrice(sales: Sale[]): number {
-    return sales.reduce((a, b) => a + (this.giveTotalPrice(b) + b.deliveryPrice), 0)
+    return sales.reduce((a, b) => a + 
+      this.dbs.giveProductPriceOfSale(b.requestedProducts, b.user.mayoristUser) 
+      + b.deliveryPrice - Number(b.couponDiscount) + Number(!!b.additionalPrice ? b.additionalPrice : 0)
+      , 0)
   }
+
+  printPdf(data: Waybill){
+    this.dbs.printWaybillPdf(data)
+  }
+
 }
 
 

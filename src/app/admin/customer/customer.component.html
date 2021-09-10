@@ -1,221 +1,318 @@
-<div class="w3-section w3-margin-left w3-margin-right animated fadeInUp" style="height: 100%">
-  <div style="padding: 0 3vw; min-height: 25vh;">
-    <h2 class="title">
-      <mat-icon>people_alt</mat-icon>
-      Clientes
-    </h2>
-    <mat-divider></mat-divider>
+<div class="w3-section w3-margin-left w3-margin-right animated fadeInUp slower" style="height: 100%">
+    <div style="padding: 0 3vw; min-height: 25vh;">
+        <h2 class="title">CLIENTES</h2>
+        <mat-tab-group>
+            <mat-tab label="Lista de Clientes">
+                 <!-- Forms -->
+                 <div style="padding-top: 16px;">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Buscar</mat-label>
+                        <input autocomplete="off" [formControl]="listFilter" type="text" matInput
+                            placeholder="Buscar">
+                    </mat-form-field>
+                </div>
+                <div *ngIf="listFiltered$ | async">
+                    <div *ngIf="dataSource.filteredData.length else noRating">
+                        <div class="table-contain">
+                            <table  mat-table [dataSource]="dataSource" matSort class="ms-table">
+                                <ng-container class=" w3-center" matColumnDef="index">
+                                    <th *matHeaderCellDef class="w3-center ms-table__th"
+                                        style="width: 10%;min-width: 30px;">
+                                        N°
+                                    </th>
+                                    <td mat-cell *matCellDef="let element; let i = index" class="w3-center ms-table__td">
+                                      {{
+                                        1 +
+                                        i +
+                                        paginatorList.pageIndex * paginatorList.pageSize
+                                      }}
+                                    </td>
+                                </ng-container>
+    
+                                <ng-container class="w3-center" matColumnDef="name" sticky>
+                                    <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px; background-color: #fafafa;">Nombre/Razón social
+                                    </th>
+                                    <td mat-cell *matCellDef="let element" class="ms-table__td" style="min-width: 170px; background-color: #fafafa;">
+                                        {{element.personData.name}} {{element.personData.type == "natural" ? element.personData.lastName :""}}
+                                    </td>
+                                </ng-container>
+    
+                                <ng-container class=" w3-center" matColumnDef="phone">
+                                    <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Telefóno
+                                    </th>
+                                    <td mat-cell *matCellDef="let element" class="ms-table__td w3-center"
+                                        style="min-width: 120px;">
+                                        {{element.personData.phone}}
+                                    </td>
+                                </ng-container>
 
-    <mat-tab-group>
-      <mat-tab label="Lista de Clientes">
-        <!-- <div style="padding-top: 16px;">
-                  <mat-form-field appearance="outline">
-                      <mat-label>Buscar</mat-label>
-                      <input autocomplete="off" [formControl]="listFilter" type="text" matInput
-                          placeholder="Buscar">
+                                <ng-container class=" w3-center" matColumnDef="customerType2">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Tipo de usuario
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
+                                      {{element.customerType | titlecase}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="customerType">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Mayorista
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
+                                      {{element.mayoristUser ? "Sí" : "No"}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="deliveryUser">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Repartidor
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
+                                      {{element.deliveryUser ? "Sí" : "No" | titlecase}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="adminUser">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Administrador
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
+                                      {{element.role == "admin" ? "Sí":"No" | titlecase}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="type">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Tipo de persona
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center">
+                                      {{element.personData.type | titlecase}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="document">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">DNI/RUC
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td w3-center"
+                                      style="min-width: 120px;">
+                                      {{element.personData.type == "natural" ? element.personData?.dni : element.personData?.ruc}}
+                                  </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="address">
+                                    <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 180px;">Dirección
+                                    </th>
+                                    <td mat-cell *matCellDef="let element" class="ms-table__td" style="min-width: 180px;">
+                                      {{element.personData.type == "natural" ? "---" : element.personData.address}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container class=" w3-center" matColumnDef="contactPerson">
+                                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 180px;">Persona de Contacto
+                                  </th>
+                                  <td mat-cell *matCellDef="let element" class="ms-table__td" style="min-width: 180px;">
+                                    {{element.personData.type == "natural" ? "---" : element.personData.contactPerson}}
+                                  </td>
+                                </ng-container>
+    
+                                <!-- <ng-container class=" w3-center" matColumnDef="sales">
+                                    <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">Nro de
+                                        Mandaditos
+                                    </th>
+                                    <td mat-cell *matCellDef="let element" class="ms-table__td w3-center"
+                                        style="min-width: 120px;">
+                                        {{element['salesCount']}}
+                                    </td>
+                                </ng-container> -->
+
+                                <ng-container matColumnDef="actions" stickyEnd>
+                                  <th *matHeaderCellDef
+                                    class="ms-table__th w3-center w3-padding "
+                                    style="background-color: #fafafa;">
+                                    Acciones
+                                  </th>
+                                  <td style="padding: 0px 24px; background-color: #fafafa;" class="ms-table__td" mat-cell *matCellDef="let raw">
+                                    
+                                    <ng-container>
+                                      <mat-menu #rawMenu="matMenu">
+                                        <button class="w3-small" mat-menu-item (click)="onMayoristUser(raw)">
+                                          <mat-icon>local_offer</mat-icon> 
+                                          Cambiar a {{raw.mayoristUser ? "Minorista" : "Mayorista"}}
+                                        </button>
+                                        <button class="w3-small" mat-menu-item
+                                          (click)="onDeliveryUser(raw)">
+                                          <ng-container *ngIf="raw.deliveryUser; else noDelivery">
+                                            <mat-icon>directions_walk</mat-icon>
+                                            Desmarcar repartidor.
+                                          </ng-container>
+                                          <ng-template #noDelivery>
+                                            <mat-icon>directions_bike</mat-icon>
+                                            Marcar como repartidor
+                                          </ng-template>
+                                        </button>
+                                        <button class="w3-small" mat-menu-item
+                                          (click)="onAdminUser(raw)">
+                                          <ng-container *ngIf="raw.role == 'admin'; else noAdmin">
+                                            <mat-icon>face</mat-icon>
+                                            Desmarcar Administrador.
+                                          </ng-container>
+                                          <ng-template #noAdmin>
+                                            <mat-icon>settings</mat-icon>
+                                            Asignar Administrador.
+                                          </ng-template>
+                                        </button>
+                                      </mat-menu>
+                    
+                                      <button mat-icon-button [matMenuTriggerFor]="rawMenu">
+                                        <mat-icon>more_vert</mat-icon>
+                                      </button>
+                                    </ng-container>
+
+                                  </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+                            </table>
+                        </div>
+                        <mat-paginator #paginatorList class="ms-paginator" [pageSizeOptions]="[5, 10, 20]"
+                            showFirstLastButtons>
+                        </mat-paginator>
+                    </div>
+                </div>
+               
+            </mat-tab>
+            <mat-tab label="Calificaciones">
+                <!-- Forms -->
+                <div style="padding-top: 16px; 
+                  display: flex; flex-direction: row; justify-content: space-between;
+                  align-items: center; flex-wrap: wrap;">
+
+                  <mat-form-field appearance="outline" >
+                    <mat-label>Fecha/Periodo</mat-label>
+                    <mat-date-range-input [formGroup]="date"
+                      readonly placeholder="FECHA/PERIODO" [rangePicker]="picker">
+                      <input matStartDate formControlName="begin" placeholder="Fecha de inicio">
+                      <input matEndDate formControlName="end" placeholder="Fecha de fin">
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
                   </mat-form-field>
-                </div> -->
-        <div *ngIf="clientsList$ | async">
-          <div *ngIf="clientDataSource.filteredData.length ">
-            <!--                   <div *ngIf="clientDataSource.filteredData.length else noRating">
- -->
-            <div class="table-contain">
-              <table mat-table [dataSource]="clientDataSource" matSort class="ms-table">
-                <ng-container class=" w3-center" matColumnDef="index">
-                  <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 10%;min-width: 20px;">
-                    N°
-                  </th>
-                  <td style="padding: 0px 20px" mat-cell *matCellDef="let raw; let i = index">
-                    {{
-                    1 +
-                    i +
-                    paginatorClient.pageIndex * paginatorClient.pageSize
-                    }}
-                  </td>
+                    
 
-                </ng-container>
-                <ng-container class="w3-center" matColumnDef="name">
-                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 100px;">
-                    Nombre
-                  </th>
-                  <td mat-cell *matCellDef="let raw" class="ms-table__td w3-" style="min-width: 100px;">
-                    {{raw.personData.name}}
-                  </td>
-                </ng-container>
-                <ng-container class=" w3-center" matColumnDef="email">
-                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">
-                    Correo
-                  </th>
-                  <td mat-cell *matCellDef="let raw" class="ms-table__td w3-" style="min-width: 120px;">
-                    {{raw.email}}
-                  </td>
-                </ng-container>
-                <ng-container class=" w3-center" matColumnDef="tipo">
-                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">
-                    Tipo de cliente
-                  </th>
-                  <td mat-cell *matCellDef="let raw" class="ms-table__td w3-center" style="min-width: 120px;">
-                    {{raw.customerType}}
-                  </td>
-                </ng-container>
-                <ng-container class=" w3-center" matColumnDef="pedidos">
-                  <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 120px;">
-                    Pedidos
-                  </th>
-                  <td mat-cell *matCellDef="let raw" class="ms-table__td w3-center" style="min-width: 120px;">
-                    {{raw.orders}}
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="actions" stickyEnd>
-                  <th mat-header-cell *matHeaderCellDef
-                    class="ms-table__th w3-center w3-padding w3-border-left w3-border-lightgrey">
-                    Acciones
-                  </th>
-                  <td style="padding: 0px 24px" mat-cell *matCellDef="let raw"
-                    class="w3-border-left w3-border-lightgrey">
-                    <ng-container>
-                      <mat-menu #rawMenu="matMenu">
-                        <button class="w3-small" mat-menu-item (click)="changeWholesaler(raw)">
-                          Mayorista
-                        </button>
-                        <button class="w3-small" mat-menu-item (click)="changeRetailer(raw)">
-                          Minorista
-                        </button>
-                      </mat-menu>
+                    <mat-form-field sclass="w3-margin-right" appearance="outline">
+                        <mat-label>Buscar</mat-label>
+                        <input autocomplete="off" [formControl]="ratingFilter" type="text" matInput
+                            placeholder="Buscar">
+                    </mat-form-field>
+                </div>
+                <div *ngIf="(rating$ | async)?.length else noRating">
 
-                      <button mat-icon-button [matMenuTriggerFor]="rawMenu">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
-                    </ng-container>
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="ClientDisplayedColumns; sticky: true"></tr>
-                <tr mat-row *matRowDef="let row; columns: ClientDisplayedColumns;"></tr>
-
-              </table>
-            </div>
-            <mat-paginator #paginatorClient class="ms-paginator" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-            </mat-paginator>
-          </div>
-        </div>
-      </mat-tab>
-
-      <mat-tab label="Calificaciones">
-        <div style="padding-top: 16px;">
-          <!-- <mat-form-field class="w3-margin-right" appearance="outline">
-                      <input readonly matInput placeholder="FECHA / PERIODO" [formControl]="date"
-                          [satDatepicker]="picker">
-                      <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
-                      <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
-                  </mat-form-field> -->
-          <!-- <mat-form-field sclass="w3-margin-right" appearance="outline">
-                      <mat-label>Buscar</mat-label>
-                      <input autocomplete="off" [formControl]="ratingFilter" type="text" matInput
-                          placeholder="Buscar">
-                  </mat-form-field> -->
-        </div>
-        <div>
-          <!-- *ngIf="(rating$ | async)?.length else noRating" -->
-
-          <div class="table-contain">
-            <table mat-table [dataSource]="rankingDataSources" matSort class="ms-table">
-              <ng-container class=" w3-center" matColumnDef="index">
-                <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 10%;">
-                  Nro
-                </th>
-                <!-- <td style="padding: 0px 25px" mat-cell *matCellDef="let element; let i = index">
-                                {{
-                                  1 +
+                    <!-- Table -->
+                    <div class="table-contain">
+                        <table *ngIf="ratingFiltered$ | async" mat-table [dataSource]="ratingDataSource" matSort
+                            class="ms-table">
+                            <ng-container class=" w3-center" matColumnDef="index">
+                                <th *matHeaderCellDef class="w3-center ms-table__th" style="width: 10%;">
+                                    Nro
+                                </th>
+                                <td mat-cell *matCellDef="let element; let i = index" class="w3-center ms-table__td">
+                                  {{
+                                    1 +
                                     i +
-                                    rankingPaginator.pageIndex * rankingPaginator.pageSize
-                                }}
-                              </td> -->
-                <td mat-cell *matCellDef="let element; let i = index" class="w3-center ms-table__td">
-                  {{element.codigo}}
-                </td>
-              </ng-container>
+                                    ratingPaginator.pageIndex * ratingPaginator.pageSize
+                                  }}
+                                </td>
+                            </ng-container>
 
-              <ng-container class=" w3-center" matColumnDef="name">
-                <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px;">Nombre
-                </th>
-                <td mat-cell *matCellDef="let element" class="ms-table__td" style="min-width: 170px;">
-                  {{element.name}}
-                </td>
-              </ng-container>
-              <ng-container class=" w3-center" matColumnDef="products">
-                <th *matHeaderCellDef class="w3-center ms-table__th">Productos
-                </th>
-                <td mat-cell *matCellDef="let element" class="ms-table__td">
-                  <div class="rating">
-                    <span class="rating__star" [ngStyle]="{color: element.products >= 1 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.products >= 2 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.products >= 3 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.products >= 4 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.products >= 5 ? '#FFD600':'white'}">★</span>
-                  </div>
-                </td>
-              </ng-container>
-              <ng-container class=" w3-center" matColumnDef="service">
-                <th *matHeaderCellDef class="w3-center ms-table__th">Servicio
-                </th>
-                <td *matCellDef="let element" class="ms-table__td" style=" padding-right:1em">
-                  <div class="rating">
-                    <span class="rating__star" [ngStyle]="{color: element.service >= 1 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.service >= 2 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.service >= 3 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.service >= 4 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.service >= 5 ? '#FFD600':'white'}">★</span>
-                  </div>
-                </td>
-              </ng-container>
-              <ng-container class=" w3-center" matColumnDef="delivery">
-                <th *matHeaderCellDef class="w3-center ms-table__th">Entrega
-                </th>
-                <td *matCellDef="let element" class="ms-table__td" style=" padding-right:1em">
-                  <div class="rating">
-                    <span class="rating__star" [ngStyle]="{color: element.delivery >= 1 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.delivery >= 2 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.delivery >= 3 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.delivery >= 4 ? '#FFD600':'white'}">★</span>
-                    <span class="rating__star" [ngStyle]="{color: element.delivery >= 5 ? '#FFD600':'white'}">★</span>
-                  </div>
-                </td>
-              </ng-container>
+                            <ng-container class=" w3-center" matColumnDef="cliente" sticky>
+                                <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px; background-color: #fafafa">Cliente
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="ms-table__td" style="min-width: 170px; background-color: #fafafa">
+                                    {{element.user.personData.name}} {{element.user.personData.type == "natural" ? element.user.personData.lastName: ""}}
+                                </td>
+                            </ng-container>
 
-              <ng-container class=" w3-center" matColumnDef="comentary">
-                <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px;">
-                  Comentario
-                </th>
-                <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="min-width: 170px;">
-                  {{element.comentary}}
-                </td>
-              </ng-container>
-              <ng-container class=" w3-center" matColumnDef="order">
-                <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px;">
-                  Nro de Pedido
-                </th>
-                <td mat-cell *matCellDef="let element" class="ms-table__td w3-center" style="min-width: 170px;">
-                  {{element.order}}
-                </td>
-              </ng-container>
+                            <ng-container class=" w3-center" matColumnDef="servicio">
+                                <th *matHeaderCellDef class="w3-center ms-table__th">Servicio
+                                </th>
+                                <td *matCellDef="let element" class="ms-table__td" style=" padding-right:1em">
+                                    <div class="rating">
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.serviceRate >= 1 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.serviceRate >= 2 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.serviceRate >= 3 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.serviceRate >= 4 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.serviceRate >= 5 ? '#FFD600':'white'}">★</span>
+                                    </div>
+                                </td>
+                            </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="rankingDisplayedColumns; sticky: true"></tr>
-              <tr mat-row *matRowDef="let row; columns: rankingDisplayedColumns;"></tr>
+                            <ng-container class=" w3-center" matColumnDef="productos">
+                                <th *matHeaderCellDef class="w3-center ms-table__th">Productos
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="ms-table__td">
+                                    <div class="rating">
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.productRate >= 1 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.productRate >= 2 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.productRate >= 3 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.productRate >= 4 ? '#FFD600':'white'}">★</span>
+                                        <span class="rating__star"
+                                            [ngStyle]="{color: element.rateData.productRate >= 5 ? '#FFD600':'white'}">★</span>
+                                    </div>
+                                </td>
+                            </ng-container>
 
-            </table>
-          </div>
-          <mat-paginator #rankingPaginator class="ms-paginator" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-          </mat-paginator>
-        </div>
-        <ng-template #noRating>
-          <div *ngIf="noResult$ | async" class="w3-container w3-center w3-margin-top w3-margin-bottom">
-            <img [src]="noResultImage" alt="no data" style="width: 100%; max-width: 300px;">
-            <p style="font-family: Montserrat;">Sin Resultados</p>
-          </div>
-        </ng-template>
-      </mat-tab>
+                            <ng-container class=" w3-center" matColumnDef="delivery">
+                              <th *matHeaderCellDef class="w3-center ms-table__th">Delivery
+                              </th>
+                              <td mat-cell *matCellDef="let element" class="ms-table__td">
+                                  <div class="rating">
+                                      <span class="rating__star"
+                                          [ngStyle]="{color: element.rateData.deliveryRate >= 1 ? '#FFD600':'white'}">★</span>
+                                      <span class="rating__star"
+                                          [ngStyle]="{color: element.rateData.deliveryRate >= 2 ? '#FFD600':'white'}">★</span>
+                                      <span class="rating__star"
+                                          [ngStyle]="{color: element.rateData.deliveryRate >= 3 ? '#FFD600':'white'}">★</span>
+                                      <span class="rating__star"
+                                          [ngStyle]="{color: element.rateData.deliveryRate >= 4 ? '#FFD600':'white'}">★</span>
+                                      <span class="rating__star"
+                                          [ngStyle]="{color: element.rateData.deliveryRate >= 5 ? '#FFD600':'white'}">★</span>
+                                  </div>
+                              </td>
+                            </ng-container>
 
+                            <ng-container class=" w3-center" matColumnDef="comentario">
+                                <th *matHeaderCellDef class="w3-center ms-table__th" style="min-width: 170px;">
+                                    Comentario
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="ms-table__td w3-center"
+                                    style="min-width: 170px;">
+                                    {{element?.rateData?.observation}}
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="ratingDisplayedColumns; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ratingDisplayedColumns;"></tr>
 
-    </mat-tab-group>
-  </div>
+                        </table>
+                    </div>
+                    <mat-paginator #ratingPaginator class="ms-paginator" [pageSizeOptions]="[5, 10, 20]"
+                        showFirstLastButtons>
+                    </mat-paginator>
+                </div>
+                <ng-template #noRating>
+                    <div class="w3-container w3-center  w3-round-large mat-elevation-z8 w3-margin">
+                        <h2 class="notResults">
+                            No hay resultados
+                        </h2>
+                    </div>
+                </ng-template>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
 </div>

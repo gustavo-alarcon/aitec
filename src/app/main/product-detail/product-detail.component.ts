@@ -5,6 +5,7 @@ import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product-detail',
@@ -12,7 +13,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
   styleUrls: ['./product-detail.component.scss'],
 })
 export class ProductDetailComponent implements OnInit {
-  loading = new BehaviorSubject<boolean>(false);
+  loading = new BehaviorSubject<boolean>(true);
   loading$ = this.loading.asObservable();
 
   product$: Observable<any>;
@@ -29,13 +30,15 @@ export class ProductDetailComponent implements OnInit {
   count: number = 1
 
   category$: Observable<any>;
+  category:any = null
 
   constructor(
     private dbs: DatabaseService,
     public auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -43,12 +46,16 @@ export class ProductDetailComponent implements OnInit {
     this.product$ = this.route.params.pipe(
       switchMap((param) => {
         window.scroll(0, 0);
-        this.loading.next(true)
         return combineLatest(
-          this.dbs.getProduct(param.id),
+          this.dbs.getProduct2(param.id),
           this.dbs.isMayUser$
         ).pipe(
           map(([product, user]) => {
+            if(!product){
+              this.snackBar.open("Este producto no está disponible!", "Aceptar")
+              this.router.navigate(['main'])
+              return null
+            }
             this.price = product.priceMin
             this.promo = product.promo
             if (user) {
@@ -61,8 +68,10 @@ export class ProductDetailComponent implements OnInit {
         );
       }),
       tap(res => {
-        this.searchNumber(res)
-        this.loading.next(false)
+        if(res){
+          this.searchNumber(res)
+          this.loading.next(false)
+        }
       })
     );
 
@@ -100,7 +109,7 @@ export class ProductDetailComponent implements OnInit {
       });
     }).then(() => {
       this.count++
-      console.log('save')
+      //console.log('save')
     })
   }
 

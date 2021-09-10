@@ -7,14 +7,14 @@
           <div class="gallery__side">
             <div class="gallery__div border--primary w3-block" *ngFor="let img of galleryImg"
               [ngClass]="img.ind == selectImage.ind ? 'gallery__div--select' : 'none'">
-              <img [defaultImage]="defaultImage" [lazyLoad]="img.photoURL" [offset]="100"
+              <img [defaultImage]="defaultImage" [lazyLoad]="img?.photoURL" [offset]="100"
                 (click)="changeSelectImage(img)" class="gallery__div--image" alt="" />
             </div>
           </div>
           <figure #image class="zoom" (mousemove)="zoom($event)"
-            [style.background-image]="'url(' + selectImage.photoURL + ')'">
+            [style.background-image]="'url(' + selectImage?.photoURL + ')'">
             <div style="background-color: white">
-              <img [defaultImage]="defaultImage" [lazyLoad]="selectImage.photoURL" [offset]="100"
+              <img [defaultImage]="defaultImage" [lazyLoad]="selectImage?.photoURL" [offset]="100"
                 class="gallery__image" />
             </div>
           </figure>
@@ -42,7 +42,7 @@
         <div class="small">
           <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
             <div ngxSlickItem *ngFor="let slide of galleryImg" class="slide">
-              <img [defaultImage]="defaultImage" [lazyLoad]="slide.photoURL" [offset]="100" class="gallery__image"
+              <img [defaultImage]="defaultImage" [lazyLoad]="slide?.photoURL" [offset]="100" class="gallery__image"
                 alt="gallery-img" />
             </div>
           </ngx-slick-carousel>
@@ -112,12 +112,12 @@
         <div *ngIf="promo && selectedProduct.promoData.quantity > 1" class="w3-center product__promoDiv">
           OFERTA: {{selectedProduct.promoData.quantity}} x {{selectedProduct.promoData.promoPrice | currency: 'S/. ':'symbol':'2.2-2'}}
         </div>
-        <div class="product__stock" *ngIf="productSelected.stock==1;else stock">
+        <div class="product__stock" *ngIf="productSelected.virtualStock - (productSelected.reservedStock ? productSelected.reservedStock : 0)==1; else stock">
           Último stock disponible
         </div>
         <ng-template #stock>
           <div class="product__stock">
-            {{ productSelected.stock }} Unidades disponibles
+            {{ productSelected.virtualStock - (productSelected.reservedStock ? productSelected.reservedStock : 0) }} Unidades disponibles
           </div>
         </ng-template>
 
@@ -134,12 +134,27 @@
         <p *ngIf="selectedProduct.guarantee">Garantia: <strong>{{selectedProduct.timeguarantee}} meses</strong></p>
         <div class="w3-center">
           <div *ngIf="auth.user$ | async; else loginbutton">
-            <app-quantity-div [product]="selectedProduct" [price]="price" [chosen]="productSelected"
-              [color]="selectedProduct.products.length > 1" size="md"></app-quantity-div>
+            <!-- ngIf si existe y si no solo aparece agregar nuevo -->
+            <ng-container *ngIf="reqProdObservable$ | async as reqProd; else emptyProd">
+              <app-quantity-div-improved 
+                [product]="selectedProduct" [price]="price" [chosen]="productSelected"
+                [color]="selectedProduct.products.length > 1" size="md">
+              </app-quantity-div-improved>
+            </ng-container>
+            <ng-template #emptyProd>
+              <ng-container *ngIf="!(pendingPayment$ | async)">
+                <button *ngIf="verifyStock$ | async" mat-flat-button color="primary" 
+                  (click)="addProd()" class="product__add" 
+                  [style.visibility]="true ? 'visible' : 'hidden'">
+                  <mat-icon>shopping_cart</mat-icon>
+                  <span> Agregar al Carrito</span>
+                </button>
+              </ng-container>
+            </ng-template>
           </div>
           <ng-template #loginbutton>
             <button mat-flat-button color="primary" class="product__add" (click)="login()"
-              [style.visibility]="selectedProduct['realStock'] > 0 ? 'visible' : 'hidden'">
+              [style.visibility]="selectedProduct['realStock'] - (selectedProduct.reservedStock ? selectedProduct.reservedStock : 0) > 0 ? 'visible' : 'hidden'">
               <mat-icon>shopping_cart</mat-icon>
               <span> Agregar al Carrito</span>
             </button>

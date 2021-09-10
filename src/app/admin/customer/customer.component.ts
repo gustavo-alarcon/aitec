@@ -2,134 +2,90 @@ import { tap, startWith, switchMap, shareReplay, map } from 'rxjs/operators';
 import { User } from 'src/app/core/models/user.model';
 import { Observable, combineLatest } from 'rxjs';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Sale } from 'src/app/core/models/sale.model';
-import { FormControl } from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { Sale, saleStatusOptions } from 'src/app/core/models/sale.model';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-customer',
-  templateUrl: './customer.component.html',
+  templateUrl: './customer.component.html',  
   styleUrls: ['./customer.component.scss']
 })
 export class CustomerComponent implements OnInit {
-  
-  //Client
-  clientDataSource = new MatTableDataSource();
-  ClientDisplayedColumns: string[] = [ 'index','name','email','tipo','pedidos','actions'];
 
-  @ViewChild("paginatorClient", { static: false }) set content(paginator: MatPaginator) {
-    this.clientDataSource.paginator = paginator;
+  dataSource = new MatTableDataSource();
+  displayedColumns: string[] = ['index', 'name', 'phone', 'customerType', 'deliveryUser', 'adminUser', 'type', 'document', 'address', 'contactPerson', 'actions'];
+
+  @ViewChild("paginatorList", { static: false }) set content(paginator: MatPaginator) {
+    this.dataSource.paginator = paginator;
   }
-  clientsList$: Observable<User[]>;
 
-
-  //ranking
-  rankingDataSource = new MatTableDataSource<any>();
-  rankingDisplayedColumns: string[] = ['index','name','products','service','delivery','comentary','order'];
-
-  @ViewChild("rankingPaginator", { static: false }) set contentRat(paginator: MatPaginator) {
-    this.rankingDataSource.paginator = paginator;
-  }
-  
-  
-
- 
-  rankingList$: Observable<Clients[]>;
-
-  rankingDataSources=dataRankingClient;
-
-
-
+  list$: Observable<User[]>;
+  listFiltered$: Observable<User[]>;
   listFilter: FormControl;
+
+  statusList = new saleStatusOptions()
 
   //rating
   rating$: Observable<Sale[]>;
   ratingFiltered$: Observable<Sale[]>;
-  date: FormControl;
+  date: FormGroup;
   ratingFilter: FormControl;
+  ratingDataSource = new MatTableDataSource<Sale>();
+  ratingDisplayedColumns: string[] = ['index', 'cliente', 'servicio', 'productos', 'delivery', 'comentario'];
 
-
-  //noResult
-  noResult$: Observable<string>;
-  noResultImage: string = ''
+  @ViewChild("ratingPaginator", { static: false }) set contentRat(paginator: MatPaginator) {
+    this.ratingDataSource.paginator = paginator;
+  }
 
   constructor(
-    public dbs: DatabaseService
+    public dbs: DatabaseService,
+    private fb: FormBuilder,
+    private snackbar: MatSnackBar
   ) { }
 
   ngOnInit() {
-    
-    /* this.noResult$ = this.dbs.noDataImage$.pipe(
-      tap(res=>{
-        this.noResultImage = '../../../../assets/images/no_data/no_data_' + res + '.svg'
-      })
-    ) */
-    //Clients
-    this.clientsList$ = this.dbs.getUserListValueChanges().pipe(
-      tap(res => {
-        this.clientDataSource.data = res;
 
+    //Clientes
+    this.list$ = this.dbs.getUserListValueChanges().pipe(
+      tap(res => {
+        this.dataSource.data = res.sort((a, b) => a.personData.name.localeCompare(b.personData.name))
+        // used to update mayorist user this.dbs.updateUser(res).commit().then(res => {console.log("Yes!")})
       }),
       shareReplay(1)
     )
-
-
-    //Clients
-    /* this.rankingList$ = this.dbs.getUserListValueChanges().pipe(
-      tap(res => {
-        this.clientDataSource.data = res;
-
-      }),
-      shareReplay(1)
-    ) */
-   
-
-    /*
-
-     this.list$ = this.dbs.getUserListValueChanges().pipe(
-      tap(res => {
-        this.clientDataSource.data = res.sort((a, b) => a.name.localeCompare(b.name)).map((el, i) => {
-          return {
-            ...el,
-            index: i + 1
-          }
-        })
-      }),
-      shareReplay(1)
-    )
-
 
     this.listFilter = new FormControl("");
 
     this.dataSource.filterPredicate =
-      (data: User, filterText: string) => {
+      (user: User, filterText: string) => {
         let filter = filterText.trim().toUpperCase();
-        let val: boolean = false;
-        if (data.contact) {
-          val = (
-            data.contact.address.toUpperCase().includes(filter) ||
-            data.contact.number.toString().includes(filter))
-        } else {
-          val = false;
-        }
-        return (data.displayName.toUpperCase().includes(filter) || val)
+
+        let dataString = user.personData.name + 
+        (user.personData["lastName"] ? user.personData["lastName"] :"") + 
+        String(user.personData.phone) + 
+        (user.personData.type == "natural" ? user.personData.dni : user.personData.ruc)+
+        (user.deliveryUser ? "Repartidor" : "") + (user.mayoristUser ? "Mayorista":"Minorista")+
+        user.personData.type + (user.role == "admin" ? "Administrador" : "")
+        return (dataString.toUpperCase().includes(filter))
       }
 
-    this.listFiltered$ = combineLatest(this.list$,
-      this.listFilter.valueChanges.pipe(startWith(""))).pipe(
+    this.listFiltered$ = combineLatest([this.list$,
+      this.listFilter.valueChanges.pipe(startWith(""))]).pipe(
         tap(([userList, filterValue]) => {
           this.dataSource.filter = filterValue
         })
       )
 
     //rating
-    this.date = new FormControl({
-      begin: this.getCurrentMonthOfViewDate().from,
-      end: this.getCurrentMonthOfViewDate().to
-    });
-
+    this.date = this.fb.group({
+      begin: [this.getCurrentMonthOfViewDate().from],
+      end: [this.getCurrentMonthOfViewDate().to]
+    })
+    
     this.ratingFilter = new FormControl("");
 
     this.rating$ = this.date.valueChanges.pipe(
@@ -137,10 +93,9 @@ export class CustomerComponent implements OnInit {
       switchMap((date: { begin: Date, end: Date }) => {
         let endDate = date.end;
         endDate.setHours(23, 59, 59);
-        return this.dbs.getSales(date.begin, endDate).pipe(map(sales => {
-          let aux = sales.filter(sale => (sale.status == 'Entregado' && !!sale.rateData))
-          this.ratingDataSource.data = aux;
-          return aux;
+        return this.dbs.getSalesRanking({begin: date.begin, end: endDate}).pipe(map(sales => {
+          this.ratingDataSource.data = sales;
+          return sales;
         }))
       }),
       shareReplay(1));
@@ -148,8 +103,10 @@ export class CustomerComponent implements OnInit {
     this.ratingDataSource.filterPredicate =
       (data: Sale, filterText: string) => {
         let filter = filterText.trim().toUpperCase();
-        return (data.createdBy.displayName.toUpperCase().includes(filter)
-          || data.rateData.observation.toUpperCase().includes(filter))
+        let dataString = data.user.personData.name + 
+          (data.user.personData["lastName"] ? data.user.personData["lastName"] :"")
+
+        return (dataString.toUpperCase().includes(filter))
       }
 
     this.ratingFiltered$ = combineLatest(this.rating$,
@@ -157,16 +114,44 @@ export class CustomerComponent implements OnInit {
         tap(([sales, filter]) => {
           this.ratingDataSource.filter = filter
         })
-      )*/
+      )
   }
 
-  changeWholesaler(user:User){
-    const customerType='Mayorista';
-    this.dbs.editCustomerType(user,customerType);
+  onMayoristUser(user: User){
+    let action = !user.mayoristUser
+    this.dbs.editUserType(user.uid, "mayoristUser", action).commit().then(
+      res => {
+        this.snackbar.open("Edición Satisfactoria!", "Aceptar")
+      },
+      err => {
+        console.log(err)
+        this.snackbar.open("Ocurrió un error. Vuelva a intentarlo", "Aceptar")
+      }
+    )
   }
-  changeRetailer(user:User){
-    const customerType='Minorista';
-    this.dbs.editCustomerType(user,customerType);
+  onDeliveryUser(user: User){
+    let action = !user.deliveryUser
+    this.dbs.editUserType(user.uid, "deliveryUser", action).commit().then(
+      res => {
+        this.snackbar.open("Edición Satisfactoria!", "Aceptar")
+      },
+      err => {
+        console.log(err)
+        this.snackbar.open("Ocurrió un error. Vuelva a intentarlo", "Aceptar")
+      }
+    )
+  }
+  onAdminUser(user: User){
+    let action = user.role == "admin"
+    this.dbs.editUserType(user.uid, "role", action ? "" : "admin").commit().then(
+      res => {
+        this.snackbar.open("Edición Satisfactoria!", "Aceptar")
+      },
+      err => {
+        console.log(err)
+        this.snackbar.open("Ocurrió un error. Vuelva a intentarlo", "Aceptar")
+      }
+    )
   }
 
   getCurrentMonthOfViewDate(): { from: Date, to: Date } {
@@ -188,26 +173,3 @@ export class CustomerComponent implements OnInit {
     return { from: actualFromDate, to: toDate };
   }
 }
-
-export interface Clients{
-  codigo:number;
-  name:string ;
-  products:number ;
-  service:number ;
-  delivery:number ;
-  comentary:string ;
-  order:string ;
-}
-
-const dataRankingClient:Clients[]=[
-  {codigo:1,name:'Luis Perez',products:4,service:2,delivery:5,comentary:'comentary',order:'#123'},
-  {codigo:2,name:'Luis Perez',products:4,service:3,delivery:4,comentary:'comentary',order:'#123'},
-  {codigo:3,name:'Luis Perez',products:2,service:1,delivery:5,comentary:'comentary',order:'#123'},
-  {codigo:4,name:'Luis Perez',products:4,service:3,delivery:2,comentary:'comentary',order:'#123'},
-  {codigo:5,name:'Luis Perez',products:4,service:3,delivery:5,comentary:'comentary',order:'#123'},
-  {codigo:6,name:'Luis Perez',products:3,service:5,delivery:2,comentary:'comentary',order:'#123'},
-  {codigo:7,name:'Luis Perez',products:4,service:3,delivery:5,comentary:'comentary',order:'#123'},
-  {codigo:8,name:'Luis Perez',products:1,service:3,delivery:2,comentary:'comentary',order:'#123'},
-  {codigo:9,name:'Luis Perez',products:2,service:3,delivery:4,comentary:'comentary',order:'#123'},
-  {codigo:10,name:'Luis Perez',products:4,service:2,delivery:5,comentary:'comentary',order:'#123'},
-];

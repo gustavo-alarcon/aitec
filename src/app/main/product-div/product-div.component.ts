@@ -55,4 +55,6 @@ export class ProductDivComponent implements OnInit {
     percentageDisccount = (moneyDisccount / (price * promo.quantity)) * 100.0;
     return Math.round(percentageDisccount)
   }
+
+  
 }

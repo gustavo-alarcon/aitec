@@ -28,7 +28,7 @@ export class AsesoresDialogComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
+    //console.log(this.data);
 
     this.createForm = this.fb.group({
       lastname: [this.data.edit ? this.data.data.lastname : null, Validators.required],

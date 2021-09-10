@@ -9,7 +9,7 @@
           autocomplete="off" [matAutocomplete]="autoProduct" class="search-form__input" (keyup.enter)="navigate()"
           style="border: none" />
         <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="showSelectedUser" [panelWidth]="450">
-          <mat-option *ngFor="let option of filteredProducts$ | async" [value]="option"
+          <mat-option *ngFor="let option of filteredProducts$ | async | slice: 0:10" [value]="option"
             (click)="navigateProduct(option)" (onSelectionChange)="navigateProduct(option)">
             <span>{{ option["description"] | titlecase }}</span>
           </mat-option>
@@ -55,10 +55,10 @@
           <mat-icon class="dark-icon">input</mat-icon> Inicia sesión
         </button>
       </ng-template>
-      <div *ngIf="auth.user$ | async as user; else login">
+      <div *ngIf="user$ | async as user; else login">
         <button mat-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
           <mat-icon style="vertical-align: middle; margin-right: 8px">person</mat-icon>
-          {{ getName(user) }}
+          {{ user.alternativeName }}
         </button>
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="logOut()">
@@ -76,16 +76,32 @@
             <mat-icon>question_answer</mat-icon>
             <span>Mis Preguntas</span>
           </button>
-        </mat-menu>
-        <button mat-button routerLink="/main/carrito" matTooltip="Carrito" *ngIf="dbs.order.length;else noOrder">
-          <mat-icon [matBadge]="dbs.order.length" [matBadgeHidden]="dbs.order.length == 0" matBadgeColor="warn">
-            shopping_cart</mat-icon>
-        </button>
-        <ng-template #noOrder>
-          <button mat-button matTooltip="Carrito">
-            <mat-icon>shopping_cart</mat-icon>
+          <button *ngIf="(user$ | async)?.role =='admin'" mat-menu-item routerLink="/admin">
+            <mat-icon>settings</mat-icon>
+            <span>Administrar</span>
           </button>
+        </mat-menu>
+        
+        <button *ngIf="(user$ | async)?.pendingPayment; else noTimer"
+          matTooltip="Completar pago."
+          color="warn" mat-flat-button routerLink="/main/carrito">
+          {{timer$ | async | date:'mm:ss'}}
+        </button>
+        <ng-template #noTimer>
+          <button 
+            *ngIf="shopCarNumber$ | async as number; else noOrder"
+            mat-button routerLink="/main/carrito" matTooltip="Carrito" >
+            <mat-icon [matBadge]="number" matBadgeColor="warn">
+              shopping_cart</mat-icon>
+          </button>
+            
+          <ng-template #noOrder>
+            <button mat-button matTooltip="Carrito">
+              <mat-icon>shopping_cart</mat-icon>
+            </button>
+          </ng-template>
         </ng-template>
+        
       </div>
     </div>
 
@@ -140,7 +156,7 @@
                   <div class="w3-col m6 l6" *ngFor="let brand of selectCategory.brands">
                     <div class="w3-block w3-margin-bottom categories__brand mat-elevation-z2">
                       <div class=" categories__brand--image">
-                        <img [defaultImage]="defaultImage" [lazyLoad]="brand.photoURL" [offset]="100"
+                        <img [defaultImage]="defaultImage" [lazyLoad]="brand?.photoURL" [offset]="100"
                           (click)="navigateBrand(brand.name)" alt="brand.name" />
                       </div>
                     </div>

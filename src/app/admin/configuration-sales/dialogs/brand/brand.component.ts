@@ -178,7 +178,7 @@ export class BrandComponent implements OnInit {
 
   }
   onSubmitForm() {
-    console.log(this.createForm.value);
+    //console.log(this.createForm.value);
 
     this.createForm.markAsPending();
     this.createForm.disable()

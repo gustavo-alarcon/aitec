@@ -7,7 +7,7 @@
     <div *ngIf="banner$ | async as images">
 
       <div class="img-oferta">
-        <img [src]="banner.photoURL" *ngFor="let banner of images ; let i = index"
+        <img [src]="banner?.photoURL" *ngFor="let banner of images ; let i = index"
           (click)="editDialog('carousel', true, banner)" class="w3-block-{{i}}" alt="" />
       </div>
 
@@ -41,9 +41,9 @@
             <img class="w3-card-4 w3-block" (click)="photoURL.click()" *ngIf="createForm.get('photoURL').value==null"
               [src]="noImage" alt="sin fotografía">
 
-            <mat-progress-bar *ngIf="photos?.resizing$.photoURL | async" style="width:100%" mode="indeterminate">
+            <mat-progress-bar *ngIf="photos?.resizing$?.photoURL | async" style="width:100%" mode="indeterminate">
             </mat-progress-bar>
-            <span *ngIf="photos.resizing$.photoURL | async" class="w3-small" style="width:100%">*comprimiendo</span>
+            <span *ngIf="photos.resizing$?.photoURL | async" class="w3-small" style="width:100%">*comprimiendo</span>
             <input style="display: none" #photoURL type="file" accept='image/*'
               (change)="addNewPhoto('photoURL', photoURL.files)" />
           </div>

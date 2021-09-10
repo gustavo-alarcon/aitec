@@ -6,7 +6,7 @@
     <app-toolbar-mobile [categories]="listCategories"></app-toolbar-mobile>
   </div>
   
-
+  <ng-container *ngIf="user$ | async"></ng-container>
   <div style="min-height: 85vh">
     <div>
       <router-outlet (activate)="onActivate($event)"></router-outlet>

@@ -1,10 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
+import { combineLatest, interval, Observable, of } from 'rxjs';
+import { filter, map, shareReplay, startWith, switchMap, takeWhile } from 'rxjs/operators';
+import { User } from 'src/app/core/models/user.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 
 @Component({
   selector: 'app-toolbar-mobile',
@@ -25,14 +27,33 @@ export class ToolbarMobileComponent implements OnInit {
     brands: Array<any>;
   } = null
 
+  shopCarNumber$: Observable<number>
+  pendingPayment$: Observable<boolean>;
+  user$: Observable<User>;
 
   constructor(
     public auth: AuthService,
     private router: Router,
-    public dbs: DatabaseService
+    public dbs: DatabaseService,
+    public shopCar: ShoppingCarService,
   ) { }
 
   ngOnInit(): void {
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
+
+    this.shopCarNumber$ = this.shopCar.reqProdListObservable.pipe(
+      map(list => {
+        if(list){
+          return list.length
+        } else {
+          return null
+        }
+
+      })
+    )
+
+    this.pendingPayment$ = this.auth.user$.pipe(map(user => !!user.pendingPayment))
+
     this.search$ = this.searchForm.valueChanges.pipe(
       startWith(''),
       map((word) => {
@@ -42,21 +63,20 @@ export class ToolbarMobileComponent implements OnInit {
 
     this.filteredProducts$ = combineLatest(
       this.searchForm.valueChanges.pipe(
-        filter((input) => input !== null),
         map((value) => typeof value == 'string' ? value : value.description)
       ),
-      this.dbs.getProductsList()
+      this.dbs.getProductsList2()
     ).pipe(
 
       map(([val, products]) => {
         let prod = products.filter(p => p.published)
-        let value = val.toLowerCase()
+        let value = val ? val.toLowerCase() : ''
         return value.length
           ? prod.filter(
             (option) =>
-              option['description'].toLowerCase().includes(value) ||
-              option['sku'].toLowerCase().includes(value) ||
-              option['category'].toLowerCase().includes(value)
+              option['description']?.toLowerCase().includes(value) ||
+              option['sku']?.toLowerCase().includes(value) ||
+              option['category']?.toLowerCase().includes(value)
           )
           : [];
       })
@@ -106,7 +126,7 @@ export class ToolbarMobileComponent implements OnInit {
         queryParams: { search: name },
       });
       this.clearInput();
-      this.toggleSearch();
+      this.openedSearch = false
     }
   }
 

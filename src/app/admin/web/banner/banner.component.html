@@ -5,7 +5,7 @@
   </button>
   <ngx-slick-carousel class="carousel" #slickModal="slick-carousel" [config]="slideConfig">
     <div ngxSlickItem class="slide" *ngFor="let banner of carousel">
-      <img [src]="banner.photoURL" class="w3-block" alt="" />
+      <img [src]="banner?.photoURL" class="w3-block" alt="" />
     </div>
   </ngx-slick-carousel>
   <div *ngIf="carousel$ | async as images">
@@ -22,7 +22,7 @@
         <mat-card class="banner__box" *ngFor="let image of images" cdkDrag>
           <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
           <div class="ms-flex ms-flex--center" style="justify-content: space-between">
-            <img [src]="image.photoURL" style="width: 30%" alt="" />
+            <img [src]="image?.photoURL" style="width: 30%" alt="" />
             <div style="width: 25%">
               <div><strong>Redirige a:</strong></div>
               <div>{{ image.redirectTo }}</div>

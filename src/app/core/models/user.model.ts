@@ -1,21 +1,40 @@
+import { SaleRequestedProducts } from "./sale.model";
+
 export interface User {
   uid?: string;
   email: string;
-  role?:string;
-  customerType?:string;
+  role?:string;     //"admin"
+
+  //customerType?:"Mayorista" | "Minorista";         //'Mayorista'
   orders?:number;
+
+  deliveryUser?: boolean;
+  mayoristUser?: boolean;
+
   location?: {
     address: string;
     reference: string;
     coord: { lat: number; lng: number };
-    departamento:string;
-    provincia:string;
-    distrito:string;
+    departamento:{
+      id: string
+      name: string
+    };
+    provincia:{
+      department_id: string
+      id: string
+      name: string
+    };
+    distrito:{
+      department_id: string
+      id: string
+      name: string
+      province_id: string
+    };
     idDistrito:string;
   }[];
 
   personData: naturalPerson | businessPerson;
-  name?:string;
+  name?:string;           //Dont use this use natural person interface
   lastName?:string;
   lastLogin?: Date;
   lastBrowser?: string[]
@@ -23,6 +42,11 @@ export interface User {
     [token: string]: true
   };
   favorites?:string[]
+
+  shoppingCar?: SaleRequestedProducts[]
+  pendingPayment?: boolean              //Used to indicate if a payment is expected
+  saleNumber?: number                   //Total number of transactions
+  
 }
 interface naturalPerson {
   type:"natural";

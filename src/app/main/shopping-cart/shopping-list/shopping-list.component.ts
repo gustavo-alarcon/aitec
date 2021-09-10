@@ -3,15 +3,20 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { SaleRequestedProducts } from 'src/app/core/models/sale.model';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 
+//Not USED?
 @Component({
   selector: 'app-shopping-list',
   templateUrl: './shopping-list.component.html',
   styleUrls: ['./shopping-list.component.scss']
 })
 export class ShoppingListComponent implements OnInit {
-  dataSource = new MatTableDataSource();
+  dataSource = new MatTableDataSource<SaleRequestedProducts>();
   displayedColumns: string[] = ['index', 'image', 'product','sku', 'quantity', 'unit','subtotal', 'delete'];
 
   @ViewChild('productsPaginator', { static: false }) set content(paginator1: MatPaginator) {
@@ -20,18 +25,26 @@ export class ShoppingListComponent implements OnInit {
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
+  reqProdListObservable$: Observable<SaleRequestedProducts[]>
+
   constructor(
     private router: Router,
     private snackBar: MatSnackBar,
-    private dbs: DatabaseService
+    private dbs: DatabaseService,
+    public shopCar: ShoppingCarService,
   ) { }
 
   ngOnInit(): void {
-    this.dataSource.data = this.dbs.order
-    console.log(this.dbs.order);
-    
+    this.reqProdListObservable$ = this.shopCar.reqProdListObservable.pipe(
+      tap(res => {
+        //console.log("requesting table")
+        //console.log(res)
+        this.dataSource.data = res
+      })
+    )
   }
-
+/////////////////////////////////////////////////////////////////////
+///////////FALTA FUNCIONES DE EDICION DE CARRITO
   getPrice(item){
     if(item.product.promo){
       return item.product.promoData.promoPrice 

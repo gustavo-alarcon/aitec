@@ -33,7 +33,7 @@ export class DeleteCategoryComponent implements OnInit {
 
 
   ngOnInit(): void {
-    console.log(this.data)
+    //console.log(this.data)
 
     switch (this.data.type) {
       case 'category':

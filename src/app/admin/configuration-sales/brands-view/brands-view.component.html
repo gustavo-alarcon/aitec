@@ -35,7 +35,7 @@
         Imagen
       </th>
       <td mat-cell *matCellDef="let raw" class="w3-center">
-        <img *ngIf="raw.photoURL; else defaultPicture" [defaultImage]="defaultImage" [lazyLoad]="raw.photoURL"
+        <img *ngIf="raw?.photoURL; else defaultPicture" [defaultImage]="defaultImage" [lazyLoad]="raw?.photoURL"
           [offset]="100" style="object-fit: contain; width: 90px; height: 90px" />
         <ng-template #defaultPicture>
           <div style="height: 120px; padding: 6px 6px">

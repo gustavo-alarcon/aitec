@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { MapBaseLayer } from '@angular/google-maps';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of } from 'rxjs';
-import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take } from 'rxjs/operators';
+import { tap, startWith, switchMap, debounceTime, distinctUntilChanged, map, filter, take, shareReplay } from 'rxjs/operators';
+import { Kardex, OPERATION_TYPE, TIPO_COMPROBANTE } from 'src/app/core/models/kardex.model';
+import { Product, unitProduct } from 'src/app/core/models/product.model';
+import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
 import { Warehouse } from 'src/app/core/models/warehouse.model';
-import { WarehouseProduct } from 'src/app/core/models/warehouseProduct.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
 import { ProductCategoryComponent } from 'src/app/main/product-detail/product-category/product-category.component';
@@ -18,30 +21,13 @@ export class WarehouseProductsEntryComponent implements OnInit {
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
 
+  cumSeriesList: SerialNumberWithPrice[] = []
+
+  invoiceType = Object.values(TIPO_COMPROBANTE)
+
   entryInvoiceControl: FormControl;
   entryWaybillControl: FormControl;
-  entryWarehouseControl: FormControl;
-  entryProductControl: FormControl;
-  entrySKUControl: FormControl;
-  entryScanControl: FormControl;
-
-  entryProducts$: Observable<WarehouseProduct[]>;
-  warehouses$: Observable<Warehouse[]>;
-
-  selectedProduct = new BehaviorSubject<any>(null);
-  selectedProduct$ = this.selectedProduct.asObservable();
-
-  serialList: Array<any> = [];
-  entryStock: number = 0;
-
-  scanValidation = new BehaviorSubject<boolean>(false);
-  scanValidation$ = this.scanValidation.asObservable();
-
-  validatingScan = new BehaviorSubject<boolean>(false);
-  validatingScan$ = this.validatingScan.asObservable();
-
-  actionAddSerie = new BehaviorSubject<boolean>(false);
-  actionAddSerie$ = this.actionAddSerie.asObservable();
+  entryInvoiceType: FormControl;
 
   constructor(
     private fb: FormBuilder,
@@ -52,177 +38,20 @@ export class WarehouseProductsEntryComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForms();
-    this.initObservables();
   }
 
   initForms() {
-    this.entryInvoiceControl = this.fb.control('');
-    this.entryWaybillControl = this.fb.control('');
-    this.entryWarehouseControl = this.fb.control('', Validators.required);
-    this.entryProductControl = this.fb.control('', Validators.required);
-    this.entryScanControl = this.fb.control('');
-  }
+    this.entryInvoiceControl = this.fb.control(null, Validators.required);
+    this.entryWaybillControl = this.fb.control(null, Validators.required);
+    this.entryInvoiceType = this.fb.control(null, Validators.required);
 
-  initObservables() {
-    this.warehouses$ =
-      this.dbs.getWarehouses();
-
-    this.entryProducts$ = combineLatest(
-      this.entryWarehouseControl.valueChanges
-        .pipe(
-          startWith(''),
-          switchMap(warehouse => { return this.dbs.getWarehouseProducts(warehouse) })
-        ),
-      this.entryProductControl.valueChanges
-        .pipe(
-          startWith(''),
-          debounceTime(300),
-          distinctUntilChanged(),
-          map(product => product.description ? product.description : product)
-        )
-    ).pipe(
-      map(([products, entryProduct]) => {
-        return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) })
-      })
-    )
-
-    this.scanValidation$ = combineLatest(
-      this.entryWarehouseControl.valueChanges,
-      this.entryProductControl.valueChanges,
-      this.entryScanControl.valueChanges.pipe(distinctUntilChanged(), filter(scan => !(scan === ''))),
-      this.actionAddSerie$.pipe(distinctUntilChanged())
-    ).pipe(
-      switchMap(([warehouse, product, scan, add]) => {
-
-        this.validatingScan.next(true);
-        if (warehouse && product) {
-          return this.dbs.getProductSerialNumbers(warehouse.id, product.id).pipe(
-            map(serials => { return !!serials.find(serial => serial.barcode === scan) ? true : false }),
-            tap(res => {
-
-              if (res) {
-                this.entryScanControl.markAsTouched()
-                this.entryScanControl.setErrors({
-                  repeated: true
-                });
-                this.snackbar.open(`🚨 El código escaneado ya existe en este almacén!`, 'Aceptar', {
-                  duration: 6000
-                });
-              } else {
-                if (add) {
-                  this.addSerie();
-                }
-                this.entryScanControl.setErrors(null)
-              }
-
-              this.validatingScan.next(false);
-              this.actionAddSerie.next(false);
-
-              return res;
-            })
-          )
-        } else {
-          this.entryScanControl.setErrors(null)
-          this.validatingScan.next(false);
-          this.actionAddSerie.next(false);
-          return of(null)
-        }
-      })
-    )
-
-  }
-
-  showEntryProduct(product: WarehouseProduct): string | null {
-    return product.description ? product.description : null;
-  }
-
-  selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value);
-  }
-
-  showEntrySKU(product: any): string | null {
-    return product ? product.sku + ' | ' + product.color.name : null
-  }
-
-  selectedEntrySKU(event: any): void {
-    this.entryStock = event.option.value.stock;
-  }
-
-  addSerie() {
-    let scan = this.entryScanControl.value.trim();
-
-    // First, lets check if the scanned code is part of our inventory
-    let validation = this.checkSKU(scan);
-
-    if (validation.exists) {
-      // If exist in our inventory, then check if the barcode already exists in the product serial numbers
-      if (this.checkSerialList(scan)) {
-        this.entryScanControl.markAsTouched()
-        this.entryScanControl.setErrors({
-          repeated: true
-        });
-        this.snackbar.open(`🚨 El código escaneado ya se encuentra en la lista!`, 'Aceptar', {
-          duration: 6000
-        });
-      } else {
-        
-        let data = {
-          barcode: scan,
-          color: validation.product.color,
-          sku: validation.product.sku
-        }
-
-        this.serialList.unshift(data);
-        this.entryStock = this.serialList.length;
-        this.entryScanControl.setValue('');
-      }
-    } else {
-      // If not exists, we have to add the SKU to the current product
-      this.addNewSKUToProduct(this.entryProductControl.value);
-    }
-  }
-
-  dispatchAddSerie(): void {
-    this.actionAddSerie.next(true);
-  }
-
-  removeSerie(i) {
-    this.serialList.splice(i, 1)
-    this.entryStock = this.serialList.length;
-  }
-
-  checkSKU(code: string): { exists: boolean, product: {color: {color: string, name: string}, sku: string} } {
-    let product = this.entryProductControl.value;
-    let exist = false;
-    let skuData;
-
-    product.skuArray.every(product => {
-      exist = code.startsWith(product.sku);
-      skuData = product
-      return !exist;
-    });
-
-    return { exists: exist, product: skuData };
-  }
-
-  checkSerialList(barcode: string): boolean {
-    let exist = false;
-
-    this.serialList.every(serie => {
-      exist = serie === barcode;
-      return !exist
-    })
-
-    return exist;
-  }
-
-  addNewSKUToProduct(product: WarehouseProduct): void {
-    console.log('new sku');
   }
 
   save(): void {
+    //console.log("saving")
+    //console.log(this.cumSeriesList)
     this.loading.next(true);
-    if (this.serialList.length > 0) {
+    if (this.cumSeriesList.length > 0) {
 
       this.auth.user$
         .pipe(
@@ -231,19 +60,30 @@ export class WarehouseProductsEntryComponent implements OnInit {
             // Save serial numbers in series collection
             // Add quantity to virtual stock and real stock
             // Add entry to kardex
-            return this.dbs.saveSerialNumbers(this.entryInvoiceControl.value,
-              this.entryWaybillControl.value,
-              this.serialList,
-              this.entryWarehouseControl.value,
-              this.entryProductControl.value,
-              user)
+            return of(this.dbs.saveSerialNumbers(
+                null,
+                this.entryInvoiceControl.value,
+                this.entryWaybillControl.value,
+                this.cumSeriesList,
+                user,
+                "---",
+                "Ingreso de Productos",
+                true,
+                <Kardex["type"]>Number(Object.keys(TIPO_COMPROBANTE).find(key => TIPO_COMPROBANTE[key] === this.entryInvoiceType.value)),
+                2,
+                null
+              ))
           })
         )
         .subscribe(batch => {
           batch.commit()
             .then(() => {
               this.loading.next(false);
-              this.serialList =[];
+              this.cumSeriesList =[];
+              this.entryInvoiceControl.setValue(null)
+              this.entryWaybillControl.setValue(null)
+              this.entryInvoiceControl.markAsUntouched()
+              this.entryWaybillControl.markAsUntouched()
               this.snackbar.open('✅ Números de serie almacenados con éxito!', 'Aceptar', {
                 duration: 6000
               });
@@ -261,7 +101,9 @@ export class WarehouseProductsEntryComponent implements OnInit {
       this.snackbar.open('🚨 No hay números de serie!', 'Aceptar', {
         duration: 6000
       });
+      this.loading.next(false);
     }
   }
 
 }
+

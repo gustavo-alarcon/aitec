@@ -2,8 +2,8 @@
 
   <h2 class="title">
     <span class="w3-margin-right">
-      <mat-icon>inventory</mat-icon>
-      Existencias
+      <mat-icon>settings</mat-icon>
+      {{view}}
     </span>
     <mat-form-field color="primary" class="content w3-small w3-margin-right" appearance="outline">
       <mat-label>Acciones</mat-label>
@@ -49,7 +49,7 @@
             Ver productos
           </button>
 
-          <button mat-flat-button (click)="downloadXls()" color="primary">
+          <button mat-flat-button [disabled]="!productsTableDataSource.data.length" (click)="downloadXls()" color="primary">
             Descargar Excel
           </button>
 
@@ -78,9 +78,10 @@
                 Imagen referencial
               </th>
               <td mat-cell *matCellDef="let raw" class="w3-center ms-flex ms-flex--center" style="padding: 10px">
-                <a href="{{ raw.gallery[raw.indCover].photoURL }}" target="_blank"
-                  *ngIf="raw.gallery[raw.indCover].photoURL; else defaultPicture">
-                  <img [defaultImage]="defaultImage" [lazyLoad]="raw.gallery[raw.indCover].photoURL" [offset]="100"
+                <a target="_blank"
+                  *ngIf="raw.gallery[raw.indCover]?.photoURL as photoURL; else defaultPicture"
+                  href="{{ photoURL }}">
+                  <img [defaultImage]="defaultImage" [lazyLoad]="photoURL" [offset]="100"
                     style="object-fit: contain; width: 90px; height: 90px" />
                 </a>
                 <ng-template #defaultPicture>
@@ -105,7 +106,7 @@
 
             <ng-container matColumnDef="sku">
               <th mat-header-cell *matHeaderCellDef mat-sort-header class="ms-table__th w3-center w3-padding">
-                Código de existencia
+                Part Number
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
                 {{ raw.sku }}
@@ -127,7 +128,7 @@
                 Stock Virtual
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                {{ raw.virtualStock }}
+                {{ raw | productStock:false}}
               </td>
             </ng-container>
 
@@ -136,15 +137,25 @@
                 Stock Real
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                {{ raw.realStock }}
+                {{ raw | productStock:true }}
               </td>
             </ng-container>
+
+            <ng-container matColumnDef="warehouseStock">
+              <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
+                Stock en Almacén
+              </th>
+              <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
+                {{raw |warehouseStock:warehouseForm?.value?.id}}
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="list">
               <th mat-header-cell *matHeaderCellDef class="ms-table__th w3-center w3-padding">
                 Nros de serie
               </th>
               <td style="padding: 0px 10px" mat-cell *matCellDef="let raw">
-                <button mat-flat-button color="primary" (click)="openDialog(raw)">Lista</button>
+                <button mat-flat-button color="primary" (click)="openDialog(raw, warehouseForm?.value?.id)">Lista</button>
               </td>
             </ng-container>
 
@@ -156,10 +167,9 @@
               <td style="padding: 0px 24px" mat-cell *matCellDef="let raw" class="w3-border-left w3-border-lightgrey">
                 <ng-container>
                   <mat-menu #rawMenu="matMenu">
-                    <button class="w3-small" mat-menu-item>
-                      Generar GR
-                    </button>
-                    <button class="w3-small" mat-menu-item>
+                    <button 
+                      (click)="openKardex(raw, warehouseForm?.value?.id)"
+                      class="w3-small" mat-menu-item>
                       Kardex
                     </button>
                   </mat-menu>
@@ -199,6 +209,16 @@
   <!-- guide referral -->
   <ng-container *ngIf="view === 'Generar guía de remisión'">
     <app-referral-guide-dialog></app-referral-guide-dialog>
+  </ng-container>
+
+  <!-- take out -->
+  <ng-container *ngIf="view === 'Retirar productos'">
+    <app-warehouse-products-take-out></app-warehouse-products-take-out>
+  </ng-container>
+
+  <!-- movements -->
+  <ng-container *ngIf="view === 'Registro movimientos'">
+    <app-movements></app-movements>
   </ng-container>
 
   <ng-template #default>

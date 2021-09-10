@@ -1,0 +1,39 @@
+.quantity {
+  justify-content: center;
+  width: 100%;
+  font-weight: 500;
+}
+
+.quantityButton {
+  background: transparent;
+  color: black;
+  box-shadow: none;
+  border: 1px solid #b2b2b2;
+
+  &--md {
+    width: 36px;
+    height: 36px;
+  }
+
+  &--sm {
+    width: 25px;
+    height: 25px;
+  }
+
+
+}
+
+.quantityButton--sm .mat-icon {
+  margin-top: -7px;
+  font-size: 15px;
+}
+
+.quantityButton--md .mat-icon {
+  margin-top: -3px;
+  font-size: 22px;
+}
+
+.product__add {
+  width: 200px;
+  text-align: center;
+}

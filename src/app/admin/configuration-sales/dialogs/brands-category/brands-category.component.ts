@@ -31,7 +31,7 @@ export class BrandsCategoryComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log(this.data);
+    //console.log(this.data);
 
     this.selectBrand = this.data.brands
 

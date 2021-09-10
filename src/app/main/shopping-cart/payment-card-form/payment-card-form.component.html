@@ -1,0 +1,54 @@
+<form 
+  *ngIf="paymentData"
+  #postForm
+  (ngSubmit)="postForm.submit()"
+  ngNoForm method="POST" 
+  action="https://secure.micuentaweb.pe/vads-payment/" target="_top">
+
+  <input type="hidden" name="vads_action_mode" [value]="paymentData.vads_action_mode"/>
+  <input type="hidden" name="vads_amount" [value]="paymentData.vads_amount"/>
+  <input type="hidden" name="vads_ctx_mode" [value]="paymentData.vads_ctx_mode"/>
+  <input type="hidden" name="vads_currency" [value]="paymentData.vads_currency"/>
+
+  <input type="hidden" name="vads_cust_email" [value]="paymentData.vads_cust_email" />
+  <input type="hidden" name="vads_cust_first_name" [value]="paymentData.vads_cust_first_name" />
+  <input type="hidden" name="vads_cust_id" [value]="paymentData.vads_cust_id" />
+  <input type="hidden" name="vads_cust_last_name" [value]="paymentData.vads_cust_last_name" />
+
+  <input type="hidden" name="vads_ext_info_payType_account" [value]="paymentData.vads_ext_info_payType_account" />
+  <input type="hidden" name="vads_ext_info_payType_id" [value]="paymentData.vads_ext_info_payType_id" />
+  <input type="hidden" name="vads_ext_info_payType_name" [value]="paymentData.vads_ext_info_payType_name" />
+  <input type="hidden" name="vads_ext_info_payType_type" [value]="paymentData.vads_ext_info_payType_type" />
+  <input type="hidden" name="vads_ext_info_status" [value]="paymentData.vads_ext_info_status" />
+  
+  
+  <input type="hidden" name="vads_order_id" [value]="paymentData.vads_order_id" />
+  <input type="hidden" name="vads_page_action" [value]="paymentData.vads_page_action"/>
+  <input type="hidden" name="vads_payment_cards" [value]="paymentData.vads_payment_cards"/>
+  <input type="hidden" name="vads_payment_config" [value]="paymentData.vads_payment_config"/>
+  <input type="hidden" name="vads_payment_option_code" [value]="paymentData.vads_payment_option_code"/>
+  <input type="hidden" name="vads_return_mode" [value]="paymentData.vads_return_mode"/>
+
+  <input type="hidden" name="vads_site_id" [value]="paymentData.vads_site_id"/>
+  <input type="hidden" name="vads_theme_config" [value]="paymentData.vads_theme_config"/>
+  <input type="hidden" name="vads_trans_date" [value]="paymentData.vads_trans_date"/>
+  <input type="hidden" name="vads_trans_id" [value]="paymentData.vads_trans_id"/>
+  <input type="hidden" name="vads_url_cancel" [value]="paymentData.vads_url_cancel"/>
+  <input type="hidden" name="vads_url_refused" [value]="paymentData.vads_url_refused"/>
+  <input type="hidden" name="vads_url_success" [value]="paymentData.vads_url_success"/>
+  <input type="hidden" name="vads_version" [value]="paymentData.vads_version"/>
+  <input type="hidden" name="signature" [value]="signature"/>
+  <input type="hidden" name="pay" value="Pay"/>
+
+ </form>
+ <div>                    
+  <div class="form" >
+    <div class="container">
+      <div
+        style="height: 50vh;display: flex;align-items: center;justify-content: center;">
+        <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+        </mat-progress-spinner>
+      </div>
+    </div>
+  </div>
+</div> 

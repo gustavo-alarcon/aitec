@@ -12,32 +12,36 @@
           <div>OFF</div>
         </div>
       </div>
-      <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="producto.gallery[producto.indCover].photoURL"
+      <img mat-card-image [defaultImage]="defaultImage" [lazyLoad]="producto.gallery[producto.indCover]?.photoURL"
         [offset]="100" class="product__image" alt="" />
       <mat-card-content>
         <h4 class="product__title w3-margin-top">{{ producto.description }}</h4>
+          <div class="product__descrip"
+            [style.visibility]="promo && producto.promoData.quantity == 1 ? 'visible' : 'hidden'">
+            Antes
+            <span class="product__offer">{{price | currency: 'S/. ':'symbol':'2.2-2'}}</span>
+          </div>
+          <div class="product__price">
+            <div *ngIf="promo && producto.promoData.quantity == 1">
+              <span>Ahora</span>
+              <span class="product__price--number">
+                {{producto.promoData.promoPrice  | currency: 'S/. ':'symbol':'2.2-2'}}
+              </span>
+            </div>
 
-        <div class="product__descrip"
-          [style.visibility]="promo && producto.promoData.quantity == 1 ? 'visible' : 'hidden'">
-          Antes
-          <span class="product__offer">{{price | currency: 'S/. ':'symbol':'2.2-2'}}</span>
-        </div>
-        <div class="product__price">
-          <div *ngIf="promo && producto.promoData.quantity == 1">
-            <span>Ahora</span>
-            <span class="product__price--number">
-              {{producto.promoData.promoPrice  | currency: 'S/. ':'symbol':'2.2-2'}}
+            <span class="product__price--number" *ngIf="!promo || producto.promoData.quantity > 1">
+              {{price | currency: 'S/. ':'symbol':'2.2-2'}}
             </span>
           </div>
+          <div *ngIf="promo && producto.promoData.quantity > 1" class="w3-center product__promo">
+            OFERTA: {{producto.promoData.quantity}} x S/.
+            {{producto.promoData.promoPrice | number: '.2'}}
+          </div>
 
-          <span class="product__price--number" *ngIf="!promo || producto.promoData.quantity > 1">
-            {{price | currency: 'S/. ':'symbol':'2.2-2'}}
-          </span>
+        <div class="w3-center product__noStock" *ngIf="!(product |productStock:false)">
+            Agotado
         </div>
-        <div *ngIf="promo && producto.promoData.quantity > 1" class="w3-center product__promo">
-          OFERTA: {{producto.promoData.quantity}} x S/.
-          {{producto.promoData.promoPrice | number: '.2'}}
-        </div>
+
       </mat-card-content>
     </div>
 

@@ -1,0 +1,194 @@
+<div *ngIf="sale$ | async; else loader"
+  class="store__container w3-section" style="position: relative;">
+
+  <div class="w3-margin-top w3-row">
+    <!-- Main section -->
+    <div class="w3-container w3-col l8 col-md-7">
+      <mat-card class="w3-block delivery">
+        <div class="w3-margin-bottom">
+          <h4 class="delivery__title w3-center">
+            Finalizando pago
+          </h4>
+          <p>Tus productos han sido reservados por 1 hora. 
+            Si excedes este tiempo, tendrás que separar tu compra nuevamente.</p>
+          <p>Solo te quedan <b style="color:red">{{timer$ | async | date:'m:ss'}}</b> 
+            minutos para completar el pago.</p>
+          <h4 class="delivery__title">
+            Elige el método de pago
+          </h4>
+          <mat-form-field class="w3-block" appearance="outline">
+            <mat-label>Opciones de pago</mat-label>
+            <mat-select [formControl]="paymentMethod">
+              <mat-option *ngFor="let pay of (paymentMethodList$| async)" [value]="pay">
+                {{pay.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="w3-margin-bottom" *ngIf="paymentMethod.value?.account">
+            <strong>{{paymentMethod.value.account}}</strong>
+          </div>
+
+          <div>
+            <div *ngIf="paymentMethod.value?.type==3">
+              
+              <div class="w3-margin-bottom">
+                <div class="w3-margin-bottom" style="position: relative"
+                  *ngFor="let image of photosList; let ind = index">
+                  <img class="voucher" style="object-fit: cover" [src]="image.img" alt="fotografía" />
+                  <div class="ms-flex w3-block" style="position: absolute; top: 0">
+                    <span class="ms-fill"></span>
+                    <button type="button" *ngIf="!image.show" mat-icon-button (click)="image.show = true">
+                      <mat-icon>zoom_in</mat-icon>
+                    </button>
+                    <button type="button" *ngIf="image.show" mat-icon-button (click)="image.show = false">
+                      <mat-icon>zoom_out</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button (click)="eliminatedphoto(ind)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <div style="text-align: center; border: 1px solid silver" *ngIf="image.show">
+                    <div class="ms-flex w3-block">
+                      <span class="ms-fill"></span>
+                      <button mat-icon-button (click)="image.show = false">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                    <img style="width: 80%" [src]="image.img" alt="fotografía grande" />
+                  </div>
+                </div>
+
+                <div class="voucher" (click)="photoURL.click()">
+                  Agregar foto de voucher de pago
+                </div>
+                <mat-hint>*Campo requerido</mat-hint>
+
+                <mat-progress-bar *ngIf="photos?.resizing$?.photoURL | async" style="width: 100%"
+                  mode="indeterminate">
+                </mat-progress-bar>
+                <span *ngIf="photos.resizing$?.photoURL | async" class="w3-small ms-color-11 ms-font-montserrat"
+                  style="width: 100%">*comprimiendo</span>
+                <input style="display: none" #photoURL type="file" accept="image/*"
+                  (change)="addNewPhoto('photoURL', photoURL.files)" />
+              </div>
+            </div>
+
+            <div *ngIf="paymentMethod.value?.type==2">
+              <app-payment-card-form 
+                [total]="(totalAll$ | async)"
+                [user]="user$ | async"
+                [sale]="sale$ | async"
+                [paymentMethod]="paymentMethod.value">
+              </app-payment-card-form>
+            </div>
+          </div>
+
+        </div>
+
+      </mat-card>
+    </div>
+
+    <!-- Ticket summary -->
+    <div class="w3-col l4 col-md-5">
+      <div class="w3-padding">
+        <div class="resume">
+          <h2 class="resume__title">Resumen de pedido</h2>
+          <div>
+            <div class="resume__divider"></div>
+            <div class="resume__list w3-section">
+              <div style="display: flex; flex-wrap: wrap; margin-bottom: 16px">
+                <div style="width: 20%">Cant.</div>
+                <div style="width: 55%">Descripción</div>
+                <div style="width: 25%">Precio</div>
+              </div>
+              <div *ngFor="let prod of (sale$|async)?.requestedProducts" class="ordItem">
+                <div style="width: 20%" class="w3-center">
+                  {{prod.quantity | number:'2.'}}
+                </div>
+                <div style="width: 55%">
+                  {{prod.product.description}}
+                </div>
+                <div style="width: 25%">
+                  {{dbs.giveProductPrice(prod) | currency: 'S/. ':'symbol':'2.2-2'}}
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <!-- Price summary -->
+          <div class="resume__descrip w3-section">
+            <div class="ms-flex ms-flex--center">
+              <span>Subtotal</span>
+              <span class="ms-fill"></span>
+              <span>{{ subtotal$ | async | number: ".2"}}</span>
+            </div>
+            <!-- <div class="ms-flex ms-flex--center">
+              <span>Cargos adicionales</span>
+              <span class="ms-fill"></span>
+              <span>0.00</span>
+            </div> -->
+            <div class="ms-flex ms-flex--center">
+              <span>Descuento promocional</span>
+              <span class="ms-fill"></span>
+              <span>{{ discount$ | async | number: ".2"}}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>IGV</span>
+              <span class="ms-fill"></span>
+              <span>{{ igv$ | async | number: ".2"}}</span>
+            </div>
+            <div class="ms-flex ms-flex--center">
+              <span>Delivery</span>
+              <span class="ms-fill"></span>
+              <span>{{delivery$ | async | number: ".2"}}</span>
+            </div>
+          </div>
+          <div class="resume__divider"></div>
+          <div>
+            <div style="display: flex; margin-top: 20px;justify-content: space-between;">
+              <div><strong>Total a pagar:</strong></div>
+              <div class="ticket__total">
+                S/. {{ totalAll$ | async | number: ".2"}}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Finish Button -->
+          <div 
+            *ngIf="paymentMethod.value?.type!=2"
+            class="w3-center w3-margin-top">
+            <button 
+              type="button"
+              *ngIf="(sale$|async) as sale"
+              [disabled]="(disFinishButton$ | async) || !(this.uploadingSale$|async)" 
+              (click)="finish(sale)" 
+              mat-raised-button color="primary" class="resume__button">
+              Finalizar Compra
+            </button>
+          </div>
+
+          <!-- Cancel button -->
+          <div class="w3-center w3-margin-top">
+            <button 
+              type="button"
+              *ngIf="(sale$|async) as sale"
+              [disabled]="!(this.uploadingSale$|async)"
+              (click)="cancelSale(sale)" 
+              mat-raised-button color="warn" class="resume__button">
+              Cancelar Compra
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #loader>
+  <div style="height: 50vh;display: flex;align-items: center;justify-content: center;">
+    <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">
+    </mat-progress-spinner>
+  </div>
+</ng-template>

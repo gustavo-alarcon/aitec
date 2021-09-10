@@ -36,6 +36,18 @@ import { WarehouseInventoryComponent } from './warehouse-inventory/warehouse-inv
 import { WarehouseCreateEditComponent } from './warehouse-create-edit/warehouse-create-edit.component';
 import { WarehouseProductsEntryComponent } from './warehouse-products-entry/warehouse-products-entry.component';
 import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-guide-dialog.component';
+import { SelectSeriesComponent } from './select-series/select-series.component';
+import { WarehouseProductsTakeOutComponent } from './warehouse-products-take-out/warehouse-products-take-out.component';
+import { SharedModule } from 'src/app/core/shared/shared.module';
+import { ListSeriesComponent } from './list-series/list-series.component';
+import { MatListModule } from '@angular/material/list';
+import { KardexDialogComponent } from './kardex-dialog/kardex-dialog.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DatePipe } from '@angular/common';
+import { MovementsComponent } from './movements/movements.component';
+import { MovementsDetailDialogComponent } from './movements-detail-dialog/movements-detail-dialog.component';
+import { TakeOutConfirmDialogComponent } from './take-out-confirm-dialog/take-out-confirm-dialog.component';
 
 
 @NgModule({
@@ -46,14 +58,24 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     WarehouseInventoryComponent,
     WarehouseCreateEditComponent,
     WarehouseProductsEntryComponent,
-    ReferralGuideDialogComponent],
+    ReferralGuideDialogComponent,
+    SelectSeriesComponent,
+    WarehouseProductsTakeOutComponent,
+    ListSeriesComponent,
+    KardexDialogComponent,
+    MovementsComponent,
+    MovementsDetailDialogComponent,
+    TakeOutConfirmDialogComponent
+  ],
   imports: [
     CommonModule,
+    SharedModule,
     WarehouseRoutingModule,
     MatMenuModule,
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
+    MatListModule,
     MatButtonModule,
     MatInputModule,
     ReactiveFormsModule,
@@ -70,12 +92,20 @@ import { ReferralGuideDialogComponent } from './referral-guide-dialog/referral-g
     MatTabsModule,
     MatTooltipModule,
     LazyLoadImageModule,
+    MatCheckboxModule,
     MatCardModule,
     MatStepperModule,
     MatRadioModule,
     MatNativeDateModule,
+    MatProgressSpinnerModule,
     FormsModule,
     NgxPrintModule, 
-  ]
+  ],
+  exports: [
+    ReferralGuideDialogComponent,
+    MatFormFieldModule,
+    CommonModule
+  ],
+  providers: [DatePipe],
 })
 export class WarehouseModule { }

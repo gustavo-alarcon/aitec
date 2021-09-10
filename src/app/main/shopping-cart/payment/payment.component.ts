@@ -21,8 +21,8 @@ export class PaymentComponent implements OnInit {
 
   data:any;
 
-  private static readonly API_ENDPOINT = 'https://api.micuentaweb.pe';
-  private static readonly API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
+  private API_ENDPOINT = 'https://api.micuentaweb.pe';
+  private API_KEY = '13421879:testpublickey_OiXCXWh4P0RiAuqIv3BUP0U27UGUdyOdNQpFM5VdFH61n';
   
   constructor(
               private readonly db:DatabaseService,
@@ -51,11 +51,11 @@ export class PaymentComponent implements OnInit {
 
   private async loadPaymentLibrary(): Promise<void> {
     if (!this.KR) {
-      await KRGlue.loadLibrary(PaymentComponent.API_ENDPOINT, PaymentComponent.API_KEY).then(async ({KR}) => {
+      await KRGlue.loadLibrary(this.API_ENDPOINT, this.API_KEY).then(async ({KR}) => {
         await KR.setFormConfig({'kr-language': 'en-US'});
 
         this.KR = KR;
-        console.log('Library loaded');
+        //console.log('Library loaded');
       });
     }
   }
@@ -66,11 +66,11 @@ export class PaymentComponent implements OnInit {
 
     this.KR.onSubmit((response) => {
 
-      console.log('response : ', response);
+      //console.log('response : ', response);
 
       //console.log(`Form submitted : ${response.formId}`);
       if (response.clientAnswer.orderStatus === 'PAID') {
-        console.log('Payment success');
+        //console.log('Payment success');
 
         return this.payFinishSuccess(response);
         
@@ -88,12 +88,12 @@ export class PaymentComponent implements OnInit {
     // Gets a new token every time    
     const formToken = await this.db.methodPostAsync(this.data);
 
-    console.log('formToken : ',formToken)
+    //console.log('formToken : ',formToken)
 
     // Builds the form
     await this.KR.setFormToken(formToken.answer.formToken);
     await this.KR.addForm('#myPaymentForm').then(({KR, result}) => {
-      console.log(`Form added : ${result.formId}`);
+      //console.log(`Form added : ${result.formId}`);
       return KR.showForm(result.formId);
     });
   }

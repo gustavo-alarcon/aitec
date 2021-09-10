@@ -1,10 +1,13 @@
 <div style="overflow-y: hidden;">
-  <div [formGroup]="guideFormGroup" autocomplete="off">
+  <b *ngIf="sale" style="font-size: 28px;">
+    #{{sale.correlativeType}}{{getCorrelative(sale.correlative)}}
+  </b>
+  <form [formGroup]="guideFormGroup" autocomplete="off">
 
     <div class="arrival">
       <mat-form-field class="w3-block w3-small size-item" appearance="outline">
-        <mat-label>Codigo de pedido / operación</mat-label>
-        <input matInput type="text" formControlName="orderCode" placeholder="Codigo de pedido" autocomplete="off">
+        <mat-label>N° de Guía de Remisión</mat-label>
+        <input matInput type="text" formControlName="orderCode" placeholder="N° de Guía de Remisión" autocomplete="off">
         <mat-error> Requerido * </mat-error>
       </mat-form-field>
 
@@ -47,27 +50,9 @@
       <div class="container-relocated">
         <mat-radio-group aria-label="Seleccione una opción" formControlName="transferReason" color="primary">
           <div class="grid-relocated">
-            <mat-radio-button class="w3-small w3-margin-right item" value="1">Ventas</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="2">Translado de establecimiento de la misma
-              empresa</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="3">Importación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="4">Venta sujeto a confirmacion del comprador
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="5">Translado de bienes para transformacion
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="6">Exportación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="7">Compra</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="8">Recojo de bines</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="9">Venta con entrega a terceros
-            </mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="10">Consignación</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="11">Translado por emison de itenerante de
-              comprobante de pago</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="12">Otros no incluidos en los puntos
-              anteriores tales como <br>
-              exhibición, demostración, etc.</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="13">Devolución</mat-radio-button>
-            <mat-radio-button class="w3-small w3-margin-right item" value="14">Translado de zona primaria
+            <mat-radio-button *ngFor="let option of radioOptions"
+              class="w3-small w3-margin-right item" [value]="option">
+              {{option | titlecase}}
             </mat-radio-button>
           </div>
         </mat-radio-group>
@@ -84,117 +69,28 @@
       </mat-form-field>
     </div>
 
-    <div class="transported">
-      <p>Datos del bien transportados</p>
+    <app-select-series
+      [sale]="sale"
+      [entry]="false"
+      [cumSeriesList]="cumSeriesList">
+    </app-select-series>
 
-      <div class="serial-container">
-        <div class="serial-form">
-
-          <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-            <mat-label>Almacén</mat-label>
-            <mat-icon matPrefix class="w3-margin-right">corporate_fare</mat-icon>
-            <mat-select [formControl]="entryWarehouseControl">
-              <mat-option *ngFor="let item of warehouses$ | async" [value]="item">
-                {{item.name}}
-              </mat-option>
-            </mat-select>
-            <mat-hint>Seleccione un almacén</mat-hint>
-            <mat-error>* Campo requerido</mat-error>
-          </mat-form-field>
-
-
-          <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-            <mat-label>Producto</mat-label>
-            <mat-icon matPrefix class="w3-margin-right">local_offer</mat-icon>
-            <input [formControl]="entryProductControl" matInput type="text" [matAutocomplete]="autoProducts"
-              placeholder="Escriba..." autocomplete="off">
-            <mat-autocomplete #autoProducts="matAutocomplete" [displayWith]="showEntryProduct"
-              (optionSelected)="selectedEntryProduct($event)">
-              <mat-option *ngFor="let product of entryProducts$ | async" style="font-size: 12px;" [value]="product">
-                {{product.description}}</mat-option>
-            </mat-autocomplete>
-            <mat-hint>Escriba y seleccione un producto</mat-hint>
-            <mat-error>* Campo requerido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-            <mat-label>Código</mat-label>
-            <mat-icon matPrefix class="w3-margin-right" style="transform: rotateZ(90deg);">line_weight
-            </mat-icon>
-            <input [formControl]="entryScanControl" matInput type="text" placeholder="Escriba..." autocomplete="off"
-              (keyup.enter)="dispatchAddSerie()">
-            <mat-hint>Presione ENTER para agregar</mat-hint>
-            <mat-progress-bar *ngIf="validatingScan$ | async" mode="indeterminate"></mat-progress-bar>
-            <mat-error>
-              <span *ngIf="scanValidation$ | async">
-                {{entryScanControl.value}} ya existe en este almacén.</span>
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div *ngIf="serialList.length else scanDefault" class="info info--default">
-          <div *ngFor="let item of serialList; let i=index" class="info_barcode">
-            <div>{{item.barcode}}</div>
-            <div class="ms-fill"></div>
-            <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(i)">remove_circle
-            </mat-icon>
-          </div>
-        </div>
-      </div>
-
-      <ng-template #scanDefault>
-        <div class="info info--default">
-          <mat-icon style="transform: rotateZ(90deg);">line_weight</mat-icon>
-          <p>Aquí se mostrará la lista de productos escaneados.</p>
-        </div>
-      </ng-template>
-
-    </div>
-    <div *ngIf="serialList.length > 0" class="w3-margin-left">
-      <button mat-raised-button color="primary" class="btn" (click)="addProducts()">Agregar</button>
-    </div>
-  </div>
+    
+  </form>
 </div>
 <br />
 <mat-divider></mat-divider>
 
-<div class="listProduct">
-  <p style="font-weight: bold;">Lista de productos</p>
-
-  <table class="table table-striped">
-    <thead class="w3-border-bottom w3-margin-bottom">
-      <tr class="grid-listProduct">
-        <th>N°</th>
-        <th>Código de producto</th>
-        <th>Producto</th>
-        <th>N° de Serie</th>
-        <th>Unidades</th>
-        <th>Medida</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of arrayProducts; let i=index" class="grid-listProduct">
-        <td> {{i + 1}} </td>
-        <td>{{item.mainCode}}</td>
-        <td> {{item.description}} </td>
-        <td><span *ngFor="let serial of item.serialList" class="w3-small">{{serial.barcode}}, </span></td>
-        <td> {{ item.quantity }}</td>
-        <td>{{item.unit}}</td>
-
-        <td> <i class="material-icons" (click)="deleteProduct(i)" style="cursor: pointer;">remove_circle</i></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
 <mat-progress-bar mode="indeterminate" *ngIf="loading$ | async" color="accent"></mat-progress-bar>
-<div *ngIf="arrayProducts.length>0" class="w3-margin-left">
-  <button mat-raised-button color="primary" class="btn w3-margin-right" (click)="saveWaybill()">Guardar</button>
-  <button mat-raised-button color="primary" class="btn" printSectionId="print-section" ngxPrint> Imprimir</button>
-</div>
+<ng-container *ngIf="user$|async as user">
+  <div *ngIf="cumSeriesList.length>0" class="w3-margin-left w3-margin-top" style="text-align: end;">
+    <button [disabled]="(loading$ | async) || !guideFormGroup.valid" mat-raised-button color="primary" class="w3-margin-right" (click)="saveWaybill(user)">Guardar</button>
+    <button mat-raised-button color="primary" (click)="printWaybill(user)"> Imprimir</button>
+  </div>
+</ng-container>
 
-<div id="print-section" style="transform: scale(0.01); margin: 10px 10px 10px 30px;">
+
+<!-- <div id="print-section" style="transform: scale(0.01); margin: 10px 10px 10px 30px;">
   <div style="margin: 20px 10px 10px 10px; width: 100%;">
     <div style="height: 200px;">
       <h2 style="position: absolute; top: 150px; right: 150px;">{{this.guideFormGroup.get('orderCode').value}}</h2>
@@ -236,6 +132,7 @@
       </table>
     </div>
   </div>
+
   <div style="margin: 20px 10px 10px 10px; width: 100%;">
     <div style="margin-left: 100px; display: grid; grid-column-gap: 1em; grid-template-columns: 1fr 1fr 1fr;">
       <p> {{this.guideFormGroup.get('transferReason').value=== '1' ? 'X': ' '}} </p>
@@ -260,4 +157,4 @@
     </div>
 
   </div>
-</div>
+</div> -->

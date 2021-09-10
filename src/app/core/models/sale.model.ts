@@ -1,14 +1,25 @@
 import { User } from 'src/app/core/models/user.model';
-import { Product } from './product.model';
+import { Product, unitProduct, Zone } from './product.model';
 import { Package } from './package.model';
+import { Coupon } from './coupon.model';
+import { Stores } from './stores.model';
+import { Payments } from './payments.model';
+import { Adviser } from './adviser.model';
+import { Waybill } from './waybill.model';
 
 export class saleStatusOptions {
-  requested = 'Solicitado';
+  requesting = 'Solicitando';               //Estado a espera de confirmación de cloud function
+  failed = 'Error';                         //Estado de rechazo de confirmación de cloud function
+  paying = 'Pagando';                       //Estado de confirmación de cloud function. Stock separado, se espera pago. Usuario se marcará con pendingPayment
+
+  requested = 'Solicitado';                 //Venta confirmada por cloud function y pagada
   attended = 'Atendido';
-  confirmedRequest = 'Solicitud Confirmada';        //can be confirmed only when voucher is valid
-  confirmedDocument = 'Comprobante Confirmado';
-  // confirmedDelivery = 'Delivery Confirmado';
-  // driverAssigned = 'Conductor Asignado';
+  //Fecha asignada y tracking
+  confirmedRequest = 'Solicitud Confirmada';  
+  //Aca recien aparece n° de comprobante      //can be confirmed only when voucher is valid
+  confirmedDocument = 'Comprobante Confirmado'; //Recien pasan a almacen
+  confirmedDelivery = 'Delivery Confirmado';
+  // driverAssigned = 'Conductor Asignado'; Para despacho
   finished = 'Entregado';
   cancelled = 'Anulado'
 }
@@ -18,65 +29,61 @@ type FilterFlags<Base, Condition, Data> =
   ;
 
 export interface SaleRequestedProducts {
-  product: Product | Package;
+  product: Product //| Package;
+  //Product can contain many colors, so we use
+  //chosenProduct to get the color
+  //This means, a sale can have many products with same id
+  //inside requested products, but with different colro (chosen)
   quantity: number;
-  //If "product" is a package, we will have to specify the chosen products
-  //for each field in package.items. chosenOptions will contain the
-  //chosen products in the same order as each field in package.items.
-  chosenOptions?: Product[];
+  chosenProduct: unitProduct;
+  chosenOptions?: any;      //I included it only to avoid type errors. Will be fixed when doing sales section
+  color: boolean;
+  price: number;
 }
 
 export interface Sale {
   id: string;
   correlative: number;
   correlativeType: string;
-  payType?: any,
-  document?: string,             //tipo de comprobante
-  location?: {
-    address: string,
-    district: any,
-    coord?: {
-      lat: number,
-      lng: number,
-    },
-    reference: string,
-    phone: number
-  },
-
-  userId?: string;
   user: User;                   //requesting user
-  requestDate: Date,            //Fecha deseada por cliente
 
-  idDocument: number;
-  documentInfo: any;
-  payInfo: any;
-
-  idDelivery: number;
-  deliveryType: string;
-  deliveryInfo: any;
-
-  observation: string;
-
-  adviser:any;
-  coupon:any;
-  //A partir de este punto, todo varia de acuerdo
-  //a formulario de ventas.
   status: saleStatusOptions[keyof saleStatusOptions]
-
   requestedProducts: SaleRequestedProducts[];
 
+  // Delivery data
+  deliveryPickUp: boolean;  //Whether it is pickup or delivery (sent)
+  delivery: Zone | Stores;   //Product zone in case of delivery, stores in pickup. When empty means a coordinar
+  observation: string;
+  location: User["location"][0]             //In case of delivery and valid zone
+  deliveryPrice: number;                  //0 when pickup. In case of delivery, has price from zone
 
-  deliveryPrice: number;
-  total: number;
+  //Coupon data
+  coupon:Coupon;
+  couponDiscount: number       //Discount applied at creatinon
+
+  //Payment data
+  document: "Boleta"| "Factura",             //tipo de comprobante
+  documentInfo: {
+    number: string,
+    name: string
+    address?: string          //Only in "Factura"
+  } 
+  
+  payType: Payments
+
+  adviser: Adviser;
+
+  //Here comes things that will be editted
+  additionalPrice?: number;
 
   voucher: {
     voucherPhoto: string,
     voucherPath: string
   }[]
 
-  voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
-  voucherActionBy?: User,
-  voucherActionAt?: Date,
+  // voucherChecked: boolean,      //done by admin. needed to confirmedDelivery
+  // voucherActionBy?: User,
+  // voucherActionAt?: Date,
 
   attendedData?: {             //Can go only when Atendido or more
     attendedBy: User,
@@ -85,7 +92,7 @@ export interface Sale {
 
   confirmedRequestData?: {        //only when confirmedRequest or more
     assignedDate: Date,           //Fecha asignada por admin
-    requestedProductsId: string[];//Used in virtual stock
+    trackingCode: string,
     observation: string,
 
     confirmedBy: User,
@@ -100,8 +107,9 @@ export interface Sale {
   }
 
   confirmedDeliveryData?: {           //To confirme delivery data we need
-    deliveryType: "Biker" | "Moto",   //to have the vouchers checked
-    deliveryBusiness: any,
+    referralGuide: Waybill,          //referralGuideDate is the date when referral
+
+    deliveryUser: User,
 
     confirmedBy: User,
     confirmedAt: Date
@@ -141,4 +149,38 @@ export interface Sale {
 
   transactionCliente?: any;
   transactionSale?: any;
+}
+
+export interface SaleEmailData {
+  adviser: boolean;
+  adviserNumber: string;
+  adviserMail: string;
+
+  correlative: string;    //#000005 correlativeType+correlative
+  createdAt: string;      //20 diciembre, 2020
+  paymentMethod: string;  //Tarjeta
+
+  document: string;   //Boleta/Factura
+  documentInfoNumber: string; //DNI/RUC
+  documentInfoName: string;      //NOmbre apellido / razon social
+  documentInfoAddress: string;      //Only in case of factura
+
+  deliveryType: string;         //Recojo en Tienda, Envío, A Coordinar (here the next won't apply)
+  departamento: string;
+  provincia: string;
+  distrito: string;
+  address: string;
+
+  productData: {
+    description: string;
+    quantity: number;
+    total: string;
+  }[]
+
+  subTotal: string;
+  igv: string;
+  sum: string;    //subTotal + igv
+  promotionalDiscount: string;
+  delivery: string;
+  total: string;
 }

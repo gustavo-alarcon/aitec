@@ -1,5 +1,5 @@
 <div style="position: relative;">
-  <div class="ms-container" style="padding: 16px 0;">
+  <div class="ms-container" style="padding-top: 16px;">
     <div class="ms-flex ms-flex--center" style="justify-content: space-between">
       <div style="padding:16px 0">
         <a class="bradcumb" routerLink="/main">Inicio</a> >
@@ -48,7 +48,7 @@
               </div>
               <mat-expansion-panel *ngFor="let cat of categories" class="filtro__panel" >
                 <mat-expansion-panel-header>
-                  <mat-panel-title> {{ cat.category }} </mat-panel-title>
+                  <mat-panel-title (click)="navigateOnlyCategory(cat.category)"> {{ cat.category }} </mat-panel-title>
                 </mat-expansion-panel-header>
                 <div *ngFor="let sub of cat.subcategories">
                   <mat-expansion-panel *ngIf="sub.categories.length;else simple" class="filtro__panel" >

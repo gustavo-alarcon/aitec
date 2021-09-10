@@ -1,106 +1,54 @@
 <mat-card>
   <mat-card-content>
-    <div class="entry">
-      <div style="padding: 12px">
+    <div>
+      <div 
+        style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center; 
+              flex-wrap: wrap ;padding: 12px">
 
-        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Comprobante de compra</mat-label>
-          <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
-          <input matInput type="text" [formControl]="entryInvoiceControl" placeholder="F001-1020" autocomplete="off">
-          <mat-hint>Número de factura, boleta, ...</mat-hint>
-          <mat-error>* Campo requerido</mat-error>
-        </mat-form-field>
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom w3-margin-right" appearance="outline">
+        <mat-label>Tipo de comprobante</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <mat-select [formControl]="entryInvoiceType">
+            <mat-option *ngFor="let option of invoiceType" [value]="option">{{option}}</mat-option>
+        </mat-select>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
 
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom w3-margin-right" appearance="outline">
+        <mat-label>Número de Comprobante</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <input matInput type="text" [formControl]="entryInvoiceControl" placeholder="F001-1020" autocomplete="off">
+        <mat-hint>Número de factura, boleta, ...</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>   
 
-        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Guía de remisión</mat-label>
-          <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
-          <input matInput type="text" [formControl]="entryWaybillControl" placeholder="GR001-2010" autocomplete="off">
-          <mat-hint>Número de guía</mat-hint>
-          <mat-error>* Campo requerido</mat-error>
-        </mat-form-field>
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom" appearance="outline">
+        <mat-label>Guía de remisión</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <input matInput type="text" [formControl]="entryWaybillControl" placeholder="GR001-2010" autocomplete="off">
+        <mat-hint>*Número de guía</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
 
       </div>
 
-      <div style="padding: 12px">
+      <app-select-series
+        [sale]="null"
+        [entry]="true"
+        [cumSeriesList]="cumSeriesList">
+      </app-select-series>
 
-        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Almacén</mat-label>
-          <mat-icon matPrefix class="w3-margin-right">corporate_fare</mat-icon>
-          <mat-select [formControl]="entryWarehouseControl">
-            <mat-option *ngFor="let item of warehouses$ | async" [value]="item">
-              {{item.name}}
-            </mat-option>
-          </mat-select>
-          <mat-hint>Seleccione un almacén</mat-hint>
-          <mat-error>* Campo requerido</mat-error>
-        </mat-form-field>
-
-
-        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Producto</mat-label>
-          <mat-icon matPrefix class="w3-margin-right">local_offer</mat-icon>
-          <input [formControl]="entryProductControl" matInput type="text" [matAutocomplete]="autoProducts"
-            placeholder="Escriba..." autocomplete="off">
-          <mat-autocomplete #autoProducts="matAutocomplete" [displayWith]="showEntryProduct"
-            (optionSelected)="selectedEntryProduct($event)">
-            <mat-option *ngFor="let product of entryProducts$ | async" style="font-size: 12px;" [value]="product">
-              {{product.description}}</mat-option>
-          </mat-autocomplete>
-          <mat-hint>Escriba y seleccione un producto</mat-hint>
-          <mat-error>* Campo requerido</mat-error>
-        </mat-form-field>
-
-        <mat-form-field color="primary" class="w3-small w3-margin-bottom w3-block" appearance="outline">
-          <mat-label>Código</mat-label>
-          <mat-icon matPrefix class="w3-margin-right" style="transform: rotateZ(90deg);">line_weight
-          </mat-icon>
-          <input [formControl]="entryScanControl" matInput type="text" placeholder="Escriba..." autocomplete="off"
-            (keyup.enter)="dispatchAddSerie()">
-          <mat-hint>Presione ENTER para agregar</mat-hint>
-          <mat-progress-bar *ngIf="validatingScan$ | async" mode="indeterminate"></mat-progress-bar>
-          <mat-error>
-            <span *ngIf="scanValidation$ | async">
-              {{entryScanControl.value}} ya existe en este almacén.</span>
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <div *ngIf="serialList.length else scanDefault" class="info info--default">
-        <div *ngFor="let item of serialList; let i=index" class="info_barcode">
-          <div>{{item.barcode}}</div>
-          <div class="ms-fill"></div>
-          <mat-icon class="font--primary" style="cursor:pointer" (click)="removeSerie(i)">remove_circle
-          </mat-icon>
-        </div>
-      </div>
     </div>
 
-    <ng-template #loadingInput>
-      <div class="loadingInput">
-        Cargando contenido ...
-      </div>
-    </ng-template>
-
-    <ng-template #infoDefault>
-      <div class="info info--default">
-        <mat-icon>warning</mat-icon>
-        <p>Debe seleccionar un almacén, producto y SKU para mostrar su información.</p>
-      </div>
-    </ng-template>
-
-    <ng-template #scanDefault>
-      <div class="info info--default">
-        <mat-icon>line_weight</mat-icon>
-        <p>Aquí se mostrará la lista de productos escaneados.</p>
-      </div>
-    </ng-template>
   </mat-card-content>
 
   <mat-card-actions>
     <div class="entry entry_actions">
       <span class="ms-fill"></span>
-      <button mat-raised-button color="primary" (click)="save()">Guardar ingreso</button>
+      <button 
+        [disabled]="(loading$ | async) || !entryInvoiceControl.valid || !entryWaybillControl.valid || !this.cumSeriesList.length || !entryInvoiceType.valid"
+        mat-raised-button color="primary" (click)="save()">Guardar ingreso</button>
     </div>
   </mat-card-actions>
+
 </mat-card>

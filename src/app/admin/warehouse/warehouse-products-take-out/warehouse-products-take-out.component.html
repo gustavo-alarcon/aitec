@@ -1,0 +1,56 @@
+<mat-card>
+  <mat-card-content>
+    <div>
+      <div 
+        style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center; 
+              flex-wrap: wrap ;padding: 12px"
+      >
+
+      <mat-form-field color="primary" style="width: 296px" class="w3-small w3-margin-bottom w3-margin-right" appearance="outline">
+        <mat-label>Tipo de comprobante</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <mat-select [formControl]="entryInvoiceType">
+            <mat-option *ngFor="let option of invoiceType" [value]="option">{{option}}</mat-option>
+        </mat-select>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field color="primary" class="w3-small w3-margin-bottom" appearance="outline">
+        <mat-label>Número de comprobante</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <input matInput type="text" [formControl]="entryInvoiceControl" placeholder="F001-1020" autocomplete="off">
+        <mat-hint>Número de factura, boleta, ...</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field>
+      
+
+      <!-- <mat-form-field color="primary" class="w3-small w3-margin-bottom" appearance="outline">
+        <mat-label>Guía de remisión</mat-label>
+        <mat-icon matPrefix class="w3-margin-right">receipt</mat-icon>
+        <input matInput type="text" [formControl]="entryWaybillControl" placeholder="GR001-2010" autocomplete="off">
+        <mat-hint>Número de guía</mat-hint>
+        <mat-error>* Campo requerido</mat-error>
+      </mat-form-field> -->
+
+      </div>
+
+      <app-select-series
+        [sale]="null"
+        [entry]="false"
+        [cumSeriesList]="cumSeriesList">
+      </app-select-series>
+
+    </div>
+
+  </mat-card-content>
+
+  <mat-card-actions>
+    <div class="entry entry_actions">
+      <span class="ms-fill"></span>
+      <button 
+        [disabled]="(loading$ | async) || !entryInvoiceControl.valid || !entryWaybillControl.valid || !this.cumSeriesList.length" 
+        mat-raised-button color="primary" (click)="save()">Retirar</button>
+    </div>
+  </mat-card-actions>
+
+</mat-card>

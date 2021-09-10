@@ -1,17 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { PlacesService } from '../../../core/services/places.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DatabaseService } from '../../../core/services/database.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { startWith, map, tap, switchMap, debounceTime, distinctUntilChanged, take, filter } from 'rxjs/operators';
-import { Warehouse } from '../../../core/models/warehouse.model';
-import { WarehouseProduct } from '../../../core/models/warehouseProduct.model';
+import { shareReplay } from 'rxjs/operators';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { SerialNumber } from 'src/app/core/models/SerialNumber.model';
-import { Product } from 'src/app/core/models/product.model';
-import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
+import { SerialNumber, SerialNumberWithPrice } from 'src/app/core/models/SerialNumber.model';
+import { TRANSFER_REASON, Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
+import { Sale, SaleRequestedProducts } from 'src/app/core/models/sale.model';
+import { User } from 'src/app/core/models/user.model';
 
 @Component({
   selector: 'app-referral-guide-dialog',
@@ -19,6 +18,10 @@ import { Waybill, WaybillProductList } from 'src/app/core/models/waybill.model';
   styleUrls: ['./referral-guide-dialog.component.scss']
 })
 export class ReferralGuideDialogComponent implements OnInit {
+  @Input() sale: Sale
+  @Output() closeDialog = new EventEmitter()  //Used when checking sales on logistics
+
+  cumSeriesList: SerialNumberWithPrice[] = []
 
   loading = new BehaviorSubject<boolean>(false);
   loading$ = this.loading.asObservable();
@@ -33,42 +36,12 @@ export class ReferralGuideDialogComponent implements OnInit {
   entrySeries: FormControl;
   entryselectProductControl: FormControl;
 
-  warehouses$: Observable<Warehouse[]>;
-  entryProducts$: Observable<WarehouseProduct[]>;
-
-  selectedProduct = new BehaviorSubject<any>(null);
-  selectedProduct$ = this.selectedProduct.asObservable();
-  actualProduct: Product = null;
 
   serialList: Array<SerialNumber> = [];
   arrayProducts: Array<WaybillProductList> = [];
-  entryStock: number = 0;
 
-  scanValidation = new BehaviorSubject<boolean>(false);
-  scanValidation$ = this.scanValidation.asObservable();
-
-  validatingScan = new BehaviorSubject<boolean>(false);
-  validatingScan$ = this.validatingScan.asObservable();
-
-  actionAddSerie = new BehaviorSubject<boolean>(false);
-  actionAddSerie$ = this.actionAddSerie.asObservable();
-
-  radioOptions = {
-    "1": "Ventas",
-    "2": "Translado de establecimiento de la misma empresa",
-    "3": "Importación",
-    "4": "Venta sujeto a confirmacion del comprador",
-    "5": "Translado de bienes para transformacion",
-    "6": "Exportación",
-    "7": "Compra",
-    "8": "Recojo de bines",
-    "9": "Venta con entrega a terceros",
-    "10": "Consignación",
-    "11": "Translado por emison de itenerante de comprobante de pago",
-    "12": "Otros no incluidos en los puntos anteriores tales como exhibición, demostración, etc.",
-    "13": "Devolución",
-    "14": "Translado de zona primaria",
-  };
+  radioOptions = TRANSFER_REASON;
+  user$: Observable<User>;
 
   constructor(
     public places: PlacesService,
@@ -89,288 +62,251 @@ export class ReferralGuideDialogComponent implements OnInit {
       orderCode: [null, Validators.required],
       addressee: [null, Validators.required],
       dni: [null, Validators.required],
-      transferDate: [null, Validators.required],
+      transferDate: [new Date(), Validators.required],
       startingPoint: [null, Validators.required],
       arrivalPoint: [null, Validators.required],
       transferReason: [null, Validators.required],
-      observations: [null, Validators.required],
+      observations: [null],
     });
 
-    this.entryWarehouseControl = this.fb.control('', Validators.required);
-    this.entryProductControl = this.fb.control('', Validators.required);
-    this.entryScanControl = this.fb.control('');
-
-    this.entrySeries = this.fb.control('', Validators.required);
-    this.entryselectProductControl = this.fb.control('');
   }
 
   initObservables(): void {
-    this.warehouses$ = this.dbs.getWarehouseList();
-
-    this.entryProducts$ = combineLatest(
-      this.entryWarehouseControl.valueChanges
-        .pipe(
-          startWith(''),
-          switchMap(warehouse => { return this.dbs.getWarehouseProducts(warehouse) })
-        ),
-      this.entryProductControl.valueChanges
-        .pipe(
-          startWith(''),
-          debounceTime(300),
-          distinctUntilChanged(),
-          map(product => product.description ? product.description : product)
-        )
-    ).pipe(
-      map(([products, entryProduct]) => {
-        return products.filter(product => { return product.description.toLowerCase().includes(entryProduct.toLowerCase()) })
-      })
-    )
-
-    this.scanValidation$ = combineLatest(
-      this.entryWarehouseControl.valueChanges,
-      this.entryProductControl.valueChanges,
-      this.entryScanControl.valueChanges.pipe(distinctUntilChanged(), filter(scan => !(scan === ''))),
-      this.actionAddSerie$.pipe(distinctUntilChanged())
-    ).pipe(
-      switchMap(([warehouse, product, scan, add]) => {
-
-        this.validatingScan.next(true);
-        if (warehouse && product && add) {
-          return this.dbs.getStoredSerialNumbers(warehouse.id, product.id).pipe(
-            map(serials => { return serials.find(serial => serial.barcode === scan) }),
-            tap(serial => {
-
-              if (serial) {
-                this.addSerie(serial.id);
-              } else {
-                this.entryScanControl.setErrors(null)
-                this.entryScanControl.markAsTouched()
-                this.entryScanControl.setErrors({
-                  repeated: true
-                });
-                this.snackbar.open(`🚨 El código escaneado no es parte de este almacén o está vendido!`, 'Aceptar', {
-                  duration: 6000
-                });
-              }
-
-              this.validatingScan.next(false);
-              this.actionAddSerie.next(false);
-
-              return !!serial;
-            })
-          )
-        } else {
-          this.entryScanControl.setErrors(null)
-          this.validatingScan.next(false);
-          this.actionAddSerie.next(false);
-          return of(null)
-        }
-      })
-    )
+    this.user$ = this.auth.user$.pipe(shareReplay(1))
   }
-
-  dispatchAddSerie(): void {
-    this.actionAddSerie.next(true);
-  }
-
-  addSerie(id: string) {
-    let scan = this.entryScanControl.value.trim();
-
-    // First, lets check if the scanned code is part of our inventory
-    let validation = this.checkSKU(scan);
-
-    if (validation.exists) {
-      // If exist in our inventory, then check if the barcode already exists in the product serial numbers
-      if (this.checkSerialList(scan)) {
-        this.entryScanControl.markAsTouched()
-        this.entryScanControl.setErrors({
-          repeated: true
-        });
-        this.snackbar.open(`🚨 El código escaneado ya se encuentra en la lista!`, 'Aceptar', {
-          duration: 6000
-        });
-      } else {
-
-        let data: SerialNumber = {
-          id: id,
-          barcode: scan,
-          color: validation.product.color,
-          sku: validation.product.sku,
-          status: null,
-          createdAt: null,
-          createdBy: null,
-          editedAt: null,
-          editedBy: null
-        }
-
-        this.serialList.unshift(data);
-        this.entryStock = this.serialList.length;
-        this.entryScanControl.setValue('');
-      }
-    } else {
-      this.snackbar.open(`🚨 El código escaneado no es parte de este almacén!`, 'Aceptar', {
-        duration: 6000
-      });
-    }
-  }
-
-  removeSerie(i) {
-    this.serialList.splice(i, 1)
-    this.entryStock = this.serialList.length;
-  }
-
-  checkSKU(code: string): { exists: boolean, product: { color: { color: string, name: string }, sku: string } } {
-    let product = this.entryProductControl.value;
-    let exist = false;
-    let skuData;
-
-    product.skuArray.every(product => {
-      exist = code.startsWith(product.sku);
-      skuData = product
-      return !exist;
-    });
-
-    return { exists: exist, product: skuData };
-  }
-
-  checkSerialList(barcode: string): boolean {
-    let exist = false;
-
-    this.serialList.every(serial => {
-      exist = serial.barcode === barcode;
-      return !exist
-    })
-
-    console.log(exist);
-
-    return exist;
-  }
-
-  showEntryProduct(product: WarehouseProduct): string | null {
-    return product.description ? product.description : null;
-  }
-
-  selectedEntryProduct(event: any): void {
-    this.selectedProduct.next(event.option.value);
-    this.actualProduct = event.option.value;
-  }
-
-
-
-
-  // AQUUIIIII ME QUEDE, AGREGANDO LA LISTA DE SERIES A LA LISTA DE PRODUCTOS
-  checkIfExistOnProducts(product: Product): boolean {
-    let exist = false;
-
-    this.arrayProducts.every(list => {
-      exist = list.mainCode === product.sku;
-      return !exist
-    });
-
-    return exist;
-  }
-
 
   addProducts() {
-
-    if (this.checkIfExistOnProducts(this.actualProduct)) {
-      this.snackbar.open(`🚨 Este producto ya se encuentra en la lista de emisión!`, 'Aceptar', {
-        duration: 6000
-      });
-      return;
-    }
-
-    let data: WaybillProductList = {
-      mainCode: this.actualProduct.sku,
-      description: this.actualProduct.description,
-      invoice: this.guideFormGroup.value['orderCode'],
-      waybill: this.guideFormGroup.value['orderCode'],
-      productId: this.actualProduct.id,
-      warehouseId: this.entryWarehouseControl.value.id,
-      serialList: this.serialList,
-      quantity: this.serialList.length,
-      unit: 'unidades',
-      totalWeight: this.actualProduct.weight ? (this.actualProduct.weight * this.serialList.length) : 0
-    };
-
-    this.arrayProducts.push(data);
-    this.serialList = [];
+    this.arrayProducts = this.cumSeriesList.map(actualProduct => {
+      let data: WaybillProductList = {
+        mainCode: actualProduct.product.sku,
+        description: actualProduct.product.description,
+        invoice: this.guideFormGroup.value['orderCode'],
+        waybill: this.guideFormGroup.value['orderCode'],
+        productId: actualProduct.product.id,
+        warehouseId: actualProduct.warehouse.id,
+        serialList: <SerialNumber[]>actualProduct.list,
+        quantity: actualProduct.list.length,
+        unit: 'unidades',
+        totalWeight: actualProduct.product.weight ? (actualProduct.product.weight * this.serialList.length) : 0
+      };
+      return data
+    })
 
   }
 
-  deleteProduct(index: number) {
-    this.arrayProducts.splice(index, 1);
-  }
-
-  saveWaybill() {
-    if (!this.arrayProducts.length) {
-      this.snackbar.open(`🚨 La lista de productos de emisión esta vacía!`, 'Aceptar', {
-        duration: 6000
-      });
-      return
-    }
-
+  saveWaybill(user: User) {
     this.loading.next(true);
 
-    this.auth.user$
-      .pipe(
-        take(1)
-      )
-      .subscribe(user => {
+    this.addProducts()
+    const data: Waybill = this.getWaybill(user)
 
-        const data: Waybill = {
-          id: '',
-          orderCode: this.guideFormGroup.value['orderCode'],
-          addressee: this.guideFormGroup.value['addressee'],
-          dni: this.guideFormGroup.value['dni'],
-          transferDate: this.guideFormGroup.value['transferDate'],
-          startingPoint: this.guideFormGroup.value['startingPoint'],
-          arrivalPoint: this.guideFormGroup.value['arrivalPoint'],
-          transferReason: this.radioOptions[this.guideFormGroup.value['transferReason']],
-          observations: this.guideFormGroup.value['observations'],
-          warehouse: this.entryWarehouseControl.value,
-          productList: this.arrayProducts,
-          createdAt: new Date(),
-          createdBy: user,
-          editedAt: null,
-          editedBy: null
+    if(this.sale){
+      if(!this.validateSaleMatch(this.cumSeriesList, this.sale.requestedProducts)){
+        this.loading.next(false);
+        return
+      } 
+    }
+
+
+    let batch = this.dbs.createWaybill(data, this.cumSeriesList, user, this.sale)
+    batch.commit()
+      .then(() => {
+        this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
+          duration: 6000
+        });
+
+        this.cumSeriesList = []
+
+        this.loading.next(false);
+
+        this.guideFormGroup.setValue({
+          orderCode: null,
+          addressee: null,
+          dni: null,
+          transferDate: new Date(),
+          startingPoint: null,
+          arrivalPoint: null,
+          transferReason: null,
+          observations: null,
+        });
+
+        this.guideFormGroup.get("orderCode").markAsUntouched()
+        this.guideFormGroup.get("addressee").markAsUntouched()
+        this.guideFormGroup.get("dni").markAsUntouched()
+        this.guideFormGroup.get("transferDate").markAsUntouched()
+        this.guideFormGroup.get("startingPoint").markAsUntouched()
+        this.guideFormGroup.get("arrivalPoint").markAsUntouched()
+        this.guideFormGroup.get("transferReason").markAsUntouched()
+        this.guideFormGroup.get("observations").markAsUntouched()
+
+        if(this.sale){
+          this.closeDialog.emit(null)
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        this.loading.next(false);
+        this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
+          duration: 6000
+        });
+      })
+
+    
+  }
+
+  validateSaleMatch(cumSeriesList: SerialNumberWithPrice[], products: SaleRequestedProducts[]) {
+
+    let summarySale: {
+      prodId: string,
+      colors: {
+        colId: string,
+        quantity: number
+      }[]
+    }[] = []
+
+    let summaryList: typeof summarySale = []
+
+    //From sale
+    let prodIdSaleList = new Set(products.map(el => el.product.id))
+
+    prodIdSaleList.forEach(prodId => {
+      let prodFiltered = products.filter(el => el.product.id == prodId)
+      let prodColorId = new Set(prodFiltered.map(el => el.chosenProduct.sku))
+      let summarySaleAux: typeof summarySale[0] = {
+        prodId,
+        colors: []
+      }
+
+      summarySaleAux.colors = Array.from(prodColorId).map(colId => {
+        let filteredColor = prodFiltered.find(el => el.chosenProduct.sku == colId)
+        return ({
+          colId,
+          quantity: filteredColor.quantity
+        })
+      })
+      summarySale.push(summarySaleAux)
+    })
+
+    //From the list of the table
+
+    summaryList = cumSeriesList.reduce((prev, curr)=> {
+      //console.log("previous: ", prev)
+      //We find matching prodId
+      let foundProduct = prev.find(el => el.prodId == curr.product.id)
+
+      if(foundProduct){
+        let skuSet = (<SerialNumber[]>curr.list).map(el => el.sku);
+        skuSet.forEach(el => {
+          let foundColor = foundProduct.colors.find(el2 => el2.colId == el)
+          if(foundColor){
+            foundColor.quantity += 1
+          } else {
+            foundProduct.colors.push({
+              colId: el,
+              quantity: 1
+            })
+          }
+        })
+        return prev
+      } else {
+
+        let aux = {
+          prodId: curr.product.id,
+          colors: []
         }
 
-        this.dbs.createWaybill(data, user)
-          .pipe(
-            take(1)
-          ).subscribe(batch => {
-            batch.commit()
-              .then(() => {
-                this.snackbar.open(`☑️ Actualizando números de serie`, 'Aceptar', {
-                  duration: 6000
-                });
+        let skuSet = (<SerialNumber[]>curr.list).map(el => el.sku);
+        skuSet.forEach(el => {
+          let foundColor = aux.colors.find(el2 => el2.colId == el)
+          if(foundColor){
+            foundColor.quantity += 1
+          } else {
+            aux.colors.push({
+              colId: el,
+              quantity: 1
+            })
+          }
+        })
 
-                this.dbs.waybillSerialNumbers(this.arrayProducts, user)
-                  .then(res => {
-                    if (res) {
-                      res.pipe(
-                        take(1)
-                      ).subscribe(batch => {
-                        batch.commit()
-                          .then(() => {
-                            this.loading.next(false);
-                            this.snackbar.open(`✅ Guía de remisión creada satisfactoriamente!`, 'Aceptar', {
-                              duration: 6000
-                            });
-                          })
-                      })
-                    }
-                  })
-              })
-              .catch(err => {
-                console.log(err);
-                this.snackbar.open(`🚨 Parece que hubo un error guardando la guía de remisión`, 'Aceptar', {
-                  duration: 6000
-                });
-              })
-          })
+        return [...prev, aux]
+      }
+    }, summaryList)
+
+    let bool = summarySale.every(el => {
+      let aux = summaryList.find(el2 => el2.prodId == el.prodId)
+      if(!aux){
+        return false
+      }
+      return el.colors.every(el2 => {
+        let aux2 = aux.colors.find(el3 => el3.colId == el2.colId)
+        if(!aux2){
+          return false
+        } else {
+          return aux2.quantity == el2.quantity
+        }
       })
+    })
+    
+    let bool2 = summaryList.every(el => {
+      let aux = summarySale.find(el2 => el2.prodId == el.prodId)
+      if(!aux){
+        return false
+      }
+      return el.colors.every(el2 => {
+        let aux2 = aux.colors.find(el3 => el3.colId == el2.colId)
+        if(!aux2){
+          return false
+        } else {
+          return aux2.quantity == el2.quantity
+        }
+      })
+    })
+
+    console.log("sale:")
+    console.log(summarySale)
+    console.log("list:")
+    console.log(summaryList)
+
+    if(!bool || !bool2){
+      this.snackbar.open("Lo sentimos, el pedido no corresponde.", "Cerrar")
+      return false
+    } else {
+      return true
+    }
+
+  }
+
+  printWaybill(user: User){
+    this.addProducts()
+    let wayBill = this.getWaybill(user)
+    this.dbs.printWaybillPdf(wayBill)
+  }
+
+  getWaybill(user: User): Waybill{
+    let waybill: Waybill = {
+      id: '',
+      orderCode: this.guideFormGroup.value['orderCode'] ? this.guideFormGroup.value['orderCode'] : "--",
+      addressee: this.guideFormGroup.value['addressee'] ? this.guideFormGroup.value['addressee'] : "--",
+      dni: this.guideFormGroup.value['dni'] ? this.guideFormGroup.value['dni'] : "--",
+      transferDate: this.guideFormGroup.value['transferDate'] ? this.guideFormGroup.value['transferDate'] : new Date(),
+      startingPoint: this.guideFormGroup.value['startingPoint'] ? this.guideFormGroup.value['startingPoint'] : "--",
+      arrivalPoint: this.guideFormGroup.value['arrivalPoint'] ? this.guideFormGroup.value['arrivalPoint'] : "--",
+      transferReason: this.guideFormGroup.value['transferReason'] ? this.guideFormGroup.value['transferReason'] : "--",
+      observations: this.guideFormGroup.value['observations'] ? this.guideFormGroup.value['observations'] : "--",
+      productList: this.arrayProducts,
+      createdAt: new Date(),
+      createdBy: user,
+      editedAt: null,
+      editedBy: null
+    }
+    if(this.sale){
+      waybill.saleOrder = this.sale.id
+    }
+    return waybill
+  }
+
+  getCorrelative(corr: number) {
+    return corr.toString().padStart(6, '0')
   }
 
 }

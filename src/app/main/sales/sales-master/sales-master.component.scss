@@ -1,0 +1,143 @@
+.list-parent-container {
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 10px 0px 0px 10px;
+}
+
+.list-container {
+  cursor: pointer;
+  width: 100%;
+  border: 1px solid #e6d7d7;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  padding: 10px 28px;
+  font-size: 14px;
+  height: 105px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.list-container hr {
+  display: block;
+  // margin-before: 0.5em;
+  // margin-after: 0.5em;
+  // margin-start: auto;
+  // margin-end: auto;
+  overflow: hidden;
+  border-style: inset;
+  border-width: 1px;
+}
+
+.list-container .mat-icon {
+  vertical-align: middle;
+}
+
+.list-container .client {
+  grid-area: client;
+  color:#555555;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 37%;
+  .actions-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .actions {
+    width: 48%;
+  }
+}
+
+.list-container .general {
+  width: 25%;
+  grid-area: general;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  white-space: nowrap;
+}
+
+.list-container .status {
+  display: flex;
+  flex-direction: column;
+  grid-area: status;
+  width: 33%;
+  justify-content: space-around;
+  align-items: center;
+  white-space: nowrap;
+  button {
+    width: 100%;
+  }
+}
+
+.overflow_container {
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.divider {
+  border: 1px solid #e0e0e0;
+  height: 90%;
+  align-self: center;
+}
+
+.search {
+  line-height: 17px;
+  width: 100%;
+  margin-left: 16px;
+}
+
+@media (max-width: 601px) {
+  .search {
+    margin-left: 0;
+    margin: 1.5em 0em;
+  }
+
+  .actionsContainer {
+    width: 100%;
+    margin-right: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .content {
+      width: 100%;
+      margin: 8px 0;
+    }
+  }
+  .list-parent-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 16px 0;
+  }
+
+  .list-container {
+    padding: 10px 22px;
+    display: flex;
+    flex-direction: column;
+    height: 260px;
+    max-width: 270px;
+  }
+  .list-container .status {
+    width: 100%;
+    height: 90px;
+  }
+  .list-container .client {
+    width: 100%;
+    height: 90px;
+  }
+  .list-container .general {
+    width: 100%;
+    height: 35px;
+  }
+  .divider {
+    height: 0;
+    width: 100%;
+  }
+}

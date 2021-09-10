@@ -25,8 +25,8 @@ export class PushService {
   getPermission(user: User): Observable<any>{ 
     return from(Notification.requestPermission()).pipe(
       switchMap(not => {
-        console.log("Notification permission granted.")
-        console.log(not);
+        //console.log("Notification permission granted.")
+        //console.log(not);
         return this.mss.getToken
       }),
       tap(token => {
@@ -37,7 +37,7 @@ export class PushService {
   
   saveTokenFb(user: User, token: string) {
     let currentTokens = user.fcmTokens || {}
-    console.log(currentTokens, token)
+    //console.log(currentTokens, token)
 
     if(!currentTokens[token]){
       let userRef = this.afs.collection('users').doc(user.uid)

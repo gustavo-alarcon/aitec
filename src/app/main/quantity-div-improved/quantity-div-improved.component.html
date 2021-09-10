@@ -1,0 +1,64 @@
+<div>
+  <div class="ms-flex ms-flex--center quantity" *ngIf="reqProductObservable$ | async as reqProd">
+    <!-- <button mat-mini-fab [ngClass]="
+        size == 'md'
+          ? 'quantityButton quantityButton--md w3-margin-right'
+          : 'quantityButton quantityButton--sm'
+      " (click)="decProdNumber()" [disabled]="(quantityForm$|async) <= 1">
+      <mat-icon>remove</mat-icon>
+    </button> -->
+
+    <mat-form-field appearance="standard" style="width: 9em">
+      <!-- <mat-label></mat-label> -->
+      <input 
+        matInput type="number" min="1" [max]="prodStock$ | async" 
+        style="text-align: center"
+        [formControl]="quantityForm"/>
+      
+      <ng-container *ngIf="quantityForm$|async"></ng-container>
+
+      <button 
+        type="button"
+        mat-mini-fab matPrefix
+        style="margin-bottom: 6px"
+        [ngClass]="size == 'md'
+          ? 'quantityButton quantityButton--md'
+          : 'quantityButton quantityButton--sm'" 
+        (click)="decProdNumber()" [disabled]="quantityForm.value <= 1">
+        <mat-icon>remove</mat-icon>
+      </button>
+
+      <button 
+        type="button"
+        mat-mini-fab matSuffix
+        [ngClass]="size == 'md'
+          ? 'quantityButton quantityButton--md'
+          : 'quantityButton quantityButton--sm'" 
+        (click)="incProdNumber()" [disabled]="quantityForm.value >= (prodStock$ | async)">
+        <mat-icon>add</mat-icon>
+      </button>
+
+      <mat-hint align="end">{{(prodStock$ | async)}} disponibles</mat-hint>
+      <mat-error align="end">
+        <span *ngIf="quantityForm?.errors?.stock">Solo {{(prodStock$ | async)}} disponibles</span>
+        <span *ngIf="quantityForm?.errors?.min">Mínimo 1 producto.</span>
+      </mat-error>
+
+    </mat-form-field>
+
+    <!-- <input 
+      matInput type="number" min="1" [max]="prodStock$ | async" 
+      style="width: 3em" [formControl]="quantityForm"
+    /> -->
+
+
+    <!-- <button mat-mini-fab [ngClass]="
+        size == 'md'
+          ? 'quantityButton quantityButton--md w3-margin-left'
+          : 'quantityButton quantityButton--sm'
+      " (click)="incProdNumber()" [disabled]="quantityForm.value >= (prodStock$ | async)">
+      <mat-icon>add</mat-icon>
+    </button> -->
+  </div>
+  
+</div>

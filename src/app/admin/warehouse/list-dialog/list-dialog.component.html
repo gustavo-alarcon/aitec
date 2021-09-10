@@ -12,10 +12,25 @@
 
 </div>
 <div mat-dialog-content>
-  <p>{{data.name | titlecase}}.</p>
-  <ul *ngIf="init$ | async as series">
-    <li *ngFor="let serie of series">
-      {{serie.serie}}
-    </li>
-  </ul>
+  <ng-container *ngIf="(serialNumber$ | async) as serialNumber; else loading">
+    <mat-list *ngIf="serialNumber.length; else default">
+      <ng-container *ngFor="let serial of serialNumber">
+        <div mat-subheader>{{serial.colorName}}</div>
+        <mat-list-item *ngFor="let element of serial.serial">
+          <mat-icon mat-list-icon>radio_button_checked</mat-icon>
+          <div mat-line>{{element.barcode}}</div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+      </ng-container>
+    </mat-list>
+    <ng-template #default>
+      <p>Sin resultados.</p>
+    </ng-template>
+  </ng-container>
+  <ng-template #loading>
+    <div style="display: flex; flex-direction: row; justify-content: center;">
+      <mat-spinner></mat-spinner>
+    </div>
+  </ng-template>
+
 </div>

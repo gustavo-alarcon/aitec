@@ -219,7 +219,7 @@ export class SignUpComponent implements OnInit {
           parent.get('pass').disable()
           parent.get('repeatedPass').disable()
 
-          console.log(res[0])
+          //console.log(res[0])
           //El metodo de email es google
           switch (res[0]) {
             case 'google.com':

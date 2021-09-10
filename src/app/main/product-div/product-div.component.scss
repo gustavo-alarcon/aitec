@@ -3,7 +3,7 @@
   box-sizing: border-box;
   position: relative;
   cursor: pointer;
-  height: 400px;
+  height: 435px;
   &__star {
     position: absolute;
     top: 0;
@@ -79,6 +79,15 @@
     padding: 5px;
     font-weight: bold;
   }
+  &__noStock {
+    border: 1px solid var(--warn-color);
+    border-radius: 5px;
+    color: var(--warn-color);
+    font-size: 1.2em;
+    margin-top: 8px;
+    padding: 5px;
+    font-weight: bold;
+  }
   &__loader{
     min-height: 165px;
     height: 100%;
@@ -87,7 +96,7 @@
 
 @media (max-width: 600px) {
   .product {
-    max-height: 300px;
+    max-height: 350px;
     &__star {
       &--icon {
         height: 24px;

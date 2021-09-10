@@ -7,7 +7,7 @@ import { DatabaseService } from 'src/app/core/services/database.service';
 @Component({
   selector: 'app-rate-dialog',
   templateUrl: './rate-dialog.component.html',
-  styleUrls: ['./rate-dialog.component.css']
+  styleUrls: ['./rate-dialog.component.scss']
 })
 export class RateDialogComponent implements OnInit {
   formGroup: FormGroup;
@@ -42,6 +42,10 @@ export class RateDialogComponent implements OnInit {
       observation: this.formGroup.get('observation').value,
     }
     this.dialogRef.close(sale);
+  }
+
+  getCorrelative(){
+    return this.data.sale.correlative.toString().padStart(6,"0")
   }
 
 }

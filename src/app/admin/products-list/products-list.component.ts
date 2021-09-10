@@ -37,8 +37,8 @@ export class ProductsListComponent implements OnInit {
   //Table
   productsTableDataSource = new MatTableDataSource<Product>();
   productsDisplayedColumns: string[] = [
-    'index', 'photoURL', 'description', 'sku', 'category', 'pricemin', 'pricemay',
-    'realStock', 'published', 'actions'
+    'index', 'published', 'photoURL', 'description', 'sku', 'category', 'pricemin', 'pricemay',
+    'realStock', 'virtualStock', 'reservedStock', 'actions'
   ]
 
   productsObservable$: Observable<Product[]>
@@ -78,6 +78,11 @@ export class ProductsListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.productsTableDataSource.filterPredicate = (prod, string) => {
+      let filter = (prod.description + prod.sku + (prod["category"]) + (prod.published ? "publicado" : "oculto")).toLowerCase()
+      return filter.includes(string.toLowerCase())
+    }
+
     this.initForms();
     this.initObservables();
   }
@@ -118,7 +123,6 @@ export class ProductsListComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.productsTableDataSource.filter = filterValue.trim().toLowerCase();
-
     if (this.productsTableDataSource.paginator) {
       this.productsTableDataSource.paginator.firstPage();
     }
@@ -206,8 +210,15 @@ export class ProductsListComponent implements OnInit {
 
   onCreateEditItem(edit: boolean, product?: Product) {
     if (edit) {
-      this.router.navigate(['/admin/products/edit', product.sku]);
-
+      if(product.published){
+        this.snackBar.open("Por favor, asegurese de ocultar el producto antes de editarlo.", "Aceptar")
+      } else {
+        if(this.getReservedStock(product)){
+          this.snackBar.open("Por favor, asegurese de que el stock reservado se encuentre en 0.", "Aceptar")
+        } else {
+          this.router.navigate(['/admin/products/edit', product.sku]);
+        }
+      }
     } else {
       this.router.navigate(['/admin/products/create']);
     }
@@ -258,13 +269,19 @@ export class ProductsListComponent implements OnInit {
     }*/
   }
 
+  getReservedStock(product: Product): number{
+    return product.products.reduce((prev, curr)=> {
+      return prev + (curr.reservedStock ? curr.reservedStock : 0)
+    }, 0  )
+  }
+
 
   downloadXls(): void {
-    /*
+    
     let table_xlsx: any[] = [];
     let headersXlsx = [
-      'Descripcion', 'SKU', 'Categoría', 'Precio',
-      'Descripción de Unidad', 'Abreviación', 'Stock Real', 'Mínimio de alerta', 'Publicado'
+      'Descripcion', 'Part Number', 'Categoría', 'Precio Mayorista', 'Precio Minorista',
+      'Stock Virtual', 'Stock Real', 'Stock Reservado', 'Publicado'
     ]
 
     table_xlsx.push(headersXlsx);
@@ -273,12 +290,12 @@ export class ProductsListComponent implements OnInit {
       const temp = [
         product.description,
         product.sku,
-        product.category,
-        product.price,
-        product.unit.description,
-        product.unit.abbreviation,
-        product.realStock,
-        product.alertMinimum,
+        product["category"] ? product["category"] : "---",
+        product.priceMay,
+        product.priceMin,
+        product.products.reduce((prev,curr)=> (prev+(curr.virtualStock ? curr.virtualStock : 0)), 0),
+        product.products.reduce((prev,curr)=> (prev+(curr.realStock ? curr.realStock : 0)), 0),
+        product.products.reduce((prev,curr)=> (prev+(curr.reservedStock ? curr.reservedStock : 0)), 0),
         product.published ? "Sí" : "No"
       ];
 
@@ -291,7 +308,7 @@ export class ProductsListComponent implements OnInit {
     XLSX.utils.book_append_sheet(wb, ws, 'Lista_de_productos');
 
     const name = 'Lista_de_productos' + '.xlsx';
-    XLSX.writeFile(wb, name);*/
+    XLSX.writeFile(wb, name);
   }
 
 }

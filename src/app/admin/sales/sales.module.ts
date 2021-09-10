@@ -28,6 +28,9 @@ import { SalesAddressDialogComponent } from './sales-address-dialog/sales-addres
 import {LazyLoadImageModule} from 'ng-lazyload-image';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GoogleMapsModule } from '@angular/google-maps';
+import { SalePricePipe } from '../../core/shared/sale-price.pipe';
+import { ProductPricePipe } from '../../core/shared/product-price.pipe';
+import { SharedModule } from 'src/app/core/shared/shared.module';
 
 
 
@@ -37,7 +40,8 @@ import { GoogleMapsModule } from '@angular/google-maps';
     SalesMasterComponent,
     SalesDetailComponent,
     SalesPhotoDialogComponent,
-    SalesAddressDialogComponent
+    SalesAddressDialogComponent,
+
   ],
   imports: [
     CommonModule,
@@ -62,7 +66,8 @@ import { GoogleMapsModule } from '@angular/google-maps';
     Ng2ImgMaxModule,
     LazyLoadImageModule,
     MatNativeDateModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    SharedModule
   ],
   providers: [
     DatePipe

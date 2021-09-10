@@ -4,10 +4,12 @@ import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map, startWith, take, tap } from 'rxjs/operators';
-import { Product } from 'src/app/core/models/product.model';
+import { debounceTime, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { Product, unitProduct } from 'src/app/core/models/product.model';
+import { SaleRequestedProducts } from 'src/app/core/models/sale.model';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { DatabaseService } from 'src/app/core/services/database.service';
+import { ShoppingCarService } from 'src/app/core/services/shopping-car.service';
 import { NoLoginDialogComponent } from '../no-login-dialog/no-login-dialog.component';
 
 @Component({
@@ -28,7 +30,7 @@ export class WebViewComponent implements OnInit {
 
   selectedProduct:any
   selected = new FormControl('')
-  changeColor$: Observable<any>
+  changeColor$: Observable<unitProduct>
 
   defaultImage = "../../../../assets/images/icono-aitec-01.png";
 
@@ -42,16 +44,54 @@ export class WebViewComponent implements OnInit {
     "autoplay": false
   };
 
+  reqProdObservable$: Observable<SaleRequestedProducts>
+  verifyStock$: Observable<boolean>
+  pendingPayment$: Observable<boolean>;
+
   constructor(
     public auth: AuthService,
     private afs: AngularFirestore,
     private renderer: Renderer2,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public ShopCar: ShoppingCarService
   ) { }
 
   ngOnInit(): void {
-    
+    //console.log("init")
+    this.reqProdObservable$ = this.changeColor$.pipe(
+      switchMap(color => {
+        //console.log("changing color")
+        return this.ShopCar.getReqProductObservable(this.product.sku, color.sku).pipe(
+          debounceTime(100),
+          startWith(null),
+        )
+      })
+    )
+    this.verifyStock$ = this.changeColor$.pipe(
+      switchMap(color => {
+        return this.ShopCar.getProductDbObservable(this.product.id).pipe(
+          map(prodDb => {
+            // console.log(this.product.id)
+            // console.log(prodDb)
+            let prodColor = prodDb.products.find(el => el.sku == color.sku)
+            // console.log(prodColor)
+            if(!!prodColor){
+              return prodColor.virtualStock - (prodColor.reservedStock ? prodColor.reservedStock : 0) > 0
+            } else {
+              return false
+            }
+          })
+        )
+        }
+      )
+    )
+
+    this.pendingPayment$ = this.auth.user$.pipe(
+      map(user => {
+        return !!user.pendingPayment
+      })
+    )
   }
 
   ngOnChanges() {
@@ -60,11 +100,12 @@ export class WebViewComponent implements OnInit {
     
     this.changeColor$ = this.selected.valueChanges.pipe(
       startWith(this.product.products[0]),
-      tap(res => {
+      tap((res: unitProduct) => {
         this.productSelected = res
         this.galleryImg = res.gallery.map((el, i) => { return { ind: i + 1, photoURL: el.photoURL } })
         this.selectImage = this.galleryImg[0]
-      })
+      }),
+      shareReplay(1)
     )
 
     this.favorite$ = this.auth.user$.pipe(
@@ -77,8 +118,20 @@ export class WebViewComponent implements OnInit {
         }
       })
     )
+  }
 
+  addProd() {
 
+    let newProduct: SaleRequestedProducts = {
+      product: this.product,
+      quantity: 1,                  
+      chosenProduct: this.selected.value,
+      color: this.product.products.length > 1,
+      price: this.price
+    };
+
+    this.ShopCar.addProd(newProduct)
+    
   }
 
   changeSelectImage(image) {

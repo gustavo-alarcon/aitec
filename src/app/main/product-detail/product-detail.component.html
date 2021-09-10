@@ -24,13 +24,15 @@
       </span>
     </div>
     <app-web-view [product]="product" [price]="price" [promo]="promo"></app-web-view>
-  
-    <app-product-category [category]="product.category"></app-product-category>
+
     <div class="w3-section">
       <h4 class="product__subtitle">Consultas sobre el producto</h4>
   
       <app-questions  [idProduct]="product.id" [nameProduct]="product.description"></app-questions>
     </div>
+  
+    <app-product-category [category]="product.idCategory"></app-product-category>
+    
   </div>
   <div class="layoout" *ngIf="loading$ | async">
     <mat-progress-spinner class="example-margin" color="primary" mode="indeterminate">

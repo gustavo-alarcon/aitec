@@ -1,0 +1,34 @@
+<div mat-dialog-title>
+  <div class="header">
+      <span>
+          <mat-icon style="vertical-align: middle; transform: scale(1.2);">{{data.titleIcon}}</mat-icon>
+          {{data.title}}
+      </span>
+      <button type="button" mat-button mat-dialog-close>
+          <mat-icon>close</mat-icon>
+      </button>
+  </div>
+  <mat-hint class="warn">
+      <mat-icon style="vertical-align: middle; transform: scale(0.8);">warning</mat-icon>
+      <span>{{data.warning}}</span>
+  </mat-hint>
+</div>
+
+<div mat-dialog-content>
+  <span style="line-height: 24px;">
+    <span [outerHTML]="data.content"></span>
+  </span>
+</div>
+
+<div *ngIf="!data.noObservation" style="margin-top: 16px;">
+  <mat-form-field  appearance="outline" style="width: -webkit-fill-available">
+      <mat-label>Ingrese Observación</mat-label>
+      <textarea matInput [formControl]="lastObservation"></textarea>
+      <mat-hint>Opcional</mat-hint>
+    </mat-form-field>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-raised-button color="basic" type="button" mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="warn" type="button" (click)="action('confirm')">Confirmar</button>
+</div>

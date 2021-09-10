@@ -4,15 +4,15 @@ import { Warehouse } from "./warehouse.model";
 
 export interface Waybill {
   id: string;
-  orderCode: string;
-  addressee: string;
+  orderCode: string;      //Cambiar a Nro de Guia de remisión
+  saleOrder?: string;
+  addressee: string;      //Destinatario
   dni: string;
   transferDate: Date;
   startingPoint: string;
   arrivalPoint: string;
-  transferReason: string;
+  transferReason: typeof TRANSFER_REASON[number];
   observations: string;
-  warehouse: Warehouse;
   productList: Array<WaybillProductList>;
   createdAt: Date;
   createdBy: User;
@@ -32,3 +32,20 @@ export interface WaybillProductList{
   unit: string;
   totalWeight?: number;
 }
+
+export const TRANSFER_REASON = <const>[
+  "venta",
+  "venta sujeta a confirmación del comprador",
+  "compra",
+  "consignación",
+  "devolución",
+  "traslado entre establecimientos de la misma empresa",
+  "traslado de bienes para transformación",
+  "recojo de bienes",
+  "traslado por emisor itinerante de comprobantes de pago",
+  "traslado zona primaria",
+  "importación",
+  "exportación",
+  "venta con entrega a terceros",
+  "otros no incluidos en los puntos anteriores tales como exhibición, demostración, etc."
+]

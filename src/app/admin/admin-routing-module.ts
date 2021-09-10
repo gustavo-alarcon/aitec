@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from '../core/auth.guard';
 import { AdminComponent } from './admin.component';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
+    canActivate: [AuthGuard],
     children: [
       
       {
@@ -23,6 +25,14 @@ const routes: Routes = [
       {
         path: 'sales',
         loadChildren: () => import('./sales/sales.module').then(mod => mod.SalesModule)
+      },
+      {
+        path: 'shipping',
+        loadChildren: () => import('./shipping/shipping.module').then(mod => mod.ShippingModule)
+      },
+      {
+        path: 'warehouse-view',
+        loadChildren: () => import('./warehouse-view/warehouse-view.module').then(mod => mod.WarehouseViewModule)
       },
       {
         path: 'warehouse',

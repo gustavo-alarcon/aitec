@@ -37,7 +37,7 @@ export class CategoryDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this.data)
+    //console.log(this.data)
     this.init$ = this.dbs.getAllCategories().pipe(
       tap(res => {
         this.allcategories = res
@@ -202,7 +202,7 @@ export class CategoryDialogComponent implements OnInit {
           //cambiar completename a todos sus subcategories
           //si cambia de idCategory, cambiar a todos sus subs
           let allsubsubs = this.allcategories.filter(ct => ct.idSubCategory == this.data.data.id)
-          console.log(allsubsubs)
+          //console.log(allsubsubs)
           allsubsubs.forEach(sb => {
             let subsubRef = this.afs.firestore
               .collection(`/db/aitec/config/generalConfig/allCategories`)

@@ -16,7 +16,9 @@
   <mat-divider></mat-divider>
 </div>
 <mat-dialog-content>
-  <span class="w3-margin-bottom" style="color:#555555">Por favor danos tu calificación: </span>
+  <p class="w3-margin-bottom" style="color:#555555; text-align: center;">
+    ¡Hola! queremos conocer tu opinión sobre tu última compra #{{getCorrelative()}}.
+  </p>
   <form [formGroup]="formGroup" 
     style="display: flex; flex-direction: column; align-items: center;">
     <div style="display: flex; flex-direction: row; justify-content: space-between; 
@@ -83,7 +85,7 @@
   <button color="primary"
     mat-raised-button (click)="onSubmitForm()" type="button"
       style="width:100%; margin-bottom: 8px;"
-      [disabled]="formGroup.status != 'VALID'"><b>Enviar mi calificación</b></button>
+      [disabled]="!formGroup.valid"><b>Enviar mi calificación</b></button>
 </mat-dialog-actions>
 
 
