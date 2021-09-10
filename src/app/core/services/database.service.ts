@@ -63,7 +63,7 @@ import { saveAs } from 'file-saver';
   providedIn: 'root',
 })
 export class DatabaseService {
-  public version: string = 'V0.0.6r';
+  public version: string = 'V0.0.7r';
   public isOpen: boolean = false;
   public isAdmin: boolean = false;
 
